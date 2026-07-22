@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCMCS Enterprise Training Simulator</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+font-family:Segoe UI,Arial,sans-serif;
+background:#f4f7fb;
+}
+
+.container{
+display:flex;
+height:100vh;
+}
+
+.sidebar{
+width:260px;
+background:linear-gradient(180deg,#1E3A8A,#2563EB);
+color:white;
+padding:20px;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+margin-bottom:30px;
+}
+
+.menu button{
+width:100%;
+margin-bottom:10px;
+padding:12px;
+border:none;
+background:rgba(255,255,255,.15);
+color:white;
+cursor:pointer;
+border-radius:8px;
+text-align:left;
+}
+
+.menu button:hover{
+background:rgba(255,255,255,.3);
+}
+
+.main{
+flex:1;
+overflow:auto;
+padding:25px;
+}
+
+.hero{
+background:linear-gradient(135deg,#1E3A8A,#0891B2);
+color:white;
+padding:30px;
+border-radius:16px;
+margin-bottom:20px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+padding:20px;
+border-radius:12px;
+color:white;
+}
+
+.blue{background:#2563EB}
+.green{background:#16A34A}
+.orange{background:#F59E0B}
+.purple{background:#7C3AED}
+
+.page{
+display:none;
+}
+
+.active{
+display:block;
+}
+
+.toolbar{
+margin-bottom:15px;
+}
+
+.btn{
+padding:10px 15px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-right:10px;
+color:white;
+}
+
+.run{background:#16A34A}
+.validate{background:#2563EB}
+.export{background:#F59E0B}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+th{
+background:#e5e7eb;
+padding:12px;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+input{
+width:100%;
+padding:8px;
+}
+
+.success{
+color:green;
+font-weight:bold;
+}
+
+.error{
+color:red;
+font-weight:bold;
+}
+
+.status{
+margin-top:15px;
+font-size:18px;
+font-weight:bold;
+}
+
+.job-card{
+background:white;
+padding:20px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.chart{
+height:250px;
+background:white;
+border-radius:12px;
+padding:20px;
+display:flex;
+align-items:flex-end;
+gap:20px;
+}
+
+.bar{
+width:80px;
+background:#2563EB;
+text-align:center;
+color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="logo">
+PCMCS Simulator
+</div>
+
+<div class="menu">
+
+<button onclick="showPage('dashboard')">
+🏠 Executive Dashboard
+</button>
+
+<button onclick="showPage('rule')">
+⚖ Rule Balancing
+</button>
+
+<button onclick="showPage('jobs')">
+📋 Job Monitoring
+</button>
+
+<button onclick="showPage('analysis')">
+📊 Cost Analytics
+</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div id="dashboard" class="page active">
+
+<div class="hero">
+<h1>PCMCS Enterprise Training Simulator</h1>
+<p>Oracle Profitability & Cost Management Cloud Service</p>
+</div>
+
+<div class="cards">
+
+<div class="card blue">
+<h3>Total Cost</h3>
+<h1>$4.44M</h1>
+</div>
+
+<div class="card green">
+<h3>Allocated Cost</h3>
+<h1>$4.44M</h1>
+</div>
+
+<div class="card orange">
+<h3>Balanced Rules</h3>
+<h1 id="balancedCard">4</h1>
+</div>
+
+<div class="card purple">
+<h3>Failed Rules</h3>
+<h1 id="failedCard">0</h1>
+</div>
+
+</div>
+
+</div>
+
+<div id="rule" class="page">
+
+<h2>Rule Balancing</h2>
+<br>
+
+<div class="toolbar">
+
+<button class="btn run"
+onclick="runCalculation()">
+Run Calculation
+</button>
+
+<button class="btn validate"
+onclick="validateRules()">
+Validate Rules
+</button>
+
+<button class="btn export"
+onclick="exportCSV()">
+Export CSV
+</button>
+
+</div>
+
+<table id="tbl">
+
+<thead>
+<tr>
+<th>Rule</th>
+<th>Allocation In</th>
+<th>Allocation Out</th>
+<th>Variance</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>HR Support Charge Out</td>
+<td><input value="890667.85"></td>
+<td><input value="-890667.85"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>IT Support Charge Out</td>
+<td><input value="1318242.03"></td>
+<td><input value="-1318242.03"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>Finance Support Charge Out</td>
+<td><input value="1321920.30"></td>
+<td><input value="-1321920.30"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>Facilities Support Charge Out</td>
+<td><input value="906603.97"></td>
+<td><input value="-906603.97"></td>
+<td></td>
+<td></td>
+</tr>
+
+</tbody>
+
+</table>
+
+<div id="status" class="status">
+Ready
+</div>
+
+</div>
+
+<div id="jobs" class="page">
+
+<h2>Job Monitoring Center</h2>
+<br>
+
+<div class="job-card">
+Job #1001 - Calculation Run
+<br><br>
+<span class="success">Completed</span>
+</div>
+
+<div class="job-card">
+Job #1002 - Data Load
+<br><br>
+<span class="success">Completed</span>
+</div>
+
+<div class="job-card">
+Job #1003 - Rule Validation
+<br><br>
+<span class="success">Completed</span>
+</div>
+
+</div>
+
+<div id="analysis" class="page">
+
+<h2>Cost Allocation Analytics</h2>
+<br>
+
+<div class="chart">
+
+<div class="bar" style="height:180px">
+HR
+</div>
+
+<div class="bar" style="height:220px">
+IT
+</div>
+
+<div class="bar" style="height:230px">
+FIN
+</div>
+
+<div class="bar" style="height:160px">
+FAC
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function showPage(id){
+
+document.querySelectorAll('.page')
+.forEach(p=>p.classList.remove('active'));
+
+document.getElementById(id)
+.classList.add('active');
+
+}
+
+function validateRules(){
+
+let pass=0;
+let fail=0;
+
+document
+.querySelectorAll("#tbl tbody tr")
+.forEach(r=>{
+
+let a=parseFloat(
+r.cells[1].querySelector("input").value
+)||0;
+
+let b=parseFloat(
+r.cells[2].querySelector("input").value
+)||0;
+
+let variance=a+b;
+
+r.cells[3].innerHTML=
+variance.toFixed(2);
+
+if(Math.abs(variance)<0.01){
+
+r.cells[4].innerHTML=
+"<span class='success'>✔ Balanced</span>";
+
+pass++;
+
+}else{
+
+r.cells[4].innerHTML=
+"<span class='error'>✖ Unbalanced</span>";
+
+fail++;
+
+}
+
+});
+
+document.getElementById("balancedCard")
+.innerHTML=pass;
+
+document.getElementById("failedCard")
+.innerHTML=fail;
+
+document.getElementById("status")
+.innerHTML=
+fail===0
+? "<span class='success'>MODEL BALANCED</span>"
+: "<span class='error'>BALANCING ISSUES FOUND</span>";
+
+}
+
+function runCalculation(){
+
+document.getElementById("status")
+.innerHTML="Running Calculation...";
+
+setTimeout(()=>{
+validateRules();
+},1500);
+
+}
+
+function exportCSV(){
+
+let csv="Rule,Allocation In,Allocation Out\n";
+
+document
+.querySelectorAll("#tbl tbody tr")
+.forEach(r=>{
+
+csv +=
+r.cells[0].innerText + "," +
+r.cells[1].querySelector("input").value + "," +
+r.cells[2].querySelector("input").value + "\n";
+
+});
+
+let blob=new Blob([csv]);
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(blob);
+a.download="PCMCS_Rule_Balancing.csv";
+a.click();
+
+}
+
+validateRules();
+
+</script>
+
+</body>
+</html>
