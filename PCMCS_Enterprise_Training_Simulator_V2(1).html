@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PCMCS Enterprise Training Simulator V2</title>
+<style>
+body{margin:0;font-family:Segoe UI,sans-serif;background:#f4f7fb}
+.sidebar{position:fixed;left:0;top:0;width:240px;height:100%;background:linear-gradient(#1E3A8A,#2563EB);padding:20px;color:#fff}
+.sidebar button{width:100%;margin:6px 0;padding:12px;border:0;border-radius:8px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+.main{margin-left:260px;padding:20px}
+.page{display:none}.active{display:block}
+.hero{background:linear-gradient(135deg,#1E3A8A,#0891B2);color:#fff;padding:20px;border-radius:12px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}
+.card{padding:15px;color:#fff;border-radius:10px}
+.b{background:#2563EB}.g{background:#16A34A}.o{background:#F59E0B}.p{background:#7C3AED}
+.pov select{padding:8px;margin:4px}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:8px}
+.btn{padding:10px 15px;margin:5px;border:0;border-radius:6px;color:#fff;cursor:pointer}
+.run{background:#16A34A}.val{background:#2563EB}.exp{background:#F59E0B}
+.job{background:#fff;padding:15px;margin:10px 0;border-radius:8px}
+.barwrap{display:flex;gap:20px;align-items:flex-end;height:250px;background:#fff;padding:20px}
+.bar{width:80px;background:#2563EB;color:#fff;text-align:center}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<h2>PCMCS V2</h2>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('rule')">Rule Balancing</button>
+<button onclick="show('calc')">Calculation Analysis</button>
+<button onclick="show('trace')">Allocation Trace</button>
+<button onclick="show('jobs')">Jobs</button>
+<button onclick="show('data')">Data Management</button>
+<button onclick="show('analytics')">Analytics</button>
+</div>
+
+<div class="main">
+
+<div class="pov">
+<select><option>Jan</option></select>
+<select><option>FY24</option></select>
+<select><option>Actual</option></select>
+<select><option>Working</option></select>
+</div>
+
+<div id="dashboard" class="page active">
+<div class="hero"><h1>PCMCS Enterprise Training Simulator</h1></div>
+<div class="cards">
+<div class="card b"><h3>Total Cost</h3><h1>$12.98M</h1></div>
+<div class="card g"><h3>Allocated</h3><h1>$12.98M</h1></div>
+<div class="card o"><h3>Balanced</h3><h1 id="bal">0</h1></div>
+<div class="card p"><h3>Failed</h3><h1 id="fail">0</h1></div>
+</div>
+</div>
+
+<div id="rule" class="page">
+<h2>Rule Balancing</h2>
+<button class="btn run" onclick="runCalc()">Run</button>
+<button class="btn val" onclick="validate()">Validate</button>
+<button class="btn exp" onclick="exportCSV()">Export</button>
+<table id="tbl">
+<tr><th>Rule</th><th>Input</th><th>Alloc Out</th><th>Variance</th><th>Status</th></tr>
+<tr><td>HR</td><td><input value="100000"></td><td><input value="-100000"></td><td></td><td></td></tr>
+<tr><td>IT</td><td><input value="200000"></td><td><input value="-200000"></td><td></td><td></td></tr>
+<tr><td>Finance</td><td><input value="300000"></td><td><input value="-300000"></td><td></td><td></td></tr>
+</table>
+<div id="status">Ready</div>
+</div>
+
+<div id="calc" class="page">
+<h2>Calculation Analysis</h2>
+<p>Source Cost: 1,000,000</p>
+<button onclick="simulate()">Simulate Allocation</button>
+<div id="sim"></div>
+</div>
+
+<div id="trace" class="page">
+<h2>Allocation Trace</h2>
+<table>
+<tr><th>Source</th><th>Driver</th><th>Target</th><th>Amount</th></tr>
+<tr><td>IT Support</td><td>Headcount</td><td>Manufacturing</td><td>525000</td></tr>
+</table>
+</div>
+
+<div id="jobs" class="page">
+<h2>Jobs</h2>
+<div class="job">Calculation Run <progress value="100" max="100"></progress> Completed</div>
+<div class="job">Data Load <progress value="100" max="100"></progress> Completed</div>
+</div>
+
+<div id="data" class="page">
+<h2>Data Management</h2>
+<input type="file">
+</div>
+
+<div id="analytics" class="page">
+<h2>Analytics</h2>
+<div class="barwrap">
+<div class="bar" style="height:180px">HR</div>
+<div class="bar" style="height:220px">IT</div>
+<div class="bar" style="height:240px">FIN</div>
+</div>
+</div>
+
+</div>
+
+<script>
+function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function validate(){
+let p=0,f=0;
+document.querySelectorAll('#tbl tr').forEach((r,i)=>{
+if(i==0)return;
+let a=parseFloat(r.cells[1].querySelector('input').value)||0;
+let b=parseFloat(r.cells[2].querySelector('input').value)||0;
+let v=a+b;
+r.cells[3].innerHTML=v.toFixed(2);
+if(Math.abs(v)<0.01){r.cells[4].innerHTML='Balanced';p++;}
+else{r.cells[4].innerHTML='Failed';f++;}
+});
+document.getElementById('bal').innerHTML=p;
+document.getElementById('fail').innerHTML=f;
+}
+function runCalc(){document.getElementById('status').innerHTML='Running...';setTimeout(validate,1000);}
+function simulate(){document.getElementById('sim').innerHTML='Marketing:350k<br>Shipping:250k<br>Assembly:200k<br>QA:200k';}
+function exportCSV(){
+let csv='Rule,Input,AllocOut\n';
+document.querySelectorAll('#tbl tr').forEach((r,i)=>{
+if(i==0)return;
+csv+=r.cells[0].innerText+','+r.cells[1].querySelector('input').value+','+r.cells[2].querySelector('input').value+'\n';
+});
+let a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([csv]));
+a.download='PCMCS_V2.csv';a.click();
+}
+validate();
+</script>
+</body>
+</html>
