@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phulka Craft</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+scroll-behavior:smooth;
+}
+
+body{
+background:#fffaf4;
+color:#333;
+}
+
+header{
+position:fixed;
+top:0;
+width:100%;
+background:#8B0000;
+padding:15px 8%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+z-index:1000;
+}
+
+.logo{
+font-size:28px;
+font-weight:700;
+color:#FFD700;
+}
+
+nav a{
+color:#fff;
+text-decoration:none;
+margin-left:20px;
+font-weight:500;
+transition:.3s;
+}
+
+nav a:hover{
+color:#FFD700;
+}
+
+.hero{
+height:100vh;
+background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
+url("https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1600&q=80");
+background-size:cover;
+background-position:center;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+color:#fff;
+padding:20px;
+}
+
+.hero h1{
+font-size:55px;
+}
+
+.hero p{
+margin:20px 0;
+font-size:20px;
+}
+
+.btn{
+display:inline-block;
+padding:14px 30px;
+background:#FFD700;
+color:#8B0000;
+text-decoration:none;
+font-weight:bold;
+border-radius:40px;
+margin:10px;
+transition:.3s;
+}
+
+.btn:hover{
+background:#fff;
+transform:translateY(-3px);
+}
+
+.section{
+padding:80px 8%;
+text-align:center;
+}
+
+.section h2{
+font-size:36px;
+color:#8B0000;
+margin-bottom:20px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+margin-top:35px;
+}
+
+.card{
+background:#fff;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,.1);
+transition:.3s;
+}
+
+.card:hover{
+transform:translateY(-8px);
+}
+
+.card h3{
+color:#8B0000;
+margin-bottom:10px;
+}
+
+.contact{
+background:#8B0000;
+color:#fff;
+text-align:center;
+padding:70px 20px;
+}
+
+footer{
+background:#5e0000;
+color:#fff;
+text-align:center;
+padding:15px;
+}
+
+.whatsapp{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:#fff;
+padding:14px 22px;
+border-radius:50px;
+text-decoration:none;
+font-weight:bold;
+box-shadow:0 5px 15px rgba(0,0,0,.3);
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:38px;
+}
+
+header{
+flex-direction:column;
+}
+
+nav{
+margin-top:10px;
+}
+
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">PHULKA CRAFT</div>
+
+<nav>
+<a href="#">Home</a>
+<a href="#about">About</a>
+<a href="#services">Services</a>
+<a href="#contact">Contact</a>
+</nav>
+
+</header>
+
+<section class="hero">
+
+<div>
+
+<h1>Fresh & Soft Homemade Phulka</h1>
+
+<p>Healthy • Hygienic • Fresh Every Day</p>
+
+<a href="tel:9406638848" class="btn">Call Now</a>
+
+<a href="https://wa.me/919406638848" class="btn">WhatsApp</a>
+
+</div>
+
+</section>
+
+<section class="section" id="about">
+
+<h2>About Us</h2>
+
+<p>
+We prepare fresh homemade phulkas using premium wheat flour,
+maintaining the highest standards of hygiene and quality.
+Morning and evening delivery available.
+</p>
+
+</section>
+
+<section class="section" id="services">
+
+<h2>Why Choose Us?</h2>
+
+<div class="cards">
+
+<div class="card">
+<h3>🥖 Fresh Daily</h3>
+<p>Freshly prepared every day.</p>
+</div>
+
+<div class="card">
+<h3>🌾 Premium Atta</h3>
+<p>Only high-quality wheat flour.</p>
+</div>
+
+<div class="card">
+<h3>🧼 Hygienic Kitchen</h3>
+<p>Prepared in a clean environment.</p>
+</div>
+
+<div class="card">
+<h3>🚚 Fast Delivery</h3>
+<p>Quick morning & evening delivery.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="contact" id="contact">
+
+<h2>Contact Us</h2>
+
+<br>
+
+<h3>📞 940-663-8848</h3>
+
+<br>
+
+<p>
+S-224, Nehru Nagar,<br>
+Near Kopal School,<br>
+Bhopal - 462003
+</p>
+
+<br>
+
+<a href="https://wa.me/919406638848" class="btn">Order on WhatsApp</a>
+
+</section>
+
+<footer>
+
+© 2026 PHULKA CRAFT | Fresh Homemade Phulka
+
+</footer>
+
+<a class="whatsapp" href="https://wa.me/919406638848">
+
+WhatsApp
+
+</a>
+
+</body>
+</html>
