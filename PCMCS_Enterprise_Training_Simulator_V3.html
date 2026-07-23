@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PCMCS Enterprise Training Simulator</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
+body{display:flex;height:100vh;background:#f4f7fb}
+
+.sidebar{
+width:260px;
+background:linear-gradient(180deg,#0B3A75,#153f8c,#1e5cc4);
+padding:20px;
+color:#fff;
+overflow:auto;
+}
+
+.logo{
+font-size:24px;
+font-weight:bold;
+text-align:center;
+margin-bottom:25px;
+}
+
+.menu button{
+width:100%;
+padding:14px;
+margin-bottom:10px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:600;
+color:#fff;
+transition:.3s;
+box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+
+.menu button:hover{
+transform:translateY(-2px);
+}
+
+.dashboardBtn{background:linear-gradient(135deg,#4facfe,#00f2fe);}
+.ruleBtn{background:linear-gradient(135deg,#667eea,#764ba2);}
+.traceBtn{background:linear-gradient(135deg,#f093fb,#f5576c);}
+.jobBtn{background:linear-gradient(135deg,#fa709a,#fee140);}
+.validBtn{background:linear-gradient(135deg,#43e97b,#38f9d7);}
+.analyticsBtn{background:linear-gradient(135deg,#30cfd0,#330867);}
+.exportBtn{background:linear-gradient(135deg,#ff9a44,#fc6076);}
+.darkBtn{background:linear-gradient(135deg,#232526,#414345);}
+
+.main{
+flex:1;
+padding:20px;
+overflow:auto;
+}
+
+.page{display:none}
+.active{display:block}
+
+.header{
+background:white;
+padding:15px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+}
+
+.card{
+padding:25px;
+border-radius:18px;
+color:#fff;
+font-weight:bold;
+box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+
+.c1{background:linear-gradient(135deg,#667eea,#764ba2);}
+.c2{background:linear-gradient(135deg,#11998e,#38ef7d);}
+.c3{background:linear-gradient(135deg,#fc4a1a,#f7b733);}
+.c4{background:linear-gradient(135deg,#ff416c,#ff4b2b);}
+
+table{
+width:100%;
+background:white;
+border-collapse:collapse;
+margin-top:15px;
+border-radius:10px;
+overflow:hidden;
+}
+
+th{
+background:#0B3A75;
+color:white;
+padding:12px;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+.action{
+background:#0B3A75;
+color:white;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+.chart{
+display:flex;
+align-items:flex-end;
+gap:20px;
+height:300px;
+background:white;
+padding:20px;
+border-radius:15px;
+}
+
+.bar{
+width:70px;
+background:linear-gradient(180deg,#4facfe,#00f2fe);
+color:white;
+text-align:center;
+}
+
+.dark{
+background:#111;
+color:white;
+}
+
+.dark .header,
+.dark table,
+.dark .chart{
+background:#1f1f1f;
+color:white;
+}
+
+.result{
+margin-top:15px;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">PCMCS Enterprise</div>
+
+<div class="menu">
+
+<button class="dashboardBtn" onclick="show('dashboard')">🏠 Dashboard</button>
+<button class="ruleBtn" onclick="show('rules')">⚖ Rule Balancing</button>
+<button class="traceBtn" onclick="show('trace')">🔍 Trace Reports</button>
+<button class="jobBtn" onclick="show('jobs')">🚀 Jobs Console</button>
+<button class="validBtn" onclick="show('validation')">✔ Validation</button>
+<button class="analyticsBtn" onclick="show('analytics')">📊 Analytics</button>
+<button class="exportBtn" onclick="exportCSV()">📁 Export CSV</button>
+<button class="darkBtn" onclick="toggleDark()">🌙 Dark Mode</button>
+
+</div>
+</div>
+
+<div class="main">
+
+<div id="dashboard" class="page active">
+
+<div class="header">
+<h2>PCMCS Dashboard</h2>
+</div>
+
+<div class="cards">
+
+<div class="card c1">
+<h3>Cost Pools</h3>
+<h1>64</h1>
+</div>
+
+<div class="card c2">
+<h3>Drivers</h3>
+<h1>42</h1>
+</div>
+
+<div class="card c3">
+<h3>Rules</h3>
+<h1>128</h1>
+</div>
+
+<div class="card c4">
+<h3>Job Success</h3>
+<h1>98%</h1>
+</div>
+
+</div>
+
+</div>
+
+<div id="rules" class="page">
+
+<div class="header">
+<h2>Rule Balancing</h2>
+</div>
+
+<table>
+<tr>
+<th>Rule</th>
+<th>Source</th>
+<th>Target</th>
+<th>Status</th>
+</tr>
+
+<tr>
+<td>Allocate Labor</td>
+<td>10000</td>
+<td>10000</td>
+<td>✔ Balanced</td>
+</tr>
+
+<tr>
+<td>Allocate Service</td>
+<td>15000</td>
+<td>14990</td>
+<td style="color:red">✖ Variance</td>
+</tr>
+
+</table>
+
+</div>
+
+<div id="trace" class="page">
+
+<div class="header">
+<h2>Trace Report Simulator</h2>
+</div>
+
+<table>
+
+<tr>
+<th>Customer</th>
+<th>Activity</th>
+<th>Driver</th>
+<th>Allocation In</th>
+</tr>
+
+<tr onclick="alert('Service Calls → Customer Service Driver → 68.86% Share → Allocation 4131.96')">
+<td>Standard Cruiser</td>
+<td>Service Calls</td>
+<td>Customer Service</td>
+<td>4131.96</td>
+</tr>
+
+<tr>
+<td>Standard Cruiser</td>
+<td>Finishing</td>
+<td>Finish</td>
+<td>1404.29</td>
+</tr>
+
+<tr>
+<td>Standard Cruiser</td>
+<td>Shipping</td>
+<td>Shipping</td>
+<td>3319.88</td>
+</tr>
+
+</table>
+
+</div>
+
+<div id="jobs" class="page">
+
+<div class="header">
+<h2>Jobs Console</h2>
+</div>
+
+<button class="action" onclick="runJob()">Run Calculation</button>
+
+<div id="jobResult" class="result"></div>
+
+</div>
+
+<div id="validation" class="page">
+
+<div class="header">
+<h2>Validation Engine</h2>
+</div>
+
+Source Amount
+<input type="number" id="source">
+
+Target Amount
+<input type="number" id="target">
+
+<button class="action" onclick="validateRule()">Validate</button>
+
+<div id="validationResult" class="result"></div>
+
+</div>
+
+<div id="analytics" class="page">
+
+<div class="header">
+<h2>Allocation Analytics</h2>
+</div>
+
+<div class="chart">
+<div class="bar" style="height:120px">Jan</div>
+<div class="bar" style="height:220px">Feb</div>
+<div class="bar" style="height:180px">Mar</div>
+<div class="bar" style="height:260px">Apr</div>
+<div class="bar" style="height:210px">May</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function show(id){
+document.querySelectorAll('.page')
+.forEach(x=>x.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function runJob(){
+document.getElementById("jobResult").innerHTML=
+"✔ Allocation Job Completed Successfully";
+}
+
+function validateRule(){
+
+let s=parseFloat(document.getElementById("source").value);
+let t=parseFloat(document.getElementById("target").value);
+
+if(s===t){
+document.getElementById("validationResult").innerHTML=
+"✔ Balanced";
+}
+else{
+document.getElementById("validationResult").innerHTML=
+"✖ Variance = "+(s-t);
+}
+}
+
+function exportCSV(){
+
+let csv =
+"Customer,Activity,Driver,Allocation\n"+
+"Standard Cruiser,Service Calls,Customer Service,4131.96\n"+
+"Standard Cruiser,Finishing,Finish,1404.29\n";
+
+let blob = new Blob([csv],{type:'text/csv'});
+let a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download="PCMCS_Report.csv";
+a.click();
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
