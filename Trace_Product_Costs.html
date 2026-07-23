@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PCMCS Corporate Training Simulator</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:#f4f6f9;
+}
+
+.topbar{
+height:60px;
+background:#12343b;
+color:white;
+display:flex;
+align-items:center;
+padding:0 20px;
+font-size:20px;
+font-weight:600;
+}
+
+.container{
+display:flex;
+height:calc(100vh - 60px);
+}
+
+.sidebar{
+width:240px;
+background:#1f2d3d;
+color:white;
+padding-top:15px;
+}
+
+.sidebar ul{
+list-style:none;
+}
+
+.sidebar li{
+padding:14px 20px;
+cursor:pointer;
+border-left:4px solid transparent;
+}
+
+.sidebar li:hover{
+background:#2f4054;
+border-left:4px solid #4db6ac;
+}
+
+.main{
+flex:1;
+overflow:auto;
+padding:20px;
+}
+
+.card-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.card h3{
+color:#666;
+font-size:14px;
+margin-bottom:10px;
+}
+
+.card h1{
+color:#12343b;
+}
+
+.section{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.section-title{
+font-size:18px;
+font-weight:600;
+margin-bottom:15px;
+color:#12343b;
+}
+
+.pov{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:10px;
+}
+
+select,input{
+width:100%;
+padding:10px;
+border:1px solid #ccc;
+border-radius:4px;
+}
+
+.trace-item{
+padding:8px;
+cursor:pointer;
+}
+
+.child{
+padding-left:30px;
+display:none;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#12343b;
+color:white;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:left;
+}
+
+.btn{
+background:#12343b;
+color:white;
+padding:10px 18px;
+border:none;
+cursor:pointer;
+border-radius:5px;
+margin-top:10px;
+}
+
+.result{
+margin-top:15px;
+padding:15px;
+background:#eef9f1;
+border-left:5px solid green;
+}
+
+.quiz-question{
+margin-bottom:20px;
+}
+
+.score{
+font-size:22px;
+font-weight:bold;
+color:#12343b;
+margin-top:15px;
+}
+
+.flow{
+text-align:center;
+font-size:18px;
+line-height:40px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+Oracle PCMCS Corporate Training Simulator
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+
+<ul>
+<li>Dashboard</li>
+<li>Models</li>
+<li>Designer</li>
+<li>Calculation Control</li>
+<li>Calculation Analysis</li>
+<li>Rule Balancing</li>
+<li>Jobs</li>
+<li>Data</li>
+<li>Trace</li>
+<li>Interview Prep</li>
+</ul>
+
+</div>
+
+<div class="main">
+
+<div class="card-grid">
+
+<div class="card">
+<h3>Total Product Cost</h3>
+<h1>$605,693</h1>
+</div>
+
+<div class="card">
+<h3>Activities</h3>
+<h1>3</h1>
+</div>
+
+<div class="card">
+<h3>Rules Executed</h3>
+<h1>12</h1>
+</div>
+
+<div class="card">
+<h3>Status</h3>
+<h1>Success</h1>
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">
+POV Selection
+</div>
+
+<div class="pov">
+
+<select>
+<option>Jan</option>
+<option>Feb</option>
+</select>
+
+<select>
+<option>FY24</option>
+<option>FY25</option>
+</select>
+
+<select>
+<option>Actual</option>
+<option>Budget</option>
+</select>
+
+<select>
+<option>Working</option>
+</select>
+
+<select>
+<option>USD Reporting</option>
+</select>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">
+Trace - Product Costs
+</div>
+
+<div class="trace-item" onclick="toggle('machining')">
+▶ Machining
+</div>
+
+<div class="child machining">
+Regular Salary : 270,846
+</div>
+
+<div class="child machining">
+Regular Wages : 55,916
+</div>
+
+<div class="child machining">
+Vacation : 74,739
+</div>
+
+<div class="child machining">
+Benefits : 81,076
+</div>
+
+<div class="child machining">
+Rent : 90,085
+</div>
+
+<div class="child machining">
+Utilities : 33,031
+</div>
+
+<div class="trace-item" onclick="toggle('assembly')">
+▶ Assembly
+</div>
+
+<div class="child assembly">
+Salary : 653,633
+</div>
+
+<div class="child assembly">
+Benefits : 203,713
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">
+Allocation Engine Simulator
+</div>
+
+<label>Product A Machine Hours</label>
+<input id="a" value="600">
+
+<br><br>
+
+<label>Product B Machine Hours</label>
+<input id="b" value="400">
+
+<button class="btn" onclick="runAllocation()">
+Run Allocation Rule
+</button>
+
+<div id="allocationResult"></div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">
+Cost Flow Visualization
+</div>
+
+<div class="flow">
+
+GL Expenses
+
+↓<br>
+
+Machining Activity
+
+↓<br>
+
+Product A / Product B
+
+↓<br>
+
+Profitability Result
+
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">
+PCMCS Quiz
+</div>
+
+<div class="quiz-question">
+
+<p><b>1. What does Trace Screen show?</b></p>
+
+<input type="radio" name="q1" value="1"> Cost Flow<br>
+<input type="radio" name="q1" value="0"> Security<br>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>2. Allocation In means?</b></p>
+
+<input type="radio" name="q2" value="1"> Cost Entering Target<br>
+<input type="radio" name="q2" value="0"> Cost Leaving Target<br>
+
+</div>
+
+<div class="quiz-question">
+
+<p><b>3. Driver is used for?</b></p>
+
+<input type="radio" name="q3" value="1"> Allocation Basis<br>
+<input type="radio" name="q3" value="0"> Currency Conversion<br>
+
+</div>
+
+<button class="btn" onclick="submitQuiz()">
+Submit Quiz
+</button>
+
+<div id="quizScore"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function toggle(group){
+
+document.querySelectorAll("." + group)
+.forEach(item=>{
+
+item.style.display=
+item.style.display==="block"
+? "none"
+: "block";
+
+});
+
+}
+
+function runAllocation(){
+
+let a=
+parseFloat(document.getElementById("a").value);
+
+let b=
+parseFloat(document.getElementById("b").value);
+
+let total=a+b;
+
+let cost=605693;
+
+let pa=(cost*a/total).toFixed(2);
+let pb=(cost*b/total).toFixed(2);
+
+document.getElementById("allocationResult").innerHTML=
+
+`
+<div class="result">
+
+Allocation Completed Successfully
+
+<br><br>
+
+Product A Cost :
+<b>$${pa}</b>
+
+<br><br>
+
+Product B Cost :
+<b>$${pb}</b>
+
+</div>
+`;
+
+}
+
+function submitQuiz(){
+
+let score=0;
+
+document
+.querySelectorAll("input[type=radio]:checked")
+.forEach(x=>score+=parseInt(x.value));
+
+document.getElementById("quizScore").innerHTML=
+
+'<div class="score">Score : '+score+'/3</div>';
+
+}
+
+</script>
+
+</body>
+</html>
