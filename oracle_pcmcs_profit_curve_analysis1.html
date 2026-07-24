@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oracle PCMCS Profit Curve Analysis - Enterprise Training Simulator</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
+body{display:flex;background:#eef2f7}
+.sidebar{
+width:220px;
+height:100vh;
+background:#1f2937;
+color:#fff;
+padding:20px;
+}
+.sidebar h2{
+margin-bottom:25px;
+text-align:center;
+}
+.sidebar button{
+width:100%;
+margin:6px 0;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#374151;
+color:white;
+cursor:pointer;
+transition:.3s;
+}
+.sidebar button:hover{
+background:#3b82f6;
+}
+
+.main{
+flex:1;
+padding:20px;
+}
+
+/* Header Section */
+.header{
+background:white;
+padding:15px 20px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+margin-bottom:20px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+flex-wrap:wrap;
+gap:15px;
+}
+
+.header-left {
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-svg {
+height:55px;
+width:auto;
+display:block;
+}
+
+.header h2{
+font-size:18px;
+color:#1f2937;
+line-height:1.3;
+}
+
+.header h2 span {
+color:#2563eb;
+font-weight:bold;
+display:block;
+font-size:20px;
+}
+
+.contact-info {
+text-align:right;
+font-size:14px;
+color:#374151;
+}
+
+.contact-info a {
+color:#2563eb;
+text-decoration:none;
+font-weight:bold;
+}
+
+.contact-info a:hover {
+text-decoration:underline;
+}
+
+.contact-info .phone {
+font-weight:600;
+color:#1f2937;
+margin-top:2px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+padding:20px;
+border-radius:12px;
+color:white;
+font-size:18px;
+font-weight:bold;
+}
+
+.blue{background:#2563eb}
+.green{background:#16a34a}
+.orange{background:#f59e0b}
+.red{background:#dc2626}
+
+.panel{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+display:none;
+}
+
+.panel.active{
+display:block;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+th{
+background:#2563eb;
+color:white;
+}
+
+input{
+padding:8px;
+width:90px;
+}
+
+button.action{
+padding:10px 18px;
+border:none;
+border-radius:8px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+margin:5px;
+}
+
+.success{color:green;font-weight:bold}
+.error{color:red;font-weight:bold}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>PCMCS</h2>
+
+<button onclick="show('dashboard')">Dashboard</button>
+
+<button onclick="show('rule')">Rule Balancing</button>
+
+<button onclick="show('jobs')">Jobs</button>
+
+<button onclick="show('analytics')">Analytics</button>
+
+<button onclick="show('profit')">Profit Curve</button>
+
+</div>
+
+<div class="main">
+
+<div class="header">
+<div class="header-left">
+<!-- BISP Logo with Tagline -->
+<svg class="logo-svg" viewBox="0 0 250 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="5" y="16" width="75" height="38" rx="8" fill="none" stroke="#0b5cbe" stroke-width="4.5"/>
+  <rect x="42" y="6" width="50" height="30" rx="6" fill="none" stroke="#e03e12" stroke-width="4.5"/>
+  <text x="100" y="45" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="42">
+    <tspan fill="#0b5cbe">BI</tspan><tspan fill="#e03e12">SP</tspan>
+  </text>
+  <text x="2" y="70" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#222">
+    Business Intelligence Solution Providers Inc.
+  </text>
+</svg>
+<h2>
+  <span>Oracle PCMCS Profit Curve Analysis</span>
+  Enterprise Training Simulator
+</h2>
+</div>
+
+<div class="contact-info">
+<div><a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+<div class="phone">📞 +91 769-409-5404</div>
+</div>
+</div>
+
+<div class="cards">
+
+<div class="card blue">Revenue<br>$43,000</div>
+
+<div class="card green">Profit<br>$8,500</div>
+
+<div class="card orange">Rules<br>12</div>
+
+<div class="card red">Jobs<br>Running</div>
+
+</div>
+
+<div id="dashboard" class="panel active">
+
+<h2>Dashboard</h2>
+
+<p>Welcome to the PCMCS Training Simulator.</p>
+
+</div>
+
+<div id="rule" class="panel">
+
+<h2>Rule Balancing</h2>
+
+<p>Allocation Total (%)</p>
+
+<input id="alloc" value="100">
+
+<button class="action" onclick="validateRule()">Validate</button>
+
+<p id="ruleResult"></p>
+
+</div>
+
+<div id="jobs" class="panel">
+
+<h2>Calculation Jobs</h2>
+
+<button class="action" onclick="runJob()">Run Calculation</button>
+
+<p id="jobStatus">Waiting...</p>
+
+</div>
+
+<div id="analytics" class="panel">
+
+<h2>Analytics</h2>
+
+<p>Total Revenue : 43000</p>
+
+<p>Total Cost : 34500</p>
+
+<p>Net Income : 8500</p>
+
+</div>
+
+<div id="profit" class="panel">
+
+<h2>Profit Curve</h2>
+
+<table>
+
+<tr>
+
+<th>Customer</th>
+
+<th>Revenue</th>
+
+<th>Cost</th>
+
+<th>Allocation</th>
+
+<th>Net Income</th>
+
+</tr>
+
+<tr>
+
+<td>BB100-001</td>
+
+<td><input id="r1" value="10000"></td>
+
+<td><input id="c1" value="7000"></td>
+
+<td><input id="a1" value="1380"></td>
+
+<td id="n1"></td>
+
+</tr>
+
+<tr>
+
+<td>BB100-002</td>
+
+<td><input id="r2" value="8000"></td>
+
+<td><input id="c2" value="6000"></td>
+
+<td><input id="a2" value="1140"></td>
+
+<td id="n2"></td>
+
+</tr>
+
+</table>
+
+<button class="action" onclick="calculate()">Run Calculation</button>
+
+<button class="action" onclick="exportCSV()">Export CSV</button>
+
+</div>
+
+</div>
+
+<script>
+
+function show(id){
+
+document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+
+document.getElementById(id).classList.add("active");
+
+}
+
+function validateRule(){
+
+let v=document.getElementById("alloc").value;
+
+document.getElementById("ruleResult").innerHTML=
+
+(v==100)?
+
+'<span class="success">Balanced ✓</span>':
+
+'<span class="error">Out Of Balance ✗</span>';
+
+}
+
+function runJob(){
+
+let s=document.getElementById("jobStatus");
+
+s.innerHTML="Running...";
+
+setTimeout(()=>{
+
+s.innerHTML="Completed Successfully ✓";
+
+},2000);
+
+}
+
+function calculate(){
+
+let r1=+document.getElementById("r1").value;
+
+let c1=+document.getElementById("c1").value;
+
+let a1=+document.getElementById("a1").value;
+
+let r2=+document.getElementById("r2").value;
+
+let c2=+document.getElementById("c2").value;
+
+let a2=+document.getElementById("a2").value;
+
+document.getElementById("n1").innerHTML=r1-c1-a1;
+
+document.getElementById("n2").innerHTML=r2-c2-a2;
+
+}
+
+function exportCSV(){
+
+let csv="Customer,Revenue,Cost,Allocation\n";
+
+csv+="BB100-001,"+r1.value+","+c1.value+","+a1.value+"\n";
+
+csv+="BB100-002,"+r2.value+","+c2.value+","+a2.value;
+
+let blob=new Blob([csv]);
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(blob);
+
+a.download="PCMCS.csv";
+
+a.click();
+
+}
+
+calculate();
+
+</script>
+
+</body>
+</html>
