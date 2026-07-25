@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle PCMCS Interactive Dashboard Simulator | BISP</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, sans-serif}
+body{background:#f4f7fb; color:#1f2937}
+
+/* Header Styling */
+.header{
+height:80px;
+background:linear-gradient(90deg, #002B5B, #0B5ED7);
+color:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+box-shadow:0 3px 10px rgba(0,0,0,0.2);
+}
+
+.header-left {
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo-svg {
+height:52px;
+width:auto;
+display:block;
+background:white;
+padding:4px 8px;
+border-radius:6px;
+}
+
+.header-title h1 {
+font-size:18px;
+font-weight:700;
+letter-spacing:0.5px;
+}
+
+.header-title p {
+font-size:12px;
+color:#93c5fd;
+}
+
+.contact-info {
+text-align:right;
+font-size:13px;
+line-height:1.4;
+}
+
+.contact-info a {
+color:#93c5fd;
+text-decoration:none;
+font-weight:bold;
+}
+
+.contact-info a:hover {
+text-decoration:underline;
+}
+
+.contact-info .phone {
+font-weight:600;
+color:#ffffff;
+}
+
+/* Layout Structure */
+.container{
+display:flex;
+height:calc(100vh - 80px);
+}
+
+/* Sidebar */
+.sidebar{
+width:250px;
+background:#1f2937;
+overflow-y:auto;
+flex-shrink:0;
+}
+
+.sidebar h3{
+padding:16px;
+color:#9ca3af;
+font-size:12px;
+text-transform:uppercase;
+letter-spacing:1px;
+background:#111827;
+border-bottom:1px solid #374151;
+}
+
+.sidebar button{
+width:100%;
+border:none;
+padding:14px 20px;
+cursor:pointer;
+text-align:left;
+background:#1f2937;
+color:#d1d5db;
+border-bottom:1px solid #374151;
+font-size:14px;
+transition:all 0.2s ease;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.sidebar button:hover, .sidebar button.active{
+background:#2563eb;
+color:white;
+padding-left:25px;
+}
+
+/* Content Area */
+.content{
+flex:1;
+padding:20px;
+overflow-y:auto;
+}
+
+/* Cards & UI Elements */
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.06);
+margin-bottom:20px;
+border:1px solid #e5e7eb;
+}
+
+.card h2 {
+font-size:18px;
+margin-bottom:15px;
+color:#111827;
+border-bottom:2px solid #f3f4f6;
+padding-bottom:8px;
+}
+
+/* Prompt Bar */
+.prompt-bar {
+display:flex;
+gap:15px;
+align-items:center;
+background:#e0f2fe;
+padding:12px 20px;
+border-radius:8px;
+margin-bottom:20px;
+border:1px solid #bae6fd;
+flex-wrap:wrap;
+}
+
+.prompt-group {
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.prompt-group label {
+font-size:13px;
+font-weight:600;
+color:#0369a1;
+}
+
+.prompt-group select {
+padding:6px 12px;
+border:1px solid #7dd3fc;
+border-radius:5px;
+outline:none;
+font-size:13px;
+background:white;
+}
+
+/* KPI Grid */
+.kpi-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+margin-bottom:20px;
+}
+
+.kpi-box{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+color:white;
+padding:18px;
+border-radius:10px;
+box-shadow:0 3px 6px rgba(37,99,235,0.2);
+}
+
+.kpi-box h4 {
+font-size:12px;
+text-transform:uppercase;
+opacity:0.85;
+margin-bottom:5px;
+}
+
+.kpi-box h2 {
+font-size:24px;
+border:none;
+padding:0;
+margin:0;
+color:white;
+}
+
+/* Tables */
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid #e5e7eb;
+padding:10px 14px;
+text-align:left;
+font-size:14px;
+}
+
+th{
+background:#f8fafc;
+color:#475569;
+font-weight:600;
+}
+
+/* Form Inputs & Buttons */
+input[type="number"], input[type="text"], select {
+width:100%;
+padding:9px 12px;
+margin-top:4px;
+margin-bottom:12px;
+border:1px solid #d1d5db;
+border-radius:6px;
+font-size:14px;
+}
+
+.btn{
+padding:9px 18px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+color:white;
+font-weight:600;
+font-size:13px;
+transition:background 0.2s;
+display:inline-flex;
+align-items:center;
+gap:6px;
+}
+
+.btn-blue{background:#2563eb}
+.btn-blue:hover{background:#1d4ed8}
+.btn-green{background:#16a34a}
+.btn-green:hover{background:#15803d}
+
+.alert{
+padding:12px 16px;
+background:#dcfce7;
+color:#166534;
+border-radius:6px;
+margin-top:12px;
+font-size:14px;
+display:none;
+border:1px solid #bbf7d0;
+}
+
+.quiz-option {
+margin:8px 0;
+font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Main Header -->
+<div class="header">
+  <div class="header-left">
+    <!-- Vector BISP Logo -->
+    <svg class="logo-svg" viewBox="0 0 250 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="16" width="75" height="38" rx="8" fill="none" stroke="#0b5cbe" stroke-width="4.5"/>
+      <rect x="42" y="6" width="50" height="30" rx="6" fill="none" stroke="#e03e12" stroke-width="4.5"/>
+      <text x="100" y="45" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="42">
+        <tspan fill="#0b5cbe">BI</tspan><tspan fill="#e03e12">SP</tspan>
+      </text>
+      <text x="2" y="70" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#222">
+        Business Intelligence Solution Providers Inc.
+      </text>
+    </svg>
+    <div class="header-title">
+      <h1>Oracle PCMCS Dashboards Simulator</h1>
+      <p>Profitability & Cost Management Cloud Service</p>
+    </div>
+  </div>
+
+  <div class="contact-info">
+    <div><a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+    <div class="phone">📞 +91 769-409-5404</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <h3>Navigation Catalog</h3>
+    <button class="active" onclick="showTab('dashboards', this)">📊 Home > Dashboards</button>
+    <button onclick="showTab('rules', this)">⚖ Rule Balancing</button>
+    <button onclick="showTab('profitability', this)">📈 Customer Profitability</button>
+    <button onclick="showTab('mcq', this)">🎓 Certification Quiz</button>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content">
+
+    <!-- Interactive Prompts Bar -->
+    <div class="prompt-bar">
+      <div class="prompt-group">
+        <label>Scenario:</label>
+        <select id="pScenario" onchange="updateDashboardData()">
+          <option value="Actual">Actual</option>
+          <option value="Budget">Budget</option>
+        </select>
+      </div>
+      <div class="prompt-group">
+        <label>Year:</label>
+        <select id="pYear" onchange="updateDashboardData()">
+          <option value="FY26">FY26</option>
+          <option value="FY25">FY25</option>
+        </select>
+      </div>
+      <div class="prompt-group">
+        <label>Entity:</label>
+        <select id="pEntity" onchange="updateDashboardData()">
+          <option value="US">US Operations</option>
+          <option value="UK">UK Operations</option>
+        </select>
+      </div>
+      <button class="btn btn-blue" style="padding:6px 12px; margin-left:auto;" onclick="updateDashboardData()">🔄 Refresh Dashboard</button>
+    </div>
+
+    <!-- TAB 1: Dashboards Overview -->
+    <div id="dashboards">
+      <div class="card">
+        <h2>Executive Dashboard KPIs</h2>
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <h4>Total Revenue</h4>
+            <h2 id="kpiRevenue">$43,000</h2>
+          </div>
+          <div class="kpi-box" style="background:linear-gradient(135deg,#16a34a,#15803d);">
+            <h4>Total Cost</h4>
+            <h2 id="kpiCost">$34,500</h2>
+          </div>
+          <div class="kpi-box" style="background:linear-gradient(135deg,#ea580c,#c2410c);">
+            <h4>Net Income</h4>
+            <h2 id="kpiNet">$8,500</h2>
+          </div>
+          <div class="kpi-box" style="background:linear-gradient(135deg,#0284c7,#0369a1);">
+            <h4>Active Rules</h4>
+            <h2>12 Rules</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Allocations Summary Grid</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Entity / Customer</th>
+              <th>Direct Cost ($)</th>
+              <th>Allocated Cost ($)</th>
+              <th>Net Profit ($)</th>
+            </tr>
+          </thead>
+          <tbody id="gridBody">
+            <tr>
+              <td>BB100-001 (Retail)</td>
+              <td>10,000</td>
+              <td>1,380</td>
+              <td>1,620</td>
+            </tr>
+            <tr>
+              <td>BB100-002 (Corporate)</td>
+              <td>8,000</td>
+              <td>1,140</td>
+              <td>860</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: Rule Balancing -->
+    <div id="rules" style="display:none">
+      <div class="card">
+        <h2>Rule Allocation Simulator</h2>
+        <p style="font-size:13px; color:#6b7280; margin-bottom:15px;">Calculates cost distribution based on Driver Percentage.</p>
+
+        <label>Source Cost ($):</label>
+        <input type="number" id="sourceCost" value="100000">
+
+        <label>Driver Percentage (%):</label>
+        <input type="number" id="driverPercent" value="25">
+
+        <button class="btn btn-blue" onclick="runAllocation()">Run Allocation Calculation</button>
+
+        <div id="allocResult" class="alert"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Profitability Analysis -->
+    <div id="profitability" style="display:none">
+      <div class="card">
+        <h2>Profit Curve Analysis Data Grid</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>Revenue ($)</th>
+              <th>Cost ($)</th>
+              <th>Allocated Amount ($)</th>
+              <th>Calculated Net Income ($)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BB100-001</td>
+              <td><input type="number" id="r1" value="10000"></td>
+              <td><input type="number" id="c1" value="7000"></td>
+              <td><input type="number" id="a1" value="1380"></td>
+              <td id="n1" style="font-weight:bold;">1620</td>
+            </tr>
+            <tr>
+              <td>BB100-002</td>
+              <td><input type="number" id="r2" value="8000"></td>
+              <td><input type="number" id="c2" value="6000"></td>
+              <td><input type="number" id="a2" value="1140"></td>
+              <td id="n2" style="font-weight:bold;">860</td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn btn-green" style="margin-top:15px;" onclick="calculateProfit()">Re-Calculate Profit</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: Certification MCQs -->
+    <div id="mcq" style="display:none">
+      <div class="card">
+        <h2>PCMCS Dashboards Certification Quiz</h2>
+        <div class="quiz-option">
+          <p><b>Q1: What is the primary purpose of Dashboards in PCMCS?</b></p>
+          <input type="radio" name="q1" value="A"> Store Metadata<br>
+          <input type="radio" name="q1" id="q1_correct" value="B"> Visualize business info & KPIs<br>
+          <input type="radio" name="q1" value="C"> Manage Users<br>
+        </div>
+        <br>
+        <div class="quiz-option">
+          <p><b>Q2: How do you filter dashboard data at runtime?</b></p>
+          <input type="radio" name="q2" id="q2_correct" value="A"> Using Prompts<br>
+          <input type="radio" name="q2" value="B"> Using Grids<br>
+          <input type="radio" name="q2" value="C"> Using Charts<br>
+        </div>
+        <br>
+        <button class="btn btn-blue" onclick="checkQuiz()">Submit Answers</button>
+        <div id="quizResult" class="alert"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Switch Side Tabs
+function showTab(tabId, element){
+  document.querySelectorAll('.content > div:not(.prompt-bar)').forEach(div => div.style.display = 'none');
+  document.getElementById(tabId).style.display = 'block';
+  
+  document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+  element.classList.add('active');
+}
+
+// Update Dashboard KPIs according to Prompts
+function updateDashboardData(){
+  let scenario = document.getElementById('pScenario').value;
+  let year = document.getElementById('pYear').value;
+
+  let rev = 43000;
+  let cost = 34500;
+
+  if(scenario === 'Budget'){
+    rev = 50000;
+    cost = 38000;
+  }
+
+  if(year === 'FY25'){
+    rev -= 5000;
+    cost -= 4000;
+  }
+
+  let net = rev - cost;
+
+  document.getElementById('kpiRevenue').innerHTML = '$' + rev.toLocaleString();
+  document.getElementById('kpiCost').innerHTML = '$' + cost.toLocaleString();
+  document.getElementById('kpiNet').innerHTML = '$' + net.toLocaleString();
+}
+
+// Allocation Engine
+function runAllocation(){
+  let src = parseFloat(document.getElementById('sourceCost').value) || 0;
+  let driver = parseFloat(document.getElementById('driverPercent').value) || 0;
+  
+  let allocated = (src * driver) / 100;
+  let res = document.getElementById('allocResult');
+  
+  res.style.display = 'block';
+  res.innerHTML = '✓ Calculation Completed! Allocated Amount = <b>$' + allocated.toLocaleString() + '</b>';
+}
+
+// Calculate Customer Profitability Grid
+function calculateProfit(){
+  let r1 = +document.getElementById('r1').value;
+  let c1 = +document.getElementById('c1').value;
+  let a1 = +document.getElementById('a1').value;
+
+  let r2 = +document.getElementById('r2').value;
+  let c2 = +document.getElementById('c2').value;
+  let a2 = +document.getElementById('a2').value;
+
+  document.getElementById('n1').innerText = (r1 - c1 - a1);
+  document.getElementById('n2').innerText = (r2 - c2 - a2);
+}
+
+// Quiz Check
+function checkQuiz(){
+  let q1 = document.getElementById('q1_correct').checked;
+  let q2 = document.getElementById('q2_correct').checked;
+  let res = document.getElementById('quizResult');
+
+  res.style.display = 'block';
+  if(q1 && q2){
+    res.className = 'alert';
+    res.style.background = '#dcfce7';
+    res.style.color = '#166534';
+    res.innerHTML = '🎉 Excellent! All answers are correct.';
+  } else {
+    res.className = 'alert';
+    res.style.background = '#fee2e2';
+    res.style.color = '#991b1b';
+    res.innerHTML = '❌ Some answers are incorrect. Please try again.';
+  }
+}
+</script>
+
+</body>
+</html>
