@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCMCS Enterprise Training Simulator | BISP</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Tahoma,sans-serif}
+body{background:#f4f7fb}
+
+/* Header with BISP Branding */
+.header{
+height:80px;
+background:linear-gradient(90deg,#002B5B,#0B5ED7);
+color:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:15px;
+font-size:20px;
+font-weight:bold;
+}
+
+.logo-svg {
+height:55px;
+width:auto;
+display:block;
+background:white;
+padding:4px 8px;
+border-radius:6px;
+}
+
+.contact{
+font-size:14px;
+text-align:right;
+line-height:1.4;
+}
+
+.contact a {
+color:#60a5fa;
+text-decoration:none;
+font-weight:bold;
+}
+
+.contact a:hover {
+text-decoration:underline;
+}
+
+.contact .phone {
+font-weight:600;
+color:#ffffff;
+}
+
+.container{
+display:flex;
+height:calc(100vh - 80px);
+}
+
+.sidebar{
+width:260px;
+background:#1f2937;
+overflow:auto;
+}
+
+.sidebar h3{
+padding:15px;
+color:#fff;
+background:#111827;
+}
+
+.sidebar button{
+width:100%;
+border:none;
+padding:14px;
+cursor:pointer;
+text-align:left;
+background:#1f2937;
+color:white;
+border-bottom:1px solid #374151;
+font-size:15px;
+}
+
+.sidebar button:hover{
+background:#2563eb;
+}
+
+.content{
+flex:1;
+padding:20px;
+overflow:auto;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+margin-bottom:20px;
+}
+
+.kpi{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+}
+
+.box{
+background:linear-gradient(135deg,#2563eb,#1e40af);
+color:white;
+padding:20px;
+border-radius:12px;
+text-align:center;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+.btn{
+padding:10px 20px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-right:10px;
+color:white;
+}
+
+.green{background:#16a34a}
+.red{background:#dc2626}
+.blue{background:#2563eb}
+.orange{background:#ea580c}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:left;
+}
+
+th{
+background:#2563eb;
+color:white;
+}
+
+.success{
+padding:15px;
+background:#dcfce7;
+color:#166534;
+border-radius:8px;
+margin-top:10px;
+display:none;
+}
+
+.quiz{
+padding:15px;
+background:#f8fafc;
+margin-bottom:15px;
+border-radius:10px;
+}
+
+.workflow{
+line-height:2;
+font-family:Consolas;
+background:#111827;
+color:#22c55e;
+padding:20px;
+border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div class="logo">
+<!-- BISP Logo Vector -->
+<svg class="logo-svg" viewBox="0 0 250 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="5" y="16" width="75" height="38" rx="8" fill="none" stroke="#0b5cbe" stroke-width="4.5"/>
+  <rect x="42" y="6" width="50" height="30" rx="6" fill="none" stroke="#e03e12" stroke-width="4.5"/>
+  <text x="100" y="45" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="42">
+    <tspan fill="#0b5cbe">BI</tspan><tspan fill="#e03e12">SP</tspan>
+  </text>
+  <text x="2" y="70" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#222">
+    Business Intelligence Solution Providers Inc.
+  </text>
+</svg>
+<span>PCMCS Enterprise Simulator</span>
+</div>
+
+<div class="contact">
+<div><a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+<div class="phone">📞 +91 769-409-5404</div>
+</div>
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+<h3>PCMCS Navigation</h3>
+
+<button onclick="show('dashboard')">🏠 Dashboard</button>
+<button onclick="show('rules')">⚖ Rule Balancing</button>
+<button onclick="show('jobs')">⚙ Jobs Console</button>
+<button onclick="show('analytics')">📊 Analytics</button>
+<button onclick="show('maintenance')">🛠 Daily Maintenance</button>
+<button onclick="show('migration')">📦 Migration</button>
+<button onclick="show('security')">🔐 Access Control</button>
+<button onclick="show('audit')">📋 Audit Logs</button>
+<button onclick="show('export')">📤 Export</button>
+<button onclick="show('quiz')">🎓 Certification Quiz</button>
+<button onclick="show('workflow')">🔄 Workflow</button>
+</div>
+
+<div class="content">
+
+<div id="dashboard">
+
+<div class="card">
+<h2>PCMCS Executive Dashboard</h2>
+</div>
+
+<div class="kpi">
+<div class="box">
+<h3>Total Revenue</h3>
+<h2>$12.4M</h2>
+</div>
+
+<div class="box">
+<h3>Total Cost</h3>
+<h2>$8.1M</h2>
+</div>
+
+<div class="box">
+<h3>Profit</h3>
+<h2>$4.3M</h2>
+</div>
+
+<div class="box">
+<h3>Allocations</h3>
+<h2>1,284</h2>
+</div>
+</div>
+
+</div>
+
+<div id="rules" style="display:none">
+
+<div class="card">
+<h2>Rule Balancing Simulator</h2>
+
+<label>Source Cost</label>
+<input type="number" id="source" value="100000">
+
+<label>Driver %</label>
+<input type="number" id="driver" value="25">
+
+<button class="btn blue" onclick="allocate()">Run Allocation</button>
+
+<div id="allocationResult" class="success"></div>
+
+</div>
+
+</div>
+
+<div id="jobs" style="display:none">
+
+<div class="card">
+<h2>Jobs Console</h2>
+
+<table>
+<tr>
+<th>Job</th>
+<th>Status</th>
+</tr>
+
+<tr>
+<td>Import GL Data</td>
+<td>Completed</td>
+</tr>
+
+<tr>
+<td>Run Allocations</td>
+<td>Completed</td>
+</tr>
+
+<tr>
+<td>Refresh Cube</td>
+<td>Completed</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<div id="analytics" style="display:none">
+
+<div class="card">
+<h2>Profitability Analytics</h2>
+
+<table>
+<tr>
+<th>Customer</th>
+<th>Revenue</th>
+<th>Cost</th>
+<th>Profit</th>
+</tr>
+
+<tr>
+<td>Walmart</td>
+<td>500000</td>
+<td>400000</td>
+<td>100000</td>
+</tr>
+
+<tr>
+<td>Target</td>
+<td>350000</td>
+<td>280000</td>
+<td>70000</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<div id="maintenance" style="display:none">
+
+<div class="card">
+
+<h2>Daily Maintenance</h2>
+
+<label>Start Time</label>
+<input type="time" id="time">
+
+<label>Time Zone</label>
+<select id="tz">
+<option>America/New_York</option>
+<option>America/Los_Angeles</option>
+<option>UTC</option>
+<option>Asia/Kolkata</option>
+</select>
+
+<label>
+<input type="checkbox" id="auto">
+ Auto Update Application Content
+</label>
+
+<br><br>
+
+<button class="btn green" onclick="saveMaintenance()">Save</button>
+<button class="btn red" onclick="resetMaintenance()">Reset</button>
+
+<div id="maintMsg" class="success"></div>
+
+</div>
+
+</div>
+
+<div id="migration" style="display:none">
+
+<div class="card">
+
+<h2>Migration Snapshot Simulator</h2>
+
+<label>Snapshot Name</label>
+<input id="snapshot" value="PROD_Q3_BACKUP">
+
+<button class="btn blue" onclick="snapshot()">Create Snapshot</button>
+
+<div id="snapMsg" class="success"></div>
+
+</div>
+
+</div>
+
+<div id="security" style="display:none">
+
+<div class="card">
+
+<h2>Access Control</h2>
+
+<table>
+<tr>
+<th>User</th>
+<th>Role</th>
+</tr>
+
+<tr>
+<td>John</td>
+<td>Finance User</td>
+</tr>
+
+<tr>
+<td>Mary</td>
+<td>Sales User</td>
+</tr>
+
+<tr>
+<td>David</td>
+<td>Administrator</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<div id="audit" style="display:none">
+
+<div class="card">
+
+<h2>Audit Trail</h2>
+
+<table>
+
+<tr>
+<th>User</th>
+<th>Action</th>
+<th>Time</th>
+</tr>
+
+<tr>
+<td>John</td>
+<td>Modified Driver</td>
+<td>10:15 AM</td>
+</tr>
+
+<tr>
+<td>David</td>
+<td>Added Rule</td>
+<td>11:30 AM</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<div id="export" style="display:none">
+
+<div class="card">
+
+<h2>Export Simulator</h2>
+
+<button class="btn orange" onclick="exportCSV()">Export CSV</button>
+
+<div id="exportMsg" class="success"></div>
+
+</div>
+
+</div>
+
+<div id="quiz" style="display:none">
+
+<div class="card">
+
+<h2>Certification Quiz</h2>
+
+<div class="quiz">
+<p><b>Which role can change Daily Maintenance?</b></p>
+
+<input type="radio" name="q1"> Viewer<br>
+<input type="radio" name="q1" id="correct"> Service Administrator<br>
+<input type="radio" name="q1"> User<br>
+
+<br>
+
+<button class="btn green" onclick="checkQuiz()">Submit</button>
+
+<div id="quizResult" class="success"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="workflow" style="display:none">
+
+<div class="card">
+
+<h2>End-to-End PCMCS Workflow</h2>
+
+<div class="workflow">
+ERP System
+↓
+Import Data
+↓
+Run Allocations
+↓
+Refresh Cube
+↓
+Generate Reports
+↓
+Export Results
+↓
+Business Analysis
+↓
+Snapshot Backup
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function show(id){
+
+let pages=document.querySelectorAll('.content > div');
+
+pages.forEach(p=>p.style.display='none');
+
+document.getElementById(id).style.display='block';
+}
+
+function allocate(){
+
+let source=parseFloat(document.getElementById('source').value);
+
+let driver=parseFloat(document.getElementById('driver').value);
+
+let result=(source*driver)/100;
+
+let msg=document.getElementById('allocationResult');
+
+msg.style.display='block';
+
+msg.innerHTML='Allocation Result = $'+result.toLocaleString();
+}
+
+function saveMaintenance(){
+
+let time=document.getElementById('time').value;
+
+if(time==""){
+alert("Enter maintenance time");
+return;
+}
+
+let msg=document.getElementById('maintMsg');
+
+msg.style.display='block';
+
+msg.innerHTML='Maintenance scheduled successfully at '+time;
+}
+
+function resetMaintenance(){
+
+document.getElementById('time').value='';
+
+document.getElementById('maintMsg').style.display='none';
+}
+
+function snapshot(){
+
+let name=document.getElementById('snapshot').value;
+
+let msg=document.getElementById('snapMsg');
+
+msg.style.display='block';
+
+msg.innerHTML='Snapshot '+name+' created successfully.';
+}
+
+function exportCSV(){
+
+let msg=document.getElementById('exportMsg');
+
+msg.style.display='block';
+
+msg.innerHTML='CSV exported successfully.';
+}
+
+function checkQuiz(){
+
+let result=document.getElementById('quizResult');
+
+if(document.getElementById('correct').checked){
+
+result.style.display='block';
+
+result.innerHTML='Correct Answer';
+}
+else{
+
+result.style.display='block';
+
+result.innerHTML='Incorrect Answer';
+}
+}
+
+</script>
+
+</body>
+</html>
