@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle PCMCS Intelligence Module — Enterprise Training Simulator | BISP</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+body{background:#f4f7fb;color:#1f2937;min-height:100vh;}
+
+.header{background:#fff;padding:14px 26px;box-shadow:0 2px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;position:sticky;top:0;z-index:50;border-bottom:3px solid #2563eb;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-left img{height:50px;width:auto;display:block;}
+.header-title h1{font-size:19px;color:#1f2937;font-weight:800;line-height:1.2;}
+.header-title p{font-size:12px;color:#2563eb;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-top:2px;}
+.contact-info{text-align:right;font-size:13.5px;color:#374151;}
+.contact-info a{color:#2563eb;font-weight:700;text-decoration:none;}
+.contact-info .phone{font-weight:700;color:#e8592e;margin-top:3px;}
+
+.app-container{display:flex;min-height:calc(100vh - 79px);}
+.sidebar{width:252px;background:#1f2937;color:#fff;padding:18px 10px;flex-shrink:0;}
+.sidebar h2{text-align:center;font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;padding-bottom:10px;margin-bottom:8px;border-bottom:1px solid #374151;}
+.sidebar .divider{font-size:10.5px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin:14px 8px 6px;}
+.sidebar button{width:100%;margin:3px 0;padding:11px 14px;border:none;border-radius:8px;background:transparent;color:#d1d5db;cursor:pointer;text-align:left;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:10px;transition:.15s;}
+.sidebar button:hover{background:#374151;color:#fff;}
+.sidebar button.active{background:#2563eb;color:#fff;}
+
+.main{flex:1;padding:22px 26px;overflow-y:auto;}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.card-kpi{padding:18px 20px;border-radius:12px;color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,.08);}
+.card-kpi span{display:block;font-size:22px;margin-top:6px;font-weight:800;}
+.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
+.green{background:linear-gradient(135deg,#16a34a,#15803d)}
+.orange{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.red{background:linear-gradient(135deg,#dc2626,#b91c1c)}
+
+.panel{background:#fff;padding:24px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.panel h2{font-size:19px;color:#111827;margin-bottom:12px;border-bottom:2px solid #e5e7eb;padding-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.panel .sub{color:#6b7280;font-size:13.5px;margin-bottom:16px;}
+
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.subtabs button{padding:8px 14px;border-radius:20px;border:1.5px solid #e5e7eb;background:#f8fafc;color:#374151;font-size:12.5px;font-weight:700;cursor:pointer;}
+.subtabs button.active{background:#2563eb;border-color:#2563eb;color:#fff;}
+.subpanel{display:none;}
+.subpanel.active{display:block;}
+
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+th,td{padding:9px 11px;border:1px solid #e5e7eb;text-align:center;}
+th{background:#2563eb;color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;}
+tr:nth-child(even) td{background:#f8fafc;}
+input[type=number],input[type=text],select{padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13.5px;}
+input[type=number]{width:90px;text-align:center;}
+
+button.action{padding:9px 18px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;font-size:13px;cursor:pointer;margin:2px 8px 2px 0;transition:.15s;}
+button.action:hover{background:#1d4ed8;}
+button.btn-green{background:#16a34a;} button.btn-green:hover{background:#15803d;}
+button.btn-orange{background:#e8592e;} button.btn-orange:hover{background:#c8481f;}
+button.btn-red{background:#dc2626;} button.btn-red:hover{background:#b91c1c;}
+button.btn-outline{background:#fff;color:#2563eb;border:1.5px solid #2563eb;}
+button.btn-outline:hover{background:#eff6ff;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+
+.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;}
+.badge.ok{background:#dcfce7;color:#15803d;}
+.badge.bad{background:#fee2e2;color:#b91c1c;}
+.badge.warn{background:#fef3c7;color:#b45309;}
+.badge.info{background:#dbeafe;color:#1d4ed8;}
+
+.progress-track{width:120px;height:9px;background:#e5e7eb;border-radius:6px;overflow:hidden;display:inline-block;vertical-align:middle;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2563eb,#16a34a);width:0%;transition:width .25s;}
+
+.workflow-box{background:#111827;color:#4ade80;font-family:'Courier New',monospace;padding:14px 16px;border-radius:10px;line-height:1.7;font-size:12.5px;max-height:220px;overflow-y:auto;margin-top:14px;}
+
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;}
+.mini-panel{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;}
+canvas{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;max-width:100%;}
+
+.mcq-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:14px;}
+.mcq-card p.q{font-weight:700;font-size:14px;color:#1e293b;margin-bottom:10px;}
+.mcq-card label{display:block;padding:8px 12px;margin:5px 0;border-radius:6px;cursor:pointer;font-size:13.5px;background:#fff;border:1px solid #cbd5e1;}
+.mcq-card label:hover{background:#f1f5f9;}
+.mcq-card label.correct{background:#dcfce7;border-color:#16a34a;}
+.mcq-card label.wrong{background:#fee2e2;border-color:#dc2626;}
+.explanation{margin-top:10px;padding:10px;background:#eff6ff;border-left:4px solid #2563eb;color:#1e40af;font-size:12.5px;display:none;border-radius:0 6px 6px 0;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.kpi-tile{padding:16px;border-radius:12px;background:#f8fafc;border:1px solid #e5e7eb;}
+.kpi-tile .lbl{font-size:12px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.kpi-tile .val{font-size:22px;font-weight:800;color:#111827;margin-top:6px;}
+.kpi-tile .trend{font-size:12px;font-weight:700;margin-top:4px;}
+.trend.up{color:#16a34a;} .trend.down{color:#dc2626;}
+
+#printSummary{display:none;}
+
+/* ===== Voice Intro Overlay ===== */
+#introOverlay{position:fixed;inset:0;background:rgba(17,24,39,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+#introOverlay.hidden{display:none;}
+.intro-card{background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.intro-card img{height:46px;margin-bottom:14px;}
+.intro-card h2{font-size:19px;color:#111827;margin-bottom:8px;}
+.intro-card p{font-size:13.5px;color:#6b7280;margin-bottom:20px;line-height:1.5;}
+.intro-wave{display:flex;justify-content:center;gap:4px;height:26px;align-items:flex-end;margin-bottom:18px;}
+.intro-wave span{width:5px;background:#2563eb;border-radius:3px;animation:wave 1s ease-in-out infinite;}
+.intro-wave span:nth-child(2){animation-delay:.1s;background:#e8592e;}
+.intro-wave span:nth-child(3){animation-delay:.2s;}
+.intro-wave span:nth-child(4){animation-delay:.3s;background:#e8592e;}
+.intro-wave span:nth-child(5){animation-delay:.4s;}
+@keyframes wave{0%,100%{height:6px;}50%{height:26px;}}
+.intro-wave.paused span{animation-play-state:paused;height:6px;}
+#introStatus{font-size:12px;color:#9ca3af;margin-bottom:16px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+.replay-btn{background:#fff;border:1.5px solid #2563eb;color:#2563eb;font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:8px;cursor:pointer;margin-top:4px;}
+.replay-btn:hover{background:#eff6ff;}
+
+@media print{
+ .sidebar,.header .contact-info,button,.subtabs{display:none !important;}
+ .app-container{display:block;}
+ .main{padding:0;}
+ .cards,.panel{display:none !important;}
+ #printSummary{display:block !important;padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Voice Introduction Overlay -->
+<div id="introOverlay">
+  <div class="intro-card">
+    <img src="data:image/png;base64,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" alt="BISP Logo">
+    <h2>Oracle PCMCS Intelligence Module — Training Simulator</h2>
+    <p>Sit back for a short spoken introduction, then explore the simulator yourself.</p>
+    <div class="intro-wave" id="introWave"><span></span><span></span><span></span><span></span><span></span></div>
+    <div id="introStatus">Starting introduction…</div>
+    <button class="action" onclick="startIntro()">▶ Play Introduction</button>
+    <br>
+    <button class="replay-btn" onclick="skipIntro()">Skip &amp; Explore Now</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <img src="data:image/png;base64,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" alt="BISP Logo">
+    <div class="header-title">
+      <h1>Oracle PCMCS Intelligence Module</h1>
+      <p>Enterprise Training Simulator</p>
+    </div>
+  </div>
+  <div class="contact-info">
+    <div><a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+    <div class="phone">📞 +91 769-409-5404</div>
+    <button class="replay-btn" style="margin-top:6px;" onclick="openIntroOverlay()">🔊 Replay Intro</button>
+  </div>
+</div>
+
+<div class="app-container">
+
+  <div class="sidebar">
+    <h2>Intelligence Menu</h2>
+    <button class="active" data-target="dashboard" onclick="show(this)">🏠 Dashboard</button>
+    <div class="divider">Intelligence Analytics</div>
+    <button data-target="analytics" onclick="show(this)">📊 Analytics Workbench</button>
+    <div class="divider">Model Governance</div>
+    <button data-target="rules" onclick="show(this)">⚖ Rule Balancing</button>
+    <button data-target="jobs" onclick="show(this)">⚙ Jobs Console</button>
+    <div class="divider">Learning</div>
+    <button data-target="quiz" onclick="show(this)">🎓 Certification Quiz</button>
+  </div>
+
+  <div class="main">
+
+    <div class="cards">
+      <div class="card-kpi blue">Total Revenue<span id="kpiRevenue">--</span></div>
+      <div class="card-kpi green">Net Profit<span id="kpiProfit">--</span></div>
+      <div class="card-kpi orange">Active Rules<span id="kpiRules">6</span></div>
+      <div class="card-kpi red">Jobs Running<span id="kpiJobs">0</span></div>
+    </div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <div id="dashboard" class="panel active">
+      <h2>Executive Dashboard
+        <button class="action btn-orange" onclick="exportExecutiveSummary()">📄 Export Executive Summary</button>
+      </h2>
+      <p class="sub">Welcome to the Oracle PCMCS Intelligence Module Enterprise Training Simulator. This environment mirrors how finance teams use PCMCS Intelligence to explore profitability, validate allocation rules, run calculation jobs, and turn results into decisions.</p>
+      <div class="grid-2">
+        <div class="mini-panel">
+          <h3 style="margin-bottom:10px;color:#111827;">What's inside this simulator</h3>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;">• <b>Analytics Workbench</b> — Analysis Views, Scatter Analysis, Profit Curves, Allocation Trace, Query Builder, and a KPI Monitor.</p>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;">• <b>Rule Balancing</b> — a live validation engine checking allocation percentages sum to 100% per cost pool.</p>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;">• <b>Jobs Console</b> — simulate calculation jobs with progress tracking and a running log.</p>
+          <p style="font-size:13.5px;color:#374151;">• <b>Certification Quiz</b> — score yourself against 10 scenario-based questions.</p>
+          <div style="margin-top:16px;">
+            <button class="action" onclick="goTo('analytics')">Open Analytics Workbench →</button>
+            <button class="action btn-green" onclick="goTo('rules')">Open Rule Balancing →</button>
+          </div>
+        </div>
+        <div class="mini-panel">
+          <h3 style="margin-bottom:10px;color:#111827;">Company Snapshot</h3>
+          <p style="font-size:13.5px;color:#374151;margin-bottom:6px;">Segments modeled: <b>15</b></p>
+          <p style="font-size:13.5px;color:#374151;margin-bottom:6px;">Active allocation rules: <b>6</b>, across 2 cost pools</p>
+          <p style="font-size:13.5px;color:#374151;margin-bottom:14px;">Data regenerates every time you refresh — the Dashboard, Analytics, and KPI Monitor stay in sync.</p>
+          <button class="action btn-outline" onclick="refreshCompanyData()">🔄 Refresh Company Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ANALYTICS WORKBENCH ===================== -->
+    <div id="analytics" class="panel">
+      <h2>Intelligence Analytics Workbench
+        <button class="action btn-outline" onclick="refreshCompanyData()">🔄 Refresh Data</button>
+      </h2>
+      <p class="sub">Explore profitability the way Oracle PCMCS Intelligence does: Analysis Views, Scatter Analysis, Profit Curves, Allocation Trace, ad-hoc Queries, and KPIs — all reading from the same underlying results.</p>
+
+      <div class="subtabs">
+        <button class="active" data-target="sub-views" onclick="showSub(this)">Analysis Views</button>
+        <button data-target="sub-scatter" onclick="showSub(this)">Scatter Analysis</button>
+        <button data-target="sub-curve" onclick="showSub(this)">Profit Curve</button>
+        <button data-target="sub-trace" onclick="showSub(this)">Allocation Trace</button>
+        <button data-target="sub-query" onclick="showSub(this)">Query Builder</button>
+        <button data-target="sub-kpi" onclick="showSub(this)">KPI Monitor</button>
+      </div>
+
+      <!-- Analysis Views -->
+      <div id="sub-views" class="subpanel active">
+        <p style="margin-bottom:10px;font-size:13.5px;"><b>Saved view:</b>
+          <select id="viewSelect" onchange="renderAnalysisView()">
+            <option value="product">Product Profitability</option>
+            <option value="customer">Customer Profitability</option>
+            <option value="region">Regional Analysis</option>
+          </select>
+          <button class="action btn-outline" style="margin-left:10px;" onclick="exportTableToCSV('viewTable','pcmcs_analysis_view.csv')">⬇ Export CSV</button>
+        </p>
+        <table id="viewTable"></table>
+      </div>
+
+      <!-- Scatter Analysis -->
+      <div id="sub-scatter" class="subpanel">
+        <p style="margin-bottom:10px;font-size:13.5px;">
+          <b>X axis:</b>
+          <select id="scatterX" onchange="drawScatter()"><option value="revenue">Revenue</option><option value="cost">Cost</option><option value="profit">Profit</option></select>
+          &nbsp; <b>Y axis:</b>
+          <select id="scatterY" onchange="drawScatter()"><option value="cost">Cost</option><option value="revenue">Revenue</option><option value="profit" selected>Profit</option></select>
+        </p>
+        <canvas id="scatterCanvas" width="640" height="320"></canvas>
+        <p class="sub" style="margin-top:10px;">Each point is a segment. Green = profitable, red = loss-making — a fast way to spot outliers and correlations across two measures.</p>
+      </div>
+
+      <!-- Profit Curve -->
+      <div id="sub-curve" class="subpanel">
+        <canvas id="curveCanvas" width="640" height="320"></canvas>
+        <p class="sub" id="curveInsight" style="margin-top:10px;"></p>
+      </div>
+
+      <!-- Allocation Trace -->
+      <div id="sub-trace" class="subpanel">
+        <p style="margin-bottom:10px;font-size:13.5px;">
+          <b>Focal node:</b>
+          <select id="traceFocal">
+            <option value="ProdX">Product X</option>
+            <option value="ProdY">Product Y</option>
+            <option value="ProdZ">Product Z</option>
+            <option value="DeptA">Dept A (IT &amp; Facilities)</option>
+            <option value="DeptB">Dept B (HR &amp; Admin)</option>
+            <option value="DeptC">Dept C (Marketing)</option>
+          </select>
+          &nbsp; <b>Direction:</b>
+          <label style="display:inline;background:none;border:none;padding:0 6px;"><input type="radio" name="traceMode" value="forward" checked> Forward</label>
+          <label style="display:inline;background:none;border:none;padding:0 6px;"><input type="radio" name="traceMode" value="backward"> Backward</label>
+          <button class="action" style="margin-left:10px;" onclick="highlightTrace()">▶ Run Trace</button>
+        </p>
+        <div class="grid-2">
+          <svg id="traceSvg" viewBox="0 0 600 320" style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;"></svg>
+          <div class="mini-panel">
+            <h3 style="margin-bottom:10px;color:#111827;font-size:14px;">Trace Detail</h3>
+            <div id="traceDetail" style="font-size:13px;color:#374151;">Select a focal node and click "Run Trace" to see how cost flows through the allocation rules.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Query Builder -->
+      <div id="sub-query" class="subpanel">
+        <p style="margin-bottom:10px;font-size:13.5px;">
+          <b>Rows:</b>
+          <select id="queryRow"><option value="product">Product</option><option value="customer">Customer</option><option value="region">Region</option></select>
+          &nbsp; <b>POV Period:</b>
+          <select id="queryPov"><option>Jan</option><option>Feb</option><option>Mar</option><option selected>Apr</option><option>May</option><option>Jun</option></select>
+          &nbsp; <button class="action btn-green" onclick="runQuery()">▶ Run Query</button>
+          <button class="action btn-outline" onclick="exportTableToCSV('queryTable','pcmcs_query_export.csv')">⬇ Export CSV</button>
+        </p>
+        <table id="queryTable"></table>
+      </div>
+
+      <!-- KPI Monitor -->
+      <div id="sub-kpi" class="subpanel">
+        <div id="kpiMonitorGrid" class="kpi-grid"></div>
+      </div>
+    </div>
+
+    <!-- ===================== RULE BALANCING ===================== -->
+    <div id="rules" class="panel">
+      <h2>Rule Balancing Validation Engine</h2>
+      <p class="sub">Each allocation rule contributes a share of its cost pool. A pool is "balanced" only when its rules sum to exactly 100%. Edit any percentage and re-validate.</p>
+      <table id="rulesTable">
+        <thead><tr><th>Rule</th><th>Cost Pool</th><th>Driver</th><th>Allocation %</th></tr></thead>
+        <tbody>
+          <tr><td>IT Allocation</td><td>Corporate Overhead Pool</td><td>Headcount</td><td><input type="number" class="rule-input" data-group="G1" value="40" oninput="recalcGroup('G1')"></td></tr>
+          <tr><td>HR Allocation</td><td>Corporate Overhead Pool</td><td>Headcount</td><td><input type="number" class="rule-input" data-group="G1" value="35" oninput="recalcGroup('G1')"></td></tr>
+          <tr><td>Facilities Allocation</td><td>Corporate Overhead Pool</td><td>Square Footage</td><td><input type="number" class="rule-input" data-group="G1" value="25" oninput="recalcGroup('G1')"></td></tr>
+          <tr style="background:#eef2ff;"><td colspan="3" style="text-align:right;font-weight:700;">Subtotal — Corporate Overhead Pool</td><td id="subtotal-G1" style="font-weight:800;">100%</td></tr>
+          <tr><td>Marketing Allocation</td><td>Regional Overhead Pool</td><td>Revenue Share</td><td><input type="number" class="rule-input" data-group="G2" value="50" oninput="recalcGroup('G2')"></td></tr>
+          <tr><td>Admin Allocation</td><td>Regional Overhead Pool</td><td>Headcount</td><td><input type="number" class="rule-input" data-group="G2" value="30" oninput="recalcGroup('G2')"></td></tr>
+          <tr><td>Support Allocation</td><td>Regional Overhead Pool</td><td>Ticket Volume</td><td><input type="number" class="rule-input" data-group="G2" value="25" oninput="recalcGroup('G2')"></td></tr>
+          <tr style="background:#eef2ff;"><td colspan="3" style="text-align:right;font-weight:700;">Subtotal — Regional Overhead Pool</td><td id="subtotal-G2" style="font-weight:800;">105%</td></tr>
+        </tbody>
+      </table>
+      <div style="margin:10px 0;">
+        <span id="ruleStatusG1"></span> &nbsp; <span id="ruleStatusG2"></span>
+      </div>
+      <button class="action" onclick="validateAll()">✅ Validate All Rules</button>
+      <button class="action btn-outline" onclick="resetRules()">↺ Reset to Defaults</button>
+      <div id="overallRuleStatus" style="margin-top:14px;font-weight:700;font-size:14px;"></div>
+    </div>
+
+    <!-- ===================== JOBS CONSOLE ===================== -->
+    <div id="jobs" class="panel">
+      <h2>Calculation Jobs Console</h2>
+      <p class="sub">Queue and run calculation jobs. The Overhead Allocation job checks the Rule Balancing engine before it can succeed — an unbalanced pool will fail the job.</p>
+      <table>
+        <thead><tr><th>Job Name</th><th>Type</th><th>POV</th><th>Status</th><th>Progress</th><th>Actions</th></tr></thead>
+        <tbody id="jobsBody"></tbody>
+      </table>
+      <div style="margin:14px 0;padding:14px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;">
+        <b style="font-size:13px;">Queue a new job:</b><br><br>
+        <input type="text" id="newJobName" placeholder="Job name" style="width:220px;">
+        <select id="newJobType"><option value="calc">Calculation</option><option value="alloc">Overhead Allocation</option><option value="kpi">KPI Refresh</option></select>
+        <input type="text" id="newJobPov" placeholder="POV (e.g. FY26-P07)" style="width:150px;">
+        <button class="action btn-green" onclick="addJob()">+ Add to Queue</button>
+      </div>
+      <button class="action btn-outline" onclick="exportJobLog()">⬇ Export Job Log</button>
+      <div class="workflow-box" id="jobLog">[System] Jobs console ready. Queue or run a job to see live logs here.</div>
+    </div>
+
+    <!-- ===================== CERTIFICATION QUIZ ===================== -->
+    <div id="quiz" class="panel">
+      <h2>Certification Knowledge Check
+        <button class="action btn-orange" onclick="window.print()">📄 Save Quiz PDF</button>
+      </h2>
+      <p class="sub">10 scenario-based questions on PCMCS Intelligence. Submit to see your score and explanations.</p>
+      <div id="quizContainer"></div>
+      <button class="action btn-green" onclick="checkQuiz()">Submit &amp; Check Answers</button>
+      <div id="quizResult" style="margin-top:14px;font-weight:700;font-size:15px;"></div>
+    </div>
+
+    <!-- Hidden printable executive summary -->
+    <div id="printSummary"></div>
+
+  </div>
+</div>
+
+<script>
+/* ===================== NAVIGATION ===================== */
+function show(el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(el.dataset.target).classList.add('active');
+  document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function goTo(id){ show(document.querySelector('.sidebar button[data-target="'+id+'"]')); }
+
+function showSub(el){
+  el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  el.closest('.panel').querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+  const id = el.dataset.target;
+  document.getElementById(id).classList.add('active');
+  if(id==='sub-scatter') drawScatter();
+  if(id==='sub-curve') drawCurve();
+  if(id==='sub-kpi') renderKPIMonitor();
+}
+
+/* ===================== HELPERS ===================== */
+function fmt(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+
+/* ===================== COMPANY DATA ===================== */
+const LABELS = {
+  product:  ['Consulting Services','Managed Support','Cloud Hosting','Data Analytics','Training Programs','Implementation','Custom Development','License Renewal','Premium Support','Integration Services','Migration Services','Advisory Services','Maintenance Contracts','Add-on Modules','Enterprise Bundle'],
+  customer: ['Retail East','Retail West','Wholesale North','Wholesale South','Online Direct','Key Accounts A','Key Accounts B','Distributor 1','Distributor 2','Corporate','Government','Healthcare','Education','SMB Segment','Enterprise Segment'],
+  region:   ['North America','EMEA','APAC','LATAM','ANZ','Middle East','South Asia','East Africa','Western Europe','Nordic Region','Southern Europe','Central Asia','Greater China','Southeast Asia','Caribbean']
+};
+let COMPANY_DATA = [];
+function generateCompanyData(){
+  const arr=[];
+  for(let i=0;i<15;i++){
+    const revenue = Math.round(60000+Math.random()*440000);
+    const cost = Math.round(revenue*(0.55+Math.random()*0.5));
+    arr.push({idx:i, revenue, cost, profit:revenue-cost});
+  }
+  return arr;
+}
+function refreshCompanyData(){
+  COMPANY_DATA = generateCompanyData();
+  updateTopKPIs();
+  renderAnalysisView();
+  drawScatter();
+  drawCurve();
+  renderKPIMonitor();
+}
+function updateTopKPIs(){
+  const rev = COMPANY_DATA.reduce((s,d)=>s+d.revenue,0);
+  const cost = COMPANY_DATA.reduce((s,d)=>s+d.cost,0);
+  document.getElementById('kpiRevenue').innerText = fmt(rev);
+  document.getElementById('kpiProfit').innerText = fmt(rev-cost);
+}
+
+/* ===================== ANALYSIS VIEWS ===================== */
+function renderAnalysisView(){
+  const view = document.getElementById('viewSelect').value;
+  const names = LABELS[view];
+  const dimLabel = view.charAt(0).toUpperCase()+view.slice(1);
+  let html = `<thead><tr><th>${dimLabel}</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin %</th></tr></thead><tbody>`;
+  COMPANY_DATA.forEach(d=>{
+    const margin = (d.profit/d.revenue*100).toFixed(1);
+    html += `<tr><td style="text-align:left;">${names[d.idx]}</td><td>${fmt(d.revenue)}</td><td>${fmt(d.cost)}</td><td style="color:${d.profit>=0?'#15803d':'#b91c1c'};font-weight:700;">${fmt(d.profit)}</td><td>${margin}%</td></tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('viewTable').innerHTML = html;
+}
+
+/* ===================== SCATTER ANALYSIS ===================== */
+function labelFor(key){ return {revenue:'Revenue ($)',cost:'Cost ($)',profit:'Profit ($)'}[key]; }
+function drawScatter(){
+  const canvas = document.getElementById('scatterCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const xKey = document.getElementById('scatterX').value;
+  const yKey = document.getElementById('scatterY').value;
+  const pad=44, w=canvas.width-pad*2, h=canvas.height-pad*2;
+  const xs = COMPANY_DATA.map(d=>d[xKey]), ys = COMPANY_DATA.map(d=>d[yKey]);
+  const xMax = Math.max(...xs)*1.1, xMin = Math.min(0,...xs);
+  const yMax = Math.max(...ys)*1.1, yMin = Math.min(...ys,0);
+  ctx.strokeStyle='#9ca3af'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,pad+h); ctx.lineTo(pad+w,pad+h); ctx.stroke();
+  ctx.fillStyle='#374151'; ctx.font='11px Segoe UI';
+  ctx.fillText(labelFor(xKey), pad+w/2-30, pad+h+28);
+  ctx.save(); ctx.translate(14,pad+h/2+30); ctx.rotate(-Math.PI/2); ctx.fillText(labelFor(yKey),0,0); ctx.restore();
+  COMPANY_DATA.forEach(d=>{
+    const px = pad + ((d[xKey]-xMin)/((xMax-xMin)||1))*w;
+    const py = pad + h - ((d[yKey]-yMin)/((yMax-yMin)||1))*h;
+    ctx.beginPath();
+    ctx.fillStyle = d.profit>=0 ? '#16a34a' : '#dc2626';
+    ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
+  });
+}
+
+/* ===================== PROFIT CURVE ===================== */
+function drawCurve(){
+  const canvas = document.getElementById('curveCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const sorted = [...COMPANY_DATA].sort((a,b)=>b.profit-a.profit);
+  let cum=0; const points = sorted.map(d=>{ cum+=d.profit; return cum; });
+  const pad=44, w=canvas.width-pad*2, h=canvas.height-pad*2;
+  const yMax = Math.max(...points), yMin = Math.min(...points,0);
+  ctx.strokeStyle='#9ca3af';
+  ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,pad+h); ctx.lineTo(pad+w,pad+h); ctx.stroke();
+  const zeroY = pad+h-((0-yMin)/((yMax-yMin)||1))*h;
+  ctx.strokeStyle='#d1d5db'; ctx.beginPath(); ctx.moveTo(pad,zeroY); ctx.lineTo(pad+w,zeroY); ctx.stroke();
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const px = pad + (i/(points.length-1))*w;
+    const py = pad+h-((p-yMin)/((yMax-yMin)||1))*h;
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  });
+  ctx.strokeStyle='#2563eb'; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.fillStyle='#374151'; ctx.font='11px Segoe UI';
+  ctx.fillText('Segments sorted by profit — most to least profitable', pad, pad+h+28);
+  let peakIdx=0, peakVal=-Infinity;
+  points.forEach((p,i)=>{ if(p>peakVal){ peakVal=p; peakIdx=i; } });
+  document.getElementById('curveInsight').innerText =
+    `Cumulative profit peaks after segment #${peakIdx+1}, at ${fmt(peakVal)}. Segments after this point are diluting overall profitability — the classic profit-curve signal for flagging underperforming accounts.`;
+}
+
+/* ===================== ALLOCATION TRACE ===================== */
+const EDGES = [
+  ['Total','DeptA',200000], ['Total','DeptB',180000], ['Total','DeptC',120000],
+  ['DeptA','ProdX',120000], ['DeptA','ProdY',80000],
+  ['DeptB','ProdX',90000],  ['DeptB','ProdZ',90000],
+  ['DeptC','ProdY',60000],  ['DeptC','ProdZ',60000]
+];
+const NODE_POS = {
+  Total:{x:300,y:34,r:36,short:'Total'},
+  DeptA:{x:120,y:150,r:32,short:'Dept A'}, DeptB:{x:300,y:150,r:32,short:'Dept B'}, DeptC:{x:480,y:150,r:32,short:'Dept C'},
+  ProdX:{x:150,y:268,r:32,short:'Prod X'}, ProdY:{x:300,y:268,r:32,short:'Prod Y'}, ProdZ:{x:450,y:268,r:32,short:'Prod Z'}
+};
+const NODE_LABEL = {Total:'Total Overhead Cost',DeptA:'Dept A (IT & Facilities)',DeptB:'Dept B (HR & Admin)',DeptC:'Dept C (Marketing)',ProdX:'Product X',ProdY:'Product Y',ProdZ:'Product Z'};
+
+function renderTraceSVG(){
+  const svg = document.getElementById('traceSvg');
+  let s = '';
+  EDGES.forEach(([p,c,amt])=>{
+    const a = NODE_POS[p], b = NODE_POS[c];
+    s += `<line id="edge-${p}-${c}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#cbd5e1" stroke-width="2"/>`;
+  });
+  Object.keys(NODE_POS).forEach(key=>{
+    const n = NODE_POS[key];
+    const fill = key==='Total' ? '#2563eb' : (key.startsWith('Dept') ? '#e8592e' : '#16a34a');
+    s += `<circle id="node-${key}" cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${fill}" stroke="#1f2937" stroke-width="1.5"/>`;
+    s += `<text x="${n.x}" y="${n.y+4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">${n.short}</text>`;
+  });
+  svg.innerHTML = s;
+}
+function upstreamEdges(node){
+  const result = new Map();
+  const stack = [node];
+  while(stack.length){
+    const n = stack.pop();
+    EDGES.forEach(e=>{
+      if(e[1]===n){
+        result.set(e[0]+'|'+e[1], e);
+        stack.push(e[0]);
+      }
+    });
+  }
+  return result;
+}
+function highlightTrace(){
+  document.querySelectorAll('#traceSvg line').forEach(l=>{ l.setAttribute('stroke','#cbd5e1'); l.setAttribute('stroke-width','2'); });
+  const focal = document.getElementById('traceFocal').value;
+  const mode = document.querySelector('input[name="traceMode"]:checked').value;
+  const edges = upstreamEdges(focal);
+  let total = 0;
+  const rows = [];
+  edges.forEach(([p,c,amt])=>{
+    const el = document.getElementById('edge-'+p+'-'+c);
+    if(el){ el.setAttribute('stroke','#e8592e'); el.setAttribute('stroke-width','4'); }
+    if(c===focal) total += amt;
+    rows.push({p,c,amt});
+  });
+  rows.sort((a,b)=> a.p.localeCompare(b.p));
+  let html = mode==='forward'
+    ? `<p><b>Forward Trace</b> — cost flowing from <b>Total Overhead Cost</b> down into <b>${NODE_LABEL[focal]}</b>:</p>`
+    : `<p><b>Backward Trace</b> — tracing <b>${NODE_LABEL[focal]}</b> back up to its originating cost pools:</p>`;
+  html += '<ul style="margin:10px 0 10px 18px;">';
+  rows.forEach(r=> html += `<li>${NODE_LABEL[r.p]} → ${NODE_LABEL[r.c]}: <b>${fmt(r.amt)}</b></li>`);
+  html += '</ul>';
+  html += `<p style="color:#16a34a;font-weight:800;">Total cost allocated into ${NODE_LABEL[focal]}: ${fmt(total)}</p>`;
+  document.getElementById('traceDetail').innerHTML = html;
+}
+
+/* ===================== QUERY BUILDER ===================== */
+function runQuery(){
+  const dim = document.getElementById('queryRow').value;
+  const pov = document.getElementById('queryPov').value;
+  const mult = {Jan:0.92,Feb:0.95,Mar:1.0,Apr:1.03,May:1.05,Jun:1.08}[pov];
+  const names = LABELS[dim];
+  let html = `<thead><tr><th>${dim.charAt(0).toUpperCase()+dim.slice(1)}</th><th>Revenue (${pov})</th><th>Cost (${pov})</th><th>Profit (${pov})</th></tr></thead><tbody>`;
+  COMPANY_DATA.slice(0,8).forEach(d=>{
+    const rev = d.revenue*mult, cost = d.cost*mult;
+    html += `<tr><td style="text-align:left;">${names[d.idx]}</td><td>${fmt(rev)}</td><td>${fmt(cost)}</td><td style="color:${rev-cost>=0?'#15803d':'#b91c1c'};font-weight:700;">${fmt(rev-cost)}</td></tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('queryTable').innerHTML = html;
+}
+
+/* ===================== KPI MONITOR ===================== */
+function renderKPIMonitor(){
+  const rev = COMPANY_DATA.reduce((s,d)=>s+d.revenue,0);
+  const cost = COMPANY_DATA.reduce((s,d)=>s+d.cost,0);
+  const profit = rev-cost;
+  const margin = (profit/rev*100).toFixed(1);
+  const costPer = cost/COMPANY_DATA.length;
+  const top = [...COMPANY_DATA].sort((a,b)=>b.profit-a.profit)[0];
+  const growth = (Math.random()*10-3).toFixed(1);
+  const tiles = [
+    {lbl:'Gross Profit', val:fmt(profit), trend:null},
+    {lbl:'Net Profit', val:fmt(profit), trend:null},
+    {lbl:'Margin %', val:margin+'%', trend:null},
+    {lbl:'Cost per Segment', val:fmt(costPer), trend:null},
+    {lbl:'Revenue Growth vs Prior', val:(growth>=0?'+':'')+growth+'%', trend:growth>=0?'up':'down'},
+    {lbl:'Top Performing Segment', val:LABELS.customer[top.idx], trend:null}
+  ];
+  document.getElementById('kpiMonitorGrid').innerHTML = tiles.map(t=>`
+    <div class="kpi-tile"><div class="lbl">${t.lbl}</div><div class="val">${t.val}</div>${t.trend?`<div class="trend ${t.trend}">${t.trend==='up'?'▲':'▼'} vs last period</div>`:''}</div>
+  `).join('');
+}
+
+/* ===================== RULE BALANCING ===================== */
+function recalcGroup(g){
+  const inputs = document.querySelectorAll(`.rule-input[data-group="${g}"]`);
+  let sum = 0;
+  inputs.forEach(i=> sum += Number(i.value||0));
+  const cell = document.getElementById('subtotal-'+g);
+  cell.innerText = sum+'%';
+  cell.style.color = sum===100 ? '#15803d' : '#b91c1c';
+}
+window.RULES_BALANCED = {G1:true,G2:false};
+function validateAll(){
+  ['G1','G2'].forEach(g=>{
+    recalcGroup(g);
+    const sum = Number(document.getElementById('subtotal-'+g).innerText.replace('%',''));
+    const ok = sum===100;
+    window.RULES_BALANCED[g] = ok;
+    const poolName = g==='G1' ? 'Corporate Overhead Pool' : 'Regional Overhead Pool';
+    document.getElementById('ruleStatus'+g).innerHTML = ok
+      ? `<span class="badge ok">${poolName}: Balanced ✓</span>`
+      : `<span class="badge bad">${poolName}: Out of Balance ✗ (${sum}%)</span>`;
+  });
+  const allOk = window.RULES_BALANCED.G1 && window.RULES_BALANCED.G2;
+  document.getElementById('overallRuleStatus').innerHTML = allOk
+    ? '<span style="color:#15803d;">✓ All allocation rules are balanced and ready for calculation.</span>'
+    : '<span style="color:#b91c1c;">✗ One or more cost pools are out of balance. Fix the percentages above before running the Overhead Allocation job.</span>';
+}
+function resetRules(){
+  const defaults = {0:40,1:35,2:25,3:50,4:30,5:25};
+  document.querySelectorAll('.rule-input').forEach((el,i)=> el.value = defaults[i]);
+  recalcGroup('G1'); recalcGroup('G2');
+  document.getElementById('ruleStatusG1').innerHTML='';
+  document.getElementById('ruleStatusG2').innerHTML='';
+  document.getElementById('overallRuleStatus').innerHTML='';
+}
+
+/* ===================== JOBS CONSOLE ===================== */
+let JOBS = [
+  {id:1,name:'Monthly Profitability Calculation',type:'calc',pov:'FY26-P06',status:'Success',progress:100},
+  {id:2,name:'Overhead Allocation Run',type:'alloc',pov:'FY26-P06',status:'Queued',progress:0}
+];
+let jobCounter = 3;
+function logLine(text){
+  const box = document.getElementById('jobLog');
+  const t = new Date().toLocaleTimeString();
+  box.innerHTML += `<br>[${t}] ${text}`;
+  box.scrollTop = box.scrollHeight;
+}
+function badgeFor(status){
+  const map = {Queued:'info',Running:'warn',Success:'ok',Failed:'bad'};
+  return `<span class="badge ${map[status]}">${status}</span>`;
+}
+function renderJobs(){
+  const body = document.getElementById('jobsBody');
+  body.innerHTML = JOBS.map(j=>`
+    <tr>
+      <td style="text-align:left;">${j.name}</td>
+      <td>${j.type}</td>
+      <td>${j.pov}</td>
+      <td>${badgeFor(j.status)}</td>
+      <td><div class="progress-track"><div class="progress-fill" style="width:${j.progress}%"></div></div></td>
+      <td>
+        <button class="action" style="padding:6px 12px;font-size:12px;" ${j.status==='Running'?'disabled':''} onclick="runJob(${j.id})">▶ Run</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('kpiJobs').innerText = JOBS.filter(j=>j.status==='Running').length;
+}
+function addJob(){
+  const name = document.getElementById('newJobName').value.trim() || 'Untitled Job';
+  const type = document.getElementById('newJobType').value;
+  const pov = document.getElementById('newJobPov').value.trim() || 'FY26-P07';
+  JOBS.push({id:jobCounter++, name, type, pov, status:'Queued', progress:0});
+  document.getElementById('newJobName').value='';
+  document.getElementById('newJobPov').value='';
+  renderJobs();
+  logLine(`Job "${name}" added to queue (POV ${pov}).`);
+}
+function runJob(id){
+  const job = JOBS.find(j=>j.id===id);
+  if(!job || job.status==='Running') return;
+  job.status='Running'; job.progress=0;
+  renderJobs();
+  logLine(`Job "${job.name}" started. Loading source data...`);
+  const timer = setInterval(()=>{
+    job.progress = Math.min(100, job.progress + (8+Math.random()*14));
+    renderJobs();
+    if(job.progress>=35 && job.progress<50) logLine(`Job "${job.name}": executing business rules...`);
+    if(job.progress>=100){
+      clearInterval(timer);
+      if(job.type==='alloc'){
+        const balanced = window.RULES_BALANCED.G1 && window.RULES_BALANCED.G2;
+        if(balanced){
+          job.status='Success';
+          logLine(`Job "${job.name}" completed successfully. All cost pools balanced.`);
+        } else {
+          job.status='Failed';
+          logLine(`Job "${job.name}" FAILED — validation error: one or more cost pools are not balanced to 100%. Fix Rule Balancing first.`);
+        }
+      } else {
+        const ok = Math.random() > 0.1;
+        job.status = ok ? 'Success' : 'Failed';
+        logLine(ok ? `Job "${job.name}" completed successfully.` : `Job "${job.name}" FAILED — source data validation warning: missing driver value.`);
+      }
+      renderJobs();
+    }
+  }, 350);
+}
+function exportJobLog(){
+  const text = document.getElementById('jobLog').innerText;
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='pcmcs_job_log.txt'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ===================== EXPORT (CSV / PDF) ===================== */
+function exportTableToCSV(tableId, filename){
+  const table = document.getElementById(tableId);
+  const rows = [...table.querySelectorAll('tr')];
+  const csv = rows.map(row => [...row.querySelectorAll('th,td')].map(cell=>{
+    const text = cell.innerText.replace(/"/g,'""');
+    return `"${text}"`;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+function exportExecutiveSummary(){
+  const rev = document.getElementById('kpiRevenue').innerText;
+  const profit = document.getElementById('kpiProfit').innerText;
+  const g1 = window.RULES_BALANCED.G1 ? 'Balanced' : 'Out of balance';
+  const g2 = window.RULES_BALANCED.G2 ? 'Balanced' : 'Out of balance';
+  const jobsDone = JOBS.filter(j=>j.status==='Success').length;
+  document.getElementById('printSummary').innerHTML = `
+    <h1 style="color:#2563eb;font-size:22px;">Oracle PCMCS Intelligence — Executive Summary</h1>
+    <p style="color:#6b7280;font-size:12px;margin:6px 0 16px;">Generated ${new Date().toLocaleString()} · BISP Trainings · www.bisptrainings.com · +91 769-409-5404</p>
+    <hr style="margin-bottom:14px;">
+    <p style="margin-bottom:8px;"><b>Total Revenue:</b> ${rev} &nbsp;&nbsp; <b>Net Profit:</b> ${profit}</p>
+    <p style="margin-bottom:8px;"><b>Corporate Overhead Pool:</b> ${g1} &nbsp;&nbsp; <b>Regional Overhead Pool:</b> ${g2}</p>
+    <p style="margin-bottom:8px;"><b>Jobs Completed Successfully:</b> ${jobsDone} / ${JOBS.length}</p>
+  `;
+  window.print();
+}
+
+/* ===================== CERTIFICATION QUIZ ===================== */
+const QUIZ = [
+  {q:"What is the primary purpose of the Intelligence module in Oracle PCMCS?", options:["Running allocation calculations","Analyzing and visualizing profitability results","Loading source data from the ERP","Managing user security roles"], a:1, exp:"Intelligence is the analytics and visualization layer — it doesn't run allocations, it helps users explore results already produced by PCMCS calculations."},
+  {q:"Does the Intelligence module perform allocation calculations?", options:["Yes, it replaces calculation rules","No — calculation rules handle allocations; Intelligence only analyzes results","Only for KPI-based allocations","Yes, but only in test environments"], a:1, exp:"Allocations are executed by PCMCS calculation rules. Intelligence reads and visualizes the results afterward."},
+  {q:"Which feature lets you trace how cost flows through allocation rules to a specific node?", options:["Scatter Analysis","Profit Curve","Allocation Trace","Query Builder"], a:2, exp:"Allocation Trace produces an interactive diagram tracing cost flow forward or backward to a focal node."},
+  {q:"A Profit Curve typically sorts a population by which measure?", options:["Alphabetical name","Profit, from most to least profitable","Allocation percentage","Date of last update"], a:1, exp:"Profit Curves rank a population from most to least profitable, making it easy to spot where profitability erodes."},
+  {q:"What does drill-down analysis let a finance user do?", options:["Change security permissions","Navigate from summary data to underlying detail","Rebuild the Essbase cube","Schedule a batch job"], a:1, exp:"Drill-down moves from summarized figures (e.g. company profit) down to region, branch, and customer-level detail."},
+  {q:"Which of these is NOT something the Intelligence module can do?", options:["Visualize KPIs on a dashboard","Create or execute allocation logic","Chart a scatter analysis of two measures","Support root-cause investigation"], a:1, exp:"Intelligence analyzes and visualizes — it cannot create allocation logic, execute calculations, or load source data."},
+  {q:"A customer's profit swings from $200,000 to -$50,000 month over month. What should you check first?", options:["The customer's marketing budget","Whether an allocation driver ratio changed unexpectedly","The company's stock price","The Essbase cube's storage size"], a:1, exp:"Sudden profitability swings often trace back to an updated or incorrect allocation driver ratio."},
+  {q:"What best distinguishes Intelligence from standard PCMCS reports?", options:["Intelligence is interactive with drill-down and visual charts; reports are mostly static and tabular","Intelligence requires no data at all","Reports can perform calculations, Intelligence cannot","There is no meaningful difference"], a:0, exp:"Intelligence favors interactive, exploratory analysis; standard reports are more structured and static."},
+  {q:"When validating Intelligence results, what should you compare them against?", options:["Nothing — Intelligence is always self-contained","Dashboard results vs PCMCS calculation results vs financial reports","Only the prior year's dashboard","Marketing forecasts"], a:1, exp:"Values should reconcile across dashboards, PCMCS calculation results, and financial reports."},
+  {q:"A region shows high revenue but low profitability. What's the most likely area to investigate?", options:["The region's time zone","Allocated overhead costs and product/customer mix","The font used on the dashboard","The number of logged-in users"], a:1, exp:"High revenue doesn't guarantee profitability if allocated costs or product/customer mix erode margin."}
+];
+function renderQuiz(){
+  const box = document.getElementById('quizContainer');
+  box.innerHTML = QUIZ.map((item,i)=>`
+    <div class="mcq-card">
+      <p class="q">${i+1}. ${item.q}</p>
+      ${item.options.map((opt,oi)=>`<label><input type="radio" name="q${i}" value="${oi}"> ${String.fromCharCode(65+oi)}. ${opt}</label>`).join('')}
+      <div class="explanation" id="exp${i}">${item.exp}</div>
+    </div>
+  `).join('');
+}
+function checkQuiz(){
+  let score = 0;
+  QUIZ.forEach((item,i)=>{
+    const chosen = document.querySelector(`input[name="q${i}"]:checked`);
+    const labels = document.querySelectorAll(`.mcq-card:nth-child(${i+1}) label`);
+    labels.forEach((lbl,oi)=>{
+      lbl.classList.remove('correct','wrong');
+      if(oi===item.a) lbl.classList.add('correct');
+      else if(chosen && Number(chosen.value)===oi) lbl.classList.add('wrong');
+    });
+    if(chosen && Number(chosen.value)===item.a) score++;
+    document.getElementById('exp'+i).style.display='block';
+  });
+  document.getElementById('quizResult').innerHTML = `You scored <span style="color:#2563eb;">${score} / ${QUIZ.length}</span>${score===QUIZ.length ? ' — perfect score! 🎉' : ''}`;
+}
+
+/* ===================== VOICE INTRODUCTION ===================== */
+const INTRO_TEXT = "Welcome to the Oracle P C M C S Intelligence Module Enterprise Training Simulator, brought to you by BISP Trainings. This tool helps you understand how Oracle's Profitability and Cost Management Cloud Service uses its Intelligence features to turn calculation results into real business insight. Start on the Dashboard for a quick overview of company-wide revenue and profit. Then head into the Analytics Workbench, where you can explore Analysis Views, plot a Scatter Analysis, study a Profit Curve, trace how costs flow through allocation rules using the interactive Allocation Trace, build your own Query, and monitor key performance indicators. Next, visit Rule Balancing to see a live validation engine that checks whether allocation percentages add up to one hundred percent. In the Jobs Console, you can queue and run calculation jobs and watch them succeed or fail in real time. And finally, test what you have learned in the Certification Quiz. Now, go ahead — click through the menu, and try it out for yourself!";
+
+let introSpoken = false;
+function pickEnglishVoice(){
+  const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  return voices.find(v=>v.lang==='en-US') || voices.find(v=>v.lang && v.lang.startsWith('en')) || voices[0];
+}
+function startIntro(){
+  if(introSpoken) return;
+  if(!('speechSynthesis' in window)){
+    document.getElementById('introStatus').innerText = 'Voice not supported in this browser — you can still explore below.';
+    document.getElementById('introWave').classList.add('paused');
+    return;
+  }
+  introSpoken = true;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(INTRO_TEXT);
+  utter.lang = 'en-US';
+  utter.rate = 0.97;
+  utter.pitch = 1;
+  const v = pickEnglishVoice();
+  if(v) utter.voice = v;
+  document.getElementById('introStatus').innerText = 'Playing introduction…';
+  document.getElementById('introWave').classList.remove('paused');
+  utter.onend = function(){ closeIntroOverlay(); };
+  utter.onerror = function(){ document.getElementById('introStatus').innerText='Tap "Skip & Explore Now" to continue.'; };
+  speechSynthesis.speak(utter);
+}
+function skipIntro(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  closeIntroOverlay();
+}
+function closeIntroOverlay(){
+  document.getElementById('introOverlay').classList.add('hidden');
+  document.getElementById('introWave').classList.add('paused');
+}
+function openIntroOverlay(){
+  introSpoken = false;
+  document.getElementById('introOverlay').classList.remove('hidden');
+  document.getElementById('introStatus').innerText = 'Starting introduction…';
+  startIntro();
+}
+
+/* ===================== INIT ===================== */
+window.onload = function(){
+  COMPANY_DATA = generateCompanyData();
+  updateTopKPIs();
+  renderAnalysisView();
+  drawScatter();
+  drawCurve();
+  renderTraceSVG();
+  renderKPIMonitor();
+  recalcGroup('G1'); recalcGroup('G2');
+  renderJobs();
+  renderQuiz();
+
+  // Attempt to autoplay the spoken introduction. Some browsers block
+  // speech synthesis before any user interaction — if that happens,
+  // the overlay's "Play Introduction" button lets the user start it
+  // with one click instead.
+  if('speechSynthesis' in window){
+    speechSynthesis.onvoiceschanged = function(){ if(!introSpoken) startIntro(); };
+    setTimeout(function(){ if(!introSpoken) startIntro(); }, 300);
+  } else {
+    document.getElementById('introStatus').innerText = 'Voice not supported in this browser — you can still explore below.';
+  }
+};
+</script>
+</body>
+</html>
