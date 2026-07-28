@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle PCMCS Reports Module — Enterprise Training Simulator | BISP</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+body{background:#f4f7fb;color:#1f2937;min-height:100vh;}
+
+.header{background:#fff;padding:14px 26px;box-shadow:0 2px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;position:sticky;top:0;z-index:50;border-bottom:3px solid #2563eb;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-left img{height:50px;width:auto;display:block;}
+.header-title h1{font-size:19px;color:#1f2937;font-weight:800;line-height:1.2;}
+.header-title p{font-size:12px;color:#2563eb;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-top:2px;}
+.contact-info{text-align:right;font-size:13.5px;color:#374151;}
+.contact-info a{color:#2563eb;font-weight:700;text-decoration:none;}
+.contact-info .phone{font-weight:700;color:#e8592e;margin-top:3px;}
+
+.app-container{display:flex;min-height:calc(100vh - 79px);}
+.sidebar{width:252px;background:#1f2937;color:#fff;padding:18px 10px;flex-shrink:0;overflow-y:auto;}
+.sidebar h2{text-align:center;font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;padding-bottom:10px;margin-bottom:8px;border-bottom:1px solid #374151;}
+.sidebar .divider{font-size:10.5px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin:14px 8px 6px;}
+.sidebar button{width:100%;margin:3px 0;padding:11px 14px;border:none;border-radius:8px;background:transparent;color:#d1d5db;cursor:pointer;text-align:left;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:10px;transition:.15s;}
+.sidebar button:hover{background:#374151;color:#fff;}
+.sidebar button.active{background:#2563eb;color:#fff;}
+
+.main{flex:1;padding:22px 26px;overflow-y:auto;}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.card-kpi{padding:18px 20px;border-radius:12px;color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,.08);}
+.card-kpi span{display:block;font-size:22px;margin-top:6px;font-weight:800;}
+.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
+.green{background:linear-gradient(135deg,#16a34a,#15803d)}
+.orange{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.red{background:linear-gradient(135deg,#dc2626,#b91c1c)}
+
+.panel{background:#fff;padding:24px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.panel h2{font-size:19px;color:#111827;margin-bottom:12px;border-bottom:2px solid #e5e7eb;padding-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.panel .sub{color:#6b7280;font-size:13.5px;margin-bottom:16px;line-height:1.5;}
+
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.subtabs button{padding:8px 14px;border-radius:20px;border:1.5px solid #e5e7eb;background:#f8fafc;color:#374151;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;}
+.subtabs button:hover{background:#eff6ff;}
+.subtabs button.active{background:#2563eb;border-color:#2563eb;color:#fff;}
+.subpanel{display:none;}
+.subpanel.active{display:block;}
+
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+th,td{padding:9px 11px;border:1px solid #e5e7eb;text-align:left;}
+th{background:#2563eb;color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;}
+tr:nth-child(even) td{background:#f8fafc;}
+tr:hover td{background:#eff6ff;}
+input[type=number],input[type=text],select,textarea{padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13.5px;font-family:inherit;}
+input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+
+button.action{padding:9px 18px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;font-size:13px;cursor:pointer;margin:2px 8px 2px 0;transition:.15s;}
+button.action:hover{background:#1d4ed8;}
+button.btn-green{background:#16a34a;} button.btn-green:hover{background:#15803d;}
+button.btn-orange{background:#e8592e;} button.btn-orange:hover{background:#c8481f;}
+button.btn-red{background:#dc2626;} button.btn-red:hover{background:#b91c1c;}
+button.btn-outline{background:#fff;color:#2563eb;border:1.5px solid #2563eb;}
+button.btn-outline:hover{background:#eff6ff;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+
+.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;}
+.badge.ok{background:#dcfce7;color:#15803d;}
+.badge.bad{background:#fee2e2;color:#b91c1c;}
+.badge.warn{background:#fef3c7;color:#b45309;}
+.badge.info{background:#dbeafe;color:#1d4ed8;}
+
+.progress-track{width:100%;height:8px;background:#e5e7eb;border-radius:6px;overflow:hidden;display:block;margin:8px 0;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2563eb,#16a34a);width:0%;transition:width .25s;}
+
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.mini-panel{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;}
+
+.mcq-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:14px;}
+.mcq-card p.q{font-weight:700;font-size:14px;color:#1e293b;margin-bottom:10px;}
+.mcq-card label{display:block;padding:8px 12px;margin:5px 0;border-radius:6px;cursor:pointer;font-size:13.5px;background:#fff;border:1px solid #cbd5e1;}
+.mcq-card label:hover{background:#f1f5f9;}
+.mcq-card label.correct{background:#dcfce7;border-color:#16a34a;}
+.mcq-card label.wrong{background:#fee2e2;border-color:#dc2626;}
+.explanation{margin-top:10px;padding:10px;background:#eff6ff;border-left:4px solid #2563eb;color:#1e40af;font-size:12.5px;display:none;border-radius:0 6px 6px 0;line-height:1.5;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.kpi-tile{padding:16px;border-radius:12px;background:#f8fafc;border:1px solid #e5e7eb;}
+.kpi-tile .lbl{font-size:12px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.kpi-tile .val{font-size:22px;font-weight:800;color:#111827;margin-top:6px;}
+.kpi-tile .trend{font-size:12px;font-weight:700;margin-top:4px;}
+.trend.up{color:#16a34a;} .trend.down{color:#dc2626;}
+
+.code-box{background:#111827;color:#4ade80;font-family:'Courier New',monospace;padding:14px 16px;border-radius:10px;line-height:1.6;font-size:12px;max-height:300px;overflow-y:auto;margin:12px 0;}
+
+.requirement-box{background:#eff6ff;border-left:4px solid #2563eb;padding:12px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13.5px;line-height:1.5;}
+
+.best-practice{background:#f0fdf4;border-left:4px solid #16a34a;padding:12px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13.5px;line-height:1.5;}
+
+.warning-box{background:#fef3c7;border-left:4px solid #b45309;padding:12px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13.5px;line-height:1.5;}
+
+h3{color:#111827;font-size:15px;font-weight:700;margin-top:16px;margin-bottom:10px;}
+
+.form-group{margin:14px 0;}
+.form-group label{display:block;margin-bottom:6px;font-weight:700;color:#1f2937;}
+
+#printSummary{display:none;}
+@media print{
+ .sidebar,.header .contact-info,button,.subtabs{display:none !important;}
+ .app-container{display:block;}
+ .main{padding:0;}
+ .cards,.panel{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="data:image/png;base64,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" alt="BISP Logo">
+    <div class="header-title">
+      <h1>Oracle PCMCS Reports Module</h1>
+      <p>Enterprise Training Simulator</p>
+    </div>
+  </div>
+  <div class="contact-info">
+    <div><a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+    <div class="phone">📞 +91 769-409-5404</div>
+  </div>
+</div>
+
+<div class="app-container">
+
+  <div class="sidebar">
+    <h2>Reports Menu</h2>
+    <button class="active" data-target="dashboard" onclick="show(this)">📊 Dashboard</button>
+    <div class="divider">Report Operations</div>
+    <button data-target="create-report" onclick="show(this)">📄 Create Report</button>
+    <button data-target="manage-reports" onclick="show(this)">📋 Manage Reports</button>
+    <button data-target="query-design" onclick="show(this)">🔍 Query Design</button>
+    <div class="divider">Learning & Reference</div>
+    <button data-target="best-practices" onclick="show(this)">⭐ Best Practices</button>
+    <button data-target="use-cases" onclick="show(this)">💼 Use Cases</button>
+    <button data-target="troubleshooting" onclick="show(this)">🔧 Troubleshooting</button>
+    <button data-target="quiz" onclick="show(this)">🎓 Certification Quiz</button>
+  </div>
+
+  <div class="main">
+
+    <div class="cards">
+      <div class="card-kpi blue">Reports Created<span id="kpiReports">847</span></div>
+      <div class="card-kpi green">Saved Queries<span id="kpiQueries">156</span></div>
+      <div class="card-kpi orange">Active Users<span id="kpiUsers">45</span></div>
+      <div class="card-kpi red">Errors (30d)<span id="kpiErrors">3</span></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="panel active">
+      <h2>Executive Dashboard
+        <button class="action btn-orange" onclick="exportDashboard()">📄 Export Summary</button>
+      </h2>
+      <p class="sub">Welcome to the Oracle PCMCS Reports Enterprise Training Simulator. This environment mirrors how finance teams use PCMCS Reports to create formatted financial reports from profitability model queries, manage report definitions, run reports as PDF/HTML, and distribute results to stakeholders.</p>
+      
+      <div class="grid-2">
+        <div class="mini-panel">
+          <h3>📌 What's Inside This Simulator</h3>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;"><b>Create Report</b> — Define report name, description, link queries (with ≥1 row, ≥1 col, exactly 1 POV), select output format (PDF/HTML).</p>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;"><b>Manage Reports</b> — View defined reports, run them, edit configurations, control permissions, delete unused reports.</p>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;"><b>Query Design</b> — Build queries with proper dimension setup following PCMCS requirements.</p>
+          <p style="margin-bottom:8px;font-size:13.5px;color:#374151;"><b>Best Practices</b> — Naming conventions, query validation, permission management, production-ready reports.</p>
+          <p style="font-size:13.5px;color:#374151;"><b>Troubleshooting & Use Cases</b> — Real-world scenarios, common mistakes, and interview preparation.</p>
+          <div style="margin-top:16px;">
+            <button class="action" onclick="goTo('create-report')">Create a Report →</button>
+            <button class="action btn-green" onclick="goTo('manage-reports')">Manage Reports →</button>
+          </div>
+        </div>
+        <div class="mini-panel">
+          <h3>🏢 ABC Manufacturing Example</h3>
+          <p style="font-size:13.5px;color:#374151;margin-bottom:6px;"><b>Scenario:</b> Multinational manufacturer allocating overhead to products and generating profit margin reports.</p>
+          <p style="font-size:13.5px;color:#374151;margin-bottom:6px;"><b>Setup:</b> Query "Profit by Product Category" with Product Category, Scenario on rows; Cost, Revenue on columns; Scenario/Period on POV.</p>
+          <p style="font-size:13.5px;color:#374151;margin-bottom:14px;"><b>Report:</b> "Margin by Product Category" linked to query, executed as PDF for executive distribution.</p>
+          <button class="action btn-outline" onclick="refreshCompanyData()">🔄 Refresh Data</button>
+        </div>
+      </div>
+
+      <h3 style="margin-top:24px;">📊 System Activity</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Activity</th>
+            <th>User</th>
+            <th>Timestamp</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Report "Quarterly P&L by Division" executed</td>
+            <td>Alice Johnson</td>
+            <td>2024-01-15 14:32</td>
+            <td><span class="badge ok">✓ Success</span></td>
+          </tr>
+          <tr>
+            <td>Query "Product Profitability" saved</td>
+            <td>Bob Smith</td>
+            <td>2024-01-15 11:20</td>
+            <td><span class="badge ok">✓ Success</span></td>
+          </tr>
+          <tr>
+            <td>Report "Resource Utilization" run as PDF</td>
+            <td>Carol White</td>
+            <td>2024-01-15 09:45</td>
+            <td><span class="badge ok">✓ Success</span></td>
+          </tr>
+          <tr>
+            <td>Permissions updated on 3 reports</td>
+            <td>System Admin</td>
+            <td>2024-01-14 16:15</td>
+            <td><span class="badge ok">✓ Success</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CREATE REPORT -->
+    <div id="create-report" class="panel">
+      <h2>Create Financial Report
+        <button class="action btn-outline" onclick="showHelper('create')">ℹ️ Quick Help</button>
+      </h2>
+      <p class="sub">Define a new financial report by linking to a saved query. Reports package query results into readable PDF or HTML format for stakeholder distribution.</p>
+
+      <div style="max-width:800px;">
+        <div class="form-group">
+          <label>Report Name *</label>
+          <input type="text" id="reportNameInput" placeholder="e.g., Quarterly P&L by Division">
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="reportDescInput" placeholder="Explain the report's purpose and contents..." style="height:80px;width:100%;"></textarea>
+        </div>
+
+        <div class="requirement-box">
+          <b>⚠️ Query Requirement:</b> Your query must have at least 1 row dimension, at least 1 column dimension, and exactly 1 dimension on POV (Point of View).
+        </div>
+
+        <div class="form-group">
+          <label>Select Query *</label>
+          <select id="querySelectInput">
+            <option value="">-- Choose a saved query --</option>
+            <option value="p&l">P&L_by_Div_Q1 (Product, Department | Revenue, Cost | Period)</option>
+            <option value="product">Product_Profit_All (Product, Region | Revenue, Cost, Overhead | Scenario)</option>
+            <option value="resource">Resource_Util_Cost (Department, Project | Hours, Rate, Allocation | Period)</option>
+            <option value="scenario">Budget_vs_Forecast (Product, Channel | Revenue, Variance | Scenario)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Output Format *</label>
+          <select id="formatSelectInput">
+            <option value="pdf">PDF (Recommended for distribution)</option>
+            <option value="html">HTML (Web-friendly)</option>
+            <option value="both">Both PDF and HTML</option>
+          </select>
+        </div>
+
+        <div class="best-practice">
+          <b>💡 Best Practice:</b> Use Financial Reporting Web Studio for advanced formatting, logos, headers, charts. PCMCS Reports provides basic tabular output; Web Studio adds polish for production distribution.
+        </div>
+
+        <div style="margin-top:20px;">
+          <button class="action" onclick="createNewReport()">✓ Create Report</button>
+          <button class="action btn-outline" onclick="previewReport()">👁️ Preview</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGE REPORTS -->
+    <div id="manage-reports" class="panel">
+      <h2>Manage Reports
+        <button class="action btn-orange" onclick="runSelectedReport()">▶ Run Selected</button>
+      </h2>
+      <p class="sub">View, edit, run, and delete report definitions. Control execution permissions and data grants for users and viewers.</p>
+
+      <div class="subtabs">
+        <button class="active" data-target="sub-list" onclick="showSub(this)">Report Library</button>
+        <button data-target="sub-permissions" onclick="showSub(this)">Permissions & Security</button>
+        <button data-target="sub-execution" onclick="showSub(this)">Execution History</button>
+      </div>
+
+      <div id="sub-list" class="subpanel active">
+        <table>
+          <thead>
+            <tr>
+              <th>Report Name</th>
+              <th>Query Used</th>
+              <th>Format</th>
+              <th>Last Run</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Quarterly P&L by Division</b></td>
+              <td>P&L_by_Div_Q1</td>
+              <td>PDF</td>
+              <td>2024-01-15 14:32</td>
+              <td><span class="badge ok">Active</span></td>
+              <td><button class="action" style="padding:4px 12px;font-size:12px;" onclick="runReport('pl')">Run</button></td>
+            </tr>
+            <tr>
+              <td><b>Product Line Profitability</b></td>
+              <td>Product_Profit_All</td>
+              <td>HTML</td>
+              <td>2024-01-14 10:15</td>
+              <td><span class="badge ok">Active</span></td>
+              <td><button class="action" style="padding:4px 12px;font-size:12px;" onclick="runReport('prod')">Run</button></td>
+            </tr>
+            <tr>
+              <td><b>Resource Utilization Costs</b></td>
+              <td>Resource_Util_Cost</td>
+              <td>PDF</td>
+              <td>2024-01-13 09:20</td>
+              <td><span class="badge ok">Active</span></td>
+              <td><button class="action" style="padding:4px 12px;font-size:12px;" onclick="runReport('res')">Run</button></td>
+            </tr>
+            <tr>
+              <td><b>Scenario Variance Analysis</b></td>
+              <td>Budget_vs_Forecast</td>
+              <td>HTML</td>
+              <td>2024-01-12 16:45</td>
+              <td><span class="badge warn">Pending</span></td>
+              <td><button class="action" style="padding:4px 12px;font-size:12px;" onclick="runReport('var')">Run</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="sub-permissions" class="subpanel">
+        <h3>Report Access Control</h3>
+        <p style="font-size:13.5px;color:#374151;margin-bottom:14px;">Assign permissions to reports. Power Users and Service Administrators create reports; Viewers/Users can only run them if granted Execute permission and appropriate Data Grants.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Report</th>
+              <th>Creator</th>
+              <th>View Permission</th>
+              <th>Execute Permission</th>
+              <th>Data Grants</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Quarterly P&L by Division</td>
+              <td>Alice Johnson</td>
+              <td><span class="badge ok">Viewer Role</span></td>
+              <td><span class="badge ok">Granted</span></td>
+              <td><span class="badge info">All Periods</span></td>
+            </tr>
+            <tr>
+              <td>Product Line Profitability</td>
+              <td>Bob Smith</td>
+              <td><span class="badge ok">Viewer Role</span></td>
+              <td><span class="badge ok">Granted</span></td>
+              <td><span class="badge info">By Product</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="sub-execution" class="subpanel">
+        <h3>Recent Report Executions</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Report</th>
+              <th>Executed By</th>
+              <th>Format</th>
+              <th>Execution Time</th>
+              <th>File Size</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Quarterly P&L by Division</td>
+              <td>Alice Johnson</td>
+              <td>PDF</td>
+              <td>2024-01-15 14:32 (2.3s)</td>
+              <td>1.2 MB</td>
+              <td><span class="badge ok">✓ Success</span></td>
+            </tr>
+            <tr>
+              <td>Product Line Profitability</td>
+              <td>Carol White</td>
+              <td>HTML</td>
+              <td>2024-01-15 09:15 (1.8s)</td>
+              <td>0.8 MB</td>
+              <td><span class="badge ok">✓ Success</span></td>
+            </tr>
+            <tr>
+              <td>Resource Utilization Costs</td>
+              <td>Bob Smith</td>
+              <td>PDF</td>
+              <td>2024-01-14 16:45 (3.2s)</td>
+              <td>2.1 MB</td>
+              <td><span class="badge ok">✓ Success</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- QUERY DESIGN -->
+    <div id="query-design" class="panel">
+      <h2>Query Design for Reports
+        <button class="action btn-outline" onclick="validateQuery()">✓ Validate Query</button>
+      </h2>
+      <p class="sub">Reports use saved queries from the Intelligence area. Queries must follow specific dimension rules: ≥1 Row Dimension, ≥1 Column Dimension, Exactly 1 POV (Point of View) Dimension.</p>
+
+      <div class="requirement-box">
+        <b>Query Requirements for Reports:</b><br>
+        ✓ At least 1 dimension on Rows (e.g., Product, Department, Region)<br>
+        ✓ At least 1 dimension on Columns (e.g., Revenue, Cost, Profit)<br>
+        ✓ Exactly 1 dimension on POV — global filter/slicer (e.g., Period: Jan-2024)<br>
+        ✗ Multiple POV dimensions will fail report generation
+      </div>
+
+      <h3 style="margin-top:24px;">Query Configuration Example</h3>
+      <div class="grid-3">
+        <div class="mini-panel">
+          <b>📍 Rows (≥1 required)</b>
+          <p style="font-size:13.5px;margin-top:8px;"><code>• Product</code><br><code>• Department</code><br><code>• Region</code></p>
+        </div>
+        <div class="mini-panel">
+          <b>📊 Columns (≥1 required)</b>
+          <p style="font-size:13.5px;margin-top:8px;"><code>• Revenue</code><br><code>• Direct Cost</code><br><code>• Allocated Overhead</code></p>
+        </div>
+        <div class="mini-panel">
+          <b>🎯 POV (Exactly 1)</b>
+          <p style="font-size:13.5px;margin-top:8px;"><code>Period: Jan-2024</code><br>OR<br><code>Scenario: Actual</code></p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:24px;">Query Templates</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Query Name</th>
+            <th>Rows</th>
+            <th>Columns</th>
+            <th>POV</th>
+            <th>Used in Reports</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>P&L_by_Div_Q1</b></td>
+            <td>Product, Department</td>
+            <td>Revenue, Cost</td>
+            <td>Period: Q1</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td><b>Product_Profit_All</b></td>
+            <td>Product, Region</td>
+            <td>Revenue, Direct Cost, Overhead</td>
+            <td>Scenario: Actual</td>
+            <td>3</td>
+          </tr>
+          <tr>
+            <td><b>Resource_Util_Cost</b></td>
+            <td>Department, Project</td>
+            <td>Hours, Rate, Allocation</td>
+            <td>Period: Jan-2024</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:24px;">Common Query Mistakes</h3>
+      <div class="warning-box">
+        <b>❌ Multiple POV Dimensions:</b> Using both "Period" and "Scenario" on POV will cause report failure. Use exactly ONE.
+      </div>
+      <div class="warning-box">
+        <b>❌ No Row or Column Dimensions:</b> Reports require at least one row and one column. Empty queries will fail.
+      </div>
+      <div class="warning-box">
+        <b>❌ Stale Query Configuration:</b> Always refresh query definitions in UI before running reports. Cached definitions can cause "No Data" results.
+      </div>
+    </div>
+
+    <!-- BEST PRACTICES -->
+    <div id="best-practices" class="panel">
+      <h2>Best Practices & Production Readiness</h2>
+      <p class="sub">Key recommendations for professional report deployment and user adoption.</p>
+
+      <h3>1️⃣ Meaningful Naming Convention</h3>
+      <div class="best-practice">
+        Always provide clear, descriptive report names and detailed descriptions. Examples: "Quarterly P&L by Division", "Monthly Margin Analysis by Product Line", "Executive Profitability Review".
+      </div>
+
+      <h3>2️⃣ Verify Queries Before Linking</h3>
+      <div class="best-practice">
+        Validate underlying queries in Smart View or Query Builder prior to linking to reports. Ensure they return expected data and follow dimension rules (≥1 row, ≥1 col, exactly 1 POV).
+      </div>
+
+      <h3>3️⃣ Enforce One POV Dimension</h3>
+      <div class="best-practice">
+        Strictly ensure queries have exactly one dimension on the POV. Multiple POVs will cause report execution to fail with "Invalid Query" errors.
+      </div>
+
+      <h3>4️⃣ Optimize for Reporting During Calculation</h3>
+      <div class="best-practice">
+        Pre-aggregate Essbase blocks during model calculation with "Optimize for Reporting" flag. This dramatically speeds up query and report retrieval times, especially for large datasets.
+      </div>
+
+      <h3>5️⃣ Use Financial Reporting Web Studio for Formatting</h3>
+      <div class="best-practice">
+        PCMCS Reports provides basic tabular output. For production reports with logos, custom headers, charts, conditional formatting, use Financial Reporting Web Studio. It integrates seamlessly with PCMCS data.
+      </div>
+
+      <h3>6️⃣ Grant Proper Permissions</h3>
+      <div class="best-practice">
+        <b>Mistake to avoid:</b> Forgetting to grant Execute permissions or Data Grants to Viewers/Users. They won't see or run reports without proper authorization.<br>
+        <b>Solution:</b> Assign "Run" permission on report/folder and configure Data Grants limiting which data they can access.
+      </div>
+
+      <h3>7️⃣ Distribute via PDF, Not Direct Access</h3>
+      <div class="best-practice">
+        Export reports as PDF for email distribution and archival. Users who cannot access PCMCS directly can still view formatted results. PDF is also better for audit compliance.
+      </div>
+
+      <h3>8️⃣ Document Report Purpose</h3>
+      <div class="best-practice">
+        Always document the business purpose, audience, and expected use of each report. This helps future users and reduces duplicate report creation.
+      </div>
+    </div>
+
+    <!-- USE CASES -->
+    <div id="use-cases" class="panel">
+      <h2>Real-World Business Use Cases</h2>
+      <p class="sub">Practical scenarios where PCMCS Reports drive financial decision-making.</p>
+
+      <h3>🏭 Manufacturing: Cost of Goods Sold Breakdown</h3>
+      <div class="mini-panel">
+        <p style="margin-bottom:8px;"><b>Scenario:</b> Production manager needs to understand product costs (material, labor, allocated overhead) monthly.</p>
+        <p style="margin-bottom:8px;"><b>Query:</b> Rows: Product Category | Columns: Material Cost, Labor, Allocated Overhead, Total | POV: Period: Jan-2024</p>
+        <p style="margin-bottom:8px;"><b>Report:</b> Run monthly, track margin erosion, identify high-cost products for optimization.</p>
+        <p><b>Impact:</b> Reduces product profitability surprises; enables faster cost control decisions.</p>
+      </div>
+
+      <h3 style="margin-top:16px;">🏥 Healthcare: Departmental Overhead Allocation</h3>
+      <div class="mini-panel">
+        <p style="margin-bottom:8px;"><b>Scenario:</b> Hospital CFO allocates nursing, supplies, equipment overhead to clinical departments for chargeback.</p>
+        <p style="margin-bottom:8px;"><b>Query:</b> Rows: Clinical Department | Columns: Nursing Cost, Supplies, Equipment, Total Allocated | POV: Period: FY-2024</p>
+        <p style="margin-bottom:8px;"><b>Report:</b> Sent to department heads monthly showing their cost accountability.</p>
+        <p><b>Impact:</b> Increases cost awareness; drives efficiency initiatives; improves budget negotiations.</p>
+      </div>
+
+      <h3 style="margin-top:16px;">📱 Telecommunications: Service Profitability</h3>
+      <div class="mini-panel">
+        <p style="margin-bottom:8px;"><b>Scenario:</b> Revenue manager analyzes margins for broadband vs. mobile plans to guide pricing strategy.</p>
+        <p style="margin-bottom:8px;"><b>Query:</b> Rows: Service Type (Broadband, Mobile) | Columns: Revenue, Direct Cost, Allocated Support, Net Margin % | POV: Scenario: Current Quarter</p>
+        <p style="margin-bottom:8px;"><b>Report:</b> Quarterly to executive team; informs product mix decisions.</p>
+        <p><b>Impact:</b> Reveals unprofitable service bundles; enables strategic pricing adjustments.</p>
+      </div>
+
+      <h3 style="margin-top:16px;">💰 Finance & Budgeting: Expense Allocation Summary</h3>
+      <div class="mini-panel">
+        <p style="margin-bottom:8px;"><b>Scenario:</b> Finance controller tracks how central services (IT, HR, Facilities) costs are distributed across business units.</p>
+        <p style="margin-bottom:8px;"><b>Query:</b> Rows: Business Unit | Columns: IT Allocation, HR Allocation, Facilities, Total Indirect | POV: Period: Current Month</p>
+        <p style="margin-bottom:8px;"><b>Report:</b> Monthly to business unit leaders; validates cost management governance.</p>
+        <p><b>Impact:</b> Ensures equitable cost distribution; controls overhead spending; improves accountability.</p>
+      </div>
+
+      <h3 style="margin-top:16px;">⚡ Energy & Utilities: Grid Maintenance Cost Allocation</h3>
+      <div class="mini-panel">
+        <p style="margin-bottom:8px;"><b>Scenario:</b> Operations team allocates grid maintenance costs across operational regions based on asset value and load.</p>
+        <p style="margin-bottom:8px;"><b>Query:</b> Rows: Region | Columns: Maintenance Base, Region Allocation %, Allocated Cost | POV: Period: Annual</p>
+        <p style="margin-bottom:8px;"><b>Report:</b> Annual budget planning; justifies capex requests to board.</p>
+        <p><b>Impact:</b> Transparent cost allocation; supports strategic investment decisions.</p>
+      </div>
+
+      <h3 style="margin-top:16px;">🎯 Executive: Scenario Variance Report</h3>
+      <div class="mini-panel">
+        <p style="margin-bottom:8px;"><b>Scenario:</b> CFO compares Budget vs. Forecast vs. Actual sales by store to identify underperforming regions.</p>
+        <p style="margin-bottom:8px;"><b>Query:</b> Rows: Store | Columns: Budget Revenue, Forecast Revenue, Actual Revenue, Variance $ | POV: Scenario: Comparative</p>
+        <p style="margin-bottom:8px;"><b>Report:</b> Monthly to C-suite; highlights strategic variances requiring immediate action.</p>
+        <p><b>Impact:</b> Accelerates variance investigation; enables rapid course correction.</p>
+      </div>
+    </div>
+
+    <!-- TROUBLESHOOTING -->
+    <div id="troubleshooting" class="panel">
+      <h2>Troubleshooting Guide</h2>
+      <p class="sub">Common issues and solutions when creating and running reports.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>Probable Cause</th>
+            <th>Resolution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Report returns no data / 0 values</b></td>
+            <td>• Uncalculated model<br>• Missing Data Grants<br>• Query POV mismatch</td>
+            <td>1. Execute calculation for target POV<br>2. Verify user Data Grants<br>3. Check query POV matches calculation context</td>
+          </tr>
+          <tr>
+            <td><b>User cannot see or run report</b></td>
+            <td>• Missing Execute permission<br>• Incorrect role assignment</td>
+            <td>1. Grant "Run" permission on report/folder<br>2. Assign Viewer or Power User role<br>3. Verify Data Grants are in place</td>
+          </tr>
+          <tr>
+            <td><b>Report fails or times out</b></td>
+            <td>• Excessively large query dataset<br>• Unoptimized Essbase blocks<br>• Network latency</td>
+            <td>1. Filter query POVs to reduce dataset<br>2. Use "Optimize for Reporting" flag<br>3. Reduce date range in report POV</td>
+          </tr>
+          <tr>
+            <td><b>Report shows outdated configuration</b></td>
+            <td>• Unrefreshed UI session<br>• Stale metadata cache</td>
+            <td>1. Click Refresh icon on Reports screen<br>2. Clear browser cache<br>3. Restart report wizard</td>
+          </tr>
+          <tr>
+            <td><b>"Invalid Query" error</b></td>
+            <td>• Multiple POV dimensions<br>• Query missing row/column</td>
+            <td>1. Verify query has exactly 1 POV<br>2. Ensure ≥1 row and ≥1 column dimension<br>3. Validate in Smart View first</td>
+          </tr>
+          <tr>
+            <td><b>PDF export produces blank output</b></td>
+            <td>• Query returned no rows<br>• Data Grants restricting view</td>
+            <td>1. Run query in Intelligence/Smart View<br>2. Verify row/column data exists<br>3. Check Data Grants allow data access</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:24px;">❌ Common Mistakes to Avoid</h3>
+      <div class="warning-box">
+        <b>Mistake #1: Relying on unformatted output</b><br>
+        PCMCS Reports produces raw query output as tables. Don't expect polished, production-ready PDFs. Use Financial Reporting Web Studio for formatted documents.
+      </div>
+      <div class="warning-box">
+        <b>Mistake #2: Not granting permissions</b><br>
+        Creating a report doesn't automatically let users run it. Forgetting to grant Execute permissions and Data Grants leaves users unable to access reports.
+      </div>
+      <div class="warning-box">
+        <b>Mistake #3: Using incorrect query design</b><br>
+        Queries with multiple POV dimensions, missing row/column, or unvalidated data will fail silently. Always test queries in Smart View before linking to reports.
+      </div>
+      <div class="warning-box">
+        <b>Mistake #4: Stale data in reports</b><br>
+        Running reports without recalculating model data or refreshing report definitions produces outdated results. Always recalc before running critical reports.
+      </div>
+    </div>
+
+    <!-- CERTIFICATION QUIZ -->
+    <div id="quiz" class="panel">
+      <h2>Certification Quiz: PCMCS Reports
+        <button class="action btn-orange" onclick="scoreQuiz()">📊 Score Quiz</button>
+      </h2>
+      <p class="sub">Test your understanding of PCMCS Reports concepts. Answer 10 scenario-based questions.</p>
+
+      <div class="mcq-card">
+        <p class="q">Q1: In PCMCS, which of the following is NOT a requirement for a query used in a report?</p>
+        <label><input type="radio" name="q1" value="a"> A. At least one dimension on Rows</label>
+        <label><input type="radio" name="q1" value="b"> B. At least one dimension on Columns</label>
+        <label><input type="radio" name="q1" value="c"> C. Exactly one dimension on POV</label>
+        <label><input type="radio" name="q1" value="d" class="correct"> D. Multiple dimensions on Columns</label>
+        <div class="explanation" id="exp1">✓ <b>Correct!</b> D is right. You can have multiple column dimensions. The strict requirement is exactly ONE POV dimension.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q2: Which user role can create custom financial reports in PCMCS?</p>
+        <label><input type="radio" name="q2" value="a"> A. Viewer only</label>
+        <label><input type="radio" name="q2" value="b"> B. User only</label>
+        <label><input type="radio" name="q2" value="c" class="correct"> C. Power User or Service Administrator</label>
+        <label><input type="radio" name="q2" value="d"> D. Any role with login</label>
+        <div class="explanation" id="exp2">✓ <b>Correct!</b> Only Power Users and Service Administrators can create reports. Regular Users/Viewers can only run them if permissions are granted.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q3: What formats are available when running a PCMCS financial report directly from the UI?</p>
+        <label><input type="radio" name="q3" value="a" class="correct"> A. PDF and HTML</label>
+        <label><input type="radio" name="q3" value="b"> B. PDF, HTML, and XLS</label>
+        <label><input type="radio" name="q3" value="c"> C. DOCX and PDF only</label>
+        <label><input type="radio" name="q3" value="d"> D. XML only</label>
+        <div class="explanation" id="exp3">✓ <b>Correct!</b> PCMCS Reports natively supports PDF and HTML output formats for distribution.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q4: What does "Optimize for Reporting" do during model calculation?</p>
+        <label><input type="radio" name="q4" value="a"> A. Encrypts the database</label>
+        <label><input type="radio" name="q4" value="b" class="correct"> B. Pre-aggregates Essbase blocks to speed up query and report retrieval</label>
+        <label><input type="radio" name="q4" value="c"> C. Automatically emails reports to CFO</label>
+        <label><input type="radio" name="q4" value="d"> D. Deletes zero-value rows</label>
+        <div class="explanation" id="exp4">✓ <b>Correct!</b> "Optimize for Reporting" pre-aggregates blocks, dramatically improving report query performance, especially for large datasets.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q5: What happens if a user without proper Execute permissions attempts to run a report?</p>
+        <label><input type="radio" name="q5" value="a"> A. Report runs with default permissions</label>
+        <label><input type="radio" name="q5" value="b" class="correct"> B. User will not see or be able to run the report</label>
+        <label><input type="radio" name="q5" value="c"> C. Report automatically converts to Excel</label>
+        <label><input type="radio" name="q5" value="d"> D. System creates a temporary admin account</label>
+        <div class="explanation" id="exp5">✓ <b>Correct!</b> Without Execute permissions, users simply cannot see or access the report. Proper security is enforced at the repository level.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q6: What is the business purpose of Reports in PCMCS?</p>
+        <label><input type="radio" name="q6" value="a"> A. Replace database backups</label>
+        <label><input type="radio" name="q6" value="b" class="correct"> B. Package profitability/cost data into readable formats for decision-making and stakeholder distribution</label>
+        <label><input type="radio" name="q6" value="c"> C. Modify underlying model data</label>
+        <label><input type="radio" name="q6" value="d"> D. Automate Essbase block consolidation</label>
+        <div class="explanation" id="exp6">✓ <b>Correct!</b> Reports transform query results into accessible, formatted documents that drive financial transparency and informed decisions.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q7: For production report formatting and graphics, which Oracle tool is recommended?</p>
+        <label><input type="radio" name="q7" value="a"> A. Smart View for Office</label>
+        <label><input type="radio" name="q7" value="b" class="correct"> B. Financial Reporting Web Studio</label>
+        <label><input type="radio" name="q7" value="c"> C. Calculation Manager</label>
+        <label><input type="radio" name="q7" value="d"> D. Data Management</label>
+        <div class="explanation" id="exp7">✓ <b>Correct!</b> Financial Reporting Web Studio is purpose-built for adding logos, headers, charts, conditional formatting, and polish to PCMCS reports.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q8: What role does a POV (Point of View) dimension play in a report query?</p>
+        <label><input type="radio" name="q8" value="a"> A. Defines column widths in the PDF output</label>
+        <label><input type="radio" name="q8" value="b" class="correct"> B. Acts as a global filter/slicer for data retrieval context (e.g., Period: Jan-2024)</label>
+        <label><input type="radio" name="q8" value="c"> C. Specifies security passwords</label>
+        <label><input type="radio" name="q8" value="d"> D. Stores calculation formulas</label>
+        <div class="explanation" id="exp8">✓ <b>Correct!</b> The POV is a critical filter that sets the data context. Only ONE POV is allowed per report query.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q9: A multinational manufacturer needs a report showing profit margins by product after overhead allocation. Which query structure should they use?</p>
+        <label><input type="radio" name="q9" value="a"> A. Rows: Scenario | Columns: Period</label>
+        <label><input type="radio" name="q9" value="b" class="correct"> B. Rows: Product | Columns: Revenue, Direct Cost, Allocated Overhead | POV: Period/Scenario</label>
+        <label><input type="radio" name="q9" value="c"> C. Rows only (no columns)</label>
+        <label><input type="radio" name="q9" value="d"> D. Multiple POV dimensions for flexibility</label>
+        <div class="explanation" id="exp9">✓ <b>Correct!</b> This follows the required structure: row dimension (Product), multiple column dimensions (financials), and exactly one POV filter.</div>
+      </div>
+
+      <div class="mcq-card">
+        <p class="q">Q10: What is the first step when troubleshooting a report that returns no data?</p>
+        <label><input type="radio" name="q10" value="a" class="correct"> A. Execute calculation for the target POV and verify user has appropriate Data Grants</label>
+        <label><input type="radio" name="q10" value="b"> B. Delete and recreate the report</label>
+        <label><input type="radio" name="q10" value="c"> C. Assume the query is broken</label>
+        <label><input type="radio" name="q10" value="d"> D. Restart PCMCS application</label>
+        <div class="explanation" id="exp10">✓ <b>Correct!</b> Most "No Data" issues stem from uncalculated models or insufficient Data Grants. Always verify calculation status and permissions first.</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div id="printSummary" style="display:none;">
+  <h1>PCMCS Reports Module Summary</h1>
+  <p>Training content generated for reference and study.</p>
+</div>
+
+<script>
+let createdReports = [];
+let reportExecutions = [];
+
+// MAIN NAVIGATION
+function show(btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));
+  const target=btn.getAttribute('data-target');
+  document.getElementById(target).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showSub(btn){
+  const target=btn.getAttribute('data-target');
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.parentElement.parentElement.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(target).classList.add('active');
+  btn.classList.add('active');
+}
+
+function goTo(target){
+  const btn=document.querySelector(`[data-target="${target}"]`);
+  if(btn) show(btn);
+}
+
+// NOTIFICATION SYSTEM
+function notify(msg, type='success'){
+  const div=document.createElement('div');
+  div.style.cssText=`position:fixed;top:20px;right:20px;background:${type==='success'?'#16a34a':'#dc2626'};color:white;padding:16px 20px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:9999;animation:slideIn 0.3s ease;max-width:400px;white-space:pre-line;line-height:1.5;`;
+  div.textContent=msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),5000);
+}
+
+// CREATE REPORT
+function createNewReport(){
+  const nameInput=document.getElementById('reportNameInput').value;
+  const descInput=document.getElementById('reportDescInput').value;
+  const querySelect=document.getElementById('querySelectInput');
+  const formatSelect=document.getElementById('formatSelectInput');
+  
+  if(!nameInput.trim()){
+    notify('⚠️ Please enter Report Name','error');
+    return;
+  }
+  if(!descInput.trim()){
+    notify('⚠️ Please enter Description','error');
+    return;
+  }
+  if(querySelect.value===''){
+    notify('⚠️ Please select a Query','error');
+    return;
+  }
+  
+  const newReport={
+    name:nameInput,
+    query:querySelect.options[querySelect.selectedIndex].text,
+    format:formatSelect.value,
+    created:new Date().toLocaleString(),
+    status:'Active'
+  };
+  
+  createdReports.push(newReport);
+  notify(`✓ Report "${nameInput}" created successfully!`);
+  document.getElementById('reportNameInput').value='';
+  document.getElementById('reportDescInput').value='';
+  querySelect.value='';
+  
+  setTimeout(()=>goTo('manage-reports'),1500);
+}
+
+function previewReport(){
+  const querySelect=document.getElementById('querySelectInput');
+  if(querySelect.value===''){
+    notify('⚠️ Please select a Query first','error');
+    return;
+  }
+  notify('👁️ Report Preview: Query data will display as table with selected columns');
+}
+
+// RUN REPORTS
+function runReport(type){
+  const execTime=(Math.random()*3+1).toFixed(1);
+  const fileSize=(Math.random()*3+0.5).toFixed(1);
+  
+  reportExecutions.push({
+    report:`Report_${type}`,
+    time:new Date().toLocaleString(),
+    duration:`${execTime}s`,
+    size:`${fileSize}MB`
+  });
+  
+  notify(`✓ Report executed successfully!\n\nDuration: ${execTime}s | Size: ${fileSize}MB`);
+  
+  // Simulate download
+  const csv='Report Data\nProduct,Revenue,Cost,Profit\nProduct A,$5M,$3M,$2M\nProduct B,$3.5M,$2.2M,$1.3M\n';
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`Report_${type}_${Date.now()}.csv`;
+  a.click();
+}
+
+function runSelectedReport(){
+  notify('▶ Executing selected report...');
+  setTimeout(()=>runReport('selected'),1000);
+}
+
+// EXPORT
+function exportDashboard(){
+  const csv='PCMCS Dashboard Export\nMetric,Value,Date\nTotal Reports,847,'+new Date().toLocaleDateString()+'\nSaved Queries,156,'+new Date().toLocaleDateString()+'\nActive Users,45,'+new Date().toLocaleDateString()+'\n';
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`PCMCS_Dashboard_${Date.now()}.csv`;
+  a.click();
+  notify('📄 Dashboard exported as CSV');
+}
+
+// REFRESH DATA
+function refreshCompanyData(){
+  const newReports=Math.floor(Math.random()*200)+800;
+  const newQueries=Math.floor(Math.random()*100)+150;
+  const newUsers=Math.floor(Math.random()*30)+40;
+  const newErrors=Math.floor(Math.random()*5);
+  
+  document.getElementById('kpiReports').textContent=newReports;
+  document.getElementById('kpiQueries').textContent=newQueries;
+  document.getElementById('kpiUsers').textContent=newUsers;
+  document.getElementById('kpiErrors').textContent=newErrors;
+  
+  notify('🔄 Company data refreshed with simulated values');
+}
+
+// VALIDATION
+function validateQuery(){
+  const querySelect=document.getElementById('querySelectInput');
+  if(querySelect.value===''){
+    notify('⚠️ Please select a Query first','error');
+    return;
+  }
+  
+  notify('✓ Query validation passed!\n- Row dimensions: 2\n- Column dimensions: 3\n- POV dimensions: 1\n- Records: 145');
+}
+
+function showHelper(section){
+  const msg=`📌 PCMCS REPORTS QUICK HELP
+
+Query Requirements:
+✓ At least 1 Row dimension (Product, Department, Region)
+✓ At least 1 Column dimension (Revenue, Cost, Profit)
+✓ Exactly 1 POV dimension (Period: Jan-2024)
+
+Example Structure:
+Rows: Product | Department
+Columns: Revenue | Direct Cost | Overhead
+POV: Period: Q1-2024
+
+KEY: Exactly ONE POV is mandatory!`;
+  notify(msg);
+}
+
+// QUIZ SCORING
+function scoreQuiz(){
+  let score=0;
+  let skipped=0;
+  const answers={q1:'d',q2:'c',q3:'a',q4:'b',q5:'b',q6:'b',q7:'b',q8:'b',q9:'b',q10:'a'};
+  let resultHTML='<div style="padding:20px;background:#f8fafc;border-radius:10px;"><h3 style="margin-bottom:16px;">📊 Quiz Results</h3><table style="width:100%;border-collapse:collapse;"><tr style="border-bottom:2px solid #e5e7eb;"><th style="text-align:left;padding:8px;">Question</th><th style="text-align:left;padding:8px;">Your Answer</th><th style="text-align:left;padding:8px;">Result</th></tr>';
+  
+  for(let i=1;i<=10;i++){
+    const selected=document.querySelector(`input[name="q${i}"]:checked`);
+    const correct=answers[`q${i}`];
+    
+    if(!selected){
+      skipped++;
+      resultHTML+=`<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:8px;">Q${i}</td><td style="padding:8px;color:#dc2626;">Not answered</td><td style="padding:8px;"><span class="badge bad">✗</span></td></tr>`;
+    } else if(selected.value===correct){
+      score++;
+      document.getElementById(`exp${i}`).style.display='block';
+      resultHTML+=`<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:8px;">Q${i}</td><td style="padding:8px;color:#16a34a;"><b>${selected.nextElementSibling.textContent.substring(0,30)}</b></td><td style="padding:8px;"><span class="badge ok">✓</span></td></tr>`;
+    } else {
+      document.getElementById(`exp${i}`).style.display='block';
+      resultHTML+=`<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:8px;">Q${i}</td><td style="padding:8px;color:#dc2626;">${selected.nextElementSibling.textContent.substring(0,30)}</td><td style="padding:8px;"><span class="badge bad">✗</span></td></tr>`;
+    }
+  }
+  
+  const percentage=Math.round(score/10*100);
+  const status=score>=8?'✓ PASS - PCMCS Reports Certified!':'⚠ Review failed questions';
+  
+  resultHTML+=`</table><div style="margin-top:20px;padding:16px;background:${score>=8?'#dcfce7':'#fee2e2'};border-radius:8px;border-left:4px solid ${score>=8?'#16a34a':'#dc2626'};"><div style="font-size:28px;font-weight:800;color:${score>=8?'#16a34a':'#dc2626'};">${score}/10 (${percentage}%)</div><div style="font-size:14px;margin-top:8px;font-weight:700;color:${score>=8?'#15803d':'#991b1b'};\">${status}</div></div></div>`;
+  
+  document.querySelector('.panel.active').innerHTML=`<h2>Quiz Results</h2><div style="margin-top:20px;">${resultHTML}<div style="margin-top:20px;"><button class="action btn-outline" onclick="location.reload()">📋 Retake Quiz</button></div></div>`;
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded',()=>{
+  notify('👋 Welcome to PCMCS Reports Training Simulator');
+});
+</script>
+</body>
+</html>
