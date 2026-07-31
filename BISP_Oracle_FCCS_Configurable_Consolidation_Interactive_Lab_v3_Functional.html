@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BISP | Oracle FCCS Configurable Consolidation Lab v3 Functional</title>
+<style>
+:root{
+  --oracle:#c74634; --oracle-dark:#8f2e22; --ink:#18212b; --muted:#667085;
+  --bg:#f4f6f8; --card:#ffffff; --line:#dde3e8; --nav:#17202a;
+  --good:#17865b; --warn:#b36b00; --blue:#1f6f9f; --violet:#7454a4;
+  --soft-red:#fff3f0; --soft-blue:#eef7fb; --shadow:0 10px 30px #18212b12;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select{font:inherit}
+.topbar{background:linear-gradient(120deg,#121b24,#263543);color:white;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;position:sticky;top:0;z-index:20;box-shadow:0 4px 16px #0003}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(145deg,var(--oracle),var(--oracle-dark));display:grid;place-items:center;font-weight:900;letter-spacing:1px;box-shadow:inset 0 0 0 2px #ffffff35,0 6px 18px #0004}
+.brand h1{font-size:18px;margin:0}.brand p{margin:3px 0 0;color:#d6dde3;font-size:12px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:9px;padding:9px 13px;cursor:pointer;font-weight:700}
+.btn.primary{background:var(--oracle);color:white}.btn.secondary{background:#fff1;color:white;border:1px solid #ffffff35}
+.shell{display:grid;grid-template-columns:255px minmax(0,1fr);min-height:calc(100vh - 72px)}
+.sidebar{background:var(--nav);padding:18px 12px;color:white}
+.side-title{font-size:11px;letter-spacing:.12em;color:#9fb0bf;padding:8px 10px}
+.navbtn{width:100%;border:0;background:transparent;color:#dbe3e9;text-align:left;padding:11px 12px;border-radius:9px;cursor:pointer;margin:2px 0;display:flex;gap:9px;align-items:center}
+.navbtn:hover,.navbtn.active{background:#ffffff14;color:white}.navbtn.active{border-left:4px solid var(--oracle)}
+.main{padding:22px;min-width:0}
+.hero{background:linear-gradient(135deg,#fff,#f8ebe8);border:1px solid #eadbd7;border-radius:18px;padding:22px;display:grid;grid-template-columns:1.35fr .65fr;gap:20px;overflow:hidden}
+.eyebrow{font-size:12px;font-weight:800;color:var(--oracle);letter-spacing:.1em}
+.hero h2{font-size:30px;margin:8px 0}.hero p{color:var(--muted);line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{background:#fff;border:1px solid var(--line);padding:7px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.hero-art{display:grid;place-items:center}
+.section{display:none}.section.active{display:block}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 12px;font-size:17px}.sub{color:var(--muted);font-size:13px;line-height:1.5}
+.kpi{font-size:26px;font-weight:850;margin-top:6px}.kpi.good{color:var(--good)}.kpi.red{color:var(--oracle)}
+.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+label{font-size:12px;font-weight:750;color:#475467;display:block}
+input,select{width:100%;margin-top:5px;border:1px solid #cfd6dc;border-radius:9px;padding:9px;background:white;color:var(--ink)}
+.formula{background:#101820;color:#f5f7fa;border-radius:12px;padding:14px;font-family:Consolas,monospace;font-size:13px;line-height:1.7;overflow:auto}
+.formula b{color:#ffb3a7}.formula .comment{color:#92b8cc}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:620px;background:white}
+th,td{padding:10px 12px;border-bottom:1px solid #e7ebef;text-align:right;font-size:13px}
+th:first-child,td:first-child{text-align:left}th{background:#f5f7f9;color:#475467}
+tr:last-child td{border-bottom:0}.total td{font-weight:800;background:#faf4f2}
+.flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:12px}
+.node{border:1px solid var(--line);background:white;border-radius:12px;padding:13px;min-width:135px;text-align:center}
+.node strong{display:block;margin-bottom:5px}.arrow{font-size:24px;color:var(--oracle)}
+.callout{border-left:5px solid var(--oracle);background:#fff7f5;padding:13px 15px;border-radius:10px;line-height:1.55}
+.compliance{border-top:4px solid var(--blue)}.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:6px 9px;border-radius:99px;background:#eaf7f1;color:var(--good)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.rule-list{display:grid;gap:9px}.rule{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:11px}
+.num{width:30px;height:30px;border-radius:8px;background:#f8e5e1;color:var(--oracle);display:grid;place-items:center;font-weight:900}
+.code{font-family:Consolas,monospace;font-size:12px;background:#eef2f5;border-radius:5px;padding:2px 5px}
+.progress{height:9px;background:#e8edf1;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--oracle);width:0;transition:width .8s}
+.pulse{animation:pulse 1.7s infinite}@keyframes pulse{50%{opacity:.45}}
+.fade{animation:fade .35s ease}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.footer{margin-top:24px;padding:18px;text-align:center;color:var(--muted);font-size:12px}
+.print-only{display:none}
+.version-pill{display:inline-flex;align-items:center;gap:6px;background:#ffffff16;border:1px solid #ffffff2c;color:#fff;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:800}
+.learning-progress{height:4px;background:#ffffff1a;position:fixed;top:72px;left:0;right:0;z-index:21}.learning-progress span{display:block;height:100%;width:12.5%;background:linear-gradient(90deg,#ff8f7d,var(--oracle));transition:width .35s}
+.insight{background:linear-gradient(135deg,var(--soft-blue),#fff);border:1px solid #cfe5ef;border-radius:13px;padding:14px}
+.chip-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:750;color:#475467}
+.decision-scale{height:18px;border-radius:999px;background:linear-gradient(90deg,#e6eef3 0 20%,#8fc7df 20% 50%,#e6b37b 50% 80%,#c74634 80% 100%);position:relative;margin:18px 0}.decision-marker{position:absolute;top:-7px;width:4px;height:32px;background:#17202a;border-radius:4px;left:80%;transition:left .35s}.decision-marker:after{content:attr(data-label);position:absolute;top:34px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;white-space:nowrap}.modal{position:fixed;inset:0;background:#0d1520b8;display:none;place-items:center;z-index:50;padding:18px}.modal.open{display:grid}.modal-card{width:min(720px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 80px #0006}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.icon-btn{border:0;background:#eef2f5;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:20px}.explain-btn{margin-top:12px;border:1px solid #e2c1ba;background:#fff8f6;color:var(--oracle-dark);border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer}.validation{font-size:12px;margin-top:8px;color:var(--good);font-weight:700}.validation.warn{color:var(--warn)}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto;padding:8px}.side-title{display:none}.navbtn{white-space:nowrap;width:auto}.hero{grid-template-columns:1fr}.hero-art{display:none}.g4,.g3,.g2,.controls{grid-template-columns:1fr}.main{padding:13px}}
+@media print{.topbar,.sidebar,.btn{display:none!important}.shell{display:block}.main{padding:0}.section{display:block!important;page-break-after:always}.print-only{display:block}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">BISP</div>
+    <div><h1>Oracle FCCS Configurable Consolidation Lab</h1><p>Interactive training simulator • IFRS-aligned examples • Essbase logic</p><span class="version-pill">◆ v2.1 • Deep-Tested Responsive Edition</span></div>
+  </div>
+  <div class="top-actions">
+    <button type="button" class="btn secondary" id="aboutBtn">About BISP</button>
+    <button type="button" class="btn secondary" id="tourBtn">Start Guided Tour</button>
+    <button type="button" class="btn secondary" id="csvBtn">Export Results</button>
+    <button type="button" class="btn secondary" id="resetBtn">Reset Examples</button>
+    <button type="button" class="btn primary" id="printBtn">Export / Print PDF</button>
+  </div>
+</header>
+<div class="learning-progress" aria-hidden="true"><span id="learningProgress"></span></div>
+
+<div class="shell">
+<nav class="sidebar" aria-label="Learning sections">
+  <div class="side-title">LEARNING PATH</div>
+  <button type="button" class="navbtn active" data-target="overview">◈ Overview</button>
+  <button type="button" class="navbtn" data-target="subsidiary">▣ Subsidiary + NCI</button>
+  <button type="button" class="navbtn" data-target="goodwill">◆ Goodwill</button>
+  <button type="button" class="navbtn" data-target="ic">⇄ Intercompany</button>
+  <button type="button" class="navbtn" data-target="equity">◉ Equity Pickup</button>
+  <button type="button" class="navbtn" data-target="fx">¤ IAS 21 / CTA</button>
+  <button type="button" class="navbtn" data-target="rules">⚙ FCCS Rule Design</button>
+  <button type="button" class="navbtn" data-target="decision">⌁ Method Decision Lab</button>
+  <button type="button" class="navbtn" data-target="scenarios">▤ Scenario Manager</button>
+  <button type="button" class="navbtn" data-target="journal">▥ Journal Builder</button>
+  <button type="button" class="navbtn" data-target="validation">⚑ Validation Center</button>
+  <button type="button" class="navbtn" data-target="compliance">✓ Compliance Map</button>
+</nav>
+
+<main class="main">
+<section id="overview" class="section active fade">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">BISP TRAININGS • ORACLE-INSPIRED LEARNING</div>
+      <h2>The clearest way to understand FCCS configurable consolidation</h2>
+      <p>Change ownership, balances, exchange rates and transaction values. The lab recalculates consolidation factors, NCI, goodwill, eliminations, equity pickup, CTA and journal outputs—and explains why every posting is created.</p>
+      <div class="badges"><span class="badge">IFRS 10</span><span class="badge">IFRS 3</span><span class="badge">IAS 21</span><span class="badge">IAS 28</span><span class="badge">IFRS 9</span></div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 360 230" width="100%" role="img" aria-label="Oracle inspired FCCS consolidation architecture">
+        <rect x="15" y="80" width="90" height="62" rx="14" fill="#fff" stroke="#c74634" stroke-width="3"/>
+        <text x="60" y="105" text-anchor="middle" font-size="13" font-weight="700">Source</text><text x="60" y="125" text-anchor="middle" font-size="11">Entity Data</text>
+        <path d="M108 111 H145" stroke="#c74634" stroke-width="4"/><path d="M140 103 l12 8 -12 8" fill="#c74634"/>
+        <rect x="150" y="44" width="110" height="135" rx="18" fill="#17202a"/>
+        <text x="205" y="74" text-anchor="middle" fill="white" font-size="14" font-weight="700">FCCS</text>
+        <rect x="170" y="89" width="70" height="25" rx="7" fill="#c74634"/><text x="205" y="106" text-anchor="middle" fill="white" font-size="10">Proportion</text>
+        <rect x="170" y="121" width="70" height="25" rx="7" fill="#c74634"/><text x="205" y="138" text-anchor="middle" fill="white" font-size="10">Elimination</text>
+        <path d="M263 111 H300" stroke="#c74634" stroke-width="4"/><path d="M295 103 l12 8 -12 8" fill="#c74634"/>
+        <rect x="307" y="80" width="40" height="62" rx="12" fill="#fff" stroke="#c74634" stroke-width="3"/>
+        <text x="327" y="106" text-anchor="middle" font-size="10" font-weight="700">Group</text><text x="327" y="123" text-anchor="middle" font-size="9">Output</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-top:16px">
+    <div class="card"><div class="sub">Consolidation method</div><div class="kpi">Subsidiary</div><div class="sub">100% consolidation when control exists</div></div>
+    <div class="card"><div class="sub">Ownership example</div><div class="kpi">80%</div><div class="sub">20% non-controlling interest</div></div>
+    <div class="card"><div class="sub">Rule output</div><div class="kpi good">Journal</div><div class="sub">Each rule behaves like a posting line</div></div>
+    <div class="card"><div class="sub">Audit trail</div><div class="kpi">FCCS_Elim</div><div class="sub">Transparent consolidation dimension</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>End-to-end configurable consolidation flow</h3>
+    <div class="flow">
+      <div class="node"><strong>1. Source</strong>Entity Input / Local Currency</div><div class="arrow">→</div>
+      <div class="node"><strong>2. Translate</strong>Parent Currency</div><div class="arrow">→</div>
+      <div class="node"><strong>3. Proportion</strong>Ownership factors</div><div class="arrow">→</div>
+      <div class="node"><strong>4. Eliminate</strong>Rulesets and rules</div><div class="arrow">→</div>
+      <div class="node"><strong>5. Contribution</strong>Group reporting</div>
+    </div>
+    <div class="callout"><b>Core FCCS concept:</b> a configurable consolidation ruleset represents a journal, while each rule represents one journal posting line. Rules can redirect targets conditionally by dimensions such as Account, Movement, Intercompany and Data Source.</div>
+  </div>
+</section>
+
+<section id="subsidiary" class="section fade">
+  <div class="grid g2">
+    <div class="card">
+      <h3>Example 1 — Subsidiary consolidation and NCI</h3>
+      <p class="sub">Parent controls Subsidiary A. Under IFRS 10, consolidate 100% of assets, liabilities, income and expenses, then separately attribute equity and profit to NCI.</p>
+      <div class="controls">
+        <label>Parent ownership %<input id="own" type="number" min="50" max="100" value="80"></label>
+        <label>Subsidiary net assets<input id="netAssets" type="number" value="1000000"></label>
+        <label>Subsidiary profit<input id="subProfit" type="number" value="200000"></label>
+      </div>
+      <div class="formula" style="margin-top:13px">
+        <b>Consolidation %</b> = 100% (control)<br>
+        <b>NCI %</b> = 100% − Ownership %<br>
+        <b>NCI in net assets</b> = Net Assets × NCI %<br>
+        <b>NCI share of profit</b> = Subsidiary Profit × NCI %
+      </div>
+    </div>
+    <div class="card">
+      <h3>Calculated output</h3>
+      <div class="grid g2">
+        <div class="card"><div class="sub">NCI percentage</div><div class="kpi" id="nciPct">20.0%</div></div>
+        <div class="card"><div class="sub">NCI net assets</div><div class="kpi" id="nciNA">200,000</div></div>
+        <div class="card"><div class="sub">Parent profit</div><div class="kpi good" id="parentProfit">160,000</div></div>
+        <div class="card"><div class="sub">NCI profit</div><div class="kpi" id="nciProfit">40,000</div></div>
+      </div>
+      <div class="status" style="margin-top:12px"><span class="dot"></span>IFRS 10 allocation balanced</div><div id="nciValidation" class="validation">Ownership and NCI total 100%.</div><button type="button" class="explain-btn" data-explain="nci">Explain this calculation</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>Illustrative consolidation journal</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>FCCS target / posting</th><th>Debit</th><th>Credit</th><th>Consolidation member</th></tr></thead>
+      <tbody id="nciJournal"></tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="goodwill" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Example 2 — Acquisition goodwill</h3>
+   <p class="sub">Simplified full-goodwill model under IFRS 3. Enter consideration, fair value of NCI, previously held interest and identifiable net assets.</p>
+   <div class="controls">
+    <label>Consideration transferred<input id="consideration" type="number" value="900000"></label>
+    <label>Fair value of NCI<input id="fvNci" type="number" value="220000"></label>
+    <label>Previously held interest<input id="prevInterest" type="number" value="0"></label>
+    <label>Fair value net assets<input id="fvNetAssets" type="number" value="1000000"></label>
+   </div>
+   <div class="formula" style="margin-top:13px"><b>Goodwill</b> = Consideration + FV of NCI + FV of previous interest − FV of identifiable net assets</div>
+  </div>
+  <div class="card">
+   <h3>Acquisition output</h3>
+   <div class="kpi red" id="goodwillResult">120,000</div><p class="sub">Recognized as goodwill, subject to impairment testing rather than amortization under IFRS.</p>
+   <div class="progress"><span id="gwBar"></span></div>
+   <button type="button" class="explain-btn" data-explain="goodwill">Explain goodwill posting</button><div class="callout" style="margin-top:14px"><b>FCCS mapping:</b> acquisition entries are commonly posted through journals or configured acquisition rules into dedicated goodwill, NCI and acquisition reserve accounts, with Movement and Data Source preserving auditability.</div>
+  </div>
+ </div>
+</section>
+
+<section id="ic" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Example 3 — Intercompany sales and unrealized profit</h3>
+   <div class="controls">
+    <label>Intercompany sales<input id="icSales" type="number" value="300000"></label>
+    <label>Cost to seller<input id="icCost" type="number" value="240000"></label>
+    <label>Inventory remaining %<input id="remainPct" type="number" min="0" max="100" value="25"></label>
+   </div>
+   <div class="formula" style="margin-top:13px">
+    <b>Gross profit</b> = IC Sales − Cost<br>
+    <b>Unrealized profit</b> = Gross Profit × Inventory remaining %<br>
+    <span class="comment">// IFRS 10: eliminate intragroup balances, transactions, income and expenses in full.</span>
+   </div>
+  </div>
+  <div class="card">
+   <h3>Elimination results</h3>
+   <div class="grid g3">
+    <div class="card"><div class="sub">Sales elimination</div><div class="kpi" id="salesElim">300,000</div></div>
+    <div class="card"><div class="sub">Gross profit</div><div class="kpi" id="grossProfit">60,000</div></div>
+    <div class="card"><div class="sub">Unrealized profit</div><div class="kpi red" id="urp">15,000</div></div>
+   <button type="button" class="explain-btn" data-explain="ic">Explain elimination logic</button></div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Generated FCCS elimination journal</h3>
+  <div class="tablewrap"><table><thead><tr><th>Rule line</th><th>Debit</th><th>Credit</th><th>Target POV</th></tr></thead><tbody id="icJournal"></tbody></table></div>
+ </div>
+</section>
+
+<section id="equity" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Example 4 — IAS 28 equity pickup</h3>
+   <p class="sub">Investor has significant influence, but not control. The associate is not line-by-line consolidated.</p>
+   <div class="controls">
+    <label>Opening investment<input id="openInv" type="number" value="500000"></label>
+    <label>Ownership %<input id="eqOwn" type="number" min="20" max="50" value="30"></label>
+    <label>Associate profit<input id="assocProfit" type="number" value="180000"></label>
+    <label>Dividends declared<input id="assocDiv" type="number" value="60000"></label>
+   </div>
+   <div class="formula" style="margin-top:13px">
+    <b>Share of profit</b> = Associate Profit × Ownership %<br>
+    <b>Share of dividends</b> = Dividends × Ownership %<br>
+    <b>Closing investment</b> = Opening + Share of Profit − Share of Dividends
+   </div>
+  </div>
+  <div class="card">
+   <h3>Equity-method output</h3>
+   <div class="grid g2">
+    <div class="card"><div class="sub">Share of profit</div><div class="kpi good" id="shareProfit">54,000</div></div>
+    <div class="card"><div class="sub">Dividend reduction</div><div class="kpi" id="shareDiv">18,000</div></div>
+    <div class="card"><div class="sub">Closing investment</div><div class="kpi" id="closeInv">536,000</div></div>
+    <div class="card"><div class="sub">Consolidation %</div><div class="kpi">0%</div></div>
+   </div>
+  </div>
+ </div>
+ <div class="card" style="margin-top:16px"><h3>Illustrative equity pickup ruleset</h3><button type="button" class="explain-btn" data-explain="equity">Explain IAS 28 versus consolidation</button><div class="formula">
+ RULESET: EPU_Consolidate_Associate<br>
+ 01 DR Investment_in_Associate = Associate_Profit × POwn<br>
+ 02 CR Share_of_Profit_Associate = Associate_Profit × POwn<br>
+ 03 DR Dividend_Income_Reversal = Dividends × POwn<br>
+ 04 CR Investment_in_Associate = Dividends × POwn
+ </div></div>
+</section>
+
+<section id="fx" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Example 5 — IAS 21 translation and CTA</h3>
+   <div class="controls">
+    <label>Foreign assets (LC)<input id="fxAssets" type="number" value="2000000"></label>
+    <label>Foreign liabilities (LC)<input id="fxLiab" type="number" value="1200000"></label>
+    <label>Closing rate<input id="closeRate" type="number" step=".01" value="1.25"></label>
+    <label>Historical equity rate<input id="histRate" type="number" step=".01" value="1.10"></label>
+   </div>
+   <div class="formula" style="margin-top:13px">
+    <b>Translated net assets</b> = (Assets − Liabilities) ÷ Closing Rate<br>
+    <b>Historical equity</b> = (Assets − Liabilities) ÷ Historical Rate<br>
+    <b>CTA</b> = Translated net assets − Historical equity
+   </div>
+  </div>
+  <div class="card">
+   <h3>Translation output</h3>
+   <div class="grid g3">
+    <div class="card"><div class="sub">Net assets at closing</div><div class="kpi" id="fxNetClose">640,000</div></div>
+    <div class="card"><div class="sub">Equity historical</div><div class="kpi" id="fxNetHist">727,273</div></div>
+    <div class="card"><div class="sub">CTA / OCI</div><div class="kpi red" id="cta">-87,273</div></div>
+   </div>
+   <button type="button" class="explain-btn" data-explain="fx">Explain CTA logic</button><div class="callout" style="margin-top:13px">The sign of CTA depends on the rate convention and account sign convention. In production FCCS, validate rate type, translation method, movement mapping and CTA system accounts.</div>
+  </div>
+ </div>
+</section>
+
+<section id="rules" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Configurable consolidation rule anatomy</h3>
+   <div class="rule-list">
+    <div class="rule"><div class="num">1</div><div><b>Ruleset</b><div class="sub">Represents the consolidation journal and execution order.</div></div><span class="code">IC_INV_ELIM</span></div>
+    <div class="rule"><div class="num">2</div><div><b>Source POV</b><div class="sub">Select Account, Movement, Data Source, IC and custom dimensions.</div></div><span class="code">Sales × 1</span></div>
+    <div class="rule"><div class="num">3</div><div><b>Factor / condition</b><div class="sub">Use ownership, consolidation or custom factor logic.</div></div><span class="code">POwn / PCon</span></div>
+    <div class="rule"><div class="num">4</div><div><b>Target redirection</b><div class="sub">Redirect debit and credit to elimination accounts and movements.</div></div><span class="code">FCCS_Elimination</span></div>
+    <div class="rule"><div class="num">5</div><div><b>Deploy and consolidate</b><div class="sub">Validate, deploy, run consolidation and review contribution detail.</div></div><span class="code">Deploy → Consolidate</span></div>
+   </div>
+  </div>
+  <div class="card">
+   <h3>Essbase-style behind-the-screen concept</h3>
+   <div class="formula">
+    <span class="comment">/* Illustrative training logic — not a copy/paste production rule */</span><br>
+    FIX(&Scenario, &Year, &Period, @RELATIVE("Total_Entity",0))<br>
+    &nbsp;&nbsp;"FCCS_Elimination" (<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;IF ("FCCS_Intercompany Entity" != "FCCS_No Intercompany");<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"IC_Sales_Elim" = -"IC_Sales";<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"IC_COGS_Elim" =  "IC_Sales";<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;ENDIF;<br>
+    &nbsp;&nbsp;)<br>
+    ENDFIX
+   </div>
+   <div class="callout" style="margin-top:13px"><b>Performance principle:</b> constrain rules by Account, Entity, Movement, Data Source and IC scope. Avoid unnecessarily broad source ranges and excessive target redirection.</div>
+  </div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Execution animation</h3>
+  <button type="button" class="btn primary" id="runRuleBtn">Run Rule Simulation</button>
+  <div class="flow" id="ruleFlow">
+   <div class="node step"><strong>Source POV</strong>Read matching cells</div><div class="arrow">→</div>
+   <div class="node step"><strong>Factor</strong>Apply ownership / sign</div><div class="arrow">→</div>
+   <div class="node step"><strong>Redirect</strong>Map target dimensions</div><div class="arrow">→</div>
+   <div class="node step"><strong>Post</strong>FCCS_Elimination</div>
+  </div>
+  <div id="runStatus" class="sub" aria-live="polite">Ready.</div>
+ </div>
+</section>
+
+<section id="decision" class="section fade">
+ <div class="hero">
+  <div>
+   <div class="eyebrow">METHOD SELECTION LAB</div>
+   <h2>Choose the accounting method before writing the FCCS rule</h2>
+   <p>Ownership percentage is an important indicator, but control and significant influence require judgement. Use this training decision engine as a starting point, then document the actual governance facts.</p>
+   <div class="chip-row"><span class="chip">IFRS 10 Control</span><span class="chip">IAS 28 Significant Influence</span><span class="chip">IFRS 9 Financial Asset</span></div>
+  </div>
+  <div class="card">
+   <label>Indicative ownership %<input id="methodOwn" type="number" min="0" max="100" value="80"></label>
+   <label style="margin-top:10px">Control exists?<select id="controlFlag"><option value="yes">Yes</option><option value="no">No</option></select></label>
+   <label style="margin-top:10px">Significant influence?<select id="influenceFlag"><option value="yes">Yes</option><option value="no">No</option></select></label>
+  </div>
+ </div>
+ <div class="grid g2" style="margin-top:16px">
+  <div class="card">
+   <h3>Decision scale</h3>
+   <div class="decision-scale"><span class="decision-marker" id="methodMarker" data-label="80%"></span></div>
+   <div style="height:28px"></div>
+   <div class="insight"><div class="sub">Recommended training method</div><div class="kpi red" id="methodResult">Full Consolidation</div><p class="sub" id="methodReason">Control exists, therefore consolidate 100% and calculate NCI separately.</p></div>
+  </div>
+  <div class="card">
+   <h3>FCCS design consequence</h3>
+   <div class="rule-list" id="methodDesign"></div>
+   <button type="button" class="explain-btn" data-explain="method">Explain the decision tree</button>
+  </div>
+ </div>
+</section>
+
+
+<section id="scenarios" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Scenario manager</h3>
+   <p class="sub">Save the complete lab state in your browser, reload it later, or apply a ready-made business case.</p>
+   <label>Scenario name<input id="scenarioName" type="text" value="Base Case" maxlength="60"></label>
+   <div class="top-actions" style="margin-top:12px">
+    <button type="button" class="btn primary" id="saveScenarioBtn">Save Scenario</button>
+    <button type="button" class="btn" id="loadScenarioBtn">Load Selected</button>
+    <button type="button" class="btn" id="deleteScenarioBtn">Delete Selected</button>
+   </div>
+   <label style="margin-top:12px">Saved scenarios<select id="scenarioList"><option value="">No saved scenarios</option></select></label>
+   <div id="scenarioStatus" class="validation" style="margin-top:12px">Ready to save a scenario.</div>
+  </div>
+  <div class="card">
+   <h3>Business-case presets</h3>
+   <div class="rule-list">
+    <button type="button" class="rule presetBtn" data-preset="subsidiary"><div class="num">80</div><div><b>Controlled subsidiary</b><div class="sub">80% ownership, NCI, goodwill and IC inventory profit.</div></div></button>
+    <button type="button" class="rule presetBtn" data-preset="associate"><div class="num">30</div><div><b>Associate investment</b><div class="sub">No control; equity pickup and dividend reduction.</div></div></button>
+    <button type="button" class="rule presetBtn" data-preset="fx"><div class="num">FX</div><div><b>Foreign operation stress case</b><div class="sub">Larger closing-versus-historical rate difference.</div></div></button>
+   </div>
+   <div class="top-actions" style="margin-top:12px">
+    <button type="button" class="btn" id="exportStateBtn">Export Scenario JSON</button>
+    <label class="btn" style="cursor:pointer">Import Scenario JSON<input id="importStateInput" type="file" accept="application/json" style="display:none"></label>
+   </div>
+  </div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Scenario comparison</h3>
+  <p class="sub">Select two saved scenarios to compare the most important consolidation outputs.</p>
+  <div class="controls">
+   <label>Scenario A<select id="compareA"><option value="">Select</option></select></label>
+   <label>Scenario B<select id="compareB"><option value="">Select</option></select></label>
+   <label>&nbsp;<button type="button" class="btn primary" id="compareBtn" style="margin-top:5px;width:100%">Compare</button></label>
+  </div>
+  <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Metric</th><th>Scenario A</th><th>Scenario B</th><th>Variance B − A</th></tr></thead><tbody id="compareBody"><tr><td colspan="4" style="text-align:center">Choose two scenarios.</td></tr></tbody></table></div>
+ </div>
+</section>
+
+<section id="journal" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Configurable journal builder</h3>
+   <p class="sub">Create a custom balanced rule line using FCCS-style source, factor and target choices.</p>
+   <div class="controls">
+    <label>Source account<select id="jbSource"><option>Intercompany Sales</option><option>Investment in Subsidiary</option><option>Associate Profit</option><option>Foreign Net Assets</option></select></label>
+    <label>Target debit account<input id="jbDebit" value="IC Sales Elimination"></label>
+    <label>Target credit account<input id="jbCredit" value="IC COGS Elimination"></label>
+    <label>Source amount<input id="jbAmount" type="number" value="300000"></label>
+    <label>Factor %<input id="jbFactor" type="number" value="100" step="0.01"></label>
+    <label>Movement<select id="jbMovement"><option>FCCS_Mvmts_Elimination</option><option>FCCS_Mvmts_Acquisitions</option><option>FCCS_Mvmts_FX_Movement</option></select></label>
+   </div>
+   <div class="top-actions" style="margin-top:12px"><button type="button" class="btn primary" id="addJournalBtn">Add Balanced Rule</button><button type="button" class="btn" id="clearJournalBtn">Clear Journal</button></div>
+   <div id="jbStatus" class="validation" style="margin-top:12px">No custom rules added.</div>
+  </div>
+  <div class="card">
+   <h3>Generated rule syntax</h3>
+   <div class="formula" id="jbSyntax">Select inputs and add a rule to generate FCCS-style syntax.</div>
+   <button type="button" class="explain-btn" id="copySyntaxBtn">Copy syntax</button>
+  </div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Consolidated custom journal</h3>
+  <div class="tablewrap"><table><thead><tr><th>#</th><th>Account / POV</th><th>Debit</th><th>Credit</th><th>Movement</th><th>Action</th></tr></thead><tbody id="customJournalBody"><tr><td colspan="6" style="text-align:center">No custom journal lines.</td></tr></tbody><tfoot><tr class="total"><td colspan="2">Total / Difference</td><td id="jbDebitTotal">0</td><td id="jbCreditTotal">0</td><td colspan="2" id="jbDifference">Balanced</td></tr></tfoot></table></div>
+  <div class="top-actions" style="margin-top:12px"><button type="button" class="btn primary" id="downloadJournalBtn">Download Journal CSV</button><button type="button" class="btn" id="postJournalBtn">Simulate Post to FCCS_Elimination</button></div>
+ </div>
+</section>
+
+<section id="validation" class="section fade">
+ <div class="grid g2">
+  <div class="card">
+   <h3>Automated validation center</h3>
+   <p class="sub">Run cross-module controls before treating the training scenario as ready for consolidation.</p>
+   <button type="button" class="btn primary" id="runValidationBtn">Run All Validations</button>
+   <div class="grid g3" style="margin-top:14px">
+    <div class="card"><div class="sub">Passed</div><div class="kpi good" id="valPassed">0</div></div>
+    <div class="card"><div class="sub">Warnings</div><div class="kpi" id="valWarnings">0</div></div>
+    <div class="card"><div class="sub">Failed</div><div class="kpi red" id="valFailed">0</div></div>
+   </div>
+  </div>
+  <div class="card">
+   <h3>Close readiness</h3>
+   <div class="progress"><span id="readinessBar"></span></div>
+   <div class="kpi" id="readinessPct">0%</div>
+   <p class="sub" id="readinessText">Run validations to calculate readiness.</p>
+  </div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Control results</h3>
+  <div class="tablewrap"><table><thead><tr><th>Control</th><th>Status</th><th>Observed result</th><th>Recommended action</th></tr></thead><tbody id="validationBody"><tr><td colspan="4" style="text-align:center">Validation has not been run.</td></tr></tbody></table></div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Period-close workflow simulator</h3>
+  <div class="flow" id="closeFlow">
+   <div class="node closeStep"><strong>1. Translate</strong><span>Pending</span></div><div class="arrow">→</div>
+   <div class="node closeStep"><strong>2. Consolidate</strong><span>Pending</span></div><div class="arrow">→</div>
+   <div class="node closeStep"><strong>3. Validate</strong><span>Pending</span></div><div class="arrow">→</div>
+   <div class="node closeStep"><strong>4. Lock</strong><span>Pending</span></div>
+  </div>
+  <button type="button" class="btn primary" id="runCloseBtn">Run Close Workflow</button>
+  <div id="closeStatus" class="sub" style="margin-top:10px">Ready.</div>
+ </div>
+</section>
+
+<section id="compliance" class="section fade">
+ <div class="grid g3">
+  <div class="card compliance"><h3>IFRS 10</h3><p class="sub">Control assessment, full consolidation of subsidiaries, uniform accounting policies, elimination of intragroup transactions and attribution to NCI.</p><span class="status"><span class="dot"></span>Subsidiary / NCI / IC</span></div>
+  <div class="card compliance"><h3>IFRS 3</h3><p class="sub">Acquisition method, identifiable assets and liabilities at fair value, goodwill or bargain purchase, and measurement of NCI.</p><span class="status"><span class="dot"></span>Goodwill</span></div>
+  <div class="card compliance"><h3>IAS 21</h3><p class="sub">Foreign currency transactions, functional currency, translation of foreign operations and exchange differences in OCI where applicable.</p><span class="status"><span class="dot"></span>Translation / CTA</span></div>
+  <div class="card compliance"><h3>IAS 28</h3><p class="sub">Equity method for associates and joint ventures, recognition of investor share of profit or loss, and reduction for distributions.</p><span class="status"><span class="dot"></span>Equity Pickup</span></div>
+  <div class="card compliance"><h3>IFRS 9</h3><p class="sub">Classification and measurement of financial instruments, impairment and relevant treatment where an investment is not consolidated or equity-accounted.</p><span class="status"><span class="dot"></span>Financial Assets</span></div>
+  <div class="card compliance"><h3>IAS 36</h3><p class="sub">Goodwill is allocated to cash-generating units and tested for impairment at least annually and when impairment indicators exist.</p><span class="status"><span class="dot"></span>Goodwill Impairment</span></div>
+ </div>
+ <div class="card" style="margin-top:16px">
+  <h3>Governance and validation checklist</h3>
+  <div class="tablewrap"><table><thead><tr><th>Control</th><th>FCCS evidence</th><th>Financial reporting objective</th></tr></thead><tbody>
+   <tr><td>Ownership approval</td><td>Ownership Management by Entity / Parent / Period</td><td>Correct method and percentages</td></tr>
+   <tr><td>Rule change control</td><td>Ruleset export, version, deployment history</td><td>Authorized consolidation logic</td></tr>
+   <tr><td>Elimination balancing</td><td>Contribution and Elimination detail</td><td>Debits equal credits</td></tr>
+   <tr><td>Currency validation</td><td>Rates, translation status, CTA reconciliation</td><td>IAS 21 consistency</td></tr>
+   <tr><td>Disclosure support</td><td>Smart View / reports / audit trail</td><td>NCI, associates, FX and goodwill disclosures</td></tr>
+  </tbody></table></div>
+ </div>
+</section>
+
+<div class="footer">BISP Trainings • Oracle EPM learning mockup • v3 Functional Edition • Educational illustration, not accounting or implementation advice.</div>
+</main>
+</div>
+
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+ <div class="modal-card">
+  <div class="modal-head"><div><div class="eyebrow">BISP LEARNING EXPLAINER</div><h2 id="modalTitle" style="margin:5px 0">Explanation</h2></div><button type="button" class="icon-btn" id="closeModal" aria-label="Close">×</button></div>
+  <div id="modalBody" class="sub" style="font-size:14px;line-height:1.7"></div>
+ </div>
+</div>
+
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
+const val=id=>Number($(id).value)||0;
+
+document.querySelectorAll('.navbtn').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active'); $(b.dataset.target).classList.add('active');
+ const navs=[...document.querySelectorAll('.navbtn')]; $('learningProgress').style.width=((navs.indexOf(b)+1)/navs.length*100)+'%';
+ window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+function calcNCI(){
+ const own=val('own')/100,nci=1-own,na=val('netAssets'),p=val('subProfit');
+ $('nciPct').textContent=(nci*100).toFixed(1)+'%';
+ $('nciNA').textContent=fmt(na*nci); $('parentProfit').textContent=fmt(p*own); $('nciProfit').textContent=fmt(p*nci);
+ const ok=val('own')>=50&&val('own')<=100;$('nciValidation').textContent=ok?'Ownership and NCI total 100%.':'Training warning: control cannot be inferred from this ownership input alone.';$('nciValidation').className='validation'+(ok?'':' warn');
+ $('nciJournal').innerHTML=`
+ <tr><td>Dr Subsidiary equity elimination</td><td>${fmt(na)}</td><td>—</td><td>FCCS_Elimination</td></tr>
+ <tr><td>Cr Parent investment (illustrative)</td><td>—</td><td>${fmt(na*own)}</td><td>FCCS_Elimination</td></tr>
+ <tr><td>Cr Non-controlling interest</td><td>—</td><td>${fmt(na*nci)}</td><td>FCCS_Elimination</td></tr>
+ <tr class="total"><td>Balanced total</td><td>${fmt(na)}</td><td>${fmt(na)}</td><td>Contribution</td></tr>`;
+}
+function calcGW(){
+ const gw=val('consideration')+val('fvNci')+val('prevInterest')-val('fvNetAssets');
+ $('goodwillResult').textContent=fmt(gw);
+ $('gwBar').style.width=Math.min(100,Math.abs(gw)/(Math.max(val('consideration'),1))*100)+'%';
+}
+function calcIC(){
+ const s=val('icSales'),gp=s-val('icCost'),urp=gp*val('remainPct')/100;
+ $('salesElim').textContent=fmt(s);$('grossProfit').textContent=fmt(gp);$('urp').textContent=fmt(urp);
+ $('icJournal').innerHTML=`
+ <tr><td>Dr Intercompany Sales</td><td>${fmt(s)}</td><td>—</td><td>Sales / FCCS_Elimination</td></tr>
+ <tr><td>Cr Intercompany COGS</td><td>—</td><td>${fmt(s)}</td><td>COGS / FCCS_Elimination</td></tr>
+ <tr><td>Dr Cost of Sales — unrealized profit</td><td>${fmt(urp)}</td><td>—</td><td>URP Movement / FCCS_Elimination</td></tr>
+ <tr><td>Cr Inventory</td><td>—</td><td>${fmt(urp)}</td><td>Inventory / FCCS_Elimination</td></tr>
+ <tr class="total"><td>Total</td><td>${fmt(s+urp)}</td><td>${fmt(s+urp)}</td><td>Balanced</td></tr>`;
+}
+function calcEquity(){
+ const own=val('eqOwn')/100,sp=val('assocProfit')*own,sd=val('assocDiv')*own;
+ $('shareProfit').textContent=fmt(sp);$('shareDiv').textContent=fmt(sd);$('closeInv').textContent=fmt(val('openInv')+sp-sd);
+}
+function calcFX(){
+ const net=val('fxAssets')-val('fxLiab'),close=net/(val('closeRate')||1),hist=net/(val('histRate')||1);
+ $('fxNetClose').textContent=fmt(close);$('fxNetHist').textContent=fmt(hist);$('cta').textContent=fmt(close-hist);
+}
+
+function calcMethod(){
+ const own=Math.max(0,Math.min(100,val('methodOwn'))),control=$('controlFlag').value==='yes',influence=$('influenceFlag').value==='yes';
+ $('methodMarker').style.left=`calc(${own}% - 2px)`;$('methodMarker').dataset.label=own.toFixed(0)+'%';
+ let result,reason,items;
+ if(control){result='Full Consolidation';reason='Control exists, therefore consolidate 100% and calculate NCI separately.';items=[['1','Method','Subsidiary / Full consolidation'],['2','Factor','PCon = 100%'],['3','Output','Contribution + NCI + eliminations']];}
+ else if(influence){result='Equity Method';reason='No control, but significant influence exists; recognize the investor share through equity pickup.';items=[['1','Method','Associate / IAS 28'],['2','Factor','POwn applied to profit and dividends'],['3','Output','Investment + share of profit']];}
+ else {result='Financial Asset';reason='Neither control nor significant influence is indicated; assess classification and measurement under IFRS 9.';items=[['1','Method','Financial instrument'],['2','Factor','Fair value / impairment policy'],['3','Output','Investment measurement, not consolidation']];}
+ $('methodResult').textContent=result;$('methodReason').textContent=reason;
+ $('methodDesign').innerHTML=items.map(x=>`<div class="rule"><div class="num">${x[0]}</div><div><b>${x[1]}</b><div class="sub">${x[2]}</div></div></div>`).join('');
+}
+['methodOwn','controlFlag','influenceFlag'].forEach(id=>{ $(id).addEventListener('input',calcMethod); $(id).addEventListener('change',calcMethod); });
+
+const groups=[
+ ['own','netAssets','subProfit'],['consideration','fvNci','prevInterest','fvNetAssets'],
+ ['icSales','icCost','remainPct'],['openInv','eqOwn','assocProfit','assocDiv'],
+ ['fxAssets','fxLiab','closeRate','histRate']
+];
+groups[0].forEach(id=>$(id).addEventListener('input',calcNCI));
+groups[1].forEach(id=>$(id).addEventListener('input',calcGW));
+groups[2].forEach(id=>$(id).addEventListener('input',calcIC));
+groups[3].forEach(id=>$(id).addEventListener('input',calcEquity));
+groups[4].forEach(id=>$(id).addEventListener('input',calcFX));
+
+$('printBtn').addEventListener('click',()=>window.print());
+$('aboutBtn').addEventListener('click',()=>openModal('About BISP Trainings',`<p><b>BISP Trainings</b> creates practical Oracle EPM learning labs that connect accounting standards, FCCS configuration, Essbase logic and implementation thinking.</p><p>This v2 lab is designed to make configurable consolidation understandable through editable examples, generated journals, guided explanations and method-selection logic.</p><p><b>Training use:</b> educational simulation only. Validate production designs against your accounting policy, ownership facts and current Oracle documentation.</p>`));
+$('closeModal').addEventListener('click',()=>closeInfoModal());
+$('infoModal').addEventListener('click',e=>{if(e.target===$('infoModal')) closeInfoModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeInfoModal();});
+function closeInfoModal(){ $('infoModal').classList.remove('open'); document.body.style.overflow=''; }
+
+function openModal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('infoModal').classList.add('open');document.body.style.overflow='hidden';$('closeModal').focus();}
+const explanations={
+ nci:['Subsidiary and NCI',`<p>When the parent controls the entity, FCCS brings in <b>100% of the subsidiary balances</b>. Ownership is then used to split equity and profit between the parent and non-controlling interest.</p><div class="formula">NCI % = 100% − Parent Ownership %<br>NCI Net Assets = Net Assets × NCI %<br>NCI Profit = Subsidiary Profit × NCI %</div><p>The elimination journal removes the parent investment against subsidiary equity and creates the NCI balance.</p>`],
+ goodwill:['Goodwill',`<p>Goodwill is the residual after comparing the acquisition value with the fair value of identifiable net assets.</p><div class="formula">Goodwill = Consideration + FV NCI + Previous Interest − FV Net Assets</div><p>A negative result is a possible bargain purchase indicator and requires reassessment before recognition.</p>`],
+ ic:['Intercompany elimination',`<p>FCCS eliminates the internal sale and corresponding cost so the group reports only external activity. Profit still embedded in closing inventory is also removed.</p><div class="formula">Unrealized Profit = (IC Sales − Seller Cost) × Inventory Remaining %</div><p>The rule must identify the intercompany partner and redirect both sides to balanced elimination targets.</p>`],
+ equity:['Equity pickup',`<p>An associate is not consolidated line by line. The investor increases the investment account for its share of profit and reduces the investment for its share of dividends.</p><p>In FCCS, this is usually designed as a dedicated equity-pickup ruleset with controlled source and target POVs.</p>`],
+ fx:['CTA',`<p>Foreign assets and liabilities are generally translated using closing rates, while historical equity components retain historical rates. The balancing difference is recorded in CTA within OCI.</p><p>The displayed sign depends on whether your rate is expressed as LC per reporting currency or reporting currency per LC.</p>`],
+ method:['Method decision tree',`<p><b>Control overrides percentage heuristics.</b> When control exists, use full consolidation. Without control but with significant influence, use the equity method. Without either, the investment generally falls into the financial-instrument framework.</p><p>Ownership ranges are indicators—not substitutes for documented governance analysis.</p>`]
+};
+document.querySelectorAll('[data-explain]').forEach(b=>b.addEventListener('click',()=>{const x=explanations[b.dataset.explain];openModal(x[0],x[1])}));
+
+let tourIndex=0;const tourTargets=['overview','subsidiary','goodwill','ic','equity','fx','rules','decision','scenarios','journal','validation','compliance'];
+$('tourBtn').addEventListener('click',()=>{
+ if(tourIndex>=tourTargets.length) tourIndex=0;
+ const target=tourTargets[tourIndex];
+ const nav=document.querySelector(`.navbtn[data-target="${target}"]`);
+ if(nav) nav.click();
+ tourIndex++;
+ $('tourBtn').textContent=tourIndex>=tourTargets.length?'Restart Guided Tour':'Next Tour Step';
+});
+
+$('csvBtn').addEventListener('click',()=>{
+ const rows=[['Metric','Value'],['Parent Ownership',val('own')+'%'],['NCI', $('nciPct').textContent],['NCI Net Assets',$('nciNA').textContent],['Goodwill',$('goodwillResult').textContent],['IC Sales Elimination',$('salesElim').textContent],['Unrealized Profit',$('urp').textContent],['Equity Pickup Profit',$('shareProfit').textContent],['Closing Investment',$('closeInv').textContent],['CTA',$('cta').textContent],['Recommended Method',$('methodResult').textContent]];
+ const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
+ const a=document.createElement('a');const url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='BISP_FCCS_Configurable_Consolidation_v2_1_Results.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
+
+const stateFields=['own','netAssets','subProfit','consideration','fvNci','prevInterest','fvNetAssets','icSales','icCost','remainPct','openInv','eqOwn','assocProfit','assocDiv','fxAssets','fxLiab','closeRate','histRate','methodOwn','controlFlag','influenceFlag'];
+function captureState(){const inputs={};stateFields.forEach(id=>inputs[id]=$(id)?.value);return {name:$('scenarioName')?.value||'Scenario',savedAt:new Date().toISOString(),inputs,outputs:{nci:$('nciNA').textContent,goodwill:$('goodwillResult').textContent,urp:$('urp').textContent,shareProfit:$('shareProfit').textContent,closeInv:$('closeInv').textContent,cta:$('cta').textContent,method:$('methodResult').textContent}};}
+function applyState(st){if(!st||!st.inputs)return;Object.entries(st.inputs).forEach(([id,v])=>{if($(id))$(id).value=v});calcNCI();calcGW();calcIC();calcEquity();calcFX();calcMethod();if($('scenarioName'))$('scenarioName').value=st.name||'Imported Scenario';}
+function getScenarios(){try{return JSON.parse(localStorage.getItem('bispFCCSScenarios')||'{}')}catch{return {}}}
+function setScenarios(x){localStorage.setItem('bispFCCSScenarios',JSON.stringify(x));refreshScenarioLists();}
+function refreshScenarioLists(){const data=getScenarios(),names=Object.keys(data).sort();['scenarioList','compareA','compareB'].forEach(id=>{const el=$(id);if(!el)return;const current=el.value;el.innerHTML=(id==='scenarioList'?'<option value="">Select saved scenario</option>':'<option value="">Select</option>')+names.map(n=>`<option value="${n.replaceAll('"','&quot;')}">${n}</option>`).join('');if(names.includes(current))el.value=current;});}
+$('saveScenarioBtn').addEventListener('click',()=>{const name=$('scenarioName').value.trim();if(!name){$('scenarioStatus').textContent='Enter a scenario name.';$('scenarioStatus').className='validation warn';return}const x=getScenarios();const st=captureState();st.name=name;x[name]=st;setScenarios(x);$('scenarioList').value=name;$('scenarioStatus').textContent=`Saved “${name}” in this browser.`;$('scenarioStatus').className='validation';});
+$('loadScenarioBtn').addEventListener('click',()=>{const name=$('scenarioList').value,x=getScenarios();if(!name||!x[name])return;applyState(x[name]);$('scenarioStatus').textContent=`Loaded “${name}”.`;$('scenarioStatus').className='validation';});
+$('deleteScenarioBtn').addEventListener('click',()=>{const name=$('scenarioList').value,x=getScenarios();if(!name)return;delete x[name];setScenarios(x);$('scenarioStatus').textContent=`Deleted “${name}”.`;$('scenarioStatus').className='validation warn';});
+const presets={subsidiary:{own:80,netAssets:1000000,subProfit:200000,consideration:900000,fvNci:220000,fvNetAssets:1000000,icSales:300000,icCost:240000,remainPct:25,methodOwn:80,controlFlag:'yes',influenceFlag:'yes'},associate:{own:100,netAssets:0,subProfit:0,openInv:500000,eqOwn:30,assocProfit:180000,assocDiv:60000,methodOwn:30,controlFlag:'no',influenceFlag:'yes'},fx:{fxAssets:3500000,fxLiab:1800000,closeRate:1.42,histRate:1.08,methodOwn:100,controlFlag:'yes',influenceFlag:'yes'}};
+document.querySelectorAll('.presetBtn').forEach(b=>b.addEventListener('click',()=>{const p=presets[b.dataset.preset];Object.entries(p).forEach(([id,v])=>{if($(id))$(id).value=v});calcNCI();calcGW();calcIC();calcEquity();calcFX();calcMethod();$('scenarioName').value=b.dataset.preset[0].toUpperCase()+b.dataset.preset.slice(1)+' Preset';$('scenarioStatus').textContent='Preset applied. Review and save it as a scenario.';}));
+$('exportStateBtn').addEventListener('click',()=>{const st=captureState(),blob=new Blob([JSON.stringify(st,null,2)],{type:'application/json'}),a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=(st.name||'FCCS_Scenario').replace(/[^a-z0-9_-]/gi,'_')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);});
+$('importStateInput').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const st=JSON.parse(await f.text());applyState(st);$('scenarioStatus').textContent='Scenario JSON imported successfully.';}catch{$('scenarioStatus').textContent='Invalid scenario JSON file.';$('scenarioStatus').className='validation warn';}e.target.value='';});
+$('compareBtn').addEventListener('click',()=>{const x=getScenarios(),a=x[$('compareA').value],b=x[$('compareB').value];if(!a||!b){$('compareBody').innerHTML='<tr><td colspan="4" style="text-align:center">Select two saved scenarios.</td></tr>';return}const metrics=[['NCI Net Assets','nci'],['Goodwill','goodwill'],['Unrealized Profit','urp'],['Share of Profit','shareProfit'],['Closing Investment','closeInv'],['CTA','cta']];const num=v=>Number(String(v||0).replace(/[^0-9.-]/g,''))||0;$('compareBody').innerHTML=metrics.map(([label,k])=>`<tr><td>${label}</td><td>${a.outputs[k]}</td><td>${b.outputs[k]}</td><td>${fmt(num(b.outputs[k])-num(a.outputs[k]))}</td></tr>`).join('')+`<tr class="total"><td>Method</td><td>${a.outputs.method}</td><td>${b.outputs.method}</td><td>—</td></tr>`;});
+
+let customJournal=[];
+function renderJournal(){if(!customJournal.length){$('customJournalBody').innerHTML='<tr><td colspan="6" style="text-align:center">No custom journal lines.</td></tr>';$('jbDebitTotal').textContent='0';$('jbCreditTotal').textContent='0';$('jbDifference').textContent='Balanced';return}let d=0,c=0;$('customJournalBody').innerHTML=customJournal.map((r,i)=>{d+=r.debit;c+=r.credit;return `<tr><td>${i+1}</td><td>${r.account}</td><td>${r.debit?fmt(r.debit):'—'}</td><td>${r.credit?fmt(r.credit):'—'}</td><td>${r.movement}</td><td><button type="button" class="btn removeJournal" data-i="${i}">Remove</button></td></tr>`}).join('');$('jbDebitTotal').textContent=fmt(d);$('jbCreditTotal').textContent=fmt(c);const diff=d-c;$('jbDifference').textContent=Math.abs(diff)<0.01?'Balanced':'Difference '+fmt(diff);document.querySelectorAll('.removeJournal').forEach(b=>b.addEventListener('click',()=>{customJournal.splice(Number(b.dataset.i),1);renderJournal();}));}
+$('addJournalBtn').addEventListener('click',()=>{const amt=val('jbAmount')*val('jbFactor')/100;if(!Number.isFinite(amt)||amt<=0){$('jbStatus').textContent='Amount and factor must produce a positive posting.';$('jbStatus').className='validation warn';return}const movement=$('jbMovement').value;customJournal.push({account:$('jbDebit').value||'Debit Target',debit:amt,credit:0,movement},{account:$('jbCredit').value||'Credit Target',debit:0,credit:amt,movement});$('jbSyntax').textContent=`RULE ${customJournal.length/2}: SOURCE("${$('jbSource').value}") * ${val('jbFactor')}%\nDR "${$('jbDebit').value}" -> ${movement}\nCR "${$('jbCredit').value}" -> ${movement}\nCONSOLIDATION_MEMBER = "FCCS_Elimination";`;$('jbStatus').textContent='Balanced debit and credit rule added.';$('jbStatus').className='validation';renderJournal();});
+$('clearJournalBtn').addEventListener('click',()=>{customJournal=[];renderJournal();$('jbSyntax').textContent='Select inputs and add a rule to generate FCCS-style syntax.';$('jbStatus').textContent='Custom journal cleared.';});
+$('copySyntaxBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('jbSyntax').textContent);$('jbStatus').textContent='Rule syntax copied.';}catch{$('jbStatus').textContent='Clipboard unavailable. Select and copy the syntax manually.';}});
+$('downloadJournalBtn').addEventListener('click',()=>{if(!customJournal.length)return;const rows=[['Line','Account','Debit','Credit','Movement','Consolidation Member'],...customJournal.map((r,i)=>[i+1,r.account,r.debit,r.credit,r.movement,'FCCS_Elimination'])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.href=url;a.download='BISP_FCCS_Custom_Journal.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);});
+$('postJournalBtn').addEventListener('click',async()=>{if(!customJournal.length){$('jbStatus').textContent='Add at least one balanced rule first.';return}const d=customJournal.reduce((s,r)=>s+r.debit,0),c=customJournal.reduce((s,r)=>s+r.credit,0);if(Math.abs(d-c)>0.01){$('jbStatus').textContent='Posting blocked: journal is not balanced.';$('jbStatus').className='validation warn';return}$('postJournalBtn').disabled=true;$('jbStatus').textContent='Validating POV and posting to FCCS_Elimination…';await new Promise(r=>setTimeout(r,900));$('jbStatus').textContent=`Posted ${customJournal.length} illustrative lines successfully.`;$('jbStatus').className='validation';$('postJournalBtn').disabled=false;});
+
+function runValidations(){const checks=[];const add=(name,status,observed,action)=>checks.push({name,status,observed,action});const own=val('own');add('Ownership range',own>=0&&own<=100?'pass':'fail',own+'%','Keep ownership between 0% and 100%.');const nci=100-own;add('Ownership + NCI',Math.abs(own+nci-100)<0.001?'pass':'fail',(own+nci).toFixed(1)+'%','Ownership and NCI must total 100%.');const gw=val('consideration')+val('fvNci')+val('prevInterest')-val('fvNetAssets');add('Goodwill result',gw>=0?'pass':'warn',fmt(gw),gw<0?'Reassess fair values and bargain-purchase indicators.':'No arithmetic exception detected.');const urp=(val('icSales')-val('icCost'))*val('remainPct')/100;add('Unrealized profit',urp>=0?'pass':'warn',fmt(urp),urp<0?'Review seller cost and inventory assumptions.':'Elimination amount is non-negative.');add('Equity-method ownership',val('eqOwn')>=20&&val('eqOwn')<=50?'pass':'warn',val('eqOwn')+'%','Confirm significant influence from governance facts.');add('FX rates',val('closeRate')>0&&val('histRate')>0?'pass':'fail',`${val('closeRate')} / ${val('histRate')}`,'Rates must be greater than zero.');const method= $('methodResult').textContent;add('Method consistency',(method==='Full Consolidation'&&$('controlFlag').value==='yes')||(method==='Equity Method'&&$('controlFlag').value==='no'&&$('influenceFlag').value==='yes')||(method==='Financial Asset'&&$('controlFlag').value==='no'&&$('influenceFlag').value==='no')?'pass':'fail',method,'Re-run method decision inputs.');const d=customJournal.reduce((s,r)=>s+r.debit,0),c=customJournal.reduce((s,r)=>s+r.credit,0);add('Custom journal balance',Math.abs(d-c)<0.01?'pass':'fail',`${fmt(d)} / ${fmt(c)}`,'Debits and credits must balance.');const counts={pass:0,warn:0,fail:0};checks.forEach(x=>counts[x.status]++);$('valPassed').textContent=counts.pass;$('valWarnings').textContent=counts.warn;$('valFailed').textContent=counts.fail;const score=Math.round((counts.pass+counts.warn*.5)/checks.length*100);$('readinessPct').textContent=score+'%';$('readinessBar').style.width=score+'%';$('readinessText').textContent=counts.fail?'Resolve failed controls before locking the period.':counts.warn?'Ready with review warnings.':'All automated controls passed.';$('validationBody').innerHTML=checks.map(x=>`<tr><td>${x.name}</td><td><span class="status" style="background:${x.status==='pass'?'#eaf7f1':x.status==='warn'?'#fff4dd':'#fff0ed'};color:${x.status==='pass'?'var(--good)':x.status==='warn'?'var(--warn)':'var(--oracle)'}"><span class="dot"></span>${x.status.toUpperCase()}</span></td><td>${x.observed}</td><td>${x.action}</td></tr>`).join('');return counts;}
+$('runValidationBtn').addEventListener('click',runValidations);
+$('runCloseBtn').addEventListener('click',async()=>{if($('runCloseBtn').disabled)return;$('runCloseBtn').disabled=true;const steps=[...document.querySelectorAll('#closeFlow .closeStep')];steps.forEach(s=>{s.style.background='white';s.querySelector('span').textContent='Pending'});for(let i=0;i<steps.length;i++){if(i===2){const c=runValidations();if(c.fail){steps[i].style.background='#fff0ed';steps[i].querySelector('span').textContent='Failed';$('closeStatus').textContent='Workflow stopped: resolve failed validations before period lock.';$('runCloseBtn').disabled=false;return}}steps[i].style.background='#eaf7f1';steps[i].querySelector('span').textContent='Completed';$('closeStatus').textContent=['Translating entity data…','Running consolidation and eliminations…','Executing validation controls…','Locking illustrative period…'][i];await new Promise(r=>setTimeout(r,650));}$('closeStatus').textContent='Close workflow completed successfully.';$('runCloseBtn').disabled=false;});
+refreshScenarioLists();renderJournal();
+
+$('resetBtn').addEventListener('click',()=>location.reload());
+$('runRuleBtn').addEventListener('click',async()=>{
+ if($('runRuleBtn').disabled) return;
+ $('runRuleBtn').disabled=true;
+ const steps=[...document.querySelectorAll('#ruleFlow .step')];
+ steps.forEach(s=>{s.style.borderColor='var(--line)';s.classList.remove('pulse')});
+ $('runStatus').textContent='Running source POV scan…';
+ for(let i=0;i<steps.length;i++){
+  steps[i].style.borderColor='var(--oracle)';steps[i].classList.add('pulse');
+  $('runStatus').textContent=['Reading matching source intersections…','Applying consolidation factor and sign…','Redirecting target Account, Movement and Data Source…','Posting balanced entries to FCCS_Elimination…'][i];
+  await new Promise(r=>setTimeout(r,650));
+  steps[i].classList.remove('pulse');steps[i].style.background='#fff7f5';
+ }
+ $('runStatus').textContent='Completed: ruleset generated a balanced illustrative elimination journal.';
+ $('runRuleBtn').disabled=false;
+});
+try{calcNCI();calcGW();calcIC();calcEquity();calcFX();calcMethod();}catch(error){console.error('Initialization failed:',error);}
+</script>
+
+</body>
+</html>
