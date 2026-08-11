@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BISP Trainings | Investment Banking Career & Practice Simulator</title>
+<style>
+:root{--navy:#07336d;--blue:#0674d8;--orange:#ef5a18;--ink:#14233a;--muted:#66778d;--bg:#f5f8fc;--line:#d7e3ef;--green:#13835c}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.container{max-width:1220px;margin:auto;padding:0 22px}
+.hero{background:linear-gradient(135deg,#fff 0%,#f1f7fd 70%,#eaf4ff 100%);border-bottom:5px solid var(--navy)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 0}
+.brand{display:flex;align-items:center;gap:13px}.brand img{width:145px;max-height:62px;object-fit:contain}.brand strong{color:var(--navy);font-size:20px}
+.contact{display:flex;gap:10px;flex-wrap:wrap}.chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-weight:700;color:var(--navy)}
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;padding:38px 0 48px;align-items:center}
+.kicker{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--orange);font-weight:900}
+h1{font-size:clamp(38px,5vw,66px);line-height:1.02;color:var(--navy);margin:10px 0}h1 span{color:var(--orange)}
+.hero p{font-size:18px;line-height:1.65;color:#3e5067}.hero-card{background:var(--navy);color:white;padding:24px;border-radius:22px}.hero-card h3{margin-top:0}
+.hero-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.hero-stat div{background:rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center}.hero-stat b{display:block;color:#ff9b52;font-size:25px}
+nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}
+.nav{display:flex;gap:8px;overflow:auto;padding:10px 0}.nav a{text-decoration:none;color:var(--navy);font-weight:800;white-space:nowrap;padding:8px 11px;border-radius:9px}.nav a:hover{background:#edf5ff}
+section{padding:52px 0}section.alt{background:#fff}h2{font-size:34px;color:var(--navy);margin:0 0 10px}.sub{color:var(--muted);line-height:1.6;max-width:900px;margin:0 0 25px}
+.grid{display:grid;gap:17px}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.card h3{margin-top:0;color:var(--navy)}
+.level{text-align:center}.level .num{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:white;font-weight:900;margin:0 auto 10px}
+.years{display:inline-block;background:#eaf3fd;color:var(--navy);border-radius:999px;padding:6px 10px;font-weight:800;font-size:13px}
+.stat-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}.stat-card .big{font-size:30px;font-weight:900;color:var(--orange)}.stat-card .label{font-weight:800;color:var(--navy)}.stat-card small{color:var(--muted)}
+.steps{counter-reset:step}.step{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
+.step:before{counter-increment:step;content:counter(step);flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:white;font-weight:900}
+.sim{background:var(--navy);border-radius:22px;padding:24px;color:white}.tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:0;border-radius:10px;padding:10px 13px;background:rgba(255,255,255,.12);color:white;font-weight:900;cursor:pointer}.tab.active{background:var(--orange)}
+.panel{display:none}.panel.active{display:block}.formgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+label{display:block;font-size:12px;font-weight:800;margin-bottom:5px}input,select{width:100%;padding:10px 11px;border-radius:9px;border:1px solid #c5d3e3;font-size:15px}
+button,.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer}.primary{background:var(--orange);color:white}.light{background:white;color:var(--navy)}.green{background:var(--green);color:white}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}.results{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.result{background:#fff;color:var(--navy);border-radius:13px;padding:14px}.result span{display:block;color:var(--muted);font-size:12px;font-weight:700}.result b{font-size:22px}
+.calc{display:none;background:rgba(255,255,255,.1);padding:15px;border-radius:12px;line-height:1.65}
+.checklist label{font-size:15px;font-weight:600;margin:8px 0;display:flex;gap:10px;align-items:flex-start}.checklist input{width:auto;margin-top:3px}
+.scorebar{height:12px;background:rgba(255,255,255,.16);border-radius:999px;overflow:hidden;margin:10px 0 3px}.scorebar>div{height:100%;background:var(--orange);width:0}
+.quizq{background:#fff;color:var(--ink);padding:16px;border-radius:14px;margin:12px 0}.quizq strong{color:var(--navy)}.quizq label{display:block;font-size:15px;font-weight:500;padding:7px 9px;border:1px solid var(--line);border-radius:9px;margin-top:7px}.quizq input{width:auto;margin-right:8px}
+.skillgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.skill{background:#fff;border:1px solid var(--line);padding:13px;border-radius:12px;text-align:center;font-weight:700;color:var(--navy)}
+.callout{background:linear-gradient(90deg,var(--orange),#ff7817);color:white;border-radius:18px;padding:20px;font-size:24px;font-weight:900}
+.disclaimer{font-size:12px;color:var(--muted);line-height:1.5}footer{background:#062b5c;color:white;padding:28px 0}.foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}.foot img{width:130px;background:#fff;border-radius:10px;padding:4px}
+@media(max-width:980px){.hero-grid,.g5,.g4,.g3{grid-template-columns:1fr 1fr}.formgrid,.results,.skillgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.hero-grid,.g5,.g4,.g3,.formgrid,.results,.skillgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="hero">
+<div class="container">
+<div class="top">
+  <div class="brand"><img src="data:image/png;base64,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" alt="BISP logo"><strong>BISP Trainings</strong></div>
+  <div class="contact"><span class="chip">🌐 www.bisptrainings.com</span><span class="chip">📞 +91 997-799-7254</span></div>
+</div>
+<div class="hero-grid">
+<div>
+  <div class="kicker">Executive Investment Banking & Financial Modeling Program</div>
+  <h1>Build Your Career in <span>Investment Banking</span></h1>
+  <p>Explore career growth, salary benchmarks, job opportunity statistics, skills required to get hired, and hands-on Investment Banking practice in one interactive BISP learning experience.</p>
+  <div class="actions"><a class="btn primary" href="#simulator" style="text-decoration:none">Launch Simulator</a><a class="btn light" href="#career" style="text-decoration:none">Explore Career Path</a></div>
+</div>
+<div class="hero-card">
+  <h3>U.S. Market Snapshot</h3>
+  <div class="hero-stat"><div><b>$101,350</b>Financial & Investment Analyst median</div><div><b>6%</b>Projected analyst growth</div><div><b>29,900</b>Analyst openings/year</div></div>
+  <p style="margin-bottom:0">Broad U.S. occupational benchmarks; not guaranteed Investment Banking compensation.</p>
+</div>
+</div>
+</div>
+</header>
+
+<nav><div class="container nav"><a href="#career">Career Growth</a><a href="#market">Salary & Jobs</a><a href="#gethired">How to Get Hired</a><a href="#simulator">Practice Simulator</a><a href="#learn">What You'll Learn</a></div></nav>
+
+<section id="career"><div class="container">
+<h2>Career Growth Path</h2>
+<p class="sub">A typical front-office Investment Banking hierarchy can progress from analytical execution roles toward senior client origination and relationship leadership. Exact titles and timing vary by firm and geography.</p>
+<div class="grid g5">
+<div class="card level"><div class="num">1</div><h3>Analyst</h3><span class="years">0–3 Years</span><p>Research, modeling, valuation analysis and pitch books.</p></div>
+<div class="card level"><div class="num">2</div><h3>Associate</h3><span class="years">3–5 Years</span><p>Execution support, model review, client materials and coordination.</p></div>
+<div class="card level"><div class="num">3</div><h3>Vice President</h3><span class="years">5–8 Years</span><p>Manage deal execution, junior teams and workstreams.</p></div>
+<div class="card level"><div class="num">4</div><h3>Director / ED</h3><span class="years">8–12 Years</span><p>Client leadership, origination support and senior execution.</p></div>
+<div class="card level"><div class="num">5</div><h3>Managing Director</h3><span class="years">12+ Years</span><p>Win mandates, originate transactions and lead relationships.</p></div>
+</div>
+</div></section>
+
+<section id="market" class="alt"><div class="container">
+<h2>Salary Snapshot & Job Opportunity Stats</h2>
+<p class="sub">U.S. Bureau of Labor Statistics benchmarks for related occupations. These should not be interpreted as a specific Investment Banking salary guarantee.</p>
+<div class="grid g3">
+<div class="stat-card"><div class="label">Securities, Commodities & Financial Services Sales Agents</div><div class="big">$78,140</div><small>Median annual wage, May 2024</small><hr><b>Top 10%: $215,210+</b></div>
+<div class="stat-card"><div class="label">Financial & Investment Analysts</div><div class="big">$101,350</div><small>Median annual wage, May 2024</small><hr><b>Securities / investments industry median: $124,050</b></div>
+<div class="stat-card"><div class="label">Business & Financial Occupations</div><div class="big">~942,500</div><small>Projected openings per year, 2024–2034</small></div>
+</div>
+<div class="grid g3" style="margin-top:17px">
+<div class="card"><h3>Financial Analysts</h3><p><b style="color:var(--orange);font-size:26px">6%</b> projected employment growth, 2024–2034.</p><p><b>~29,900 openings/year</b></p></div>
+<div class="card"><h3>Securities & Financial Services Sales Agents</h3><p><b style="color:var(--orange);font-size:26px">3%</b> projected employment growth, 2024–2034.</p><p><b>~38,100 openings/year</b></p></div>
+<div class="card"><h3>Important Context</h3><p>Investment Banker is not a single standalone BLS occupation, so these related benchmarks are best used for broad career context.</p></div>
+</div>
+<p class="disclaimer">Source basis: U.S. Bureau of Labor Statistics Occupational Outlook Handbook, May 2024 wage data and 2024–2034 employment projections.</p>
+</div></section>
+
+<section id="gethired"><div class="container">
+<h2>How to Get a Job as an Investment Banker</h2>
+<p class="sub">Build a profile that demonstrates finance fundamentals, modeling capability, transaction knowledge, communication skill and consistent networking.</p>
+<div class="grid g3 steps">
+<div class="step"><div><b>Build accounting & finance fundamentals</b><p>Understand the three statements, enterprise value vs equity value, working capital, debt and cash flow.</p></div></div>
+<div class="step"><div><b>Master Excel, valuation & modeling</b><p>Practice clean model structure, assumptions, sensitivities and error checks.</p></div></div>
+<div class="step"><div><b>Practice DCF, comps, M&A & LBO</b><p>Develop repeatable case-study skills rather than memorizing definitions.</p></div></div>
+<div class="step"><div><b>Create a deal-focused resume & LinkedIn profile</b><p>Show quantified finance work, models, projects and transaction exposure.</p></div></div>
+<div class="step"><div><b>Network strategically</b><p>Build relevant professional relationships and apply consistently across suitable roles.</p></div></div>
+<div class="step"><div><b>Prepare for interviews</b><p>Practice technical questions, valuation walkthroughs, deal discussions and behavioral stories.</p></div></div>
+</div>
+</div></section>
+
+<section id="simulator" class="alt"><div class="container">
+<h2>Investment Banking Career & Practice Simulator</h2>
+<p class="sub">Practice both the technical and career-readiness sides of an Investment Banking transition.</p>
+<div class="sim">
+<div class="tabs">
+<button class="tab active" data-tab="readiness">Career Readiness</button><button class="tab" data-tab="dcf">DCF Practice</button><button class="tab" data-tab="comp">Comparable Valuation</button><button class="tab" data-tab="quiz">Interview Quiz</button>
+</div>
+
+<div class="panel active" id="readiness">
+<h3>Career Readiness Score</h3>
+<div class="checklist" id="checks">
+<label><input type="checkbox" value="12"> I can confidently link the Income Statement, Balance Sheet and Cash Flow Statement.</label>
+<label><input type="checkbox" value="12"> I understand Enterprise Value, Equity Value, Net Debt and EBITDA.</label>
+<label><input type="checkbox" value="14"> I can build or explain a DCF model.</label>
+<label><input type="checkbox" value="12"> I can perform Comparable Company Analysis.</label>
+<label><input type="checkbox" value="12"> I understand M&A accretion / dilution.</label>
+<label><input type="checkbox" value="12"> I understand basic LBO returns (IRR / MOIC).</label>
+<label><input type="checkbox" value="10"> My resume/LinkedIn profile is deal- or finance-focused.</label>
+<label><input type="checkbox" value="8"> I am actively networking with finance / transaction professionals.</label>
+<label><input type="checkbox" value="8"> I have practiced technical and behavioral Investment Banking interviews.</label>
+</div>
+<div class="actions"><button class="primary" id="scoreBtn">Calculate Readiness</button><button class="light" id="resetReadiness">Reset</button></div>
+<div class="scorebar"><div id="scoreFill"></div></div><div id="readinessText" aria-live="polite">Score: —</div>
+</div>
+
+<div class="panel" id="dcf">
+<h3>DCF Valuation Mini Model</h3>
+<div class="formgrid">
+<div><label for="fcf1">Year 1 FCF</label><input id="fcf1" type="number" value="100"></div><div><label for="fcf2">Year 2 FCF</label><input id="fcf2" type="number" value="112"></div>
+<div><label for="fcf3">Year 3 FCF</label><input id="fcf3" type="number" value="125"></div><div><label for="fcf4">Year 4 FCF</label><input id="fcf4" type="number" value="140"></div>
+<div><label for="fcf5">Year 5 FCF</label><input id="fcf5" type="number" value="155"></div><div><label for="wacc">WACC %</label><input id="wacc" type="number" step="0.1" value="10"></div>
+<div><label for="tg">Terminal Growth %</label><input id="tg" type="number" step="0.1" value="4"></div><div><label for="netdebt">Net Debt</label><input id="netdebt" type="number" value="300"></div>
+<div><label for="shares">Shares Outstanding</label><input id="shares" type="number" value="100"></div>
+</div>
+<div class="actions"><button class="primary" id="dcfBtn">Calculate</button><button class="light" id="showDcf">Show Calculation</button><button class="green" id="exportBtn">Export Results</button></div>
+<div class="results"><div class="result"><span>PV Forecast FCF</span><b id="pvf">—</b></div><div class="result"><span>PV Terminal Value</span><b id="pvt">—</b></div><div class="result"><span>Enterprise Value</span><b id="ev">—</b></div><div class="result"><span>Implied Share Value</span><b id="sp">—</b></div></div>
+<div class="calc" id="dcfCalc">PV(FCFₜ) = FCFₜ ÷ (1 + WACC)ᵗ<br>Terminal Value = FCF₅ × (1 + g) ÷ (WACC − g)<br>Enterprise Value = PV forecast FCF + PV terminal value<br>Equity Value = Enterprise Value − Net Debt<br>Share Value = Equity Value ÷ Shares Outstanding</div>
+</div>
+
+<div class="panel" id="comp">
+<h3>Comparable Company Valuation Practice</h3>
+<div class="formgrid"><div><label for="ebitda">Target EBITDA</label><input id="ebitda" type="number" value="120"></div><div><label for="multiple">Selected EV / EBITDA Multiple</label><input id="multiple" type="number" step="0.1" value="9.5"></div><div><label for="cdebt">Net Debt</label><input id="cdebt" type="number" value="250"></div><div><label for="cshares">Shares Outstanding</label><input id="cshares" type="number" value="100"></div></div>
+<div class="actions"><button class="primary" id="compBtn">Calculate Implied Valuation</button><button class="light" id="showComp">Show Calculation</button></div>
+<div class="results"><div class="result"><span>Enterprise Value</span><b id="cev">—</b></div><div class="result"><span>Equity Value</span><b id="ceq">—</b></div><div class="result"><span>Implied Share Value</span><b id="csp">—</b></div><div class="result"><span>Selected Multiple</span><b id="cmult">—</b></div></div>
+<div class="calc" id="compCalc">Enterprise Value = Target EBITDA × Selected EV/EBITDA Multiple<br>Equity Value = Enterprise Value − Net Debt<br>Implied Share Value = Equity Value ÷ Shares Outstanding</div>
+</div>
+
+<div class="panel" id="quiz">
+<h3>Investment Banking Interview Knowledge Check</h3><div id="quizWrap"></div>
+<div class="actions"><button class="primary" id="quizBtn">Submit Quiz</button><button class="light" id="quizReset">Reset Quiz</button></div><div id="quizScore" aria-live="polite"></div>
+</div>
+</div>
+</div></section>
+
+<section id="learn"><div class="container">
+<h2>What You'll Learn</h2><p class="sub">Core areas aligned with the BISP Executive Investment Banking & Financial Modeling learning journey.</p>
+<div class="skillgrid">
+<div class="skill">Comparable Company Analysis</div><div class="skill">Precedent Transactions</div><div class="skill">DCF Valuation</div><div class="skill">Three-Statement Modeling</div><div class="skill">M&A Accretion / Dilution</div>
+<div class="skill">LBO Modeling</div><div class="skill">Purchase Price Allocation</div><div class="skill">ECM & DCM</div><div class="skill">Due Diligence</div><div class="skill">Advanced M&A Structuring</div>
+<div class="skill">Synergy Valuation</div><div class="skill">Cross-Border Transactions</div><div class="skill">Pitch Books & Board Communication</div><div class="skill">AI-assisted IB Workflows</div><div class="skill">End-to-End M&A Simulation</div>
+</div>
+<div class="callout" style="margin-top:24px">Learn the language of deals. Build the models. Understand valuation. Win better career opportunities.</div>
+</div></section>
+
+<footer><div class="container foot">
+<div style="display:flex;gap:12px;align-items:center"><img src="data:image/png;base64,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" alt="BISP logo"><div><b>BISP Trainings</b><br>Practical Learning for Finance & Technology Professionals</div></div>
+<div>🌐 www.bisptrainings.com<br><span style="display:inline-block;margin-top:7px">📞 Call / WhatsApp: <b>+91 997-799-7254</b></span></div>
+</div></footer>
+
+<script>
+const state={dcf:null,comp:null,readiness:null,quiz:null};
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+ btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');
+}));
+const num=id=>parseFloat(document.getElementById(id).value)||0;
+const fmt=x=>Number(x).toLocaleString(undefined,{maximumFractionDigits:2});
+
+document.getElementById('scoreBtn').addEventListener('click',()=>{
+ let s=0;document.querySelectorAll('#checks input:checked').forEach(x=>s+=Number(x.value));state.readiness=s;
+ document.getElementById('scoreFill').style.width=Math.min(100,s)+'%';
+ let band=s>=80?'Strong readiness — focus on interview execution and networking.':s>=60?'Good foundation — strengthen weaker technical or recruiting areas.':s>=40?'Developing — build more modeling, valuation and interview practice.':'Early stage — start with accounting, valuation and Excel fundamentals.';
+ document.getElementById('readinessText').textContent='Score: '+s+'/100 — '+band;
+});
+document.getElementById('resetReadiness').addEventListener('click',()=>{
+ document.querySelectorAll('#checks input').forEach(x=>x.checked=false);document.getElementById('scoreFill').style.width='0%';document.getElementById('readinessText').textContent='Score: —';state.readiness=null;
+});
+
+document.getElementById('dcfBtn').addEventListener('click',()=>{
+ const fcfs=[num('fcf1'),num('fcf2'),num('fcf3'),num('fcf4'),num('fcf5')],w=num('wacc')/100,g=num('tg')/100;
+ if(w<=g){alert('WACC must be greater than terminal growth rate.');return;}
+ let pv=0;fcfs.forEach((f,i)=>pv+=f/Math.pow(1+w,i+1));
+ const tv=fcfs[4]*(1+g)/(w-g),pvt=tv/Math.pow(1+w,5),ev=pv+pvt,eq=ev-num('netdebt'),sp=num('shares')?eq/num('shares'):0;
+ document.getElementById('pvf').textContent=fmt(pv);document.getElementById('pvt').textContent=fmt(pvt);document.getElementById('ev').textContent=fmt(ev);document.getElementById('sp').textContent=fmt(sp);
+ state.dcf={pvForecast:pv,pvTerminal:pvt,enterpriseValue:ev,equityValue:eq,shareValue:sp};
+});
+document.getElementById('showDcf').addEventListener('click',()=>{let e=document.getElementById('dcfCalc');e.style.display=e.style.display==='block'?'none':'block';});
+
+document.getElementById('compBtn').addEventListener('click',()=>{
+ const ebitda=num('ebitda'),mult=num('multiple'),ev=ebitda*mult,eq=ev-num('cdebt'),sp=num('cshares')?eq/num('cshares'):0;
+ document.getElementById('cev').textContent=fmt(ev);document.getElementById('ceq').textContent=fmt(eq);document.getElementById('csp').textContent=fmt(sp);document.getElementById('cmult').textContent=mult.toFixed(1)+'x';
+ state.comp={enterpriseValue:ev,equityValue:eq,shareValue:sp,multiple:mult};
+});
+document.getElementById('showComp').addEventListener('click',()=>{let e=document.getElementById('compCalc');e.style.display=e.style.display==='block'?'none':'block';});
+
+const questions=[
+ {q:'Enterprise Value is most commonly adjusted to Equity Value by:',o:['Subtracting net debt','Adding revenue','Subtracting EBITDA','Adding depreciation'],a:0},
+ {q:'A DCF primarily values a company by:',o:['Discounting future free cash flows','Using only book value','Using only dividend yield','Using only historical earnings'],a:0},
+ {q:'Comparable Company Analysis generally relies on:',o:['Trading multiples of peer companies','Only management forecasts','Only tax returns','Only cash balances'],a:0},
+ {q:'If pro forma EPS is greater than standalone EPS, the deal is:',o:['Accretive','Dilutive','Neutral by definition','Distressed'],a:0},
+ {q:'MOIC and IRR are especially common in:',o:['LBO / private equity analysis','Inventory costing','Payroll accounting','Bank reconciliation'],a:0},
+ {q:'A strong Investment Banking candidate should be able to explain:',o:['How the three financial statements link','Only revenue growth','Only stock price history','Only tax rates'],a:0},
+ {q:'Precedent Transaction Analysis uses:',o:['Relevant historical M&A transactions','Only public trading comps','Only DCF values','Only debt schedules'],a:0},
+ {q:'Pitch books are primarily used for:',o:['Client communication and transaction positioning','Payroll processing','Inventory tracking','Tax filing'],a:0}
+];
+function renderQuiz(){
+ let h='';questions.forEach((x,i)=>{h+='<div class="quizq"><strong>'+(i+1)+'. '+x.q+'</strong>'+x.o.map((o,j)=>'<label><input type="radio" name="q'+i+'" value="'+j+'">'+o+'</label>').join('')+'</div>';});
+ document.getElementById('quizWrap').innerHTML=h;document.getElementById('quizScore').textContent='';
+}
+renderQuiz();
+document.getElementById('quizBtn').addEventListener('click',()=>{
+ let s=0;questions.forEach((x,i)=>{const c=document.querySelector('input[name="q'+i+'"]:checked');if(c&&Number(c.value)===x.a)s++;});
+ state.quiz={score:s,total:questions.length};document.getElementById('quizScore').textContent='Score: '+s+'/'+questions.length+' ('+Math.round(s/questions.length*100)+'%)';
+});
+document.getElementById('quizReset').addEventListener('click',renderQuiz);
+
+document.getElementById('exportBtn').addEventListener('click',()=>{
+ let rows=[['BISP Trainings - Investment Banking Career & Practice Results'],['Generated',new Date().toLocaleString()]];
+ if(state.readiness!==null)rows.push([],['Career Readiness Score',state.readiness+'/100']);
+ if(state.dcf){rows.push([],['DCF Results']);Object.entries(state.dcf).forEach(([k,v])=>rows.push([k,typeof v==='number'?v.toFixed(4):v]));}
+ if(state.comp){rows.push([],['Comparable Valuation Results']);Object.entries(state.comp).forEach(([k,v])=>rows.push([k,typeof v==='number'?v.toFixed(4):v]));}
+ if(state.quiz)rows.push([],['Quiz Score',state.quiz.score],['Quiz Total',state.quiz.total]);
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\\n');
+ const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BISP_Investment_Banking_Career_Practice_Results.csv';a.click();URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
