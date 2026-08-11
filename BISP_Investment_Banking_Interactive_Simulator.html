@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BISP Trainings | Investment Banking Interactive Simulator</title>
+<style>
+:root {
+  --navy:#072d61;
+  --blue:#0674d8;
+  --orange:#f05a18;
+  --orange2:#ff7a00;
+  --ink:#12233a;
+  --muted:#607086;
+  --bg:#f4f8fc;
+  --card:#ffffff;
+  --line:#d7e2ef;
+  --green:#0c8b59;
+  --shadow:0 12px 30px rgba(7,45,97,.12);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:inherit}
+.hero{
+  background:
+   radial-gradient(circle at 85% 20%, rgba(6,116,216,.14), transparent 30%),
+   linear-gradient(135deg,#fff 0%,#f5f9ff 55%,#eef5ff 100%);
+  border-bottom:6px solid var(--navy);
+}
+.container{max-width:1240px;margin:0 auto;padding:0 22px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:150px;max-height:64px;object-fit:contain}
+.brand-text{font-weight:800;color:var(--navy);font-size:20px}
+.contact{display:flex;gap:12px;flex-wrap:wrap;font-weight:700}
+.pill{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(7,45,97,.06)}
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:30px;align-items:center;padding:38px 0 46px}
+.eyebrow{color:var(--orange);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+h1{font-size:clamp(34px,5vw,64px);line-height:1.02;margin:10px 0;color:var(--navy);letter-spacing:-.03em}
+.hero h2{color:var(--orange);font-size:clamp(20px,2.4vw,34px);margin:12px 0 18px;line-height:1.2}
+.hero p{font-size:18px;line-height:1.65;color:#34475f;max-width:820px}
+.hero-card{background:var(--navy);color:white;border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+.hero-card h3{margin-top:0;font-size:23px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{background:rgba(255,255,255,.1);padding:16px;border-radius:16px;text-align:center}
+.stat b{display:block;font-size:28px;color:#ff9d52}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.btn{border:none;border-radius:12px;padding:12px 17px;font-weight:800;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-secondary{background:var(--navy);color:#fff}
+.btn-light{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn-green{background:var(--green);color:#fff}
+nav.sticky{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;gap:9px;overflow:auto;padding:10px 0}
+.nav-inner a{white-space:nowrap;text-decoration:none;font-weight:800;color:var(--navy);padding:9px 12px;border-radius:10px}
+.nav-inner a:hover{background:#edf5ff}
+section{padding:56px 0}
+.section-title{font-size:34px;color:var(--navy);margin:0 0 10px}
+.section-sub{color:var(--muted);max-width:900px;line-height:1.6;margin:0 0 26px}
+.grid{display:grid;gap:18px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 22px rgba(7,45,97,.06)}
+.card h3{color:var(--navy);margin-top:0}
+.learn-list{columns:2;column-gap:30px;padding-left:20px}
+.learn-list li{break-inside:avoid;margin:0 0 12px;line-height:1.45}
+.level{position:relative;overflow:hidden}
+.level::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--blue)}
+.level.l2::before{background:var(--orange)}
+.level.l3::before{background:var(--green)}
+.level .hours{display:inline-block;margin-top:8px;padding:7px 10px;border-radius:10px;background:#edf5ff;font-weight:900;color:var(--navy)}
+.flow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.flow-step{background:#fff;border:2px solid var(--orange);padding:12px 16px;border-radius:12px;font-weight:900;color:var(--navy)}
+.arrow{color:var(--orange);font-size:23px;font-weight:900}
+.sim-wrap{background:linear-gradient(180deg,#082e63,#0a3e7e);color:white;border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.tabbtn{border:none;border-radius:10px;padding:11px 14px;font-weight:900;cursor:pointer;background:rgba(255,255,255,.12);color:white}
+.tabbtn.active{background:var(--orange)}
+.tabpanel{display:none}
+.tabpanel.active{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+label{display:block;font-size:12px;font-weight:900;margin-bottom:6px;color:inherit}
+input,select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid #c6d4e5;font-size:15px}
+.table-wrap{overflow:auto;border-radius:12px}
+table{width:100%;border-collapse:collapse;background:white;color:var(--ink);min-width:650px}
+th,td{padding:11px;border-bottom:1px solid #e4ebf3;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{background:#edf5ff;color:var(--navy)}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.result{background:white;color:var(--navy);border-radius:14px;padding:15px}
+.result small{display:block;color:var(--muted);font-weight:700}
+.result strong{font-size:24px}
+.calc-box{margin-top:16px;background:rgba(255,255,255,.1);border-radius:14px;padding:16px;display:none;line-height:1.65}
+.quiz-card{background:white;color:var(--ink);border-radius:16px;padding:20px}
+.question{font-weight:900;color:var(--navy);font-size:18px;margin-bottom:12px}
+.option{display:block;margin:8px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.option:hover{background:#f5f9ff}
+.feedback{margin-top:12px;font-weight:800}
+.drag-area{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.drag-bank,.drop-zone{min-height:170px;background:white;color:var(--ink);border-radius:14px;padding:14px}
+.drag-item{padding:10px 12px;background:#edf5ff;border:1px solid #bfd6ef;border-radius:10px;margin:8px 0;cursor:grab;font-weight:800;color:var(--navy)}
+.drop-zone{border:2px dashed #9cb6d2}
+.essbase{background:#071d3b;color:#dceaff;border-radius:14px;padding:16px;font-family:Consolas,monospace;white-space:pre-wrap;overflow:auto;display:none;margin-top:16px}
+.badge{display:inline-flex;padding:6px 9px;border-radius:999px;background:#fff0e8;color:#b8410d;font-weight:900;font-size:12px}
+.audience .card{text-align:center}
+.audience .icon{font-size:34px}
+footer{background:#062653;color:white;padding:30px 0}
+footer .foot{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+footer img{width:135px;background:white;border-radius:10px;padding:5px}
+footer a{color:white}
+.note{font-size:13px;color:#73839a;line-height:1.5}
+@media (max-width:960px){
+  .hero-grid,.grid-3,.grid-4,.drag-area{grid-template-columns:1fr}
+  .form-grid,.result-grid{grid-template-columns:repeat(2,1fr)}
+  .learn-list{columns:1}
+}
+@media (max-width:560px){
+  .form-grid,.result-grid{grid-template-columns:1fr}
+  .brand img{width:125px}
+  section{padding:42px 0}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <img alt="BISP Logo" src="data:image/png;base64,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">
+        <div class="brand-text">BISP Trainings</div>
+      </div>
+      <div class="contact">
+        <span class="pill">🌐 www.bisptrainings.com</span>
+        <span class="pill">📞 +91 997-799-7254</span>
+      </div>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Executive Investment Banking Program</div>
+        <h1>Move Beyond Finance Theory</h1>
+        <h2>Learn How Investment Banking Deals Are Actually Analyzed, Valued & Executed</h2>
+        <p>Designed for working professionals who already understand business and finance and want practical capabilities in Investment Banking, Valuation, Financial Modeling, M&amp;A and Deal Advisory.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#simulator">Launch Practice Simulator</a>
+          <a class="btn btn-secondary" href="#journey">Explore 3-Level Journey</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h3>Program Snapshot</h3>
+        <div class="stat-grid">
+          <div class="stat"><b>24</b>Level I Hours</div>
+          <div class="stat"><b>45</b>Level II Hours</div>
+          <div class="stat"><b>38</b>Level III Hours</div>
+        </div>
+        <p style="margin-bottom:0">Approx. <strong>107 hours</strong> of structured learning, with a deal-team-style capstone from pitch to board presentation.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky">
+  <div class="container nav-inner">
+    <a href="#overview">Overview</a>
+    <a href="#learn">What You'll Learn</a>
+    <a href="#journey">3-Level Journey</a>
+    <a href="#simulator">Simulator</a>
+    <a href="#practice">Quiz Practice</a>
+    <a href="#audience">Who Should Join</a>
+  </div>
+</nav>
+
+<section id="overview">
+<div class="container">
+  <h2 class="section-title">Investment Banking, Practically</h2>
+  <p class="section-sub">This learning experience is structured around modeling, transactions, case studies and real-world deal decision making—not only classroom theory.</p>
+  <div class="grid grid-3">
+    <div class="card"><span class="badge">Valuation</span><h3>Analyze & Value</h3><p>Work with financial statements, NPV, IRR, WACC, comparable companies, precedent transactions and DCF.</p></div>
+    <div class="card"><span class="badge">Modeling</span><h3>Build & Test</h3><p>Practice three-statement modeling, M&amp;A accretion/dilution, purchase price allocation and LBO return mechanics.</p></div>
+    <div class="card"><span class="badge">Deals</span><h3>Structure & Communicate</h3><p>Explore due diligence, ECM, DCM, cross-border transactions, pitch books, negotiation and board-level communication.</p></div>
+  </div>
+</div>
+</section>
+
+<section id="learn" style="background:#fff">
+<div class="container">
+  <h2 class="section-title">What You'll Learn</h2>
+  <div class="card">
+    <ul class="learn-list">
+      <li>Investment Banking Industry &amp; Deal Lifecycle</li>
+      <li>Financial Statement Analysis &amp; Accounting for Valuation</li>
+      <li>NPV, IRR, Cost of Capital &amp; WACC</li>
+      <li>Comparable Company Analysis</li>
+      <li>Precedent Transaction Analysis</li>
+      <li>DCF Valuation Modeling</li>
+      <li>Three-Statement Financial Modeling</li>
+      <li>M&amp;A Accretion / Dilution Modeling</li>
+      <li>Purchase Price Allocation &amp; Goodwill</li>
+      <li>LBO Modeling – IRR, MOIC &amp; Debt Paydown</li>
+      <li>Equity Capital Markets &amp; IPO Process</li>
+      <li>Debt Capital Markets &amp; Bond Issuance</li>
+      <li>Due Diligence &amp; Deal Structuring</li>
+      <li>Pitch Books &amp; Board-Level Communication</li>
+      <li>Advanced M&amp;A &amp; Cross-Border Transactions</li>
+      <li>Synergy Valuation &amp; Strategic Deal Rationale</li>
+      <li>Restructuring &amp; Distressed M&amp;A</li>
+      <li>Negotiation &amp; Deal Leadership</li>
+      <li>AI &amp; Technology in Modern Investment Banking</li>
+      <li>End-to-End M&amp;A Deal Simulation</li>
+    </ul>
+  </div>
+  <div style="margin-top:24px" class="card">
+    <h3>Capstone Deal Simulation</h3>
+    <div class="flow">
+      <span class="flow-step">Pitch</span><span class="arrow">→</span>
+      <span class="flow-step">Valuation</span><span class="arrow">→</span>
+      <span class="flow-step">Structuring</span><span class="arrow">→</span>
+      <span class="flow-step">Negotiation</span><span class="arrow">→</span>
+      <span class="flow-step">Board Presentation</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="journey">
+<div class="container">
+  <h2 class="section-title">3-Level Learning Journey</h2>
+  <p class="section-sub">A progression from Investment Banking foundations to modeling-heavy technical work and then senior-level deal judgment.</p>
+  <div class="grid grid-3">
+    <div class="card level">
+      <h3>Level I – Investment Banking Foundations</h3>
+      <p>IB functions, financial statements, valuation concepts, capital structure, documentation and transaction lifecycle.</p>
+      <span class="hours">24 Hours</span>
+    </div>
+    <div class="card level l2">
+      <h3>Level II – Valuation, Modeling &amp; Deal Mechanics</h3>
+      <p>DCF, Comps, Precedent Transactions, 3-Statement Modeling, M&amp;A, LBO, ECM, DCM and applied valuation cases.</p>
+      <span class="hours">45 Hours</span>
+    </div>
+    <div class="card level l3">
+      <h3>Level III – Complex Deals, Strategy &amp; Senior Judgment</h3>
+      <p>Advanced M&amp;A, sponsor economics, restructuring, cross-border deals, fairness opinions, negotiation, AI workflows and simulations.</p>
+      <span class="hours">38 Hours</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="simulator" style="background:#fff">
+<div class="container">
+  <h2 class="section-title">Interactive Investment Banking Practice Simulator</h2>
+  <p class="section-sub">Use the practice tools below to learn how valuation and transaction concepts connect. All calculations run locally in your browser.</p>
+
+  <div class="sim-wrap">
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="dcf">DCF Valuation</button>
+      <button class="tabbtn" data-tab="ma">M&amp;A Accretion/Dilution</button>
+      <button class="tabbtn" data-tab="deal">Deal Lifecycle</button>
+      <button class="tabbtn" data-tab="essbase">Essbase Calc Example</button>
+    </div>
+
+    <div id="dcf" class="tabpanel active">
+      <h3>DCF Valuation Mini Model</h3>
+      <div class="form-grid">
+        <div><label>Year 1 FCF</label><input id="f1" type="number" value="120"></div>
+        <div><label>Year 2 FCF</label><input id="f2" type="number" value="132"></div>
+        <div><label>Year 3 FCF</label><input id="f3" type="number" value="145"></div>
+        <div><label>Year 4 FCF</label><input id="f4" type="number" value="160"></div>
+        <div><label>Year 5 FCF</label><input id="f5" type="number" value="176"></div>
+        <div><label>WACC %</label><input id="wacc" type="number" step="0.1" value="10"></div>
+        <div><label>Terminal Growth %</label><input id="g" type="number" step="0.1" value="4"></div>
+        <div><label>Net Debt</label><input id="debt" type="number" value="350"></div>
+        <div><label>Shares Outstanding</label><input id="shares" type="number" value="100"></div>
+      </div>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="calcDCF()">Calculate DCF</button>
+        <button class="btn btn-light" onclick="toggleCalc('dcfCalc')">Show Calculation</button>
+        <button class="btn btn-green" onclick="exportResults()">Export Practice Results</button>
+        <button class="btn btn-light" onclick="resetDCF()">Reset</button>
+      </div>
+      <div class="result-grid">
+        <div class="result"><small>PV of Forecast FCF</small><strong id="pvfcf">—</strong></div>
+        <div class="result"><small>PV of Terminal Value</small><strong id="pvtv">—</strong></div>
+        <div class="result"><small>Enterprise Value</small><strong id="ev">—</strong></div>
+        <div class="result"><small>Implied Value / Share</small><strong id="price">—</strong></div>
+      </div>
+      <div class="calc-box" id="dcfCalc">
+        <b>DCF Formula Walkthrough</b><br>
+        PV(FCFₜ) = FCFₜ / (1 + WACC)ᵗ<br>
+        Terminal Value = FCF₅ × (1 + g) / (WACC − g)<br>
+        Enterprise Value = Sum of forecast-period PVs + PV of Terminal Value<br>
+        Equity Value = Enterprise Value − Net Debt<br>
+        Implied Share Value = Equity Value / Shares Outstanding
+      </div>
+    </div>
+
+    <div id="ma" class="tabpanel">
+      <h3>M&amp;A Accretion / Dilution Practice</h3>
+      <div class="form-grid">
+        <div><label>Acquirer Net Income</label><input id="ani" type="number" value="500"></div>
+        <div><label>Acquirer Shares</label><input id="ash" type="number" value="200"></div>
+        <div><label>Target Net Income</label><input id="tni" type="number" value="120"></div>
+        <div><label>Synergies After Tax</label><input id="syn" type="number" value="30"></div>
+        <div><label>New Shares Issued</label><input id="newsh" type="number" value="35"></div>
+        <div><label>After-tax Financing Cost</label><input id="fin" type="number" value="20"></div>
+      </div>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="calcMA()">Calculate Accretion/Dilution</button>
+        <button class="btn btn-light" onclick="toggleCalc('maCalc')">Show Calculation</button>
+        <button class="btn btn-light" onclick="resetMA()">Reset</button>
+      </div>
+      <div class="result-grid">
+        <div class="result"><small>Standalone EPS</small><strong id="eps0">—</strong></div>
+        <div class="result"><small>Pro Forma EPS</small><strong id="eps1">—</strong></div>
+        <div class="result"><small>EPS Change %</small><strong id="epschg">—</strong></div>
+        <div class="result"><small>Deal Effect</small><strong id="effect">—</strong></div>
+      </div>
+      <div class="calc-box" id="maCalc">
+        <b>Accretion / Dilution Formula</b><br>
+        Standalone EPS = Acquirer Net Income / Acquirer Shares<br>
+        Pro Forma Net Income = Acquirer NI + Target NI + Synergies − Financing Cost<br>
+        Pro Forma Shares = Acquirer Shares + New Shares Issued<br>
+        Pro Forma EPS = Pro Forma Net Income / Pro Forma Shares<br>
+        EPS Change % = (Pro Forma EPS / Standalone EPS − 1) × 100
+      </div>
+    </div>
+
+    <div id="deal" class="tabpanel">
+      <h3>Deal Lifecycle Sequencing Practice</h3>
+      <p>Drag the stages into the correct order in the right-hand box.</p>
+      <div class="drag-area">
+        <div class="drag-bank" id="bank"></div>
+        <div class="drop-zone" id="drop" ondragover="event.preventDefault()" ondrop="dropItem(event)"></div>
+      </div>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="checkDealOrder()">Check Sequence</button>
+        <button class="btn btn-light" onclick="setupDeal()">Reset Sequence</button>
+      </div>
+      <div id="dealFeedback" class="feedback"></div>
+    </div>
+
+    <div id="essbase" class="tabpanel">
+      <h3>Essbase Calculation Example</h3>
+      <p>This is a conceptual sample showing how valuation assumptions could be structured in an Essbase-style calculation script for training purposes.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="toggleCalc('essCode')">Show / Hide Essbase Calculation</button>
+      </div>
+      <div id="essCode" class="essbase">/* BISP Trainings - Investment Banking Valuation Example */
+FIX("Working","FY27","USD")
+  "Terminal_FCF" = "FCF_Y5" * (1 + "Terminal_Growth");
+  "Terminal_Value" = "Terminal_FCF" / ("WACC" - "Terminal_Growth");
+  "Enterprise_Value" = "PV_FCF" + "PV_Terminal_Value";
+  "Equity_Value" = "Enterprise_Value" - "Net_Debt";
+  "Implied_Share_Value" = "Equity_Value" / "Shares_Outstanding";
+ENDFIX</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="practice">
+<div class="container">
+  <h2 class="section-title">Knowledge Check</h2>
+  <p class="section-sub">Practice key concepts from the curriculum. Your score is included in the export file.</p>
+  <div class="quiz-card">
+    <div id="quiz"></div>
+    <div class="cta-row">
+      <button class="btn btn-primary" onclick="submitQuiz()">Submit Quiz</button>
+      <button class="btn btn-light" onclick="renderQuiz()">Reset Quiz</button>
+    </div>
+    <div id="quizResult" class="feedback"></div>
+  </div>
+</div>
+</section>
+
+<section id="audience" class="audience" style="background:#fff">
+<div class="container">
+  <h2 class="section-title">Who Should Consider This Program?</h2>
+  <div class="grid grid-4">
+    <div class="card"><div class="icon">💼</div><h3>Finance Leaders</h3><p>Finance Managers, Controllers &amp; FP&amp;A Professionals</p></div>
+    <div class="card"><div class="icon">🎓</div><h3>Qualified Professionals</h3><p>CA, CFA, MBA Finance &amp; Accounting Professionals</p></div>
+    <div class="card"><div class="icon">📊</div><h3>Analysts</h3><p>Corporate Finance, Valuation, Equity Research &amp; Financial Analysts</p></div>
+    <div class="card"><div class="icon">🤝</div><h3>Deal Professionals</h3><p>Transaction Advisory, Deal Advisory, Private Equity &amp; Corporate Development Aspirants</p></div>
+  </div>
+</div>
+</section>
+
+<footer>
+<div class="container foot">
+  <div style="display:flex;align-items:center;gap:14px">
+    <img alt="BISP Logo" src="data:image/png;base64,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">
+    <div><strong>BISP Trainings</strong><br><span>Advance Your Finance Career with Practical Investment Banking Skills</span></div>
+  </div>
+  <div>
+    <div>🌐 <a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+    <div style="margin-top:8px">📞 Call / WhatsApp: <strong>+91 997-799-7254</strong></div>
+  </div>
+</div>
+</footer>
+
+<script>
+let latest = {dcf:null, ma:null, quiz:null};
+
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+function n(id){ return parseFloat(document.getElementById(id).value)||0; }
+function money(x){ return x.toLocaleString(undefined,{maximumFractionDigits:2}); }
+function toggleCalc(id){
+  const el=document.getElementById(id);
+  el.style.display = el.style.display==='block' ? 'none' : 'block';
+}
+
+function calcDCF(){
+  const fcfs=[n('f1'),n('f2'),n('f3'),n('f4'),n('f5')];
+  const w=n('wacc')/100, g=n('g')/100, debt=n('debt'), shares=n('shares');
+  if(w<=g){ alert('WACC must be greater than terminal growth rate.'); return; }
+  let pv=0;
+  fcfs.forEach((f,i)=>pv += f/Math.pow(1+w,i+1));
+  const tv=fcfs[4]*(1+g)/(w-g);
+  const pvtv=tv/Math.pow(1+w,5);
+  const ev=pv+pvtv;
+  const equity=ev-debt;
+  const price=shares ? equity/shares : 0;
+  document.getElementById('pvfcf').textContent=money(pv);
+  document.getElementById('pvtv').textContent=money(pvtv);
+  document.getElementById('ev').textContent=money(ev);
+  document.getElementById('price').textContent=money(price);
+  latest.dcf={pvForecast:pv,pvTerminal:pvtv,enterpriseValue:ev,equityValue:equity,impliedShareValue:price};
+}
+
+function resetDCF(){
+  const vals={f1:120,f2:132,f3:145,f4:160,f5:176,wacc:10,g:4,debt:350,shares:100};
+  for(const [k,v] of Object.entries(vals)) document.getElementById(k).value=v;
+  ['pvfcf','pvtv','ev','price'].forEach(id=>document.getElementById(id).textContent='—');
+  latest.dcf=null;
+}
+
+function calcMA(){
+  const ani=n('ani'), ash=n('ash'), tni=n('tni'), syn=n('syn'), newsh=n('newsh'), fin=n('fin');
+  const eps0=ash?ani/ash:0;
+  const pni=ani+tni+syn-fin;
+  const psh=ash+newsh;
+  const eps1=psh?pni/psh:0;
+  const chg=eps0?((eps1/eps0)-1)*100:0;
+  document.getElementById('eps0').textContent=money(eps0);
+  document.getElementById('eps1').textContent=money(eps1);
+  document.getElementById('epschg').textContent=chg.toFixed(2)+'%';
+  document.getElementById('effect').textContent=chg>=0?'Accretive':'Dilutive';
+  latest.ma={standaloneEPS:eps0,proFormaEPS:eps1,epsChangePct:chg,effect:chg>=0?'Accretive':'Dilutive'};
+}
+
+function resetMA(){
+  const vals={ani:500,ash:200,tni:120,syn:30,newsh:35,fin:20};
+  for(const [k,v] of Object.entries(vals)) document.getElementById(k).value=v;
+  ['eps0','eps1','epschg','effect'].forEach(id=>document.getElementById(id).textContent='—');
+  latest.ma=null;
+}
+
+const dealOrder=['Pitch','Valuation','Structuring','Negotiation','Board Presentation'];
+function setupDeal(){
+  const bank=document.getElementById('bank'), drop=document.getElementById('drop');
+  bank.innerHTML='<b>Available Stages</b>'; drop.innerHTML='<b>Your Sequence</b>';
+  [...dealOrder].sort(()=>Math.random()-.5).forEach((x,i)=>{
+    const d=document.createElement('div');
+    d.className='drag-item'; d.draggable=true; d.id='deal_'+i+'_'+Date.now(); d.textContent=x;
+    d.ondragstart=e=>e.dataTransfer.setData('text/plain',d.id);
+    bank.appendChild(d);
+  });
+  document.getElementById('dealFeedback').textContent='';
+}
+function dropItem(e){
+  e.preventDefault();
+  const id=e.dataTransfer.getData('text/plain');
+  const el=document.getElementById(id);
+  if(el) document.getElementById('drop').appendChild(el);
+}
+function checkDealOrder(){
+  const items=[...document.querySelectorAll('#drop .drag-item')].map(x=>x.textContent);
+  const fb=document.getElementById('dealFeedback');
+  if(items.length!==dealOrder.length){ fb.textContent='Move all five stages into Your Sequence first.'; return; }
+  fb.textContent=items.every((x,i)=>x===dealOrder[i]) ? '✅ Correct sequence.' : '❌ Not quite. Try again: think from client pitch through board presentation.';
+}
+
+const qs=[
+  {q:'Which valuation method discounts projected free cash flows to present value?',o:['DCF','Precedent Transactions','Trading Comps','Book Value'],a:0},
+  {q:'In a DCF using Gordon Growth, terminal value is most directly affected by:',o:['WACC and terminal growth','Inventory days only','Dividend payout only','Tax jurisdiction only'],a:0},
+  {q:'An M&A deal is accretive when:',o:['Pro forma EPS is higher than standalone EPS','Revenue decreases','Net debt is zero','Goodwill is eliminated'],a:0},
+  {q:'MOIC is most commonly associated with:',o:['LBO / private equity returns','IPO greenshoe mechanics','Cash flow statement classification','Working capital normalization'],a:0},
+  {q:'Which item belongs to the capstone deal flow?',o:['Negotiation','Payroll processing','Monthly close','Bank reconciliation'],a:0},
+  {q:'Comparable Company Analysis primarily uses:',o:['Trading multiples of peer companies','Only book value','Only dividend yield','Only historical cost'],a:0},
+  {q:'Precedent Transaction Analysis focuses on:',o:['Past relevant M&A transactions','Future payroll forecasts','Internal audit samples','Inventory counts'],a:0},
+  {q:'Three-statement modeling links:',o:['Income Statement, Balance Sheet and Cash Flow','Only P&L and tax return','Only cash and debt','Only revenue and EBITDA'],a:0},
+  {q:'ECM is associated with:',o:['Equity issuance / IPO activity','Only bank loans','Only distressed debt','Only restructuring'],a:0},
+  {q:'Which advanced topic is included in Level III?',o:['Cross-border deal complexity','Basic bookkeeping','Payroll accounting','Petty cash'],a:0}
+];
+
+function renderQuiz(){
+  const q=document.getElementById('quiz'); q.innerHTML='';
+  qs.forEach((x,i)=>{
+    const box=document.createElement('div');
+    box.style.marginBottom='22px';
+    box.innerHTML='<div class="question">'+(i+1)+'. '+x.q+'</div>'+
+      x.o.map((o,j)=>'<label class="option"><input style="width:auto;margin-right:8px" type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>').join('');
+    q.appendChild(box);
+  });
+  document.getElementById('quizResult').textContent='';
+  latest.quiz=null;
+}
+function submitQuiz(){
+  let score=0, answered=0;
+  qs.forEach((x,i)=>{
+    const s=document.querySelector('input[name="q'+i+'"]:checked');
+    if(s){answered++; if(parseInt(s.value)===x.a) score++;}
+  });
+  latest.quiz={score,total:qs.length,answered};
+  document.getElementById('quizResult').textContent='Score: '+score+' / '+qs.length+' ('+Math.round(score/qs.length*100)+'%)';
+}
+
+function exportResults(){
+  const rows=[['BISP Trainings - Investment Banking Practice Results'],['Generated',new Date().toLocaleString()]];
+  if(latest.dcf){
+    rows.push([],['DCF Valuation']);
+    Object.entries(latest.dcf).forEach(([k,v])=>rows.push([k,typeof v==='number'?v.toFixed(4):v]));
+  }
+  if(latest.ma){
+    rows.push([],['M&A Accretion/Dilution']);
+    Object.entries(latest.ma).forEach(([k,v])=>rows.push([k,typeof v==='number'?v.toFixed(4):v]));
+  }
+  if(latest.quiz){
+    rows.push([],['Quiz'],['Score',latest.quiz.score],['Total',latest.quiz.total],['Answered',latest.quiz.answered]);
+  }
+  const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='BISP_Investment_Banking_Practice_Results.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+setupDeal();
+renderQuiz();
+</script>
+</body>
+</html>
