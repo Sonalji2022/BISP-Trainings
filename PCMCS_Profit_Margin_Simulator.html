@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle PCMCS – Profit Margin Card Simulator | BISP Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0B2545;
+  --navy-2:#123A6B;
+  --charcoal:#2B2F36;
+  --gray-900:#3A3F47;
+  --gray-600:#6B7280;
+  --gray-300:#D7DBE0;
+  --gray-100:#F2F3F5;
+  --bg:#F6F7F9;
+  --white:#FFFFFF;
+  --teal:#1F7A6C;
+  --teal-bg:#E7F3F0;
+  --amber:#B8862E;
+  --amber-bg:#FBF1E1;
+  --red:#B3352A;
+  --red-bg:#FBEAE8;
+  --slate:#4A6FA5;
+  --radius:8px;
+  --radius-sm:6px;
+  --shadow:0 1px 2px rgba(11,37,69,0.06), 0 2px 8px rgba(11,37,69,0.05);
+  --shadow-md:0 4px 16px rgba(11,37,69,0.09);
+  font-size:15px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--charcoal);
+  -webkit-font-smoothing:antialiased;
+}
+.tabular{font-variant-numeric:tabular-nums;}
+
+/* ===== Header ===== */
+.topbar{
+  background:var(--white);
+  border-bottom:1px solid var(--gray-300);
+  padding:14px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand img{height:34px;display:block;}
+.brand-divider{width:1px;height:28px;background:var(--gray-300);}
+.brand-text{line-height:1.15;}
+.brand-text .name{font-weight:800;font-size:16px;color:var(--navy);letter-spacing:.2px;}
+.brand-text .tag{font-size:11px;color:var(--gray-600);font-weight:500;}
+.contact-block{text-align:right;font-size:12.5px;color:var(--gray-600);line-height:1.5;}
+.contact-block a{color:var(--navy-2);text-decoration:none;font-weight:600;}
+.contact-block .lbl{color:var(--gray-600);font-weight:400;}
+
+.hero{
+  background:linear-gradient(180deg,var(--navy) 0%, var(--navy-2) 100%);
+  color:var(--white);
+  padding:26px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:16px;
+}
+.hero h1{margin:0;font-size:23px;font-weight:700;letter-spacing:.2px;}
+.hero p{margin:4px 0 0;font-size:13px;color:#B9C6DA;font-weight:500;letter-spacing:.3px;}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{
+  font-family:inherit;
+  border:1px solid transparent;
+  border-radius:var(--radius-sm);
+  padding:9px 16px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  transition:all .15s ease;
+}
+.btn svg{width:15px;height:15px;flex:none;}
+.btn-primary{background:var(--white);color:var(--navy);}
+.btn-primary:hover{background:#EDF1F7;}
+.btn-ghost{background:rgba(255,255,255,0.08);color:var(--white);border-color:rgba(255,255,255,0.35);}
+.btn-ghost:hover{background:rgba(255,255,255,0.16);}
+.btn-outline{background:var(--white);color:var(--navy-2);border-color:var(--gray-300);}
+.btn-outline:hover{background:var(--gray-100);}
+
+/* ===== Layout ===== */
+.wrap{max-width:1440px;margin:0 auto;padding:22px 28px 40px;}
+
+/* ===== Filters ===== */
+.filters{
+  background:var(--white);
+  border:1px solid var(--gray-300);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px 20px;
+  display:flex;
+  align-items:flex-end;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.filter-field{display:flex;flex-direction:column;gap:6px;min-width:150px;}
+.filter-field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-600);}
+.filter-field select{
+  font-family:inherit;
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--charcoal);
+  padding:8px 30px 8px 10px;
+  border:1px solid var(--gray-300);
+  border-radius:var(--radius-sm);
+  background:var(--white) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%236B7280'/></svg>") no-repeat right 11px center;
+  appearance:none;
+  cursor:pointer;
+}
+.filter-field select:focus{outline:2px solid var(--slate);outline-offset:1px;}
+.filter-spacer{flex:1;}
+.pov-pill{
+  margin-left:auto;
+  font-size:12px;
+  color:var(--gray-600);
+  background:var(--gray-100);
+  border:1px solid var(--gray-300);
+  border-radius:20px;
+  padding:8px 14px;
+  font-weight:600;
+}
+.pov-pill b{color:var(--navy);}
+
+/* ===== KPI cards ===== */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:22px;
+}
+.kpi-card{
+  background:var(--white);
+  border:1px solid var(--gray-300);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px 20px;
+  position:relative;
+  overflow:hidden;
+}
+.kpi-card .accent{position:absolute;left:0;top:0;bottom:0;width:3px;}
+.kpi-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.kpi-icon{
+  width:34px;height:34px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gray-100);color:var(--navy-2);
+}
+.kpi-icon svg{width:18px;height:18px;}
+.kpi-label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-600);margin-top:14px;}
+.kpi-value{font-size:25px;font-weight:800;color:var(--navy);margin-top:4px;letter-spacing:-.3px;}
+.kpi-sub{font-size:12px;margin-top:6px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.kpi-sub.up{color:var(--teal);}
+.kpi-sub.down{color:var(--red);}
+.kpi-sub svg{width:12px;height:12px;}
+.kpi-sub .muted{color:var(--gray-600);font-weight:500;}
+
+/* ===== Panels / charts ===== */
+.grid-2{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;margin-bottom:16px;}
+.panel{
+  background:var(--white);
+  border:1px solid var(--gray-300);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px 20px 12px;
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.panel-title{font-size:14px;font-weight:700;color:var(--navy);}
+.panel-title span{display:block;font-size:11.5px;font-weight:500;color:var(--gray-600);margin-top:2px;}
+.legend-chip{display:flex;gap:12px;font-size:11.5px;color:var(--gray-600);font-weight:600;}
+.legend-chip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+.chart-box{position:relative;height:270px;}
+.chart-box.tall{height:300px;}
+
+/* ===== Table ===== */
+.table-panel{background:var(--white);border:1px solid var(--gray-300);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px 6px;margin-bottom:16px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  text-align:left;
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  color:var(--gray-600);
+  font-weight:700;
+  padding:10px 12px;
+  border-bottom:2px solid var(--gray-300);
+  cursor:pointer;
+  user-select:none;
+  white-space:nowrap;
+}
+thead th:hover{color:var(--navy);}
+thead th.sorted{color:var(--navy);}
+thead th .arrow{font-size:9px;margin-left:3px;opacity:.6;}
+tbody td{padding:11px 12px;border-bottom:1px solid var(--gray-100);color:var(--charcoal);white-space:nowrap;}
+tbody tr{cursor:pointer;transition:background .1s;}
+tbody tr:hover{background:var(--gray-100);}
+tbody tr.expanded{background:#EEF2F7;}
+.code-pill{font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;background:var(--gray-100);border:1px solid var(--gray-300);padding:2px 7px;border-radius:4px;color:var(--gray-900);font-weight:600;}
+.badge{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:12px;padding:4px 10px;border-radius:20px;}
+.badge.green{background:var(--teal-bg);color:var(--teal);}
+.badge.amber{background:var(--amber-bg);color:var(--amber);}
+.badge.red{background:var(--red-bg);color:var(--red);}
+.badge i{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.drill-row td{background:#FAFBFC;padding:0;}
+.drill-inner{padding:16px 24px 20px 48px;border-bottom:1px solid var(--gray-100);}
+.drill-title{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--gray-600);margin-bottom:12px;}
+.drill-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.drill-bar-row{display:grid;grid-template-columns:130px 1fr 90px;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px;}
+.drill-bar-track{background:var(--gray-100);border-radius:4px;height:10px;overflow:hidden;}
+.drill-bar-fill{height:100%;border-radius:4px;background:var(--slate);}
+.drill-note{font-size:12.5px;color:var(--gray-900);line-height:1.6;background:var(--white);border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:12px 14px;}
+.drill-note b{color:var(--navy);}
+
+/* ===== Footer ===== */
+.footer{
+  background:var(--navy);
+  color:#B9C6DA;
+  padding:20px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  font-size:12px;
+}
+.footer a{color:var(--white);text-decoration:none;font-weight:600;}
+.footer .copy{color:#8296B4;}
+
+/* ===== Empty state ===== */
+.empty{padding:40px;text-align:center;color:var(--gray-600);font-size:13px;}
+
+/* ===== Responsive ===== */
+@media (max-width:1180px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .grid-2{grid-template-columns:1fr;}
+}
+@media (max-width:720px){
+  .kpi-grid{grid-template-columns:1fr;}
+  .wrap{padding:16px 14px 32px;}
+  .hero{padding:20px 16px;}
+  .topbar{padding:12px 16px;}
+  .contact-block{text-align:left;}
+  .drill-grid{grid-template-columns:1fr;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Top identity bar ===== -->
+<div class="topbar">
+  <div class="brand">
+    <img src="data:image/png;base64,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" alt="BISP">
+    <div class="brand-divider"></div>
+    <div class="brand-text">
+      <div class="name">BISP Solutions</div>
+      <div class="tag">Oracle EPM &amp; Cloud Training</div>
+    </div>
+  </div>
+  <div class="contact-block">
+    <div><span class="lbl">Website:</span> <a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a></div>
+    <div><span class="lbl">Phone:</span> <a href="tel:+917694095404">+91 769-409-5404</a></div>
+  </div>
+</div>
+
+<!-- ===== Hero / title bar ===== -->
+<div class="hero">
+  <div>
+    <h1>Oracle PCMCS – Profit Margin Card Simulator</h1>
+    <p>POWERED BY BISP SOLUTIONS</p>
+  </div>
+  <div class="hero-actions">
+    <button class="btn btn-ghost" id="btnReset">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      Reset Filters
+    </button>
+    <button class="btn btn-primary" id="btnExcel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Export Excel
+    </button>
+    <button class="btn btn-primary" id="btnPdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Export PDF
+    </button>
+  </div>
+</div>
+
+<div class="wrap" id="dashboardCapture">
+
+  <!-- ===== Global Filters ===== -->
+  <div class="filters">
+    <div class="filter-field">
+      <label>Year</label>
+      <select id="fYear"></select>
+    </div>
+    <div class="filter-field">
+      <label>Scenario</label>
+      <select id="fScenario"></select>
+    </div>
+    <div class="filter-field">
+      <label>Period</label>
+      <select id="fPeriod"></select>
+    </div>
+    <div class="filter-field">
+      <label>Product</label>
+      <select id="fProduct"></select>
+    </div>
+    <div class="filter-field">
+      <label>Customer Channel</label>
+      <select id="fChannel"></select>
+    </div>
+    <div class="filter-spacer"></div>
+    <div class="pov-pill">POV: <b id="povLabel">—</b></div>
+  </div>
+
+  <!-- ===== KPI Cards ===== -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- ===== Chart Row ===== -->
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Profit Margin by Product<span>Color banded per BISP margin-health thresholds</span></div>
+        <div class="legend-chip">
+          <span><i style="background:#1F7A6C"></i>&ge;25%</span>
+          <span><i style="background:#B8862E"></i>15–24.9%</span>
+          <span><i style="background:#B3352A"></i>&lt;15%</span>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="chartMargin"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Revenue vs. Allocated Cost<span>Grouped comparison, selected POV</span></div>
+        <div class="legend-chip">
+          <span><i style="background:#0B2545"></i>Revenue</span>
+          <span><i style="background:#9AA7B8"></i>Cost</span>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="chartRevCost"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===== Trend ===== -->
+  <div class="panel" style="margin-bottom:16px;">
+    <div class="panel-head">
+      <div class="panel-title">Trend Analysis — Quarterly<span>Revenue, cost and margin % across Q1–Q4 for selected scope</span></div>
+      <div class="legend-chip">
+        <span><i style="background:#0B2545"></i>Revenue</span>
+        <span><i style="background:#9AA7B8"></i>Cost</span>
+        <span><i style="background:#1F7A6C"></i>Margin %</span>
+      </div>
+    </div>
+    <div class="chart-box tall"><canvas id="chartTrend"></canvas></div>
+  </div>
+
+  <!-- ===== Product Table ===== -->
+  <div class="table-panel">
+    <div class="panel-head">
+      <div class="panel-title">Product-wise Performance<span>Click a row to drill into cost-allocation detail</span></div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="perfTable">
+        <thead>
+          <tr>
+            <th data-key="code">Code</th>
+            <th data-key="name">Product</th>
+            <th data-key="revenue">Revenue</th>
+            <th data-key="cost">Allocated Cost</th>
+            <th data-key="profit">Net Profit</th>
+            <th data-key="margin">Margin %</th>
+            <th data-key="vsBudget">vs. Budget</th>
+          </tr>
+        </thead>
+        <tbody id="perfBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+  <div>© <span id="yr"></span> BISP Solutions — Oracle PCMCS Profit Margin Card Simulator. For training &amp; demonstration purposes.</div>
+  <div><a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a> &nbsp;|&nbsp; <a href="tel:+917694095404">+91 769-409-5404</a></div>
+</div>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* =========================================================
+   DATA MODEL
+   ========================================================= */
+const PRODUCTS = [
+  {code:'BB100', name:'Mountain Bike', baseRevenue:4500000, baseCostRatio:3400000/4500000, family:'Performance'},
+  {code:'BB200', name:'Road Bike',     baseRevenue:1200000, baseCostRatio:1050000/1200000, family:'Performance'},
+  {code:'BB300', name:'Hybrid Bike',   baseRevenue:900000,  baseCostRatio:780000/900000,   family:'Lifestyle'},
+  {code:'SR100', name:'Kids Bike',     baseRevenue:800000,  baseCostRatio:650000/800000,   family:'Lifestyle'},
+  {code:'SR200', name:'Electric Bike', baseRevenue:1400000, baseCostRatio:1020000/1400000, family:'Premium'},
+  {code:'SR300', name:'BMX Bike',      baseRevenue:1000000, baseCostRatio:880000/1000000,  family:'Sport'}
+];
+const YEARS = ['2024','2025','2026'];
+const SCENARIOS = ['Actual','Budget'];
+const PERIODS = ['Annual','Q1','Q2','Q3','Q4'];
+const CHANNELS = ['All Channels','Online','Retail Stores','Distributors'];
+
+const YEAR_FACTOR   = {'2024':0.85, '2025':0.93, '2026':1.00};
+const QTR_SHARE      = {'Q1':0.225,'Q2':0.245,'Q3':0.255,'Q4':0.275};
+const CHANNEL_SHARE  = {'All Channels':1.00,'Online':0.42,'Retail Stores':0.35,'Distributors':0.23};
+const COST_ALLOC = [
+  {key:'Material',  base:0.46, color:'#0B2545'},
+  {key:'Labor',     base:0.22, color:'#3E5C76'},
+  {key:'Freight & Logistics', base:0.14, color:'#4A6FA5'},
+  {key:'Overhead',  base:0.12, color:'#8BA0BE'},
+  {key:'Marketing', base:0.06, color:'#B9C6DA'}
+];
+
+function seeded(str){
+  let h = 0;
+  for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return (h % 10000) / 10000; // 0..1
+}
+
+function fmtUSD(n, compact){
+  if (compact){
+    if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+    if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
+  }
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+function fmtPct(n){ return n.toFixed(1) + '%'; }
+function marginTier(m){
+  if (m >= 25) return 'green';
+  if (m >= 15) return 'amber';
+  return 'red';
+}
+function tierColor(tier){
+  return tier==='green' ? '#1F7A6C' : (tier==='amber' ? '#B8862E' : '#B3352A');
+}
+
+// core computation for one product at one POV combination
+function computeProduct(p, year, scenario, period, channel){
+  const yFactor = YEAR_FACTOR[year];
+  const scenSeed = seeded(p.code+year+scenario+channel+'scen');
+  const scenFactor = scenario === 'Budget' ? 1.00 : (0.94 + scenSeed*0.16); // Actual varies +/- around Budget baseline
+  const chFactor = CHANNEL_SHARE[channel];
+
+  let revenue;
+  if (period === 'Annual'){
+    revenue = p.baseRevenue * yFactor * scenFactor * chFactor;
+  } else {
+    revenue = p.baseRevenue * yFactor * scenFactor * chFactor * QTR_SHARE[period] * 4 / 1; // quarter of annualized base
+    revenue = p.baseRevenue * yFactor * scenFactor * chFactor * QTR_SHARE[period];
+  }
+  const costSeed = seeded(p.code+year+scenario+period+channel+'cost');
+  const costRatio = Math.min(0.93, Math.max(0.55, p.baseCostRatio * (0.97 + costSeed*0.06)));
+  const cost = revenue * costRatio;
+  const profit = revenue - cost;
+  const margin = revenue > 0 ? (profit/revenue)*100 : 0;
+
+  // budget comparison (only meaningful in Actual view, but always computed)
+  const budgetFactor = 1.00;
+  const budgetRevenue = period === 'Annual'
+    ? p.baseRevenue * yFactor * budgetFactor * chFactor
+    : p.baseRevenue * yFactor * budgetFactor * chFactor * QTR_SHARE[period];
+  const budgetCostRatio = p.baseCostRatio;
+  const budgetProfit = budgetRevenue * (1-budgetCostRatio);
+  const budgetMargin = budgetProfit>0 ? ((budgetRevenue - budgetRevenue*budgetCostRatio)/budgetRevenue)*100 : 0;
+  const vsBudget = margin - budgetMargin;
+
+  return {code:p.code, name:p.name, family:p.family, revenue, cost, profit, margin, vsBudget, costRatio};
+}
+
+function getCurrentData(){
+  const year = state.year, scenario = state.scenario, period = state.period, channel = state.channel;
+  let list = PRODUCTS;
+  if (state.product !== 'All Products') list = PRODUCTS.filter(p=>p.code===state.product);
+  return list.map(p => computeProduct(p, year, scenario, period, channel));
+}
+
+function getTrendData(){
+  // Quarterly trend for selected year/scenario/channel/product, ignoring period filter
+  let list = PRODUCTS;
+  if (state.product !== 'All Products') list = PRODUCTS.filter(p=>p.code===state.product);
+  return ['Q1','Q2','Q3','Q4'].map(q=>{
+    let rev=0, cost=0;
+    list.forEach(p=>{
+      const r = computeProduct(p, state.year, state.scenario, q, state.channel);
+      rev += r.revenue; cost += r.cost;
+    });
+    const profit = rev-cost;
+    const margin = rev>0 ? (profit/rev)*100 : 0;
+    return {period:q, revenue:rev, cost:cost, margin:margin};
+  });
+}
+
+function costBreakdown(row){
+  return COST_ALLOC.map(c=>{
+    const seed = seeded(row.code+c.key+state.year+state.period);
+    const pct = Math.max(0.03, c.base * (0.9 + seed*0.2));
+    return {label:c.key, pct, value: row.cost*pct, color:c.color};
+  });
+}
+
+/* =========================================================
+   STATE + FILTER UI
+   ========================================================= */
+const state = { year:'2026', scenario:'Actual', period:'Annual', product:'All Products', channel:'All Channels' };
+let sortKey = 'revenue', sortDir = 'desc';
+let expandedRow = null;
+
+function fillSelect(id, options, current){
+  const el = document.getElementById(id);
+  el.innerHTML = options.map(o=>`<option value="${o}" ${o===current?'selected':''}>${o}</option>`).join('');
+}
+fillSelect('fYear', YEARS, state.year);
+fillSelect('fScenario', SCENARIOS, state.scenario);
+fillSelect('fPeriod', PERIODS, state.period);
+fillSelect('fProduct', ['All Products', ...PRODUCTS.map(p=>p.code+' — '+p.name)], state.product);
+fillSelect('fChannel', CHANNELS, state.channel);
+
+document.getElementById('fYear').addEventListener('change', e=>{state.year=e.target.value; renderAll();});
+document.getElementById('fScenario').addEventListener('change', e=>{state.scenario=e.target.value; renderAll();});
+document.getElementById('fPeriod').addEventListener('change', e=>{state.period=e.target.value; renderAll();});
+document.getElementById('fProduct').addEventListener('change', e=>{
+  const v = e.target.value;
+  state.product = v==='All Products' ? 'All Products' : v.split(' — ')[0];
+  renderAll();
+});
+document.getElementById('fChannel').addEventListener('change', e=>{state.channel=e.target.value; renderAll();});
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  state.year='2026'; state.scenario='Actual'; state.period='Annual'; state.product='All Products'; state.channel='All Channels';
+  fillSelect('fYear', YEARS, state.year);
+  fillSelect('fScenario', SCENARIOS, state.scenario);
+  fillSelect('fPeriod', PERIODS, state.period);
+  fillSelect('fProduct', ['All Products', ...PRODUCTS.map(p=>p.code+' — '+p.name)], state.product);
+  fillSelect('fChannel', CHANNELS, state.channel);
+  expandedRow = null;
+  renderAll();
+});
+
+/* =========================================================
+   ICONS
+   ========================================================= */
+const ICONS = {
+  revenue:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  cost:'<path d="M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>',
+  profit:'<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>',
+  margin:'<circle cx="12" cy="12" r="10"/><path d="M8 15l8-8M9 9h.01M15 15h.01"/>'
+};
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+function renderKPIs(rows){
+  const totalRevenue = rows.reduce((s,r)=>s+r.revenue,0);
+  const totalCost = rows.reduce((s,r)=>s+r.cost,0);
+  const totalProfit = totalRevenue-totalCost;
+  const avgMargin = totalRevenue>0 ? (totalProfit/totalRevenue)*100 : 0;
+  const avgVsBudget = rows.reduce((s,r)=>s+r.vsBudget,0)/rows.length;
+
+  const cards = [
+    {label:'Total Revenue', value:fmtUSD(totalRevenue,true), sub:(state.scenario==='Actual'? 'vs. Budget scenario':'Baseline plan'), icon:ICONS.revenue, accent:'#0B2545', trendUp:true, trendVal: state.scenario==='Actual' ? fmtPct(Math.abs(avgVsBudget))+' margin '+(avgVsBudget>=0?'above':'below') : null},
+    {label:'Total Allocated Cost', value:fmtUSD(totalCost,true), sub:'Material, labor, freight, overhead', icon:ICONS.cost, accent:'#4A6FA5'},
+    {label:'Net Profit', value:fmtUSD(totalProfit,true), sub:'Revenue minus allocated cost', icon:ICONS.profit, accent:'#1F7A6C'},
+    {label:'Profit Margin %', value:fmtPct(avgMargin), sub:marginTier(avgMargin)==='green'?'Healthy margin band':(marginTier(avgMargin)==='amber'?'Watch-list margin band':'Below target band'), icon:ICONS.margin, accent:tierColor(marginTier(avgMargin))}
+  ];
+
+  document.getElementById('kpiGrid').innerHTML = cards.map(c=>`
+    <div class="kpi-card">
+      <div class="accent" style="background:${c.accent}"></div>
+      <div class="kpi-top">
+        <div class="kpi-icon" style="color:${c.accent}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${c.icon}</svg></div>
+      </div>
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value tabular">${c.value}</div>
+      <div class="kpi-sub"><span class="muted">${c.sub}</span></div>
+    </div>
+  `).join('');
+}
+
+/* =========================================================
+   CHARTS
+   ========================================================= */
+let chartMargin, chartRevCost, chartTrend;
+Chart.defaults.font.family = "'Inter',sans-serif";
+Chart.defaults.color = '#6B7280';
+Chart.defaults.font.size = 11.5;
+
+function renderMarginChart(rows){
+  const ctx = document.getElementById('chartMargin');
+  const labels = rows.map(r=>r.code);
+  const data = rows.map(r=>r.margin.toFixed(1));
+  const colors = rows.map(r=>tierColor(marginTier(r.margin)));
+  if (chartMargin) chartMargin.destroy();
+  chartMargin = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:[{data, backgroundColor:colors, borderRadius:5, maxBarThickness:44}]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.raw+'% margin'}}},
+      scales:{
+        y:{beginAtZero:true, max:35, grid:{color:'#EEF0F3'}, ticks:{callback:v=>v+'%'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderRevCostChart(rows){
+  const ctx = document.getElementById('chartRevCost');
+  const labels = rows.map(r=>r.code);
+  if (chartRevCost) chartRevCost.destroy();
+  chartRevCost = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:[
+      {label:'Revenue', data:rows.map(r=>r.revenue), backgroundColor:'#0B2545', borderRadius:5, maxBarThickness:20},
+      {label:'Cost', data:rows.map(r=>r.cost), backgroundColor:'#9AA7B8', borderRadius:5, maxBarThickness:20}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.dataset.label+': '+fmtUSD(c.raw,true)}}},
+      scales:{
+        y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{callback:v=>fmtUSD(v,true)}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderTrendChart(){
+  const trend = getTrendData();
+  const ctx = document.getElementById('chartTrend');
+  if (chartTrend) chartTrend.destroy();
+  chartTrend = new Chart(ctx, {
+    data:{
+      labels: trend.map(t=>t.period),
+      datasets:[
+        {type:'bar', label:'Revenue', data:trend.map(t=>t.revenue), backgroundColor:'#0B2545', borderRadius:5, maxBarThickness:46, yAxisID:'y'},
+        {type:'bar', label:'Cost', data:trend.map(t=>t.cost), backgroundColor:'#9AA7B8', borderRadius:5, maxBarThickness:46, yAxisID:'y'},
+        {type:'line', label:'Margin %', data:trend.map(t=>t.margin.toFixed(1)), borderColor:'#1F7A6C', backgroundColor:'#1F7A6C', tension:.35, pointRadius:4, pointBackgroundColor:'#1F7A6C', borderWidth:2.5, yAxisID:'y1'}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{position:'left', beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{callback:v=>fmtUSD(v,true)}},
+        y1:{position:'right', beginAtZero:true, max:40, grid:{display:false}, ticks:{callback:v=>v+'%'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+
+/* =========================================================
+   TABLE + DRILL-DOWN
+   ========================================================= */
+function sortRows(rows){
+  const dir = sortDir==='asc'?1:-1;
+  return [...rows].sort((a,b)=>{
+    let av=a[sortKey], bv=b[sortKey];
+    if (typeof av === 'string') return av.localeCompare(bv)*dir;
+    return (av-bv)*dir;
+  });
+}
+
+function renderTable(rows){
+  const sorted = sortRows(rows);
+  const body = document.getElementById('perfBody');
+  if (!sorted.length){
+    body.innerHTML = `<tr><td colspan="7"><div class="empty">No records match the current filter selection.</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = sorted.map(r=>{
+    const tier = marginTier(r.margin);
+    const vsB = r.vsBudget;
+    const rows2 = `
+    <tr data-code="${r.code}" class="${expandedRow===r.code?'expanded':''}">
+      <td><span class="code-pill">${r.code}</span></td>
+      <td><strong>${r.name}</strong></td>
+      <td class="tabular">${fmtUSD(r.revenue)}</td>
+      <td class="tabular">${fmtUSD(r.cost)}</td>
+      <td class="tabular">${fmtUSD(r.profit)}</td>
+      <td><span class="badge ${tier}"><i></i>${fmtPct(r.margin)}</span></td>
+      <td class="tabular" style="color:${vsB>=0?'#1F7A6C':'#B3352A'};font-weight:700;">${vsB>=0?'+':''}${vsB.toFixed(1)} pts</td>
+    </tr>`;
+    if (expandedRow === r.code){
+      const bd = costBreakdown(r);
+      const barsHtml = bd.map(b=>`
+        <div class="drill-bar-row">
+          <span>${b.label}</span>
+          <div class="drill-bar-track"><div class="drill-bar-fill" style="width:${(b.pct*100).toFixed(0)}%;background:${b.color}"></div></div>
+          <span class="tabular" style="text-align:right;font-weight:700;">${fmtUSD(b.value,true)}</span>
+        </div>`).join('');
+      const note = r.margin>=25
+        ? `<b>Strong performer.</b> ${r.name} sits in the healthy margin band. Consider incremental marketing investment to defend share, per PCMCS best-practice color rules (green &ge; 25%).`
+        : (r.margin>=15
+            ? `<b>Watch-list.</b> ${r.name} is within acceptable range but below the 25% target. Review freight/logistics and overhead allocation for tightening opportunities.`
+            : `<b>Action required.</b> ${r.name} is below the 15% threshold (red band). Drill into supplier and freight contracts — this mirrors the Road Bike scenario in the PCMCS guide.`);
+      return rows2 + `
+      <tr class="drill-row"><td colspan="7"><div class="drill-inner">
+        <div class="drill-title">Cost Allocation Drill-down — ${r.code} · ${state.year} ${state.scenario} · ${state.period} · ${state.channel}</div>
+        <div class="drill-grid">
+          <div>${barsHtml}</div>
+          <div class="drill-note">${note}</div>
+        </div>
+      </div></td></tr>`;
+    }
+    return rows2;
+  }).join('');
+
+  body.querySelectorAll('tr[data-code]').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const code = tr.getAttribute('data-code');
+      expandedRow = (expandedRow===code) ? null : code;
+      renderTable(getCurrentData());
+    });
+  });
+}
+
+function updateSortHeaders(){
+  document.querySelectorAll('#perfTable thead th').forEach(th=>{
+    th.classList.toggle('sorted', th.dataset.key===sortKey);
+    th.innerHTML = th.textContent.replace(/[▲▼]\s*$/,'').trim() + (th.dataset.key===sortKey ? ` <span class="arrow">${sortDir==='asc'?'▲':'▼'}</span>` : '');
+  });
+}
+document.querySelectorAll('#perfTable thead th').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.key;
+    if (sortKey===key){ sortDir = sortDir==='asc'?'desc':'asc'; } else { sortKey=key; sortDir='desc'; }
+    updateSortHeaders();
+    renderTable(getCurrentData());
+  });
+});
+
+/* =========================================================
+   MASTER RENDER
+   ========================================================= */
+function renderAll(){
+  const rows = getCurrentData();
+  document.getElementById('povLabel').textContent = `${state.year} · ${state.scenario} · ${state.period} · ${state.channel}`;
+  renderKPIs(rows);
+  renderMarginChart(rows);
+  renderRevCostChart(rows);
+  renderTrendChart();
+  updateSortHeaders();
+  renderTable(rows);
+}
+renderAll();
+
+/* =========================================================
+   EXPORTS
+   ========================================================= */
+document.getElementById('btnExcel').addEventListener('click', ()=>{
+  const rows = sortRows(getCurrentData());
+  const data = rows.map(r=>({
+    'Code': r.code, 'Product': r.name,
+    'Revenue': Math.round(r.revenue), 'Allocated Cost': Math.round(r.cost),
+    'Net Profit': Math.round(r.profit), 'Profit Margin %': Number(r.margin.toFixed(2)),
+    'Vs Budget (pts)': Number(r.vsBudget.toFixed(2)),
+    'Year': state.year, 'Scenario': state.scenario, 'Period': state.period, 'Channel': state.channel
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  ws['!cols'] = [{wch:8},{wch:16},{wch:14},{wch:16},{wch:14},{wch:16},{wch:16},{wch:8},{wch:10},{wch:8},{wch:16}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Profit Margin');
+  XLSX.writeFile(wb, `PCMCS_Profit_Margin_${state.year}_${state.scenario}_${state.period}.xlsx`);
+});
+
+document.getElementById('btnPdf').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btnPdf');
+  const original = btn.innerHTML;
+  btn.innerHTML = 'Generating…';
+  btn.disabled = true;
+  try{
+    const el = document.getElementById('dashboardCapture');
+    const canvas = await html2canvas(el, {scale:2, backgroundColor:'#F6F7F9', useCORS:true});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','pt','a4');
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = canvas.height * (imgW/canvas.width);
+    let heightLeft = imgH, position = 0;
+    pdf.addImage(imgData,'PNG',0,position,imgW,imgH);
+    heightLeft -= pageH;
+    while (heightLeft > 0){
+      position = heightLeft - imgH;
+      pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,position,imgW,imgH);
+      heightLeft -= pageH;
+    }
+    pdf.save(`PCMCS_Profit_Margin_${state.year}_${state.scenario}_${state.period}.pdf`);
+  } catch(e){
+    console.error(e);
+    alert('PDF export failed to render. Please try again.');
+  } finally{
+    btn.innerHTML = original;
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
