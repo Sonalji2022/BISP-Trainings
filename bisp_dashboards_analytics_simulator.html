@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BISP Trainings | Dashboards &amp; Analytics Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#0A1930;
+  --navy-2:#122A4E;
+  --navy-3:#1B3A66;
+  --paper:#EFF3F8;
+  --card:#FFFFFF;
+  --line:#DCE3ED;
+  --ink:#101B2D;
+  --muted:#5A6B85;
+  --blue:#2158C4;
+  --blue-2:#1A46A0;
+  --orange:#E8622C;
+  --teal:#0D9E8C;
+  --amber:#E5A421;
+  --red:#D6394A;
+  --shadow: 0 1px 2px rgba(10,25,48,.06), 0 8px 24px -12px rgba(10,25,48,.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',Arial,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:'Sora',Arial,sans-serif;margin:0;letter-spacing:-0.01em;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit;cursor:pointer;}
+a{color:inherit;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:#c3cede;border-radius:8px;}
+
+/* ---------- Ledger rail signature element ---------- */
+.rail{display:flex;align-items:center;gap:0;flex-wrap:wrap;padding:14px 0;}
+.rail-node{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;color:var(--navy-2);white-space:nowrap;}
+.rail-node.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.rail-node.done{background:#E9F7F3;border-color:#BFE7DD;color:var(--teal);}
+.rail-arrow{width:26px;height:2px;background:var(--line);position:relative;margin:0 2px;}
+.rail-arrow::after{content:'';position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left-color:var(--line);}
+
+/* ---------- App shell ---------- */
+#app{min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:linear-gradient(90deg,var(--navy),var(--navy-3));color:#fff;display:flex;align-items:center;
+  padding:10px 22px;gap:16px;box-shadow:var(--shadow);position:sticky;top:0;z-index:40;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand img{height:34px;background:#fff;border-radius:6px;padding:3px 6px;}
+.brand-text{line-height:1.15;}
+.brand-text b{font-family:'Sora';font-size:15px;display:block;}
+.brand-text span{font-size:10.5px;color:#B9C7E0;letter-spacing:.04em;text-transform:uppercase;}
+.topbar .title{margin-left:6px;padding-left:16px;border-left:1px solid rgba(255,255,255,.2);}
+.topbar .title h1{font-size:15px;color:#fff;}
+.topbar .title small{color:#AFC0DE;font-size:11px;}
+.topbar .spacer{flex:1;}
+.userpill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);padding:6px 12px;border-radius:999px;font-size:12.5px;}
+.userpill .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);}
+.body-wrap{display:flex;flex:1;min-height:0;}
+.sidebar{width:224px;background:var(--navy-2);color:#EAF0FB;padding:16px 10px;flex-shrink:0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:500;
+  color:#C9D6EC;cursor:pointer;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:var(--blue);color:#fff;font-weight:600;}
+.nav-icon{width:18px;text-align:center;font-size:14px;}
+.nav-sec{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7C8EB2;margin:14px 10px 6px;}
+.main{flex:1;padding:22px 26px 50px;min-width:0;}
+.crumbtop{font-size:11.5px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+.pagehead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px;}
+.pagehead h2{font-size:22px;}
+.pagehead .sub{color:var(--muted);font-size:13px;}
+.illus-tag{display:inline-flex;align-items:center;gap:6px;background:#FFF4E9;color:#A85A1B;border:1px solid #F3D9B8;
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;margin:8px 0 18px;}
+.illus-tag::before{content:'◆';font-size:8px;}
+
+footer.appfoot{background:var(--navy);color:#B9C7E0;text-align:center;padding:16px;font-size:12px;margin-top:auto;}
+footer.appfoot b{color:#fff;}
+
+/* ---------- generic grid / cards ---------- */
+.grid{display:grid;gap:14px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;}
+.card h3{font-size:13.5px;color:var(--navy-2);margin-bottom:10px;}
+.card h3 .n{color:var(--muted);font-weight:500;font-size:11px;}
+
+.kpi{cursor:pointer;position:relative;overflow:hidden;transition:transform .12s ease, box-shadow .12s ease;border-left:4px solid var(--blue);}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(10,25,48,.08),0 14px 28px -14px rgba(10,25,48,.28);}
+.kpi.selected{outline:2px solid var(--navy);outline-offset:-2px;}
+.kpi .label{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.kpi .value{font-family:'IBM Plex Mono';font-weight:700;font-size:26px;margin-top:6px;color:var(--ink);}
+.kpi .trend{font-size:11.5px;margin-top:5px;font-weight:600;}
+.kpi .trend.up{color:var(--teal);} .kpi .trend.down{color:var(--red);} .kpi .trend.flat{color:var(--muted);}
+.kpi.risk{border-left-color:var(--red);} .kpi.warn{border-left-color:var(--amber);} .kpi.good{border-left-color:var(--teal);}
+
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+.chip.High{background:#FCE4E6;color:var(--red);} .chip.Medium{background:#FCF0D9;color:#93670C;} .chip.Low{background:#E4F5F1;color:var(--teal);}
+.chip.Approved{background:#E4F5F1;color:var(--teal);} .chip.Rejected{background:#FCE4E6;color:var(--red);}
+.chip.Submitted{background:#E7EEFB;color:var(--blue-2);} .chip.InProgress,.chip.In-Progress{background:#FCF0D9;color:#93670C;}
+.chip.NotStarted,.chip.Not-Started{background:#EDEFF3;color:var(--muted);}
+
+table{width:100%;border-collapse:collapse;font-size:12.8px;}
+table th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;
+  border-bottom:1px solid var(--line);padding:8px 10px;background:#F7F9FC;}
+table td{padding:8px 10px;border-bottom:1px solid #EEF1F6;}
+table tr.rowlink{cursor:pointer;}
+table tr.rowlink:hover{background:#F4F8FF;}
+.tblwrap{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:10px;}
+
+.btn{background:var(--blue);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;}
+.btn:hover{background:var(--blue-2);}
+.btn.ghost{background:#fff;color:var(--navy-2);border:1px solid var(--line);}
+.btn.ghost:hover{background:#F3F6FB;}
+.btn.small{padding:6px 11px;font-size:12px;}
+.btn.orange{background:var(--orange);} .btn.orange:hover{background:#C94E1E;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+.tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.tab{padding:9px 14px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+.filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-bottom:16px;}
+.fld{display:flex;flex-direction:column;gap:4px;}
+.fld label{font-size:10.5px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.04em;}
+.fld select,.fld input{padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:12.8px;min-width:130px;background:#fff;}
+.fld input[type=text]{min-width:170px;}
+
+.modal-bg{position:fixed;inset:0;background:rgba(9,17,32,.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal{background:#fff;border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:22px;box-shadow:0 30px 60px rgba(0,0,0,.35);}
+.modal h3{font-size:16px;margin-bottom:4px;}
+.modal .close{float:right;background:none;border:none;color:var(--muted);font-size:18px;}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.kv div{background:#F7F9FC;border-radius:8px;padding:9px 11px;}
+.kv .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;font-weight:700;}
+.kv .v{font-family:'IBM Plex Mono';font-weight:600;margin-top:2px;}
+
+canvas{max-height:260px;}
+.chartbox{position:relative;height:250px;}
+
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:14px 0 4px;}
+.flow-step{background:var(--card);border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:700;
+  color:var(--navy-2);min-width:110px;text-align:center;}
+.flow-step.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+.flow-arrow{width:22px;text-align:center;color:var(--muted);font-weight:700;}
+
+.scn-card{border-left:4px solid var(--blue);}
+.scn-card.complete{border-left-color:var(--teal);}
+.badge-done{background:#E4F5F1;color:var(--teal);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;}
+.stepline{border-left:2px solid var(--line);padding:2px 0 2px 18px;position:relative;margin-left:6px;}
+.stepline .step{margin-bottom:12px;position:relative;}
+.stepline .step::before{content:'';position:absolute;left:-23px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--line);}
+.stepline .step.done::before{background:var(--teal);}
+.stepline .step.cur::before{background:var(--blue);box-shadow:0 0 0 4px #E7EEFB;}
+
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:
+  radial-gradient(1200px 600px at 15% -10%, #1B3A66 0%, transparent 60%), var(--navy);padding:20px;}
+.login-card{background:#fff;border-radius:16px;width:100%;max-width:440px;padding:34px 32px;box-shadow:0 30px 70px rgba(0,0,0,.4);}
+.login-card .brand{justify-content:center;margin-bottom:6px;}
+.login-card img{height:46px;}
+.login-title{text-align:center;margin:14px 0 2px;font-size:19px;}
+.login-sub{text-align:center;color:var(--muted);font-size:12.5px;margin-bottom:22px;letter-spacing:.04em;text-transform:uppercase;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 20px;}
+.role-btn{padding:10px;border:1.5px solid var(--line);border-radius:9px;background:#fff;font-size:12.5px;font-weight:600;color:var(--navy-2);text-align:center;}
+.role-btn.sel{border-color:var(--blue);background:#EEF3FE;color:var(--blue-2);}
+.login-card label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.login-card input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;margin:6px 0 16px;font-size:14px;}
+.login-card .btn{width:100%;padding:12px;font-size:14px;}
+
+.progressbar{height:8px;background:#E7ECF4;border-radius:99px;overflow:hidden;margin:8px 0 4px;}
+.progressbar > div{height:100%;background:var(--teal);}
+
+.final-wrap{text-align:center;padding:40px 20px;}
+.final-wrap h1{font-size:30px;color:var(--navy);}
+.trophy{font-size:52px;}
+
+.notice{background:#EEF3FE;border:1px solid #C9DAF7;color:var(--blue-2);padding:10px 14px;border-radius:9px;font-size:12.8px;margin-bottom:14px;}
+
+.mcq label{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;font-size:13px;cursor:pointer;}
+.mcq label:hover{background:#F5F8FC;}
+.mcq input{margin-right:8px;}
+.mcq label.correct{background:#E4F5F1;border-color:var(--teal);}
+.mcq label.incorrect{background:#FCE4E6;border-color:var(--red);}
+
+.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.pill-btn{padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--navy-2);}
+.pill-btn.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+.widget-card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:14px;}
+.widget-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.widget-head h4{font-size:13px;}
+.widget-cfg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.widget-cfg select,.widget-cfg input{padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px;}
+.x-btn{background:none;border:none;color:var(--muted);font-size:14px;}
+.x-btn:hover{color:var(--red);}
+
+.palette{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px;}
+.pal-btn{background:#fff;border:1.5px dashed var(--blue);color:var(--blue-2);padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:700;}
+.pal-btn:hover{background:#EEF3FE;}
+
+small.hint{color:var(--muted);font-size:11.5px;display:block;margin-top:4px;}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;border:1px dashed var(--line);border-radius:10px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =====================================================================
+   BISP TRAININGS — DASHBOARDS & ANALYTICS SIMULATOR
+   Original BISP Oracle-inspired training simulator (illustrative data)
+   ===================================================================== */
+
+const LOGO = "data:image/jpeg;base64,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";
+
+/* ---------------- deterministic PRNG ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rnd = mulberry32(42);
+function pick(arr){return arr[Math.floor(rnd()*arr.length)];}
+function rint(min,max){return Math.floor(rnd()*(max-min+1))+min;}
+function fmtC(n){return '$'+Math.round(n).toLocaleString('en-US');}
+function fmtC2(n){const a=Math.abs(n);const s=a>=1e6?(a/1e6).toFixed(1)+'M':a>=1e3?(a/1e3).toFixed(1)+'K':a.toFixed(0);return (n<0?'-$':'$')+s;}
+function uid(p){return p+'-'+Math.random().toString(36).slice(2,7).toUpperCase();}
+
+/* ---------------- reference lists ---------------- */
+const ORG_UNITS=['Corporate','Finance','Treasury','Accounts Payable','Accounts Receivable','Payroll','Tax'];
+const ACCOUNT_TYPES=['Cash','Bank','Intercompany','Accrual','Fixed Assets','Prepaid Expense'];
+const PREPARERS=['A. Mehta','R. Singh','J. Alvarez','P. Chen','S. Okafor','M. Kapoor','T. Nguyen'];
+const REVIEWERS=['D. Fernandes','K. Wong','L. Patel','N. Brooks'];
+const STATUSES=['Not Started','In Progress','Submitted','Approved','Rejected'];
+const RISKS=['High','Medium','Low'];
+const REJECT_REASONS=['Unsupported Balance','Missing Attachment','Incorrect GL Mapping','Late Submission','Variance Threshold Exceeded'];
+const PERIODS=['Mar-2026','Apr-2026','May-2026','Jun-2026','Jul-2026','Aug-2026'];
+const CUR_PERIOD='Aug-2026';
+const MATCH_RULES=['Exact Match','Tolerance Match','Date Match','Many-to-One','Other'];
+const SOURCES=['Source A — ERP Feed','Source B — Bank Feed','Source C — Card Processor'];
+
+/* ---------------- mock data generation ---------------- */
+function genRecords(n){
+  const out=[];
+  for(let i=0;i<n;i++){
+    const period=i<n*0.72?CUR_PERIOD:pick(PERIODS.slice(0,-1));
+    const status=pick(STATUSES.concat(['Approved','Approved','Approved'])); // weight toward approved
+    const risk=rnd()<0.16?'High':rnd()<0.5?'Medium':'Low';
+    const approved=status==='Approved';
+    const daysOpen=approved?rint(0,4):rint(1,110);
+    const late = !approved && daysOpen>15 && rnd()<0.6;
+    const onTime = approved && rnd()<0.86;
+    const autoRecon = approved && rnd()<0.42;
+    const balance = Math.round((rnd()*480000+500)*(rnd()<0.2?-1:1));
+    const difference = (status==='Rejected'||risk==='High')? Math.round(rnd()*38000+250)*(rnd()<0.3?-1:1) : (rnd()<0.7?0:Math.round(rnd()*4000));
+    out.push({
+      id:uid('REC'),
+      account:'GL-'+rint(10000,89999),
+      orgUnit:pick(ORG_UNITS),
+      accountType:pick(ACCOUNT_TYPES),
+      period, status, risk,
+      preparer:pick(PREPARERS), reviewer:pick(REVIEWERS),
+      balance, difference, daysOpen,
+      late, onTime, autoRecon,
+      rejectionReason: status==='Rejected'?pick(REJECT_REASONS):null,
+      owner: pick(PREPARERS)
+    });
+  }
+  return out;
+}
+const RECORDS = genRecords(140);
+
+function genTxns(n){
+  const out=[];
+  for(let i=0;i<n;i++){
+    const r=rnd();
+    const matchType = r<0.63?'Auto':r<0.86?'Manual':'Unmatched';
+    const rule = matchType!=='Unmatched'? pick(MATCH_RULES) : null;
+    const ageDays = matchType==='Unmatched'? rint(0,140): rint(0,5);
+    out.push({
+      id:uid('TXN'),
+      source:pick(SOURCES),
+      matchType, rule,
+      amount: Math.round((rnd()*22000+40)*(rnd()<0.25?-1:1)),
+      ageDays,
+      valid: rnd()<0.9,
+      duplicate: rnd()<0.05,
+      missingFields: rnd()<0.07,
+      suggested: matchType==='Unmatched' && rnd()<0.35
+    });
+  }
+  return out;
+}
+const TXNS = genTxns(420);
+
+/* trend series (illustrative) */
+const TREND_COMPLETION=[71,76,79,82,85,88];
+const TREND_UNEXPLAINED=[184000,161000,150000,132000,120000,96000];
+const TREND_MATCHRATE=[81,83,85,86,89,91];
+
+/* ---------------- computed KPIs ---------------- */
+function computeExecKPIs(recs){
+  const total=recs.length;
+  const completed=recs.filter(r=>r.status==='Approved').length;
+  const onTime=recs.filter(r=>r.onTime).length;
+  const late=recs.filter(r=>r.late).length;
+  const open=recs.filter(r=>['Not Started','In Progress','Submitted'].includes(r.status)).length;
+  const rejected=recs.filter(r=>r.status==='Rejected').length;
+  const auto=recs.filter(r=>r.autoRecon).length;
+  const highRisk=recs.filter(r=>r.risk==='High' && r.status!=='Approved').length;
+  const unexplained=recs.filter(r=>r.status!=='Approved').reduce((s,r)=>s+Math.abs(r.difference),0);
+  const aging=recs.filter(r=>r.status!=='Approved' && r.daysOpen>60).reduce((s,r)=>s+Math.abs(r.balance),0);
+  const matchRate= total? Math.round((completed+auto*0.0)/total*100):0;
+  const unmatchedValue = recs.filter(r=>r.difference!==0).reduce((s,r)=>s+Math.abs(r.difference),0);
+  return {total,completed,onTime,late,open,rejected,auto,highRisk,unexplained,aging,matchRate,unmatchedValue};
+}
+function computeTxnKPIs(txns){
+  const total=txns.length;
+  const auto=txns.filter(t=>t.matchType==='Auto').length;
+  const manual=txns.filter(t=>t.matchType==='Manual').length;
+  const unmatched=txns.filter(t=>t.matchType==='Unmatched');
+  const unmatchedAmt=unmatched.reduce((s,t)=>s+Math.abs(t.amount),0);
+  const suggested=txns.filter(t=>t.suggested).length;
+  const adjustments=Math.round(unmatched.length*0.18);
+  const old90=unmatched.filter(t=>t.ageDays>90).length;
+  return {
+    total, autoRate: total?Math.round(auto/total*100):0, manualRate: total?Math.round(manual/total*100):0,
+    unmatchedCount: unmatched.length, unmatchedAmt, suggested, adjustments, old90,
+    jobDuration: 14, // minutes, illustrative
+  };
+}
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const state = {
+  view:'login',
+  sub:'executive',
+  user:null,
+  startTime:null,
+  visited:new Set(),
+  exec:{selectedKPI:null},
+  comp:{orgUnit:null, risk:null, late:false},
+  match:{rule:null, bucket:null, source:null},
+  builder:{components:[], filters:{}, savedPrompts:[], savedDashboards:[]},
+  scenarioProgress:{},
+  actionLog:[],
+  activeScenario:null,
+  scenarioStartIdx:0,
+  training:{step:0},
+  practice:{qIdx:0, correct:0, total:0, answered:false, pool:null, current:null},
+  exam:{qIdx:0, answers:{}, submitted:false, startTime:null},
+  detailRecord:null
+};
+function logAction(key){state.actionLog.push({key,t:Date.now()});}
+
+const charts={};
+function killCharts(){Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});for(const k in charts)delete charts[k];}
+function mkChart(id,cfg){
+  const el=document.getElementById(id); if(!el) return;
+  charts[id]=new Chart(el, cfg);
+}
+const PALETTE=['#2158C4','#0D9E8C','#E5A421','#D6394A','#7C5CD6','#1B3A66','#E8622C','#3AA0D9'];
+
+/* =====================================================================
+   RENDER ROOT
+   ===================================================================== */
+function render(){
+  const app=document.getElementById('app');
+  if(state.view==='login'){app.innerHTML=renderLogin();bindLogin();return;}
+  app.innerHTML = renderShell();
+  bindShell();
+  killCharts();
+  renderSubview();
+}
+
+/* ---------------- LOGIN ---------------- */
+const ROLES=['Executive','Finance Manager','Controller','Preparer','Reviewer','Administrator'];
+let selRole='Controller';
+function renderLogin(){
+  return `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="brand"><img src="${LOGO}" alt="BISP logo"></div>
+      <div class="login-title">Dashboards &amp; Analytics</div>
+      <div class="login-sub">Training Simulator</div>
+      <label>Username</label>
+      <input id="uname" type="text" placeholder="Enter username">
+      <label>Role</label>
+      <div class="role-grid" id="roleGrid">
+        ${ROLES.map(r=>`<div class="role-btn ${r===selRole?'sel':''}" data-role="${r}">${r}</div>`).join('')}
+      </div>
+      <button class="btn" id="loginBtn">LOGIN</button>
+      <div style="text-align:center;margin-top:16px;color:#8A96AC;font-size:11px;">© BISP Trainings · www.bisptrainings.com</div>
+    </div>
+  </div>`;
+}
+function bindLogin(){
+  document.getElementById('roleGrid').addEventListener('click',e=>{
+    const t=e.target.closest('.role-btn'); if(!t) return;
+    selRole=t.dataset.role;
+    document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('sel',b===t));
+  });
+  document.getElementById('loginBtn').addEventListener('click',()=>{
+    const name=document.getElementById('uname').value.trim()||'Trainee';
+    state.user={name,role:selRole};
+    state.startTime=Date.now();
+    state.view='shell'; state.sub='executive'; state.visited.add('executive');
+    render();
+  });
+}
+
+/* ---------------- SHELL ---------------- */
+const NAV=[
+  {id:'executive',icon:'◆',label:'Executive Overview'},
+  {id:'compliance',icon:'◈',label:'Compliance'},
+  {id:'matching',icon:'⇄',label:'Transaction Matching'},
+  {id:'builder',icon:'▦',label:'Custom Builder'},
+  {id:'analytics',icon:'∿',label:'Analytics'},
+  {id:'scenarios',icon:'●',label:'Training Scenarios'},
+  {id:'training',icon:'▶',label:'Training Mode'},
+  {id:'practice',icon:'✎',label:'Practice Mode'},
+  {id:'exam',icon:'✓',label:'Exam Mode'},
+  {id:'reports',icon:'▤',label:'Reports'},
+  {id:'help',icon:'?',label:'Help'},
+];
+function renderShell(){
+  const elapsed = state.startTime? Math.round((Date.now()-state.startTime)/60000):0;
+  return `
+  <div style="display:flex;flex-direction:column;min-height:100vh;">
+    <div class="topbar">
+      <div class="brand"><img src="${LOGO}" alt="BISP logo">
+        <div class="brand-text"><b>BISP Trainings</b><span>bisptrainings.com</span></div>
+      </div>
+      <div class="title"><h1>Dashboards &amp; Analytics Simulator</h1><small>Original BISP Oracle-inspired training simulator · Illustrative data</small></div>
+      <div class="spacer"></div>
+      <div class="userpill"><span class="dot"></span>${state.user.name} · ${state.user.role} · ~${elapsed} min</div>
+    </div>
+    <div class="body-wrap">
+      <div class="sidebar">
+        <div class="nav-sec">Navigate</div>
+        ${NAV.map(n=>`<div class="nav-item ${state.sub===n.id?'active':''}" data-nav="${n.id}"><span class="nav-icon">${n.icon}</span>${n.label}</div>`).join('')}
+        <div class="nav-sec">Support</div>
+        <div style="padding:10px 12px;font-size:11.5px;color:#9FB0D0;line-height:1.6;">
+          Call Us:<br><b style="color:#fff;">+91 769-409-5404</b>
+        </div>
+      </div>
+      <div class="main" id="main"></div>
+    </div>
+    <footer class="appfoot">© <b>BISP Trainings</b> | www.bisptrainings.com · Call Us: +91 769-409-5404</footer>
+  </div>`;
+}
+function bindShell(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      state.sub=el.dataset.nav; state.visited.add(state.sub);
+      state.detailRecord=null;
+      render();
+    });
+  });
+}
+function renderSubview(){
+  const m=document.getElementById('main');
+  const fns={
+    executive:renderExecutive, compliance:renderCompliance, matching:renderMatching,
+    builder:renderBuilder, analytics:renderAnalytics, scenarios:renderScenarioList,
+    scenarioDetail:renderScenarioDetail, training:renderTraining, practice:renderPractice,
+    exam:renderExam, reports:renderReports, help:renderHelp, final:renderFinal
+  };
+  const fn=fns[state.sub]||renderExecutive;
+  m.innerHTML = fn();
+  bindSubview(state.sub);
+  if(state.detailRecord){document.body.insertAdjacentHTML('beforeend', renderRecordModal(state.detailRecord));bindModal();}
+}
+
+/* =====================================================================
+   7.1 EXECUTIVE OVERVIEW
+   ===================================================================== */
+const EXEC_KPI_DEFS=[
+  {key:'total',label:'Total Reconciliations',cls:''},
+  {key:'completed',label:'Completed',cls:'good'},
+  {key:'onTime',label:'On Time',cls:'good'},
+  {key:'late',label:'Late',cls:'risk'},
+  {key:'open',label:'Open',cls:'warn'},
+  {key:'rejected',label:'Rejected',cls:'risk'},
+  {key:'auto',label:'Auto-Reconciled',cls:'good'},
+  {key:'highRisk',label:'High Risk',cls:'risk'},
+  {key:'unexplained',label:'Unexplained Difference',cls:'warn',money:true},
+  {key:'aging',label:'Aging Exposure',cls:'warn',money:true},
+  {key:'matchRate',label:'Match Rate',cls:'good',pct:true},
+  {key:'unmatchedValue',label:'Unmatched Value',cls:'risk',money:true},
+];
+const KPI_FILTERS={
+  total:r=>true,
+  completed:r=>r.status==='Approved',
+  onTime:r=>r.onTime,
+  late:r=>r.late,
+  open:r=>['Not Started','In Progress','Submitted'].includes(r.status),
+  rejected:r=>r.status==='Rejected',
+  auto:r=>r.autoRecon,
+  highRisk:r=>r.risk==='High' && r.status!=='Approved',
+  unexplained:r=>r.status!=='Approved' && r.difference!==0,
+  aging:r=>r.status!=='Approved' && r.daysOpen>60,
+  matchRate:r=>r.status==='Approved',
+  unmatchedValue:r=>r.difference!==0,
+};
+function renderExecutive(){
+  const k=computeExecKPIs(RECORDS);
+  const sel=state.exec.selectedKPI;
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / 7.1</div>
+  <div class="pagehead"><h2>Executive Overview</h2><div class="sub">Enterprise reconciliation health at a glance</div></div>
+  <div class="illus-tag">Illustrative Training Data</div>
+
+  <div class="grid grid-4" id="execKpis">
+    ${EXEC_KPI_DEFS.map(d=>{
+      const v=k[d.key];
+      const disp = d.money? fmtC2(v) : d.pct? v+'%' : v.toLocaleString();
+      return `<div class="card kpi ${d.cls} ${sel===d.key?'selected':''}" data-kpi="${d.key}">
+        <div class="label">${d.label}</div>
+        <div class="value">${disp}</div>
+        <div class="trend ${rnd()>0?'':''}"></div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <h3 style="margin:22px 0 10px;font-size:15px;">Executive Charts</h3>
+  <div class="grid grid-3">
+    <div class="card"><h3>Status Distribution</h3><div class="chartbox"><canvas id="chStatus"></canvas></div></div>
+    <div class="card"><h3>Completion Trend <span class="n">6-period</span></h3><div class="chartbox"><canvas id="chCompletion"></canvas></div></div>
+    <div class="card"><h3>Risk Distribution</h3><div class="chartbox"><canvas id="chRisk"></canvas></div></div>
+    <div class="card"><h3>Unexplained Difference Trend</h3><div class="chartbox"><canvas id="chUnexp"></canvas></div></div>
+    <div class="card"><h3>Aging Exposure</h3><div class="chartbox"><canvas id="chAging"></canvas></div></div>
+    <div class="card"><h3>Match Rate</h3><div class="chartbox"><canvas id="chMatchRate"></canvas></div></div>
+  </div>
+
+  ${sel? renderDrillPanel(sel) : ''}
+  `;
+}
+function renderDrillPanel(kpiKey){
+  const def=EXEC_KPI_DEFS.find(d=>d.key===kpiKey);
+  const filtered=RECORDS.filter(KPI_FILTERS[kpiKey]);
+  const byOrg={};
+  filtered.forEach(r=>byOrg[r.orgUnit]=(byOrg[r.orgUnit]||0)+1);
+  return `
+  <div style="margin-top:26px;">
+    <div class="rail">
+      <div class="rail-node active">KPI: ${def.label}</div><div class="rail-arrow"></div>
+      <div class="rail-node">Related Chart</div><div class="rail-arrow"></div>
+      <div class="rail-node">Filtered Data (${filtered.length})</div><div class="rail-arrow"></div>
+      <div class="rail-node">Detail List</div><div class="rail-arrow"></div>
+      <div class="rail-node">Record Detail</div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><h3>Breakdown by Organizational Unit</h3><div class="chartbox"><canvas id="chDrill"></canvas></div></div>
+      <div class="card">
+        <h3>Filtered Data &amp; Detail List <span class="n">click a row for record detail</span></h3>
+        <div class="tblwrap"><table>
+          <thead><tr><th>Account</th><th>Entity</th><th>Status</th><th>Risk</th><th>Balance</th><th>Diff.</th></tr></thead>
+          <tbody>
+            ${filtered.slice(0,40).map(r=>`<tr class="rowlink" data-rec="${r.id}">
+              <td class="mono">${r.account}</td><td>${r.orgUnit}</td>
+              <td><span class="chip ${r.status.replace(' ','')}">${r.status}</span></td>
+              <td><span class="chip ${r.risk}">${r.risk}</span></td>
+              <td class="mono">${fmtC(r.balance)}</td><td class="mono">${fmtC(r.difference)}</td>
+            </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#8A96AC;padding:20px;">No records match this KPI</td></tr>'}
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>`;
+}
+function drawExecCharts(){
+  const statusCounts=STATUSES.map(s=>RECORDS.filter(r=>r.status===s).length);
+  mkChart('chStatus',{type:'doughnut',data:{labels:STATUSES,datasets:[{data:statusCounts,backgroundColor:PALETTE}]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}});
+  mkChart('chCompletion',{type:'line',data:{labels:PERIODS,datasets:[{label:'Completion %',data:TREND_COMPLETION,borderColor:'#0D9E8C',backgroundColor:'#0D9E8C22',fill:true,tension:.35}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{min:60,max:100}}}});
+  const riskCounts=RISKS.map(r=>RECORDS.filter(x=>x.risk===r).length);
+  mkChart('chRisk',{type:'pie',data:{labels:RISKS,datasets:[{data:riskCounts,backgroundColor:['#D6394A','#E5A421','#0D9E8C']}]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}}});
+  mkChart('chUnexp',{type:'line',data:{labels:PERIODS,datasets:[{label:'Unexplained $',data:TREND_UNEXPLAINED,borderColor:'#D6394A',backgroundColor:'#D6394A22',fill:true,tension:.35}]},
+    options:{plugins:{legend:{display:false}}}});
+  const agingBuckets=['0-30','31-60','61-90','90+'];
+  const agingVals=agingBuckets.map((b,i)=>RECORDS.filter(r=>{const d=r.daysOpen;return i===0?d<=30:i===1?d>30&&d<=60:i===2?d>60&&d<=90:d>90;}).reduce((s,r)=>s+Math.abs(r.balance),0));
+  mkChart('chAging',{type:'bar',data:{labels:agingBuckets,datasets:[{label:'Exposure $',data:agingVals,backgroundColor:'#E5A421'}]},
+    options:{plugins:{legend:{display:false}}}});
+  mkChart('chMatchRate',{type:'line',data:{labels:PERIODS,datasets:[{label:'Match Rate %',data:TREND_MATCHRATE,borderColor:'#2158C4',backgroundColor:'#2158C422',fill:true,tension:.35}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{min:60,max:100}}}});
+  if(state.exec.selectedKPI){
+    const filtered=RECORDS.filter(KPI_FILTERS[state.exec.selectedKPI]);
+    const byOrg={}; ORG_UNITS.forEach(o=>byOrg[o]=0); filtered.forEach(r=>byOrg[r.orgUnit]++);
+    mkChart('chDrill',{type:'bar',data:{labels:Object.keys(byOrg),datasets:[{label:'Count',data:Object.values(byOrg),backgroundColor:'#2158C4'}]},
+      options:{plugins:{legend:{display:false}},indexAxis:'y'}});
+  }
+}
+
+/* =====================================================================
+   7.2 COMPLIANCE DASHBOARD
+   ===================================================================== */
+function complianceFiltered(){
+  return RECORDS.filter(r=>{
+    if(state.comp.orgUnit && r.orgUnit!==state.comp.orgUnit) return false;
+    if(state.comp.risk && r.risk!==state.comp.risk) return false;
+    if(state.comp.late && !r.late) return false;
+    return true;
+  });
+}
+function renderCompliance(){
+  const f=complianceFiltered();
+  const active=[state.comp.orgUnit,state.comp.risk,state.comp.late?'Late Only':null].filter(Boolean);
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / 7.2</div>
+  <div class="pagehead"><h2>Compliance Dashboard</h2><div class="sub">Organizational accountability &amp; exception review</div></div>
+  <div class="illus-tag">Illustrative Training Data</div>
+
+  ${active.length?`<div class="notice">Active filters: <b>${active.join(' · ')}</b> — charts and lists below are scoped to this selection. <span style="cursor:pointer;text-decoration:underline;" id="clearComp">Clear filters</span></div>`:''}
+
+  <div class="grid grid-3">
+    <div class="card"><h3>Status by Organizational Unit <span class="n">click a bar to filter</span></h3><div class="chartbox"><canvas id="chOrg"></canvas></div></div>
+    <div class="card"><h3>Status by Account Type</h3><div class="chartbox"><canvas id="chAcctType"></canvas></div></div>
+    <div class="card"><h3>Completion by Preparer</h3><div class="chartbox"><canvas id="chPreparer"></canvas></div></div>
+    <div class="card"><h3>Completion by Reviewer</h3><div class="chartbox"><canvas id="chReviewer"></canvas></div></div>
+    <div class="card"><h3>Late Reconciliations <span class="n">click to filter</span></h3><div class="chartbox"><canvas id="chLate"></canvas></div></div>
+    <div class="card"><h3>High-Risk Open Accounts <span class="n">click to filter</span></h3><div class="chartbox"><canvas id="chHighRisk"></canvas></div></div>
+    <div class="card"><h3>Rejections by Reason</h3><div class="chartbox"><canvas id="chRejReason"></canvas></div></div>
+    <div class="card"><h3>Auto-Reconciliation %</h3><div class="chartbox"><canvas id="chAutoPct"></canvas></div></div>
+    <div class="card"><h3>Unexplained Difference Trend</h3><div class="chartbox"><canvas id="chUnexp2"></canvas></div></div>
+    <div class="card"><h3>Period-over-Period Completion</h3><div class="chartbox"><canvas id="chPoP"></canvas></div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>High-Risk List <span class="n">${f.filter(r=>r.risk==='High').length} accounts · click a row for detail</span></h3>
+    <div class="tblwrap"><table>
+      <thead><tr><th>Account</th><th>Entity</th><th>Period</th><th>Risk</th><th>Balance</th><th>Difference</th><th>Days Open</th><th>Owner</th></tr></thead>
+      <tbody>
+      ${f.filter(r=>r.risk==='High').slice(0,50).map(r=>`<tr class="rowlink" data-rec="${r.id}">
+        <td class="mono">${r.account}</td><td>${r.orgUnit}</td><td>${r.period}</td>
+        <td><span class="chip High">High</span></td><td class="mono">${fmtC(r.balance)}</td>
+        <td class="mono">${fmtC(r.difference)}</td><td>${r.daysOpen}</td><td>${r.owner}</td>
+      </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:#8A96AC;padding:20px;">No high-risk accounts in current filter</td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+function drawComplianceCharts(){
+  const f=complianceFiltered();
+  const byOrg=ORG_UNITS.map(o=>f.filter(r=>r.orgUnit===o).length);
+  mkChart('chOrg',{type:'bar',data:{labels:ORG_UNITS,datasets:[{data:byOrg,backgroundColor:ORG_UNITS.map(o=>o===state.comp.orgUnit?'#0A1930':'#2158C4')}]},
+    options:{plugins:{legend:{display:false}},onClick:(e,els)=>{if(!els.length)return;const o=ORG_UNITS[els[0].index];state.comp.orgUnit=state.comp.orgUnit===o?null:o;logAction('comp_org_'+o);renderSubview();}}});
+  const byType=ACCOUNT_TYPES.map(t=>f.filter(r=>r.accountType===t).length);
+  mkChart('chAcctType',{type:'bar',data:{labels:ACCOUNT_TYPES,datasets:[{data:byType,backgroundColor:'#3AA0D9'}]},options:{plugins:{legend:{display:false}},indexAxis:'y'}});
+  const byPrep=PREPARERS.map(p=>f.filter(r=>r.preparer===p && r.status==='Approved').length);
+  mkChart('chPreparer',{type:'bar',data:{labels:PREPARERS,datasets:[{data:byPrep,backgroundColor:'#0D9E8C'}]},options:{plugins:{legend:{display:false}}}});
+  const byRev=REVIEWERS.map(rv=>f.filter(r=>r.reviewer===rv && r.status==='Approved').length);
+  mkChart('chReviewer',{type:'bar',data:{labels:REVIEWERS,datasets:[{data:byRev,backgroundColor:'#7C5CD6'}]},options:{plugins:{legend:{display:false}}}});
+  const lateCount=f.filter(r=>r.late).length, notLate=f.length-lateCount;
+  mkChart('chLate',{type:'doughnut',data:{labels:['Late','On Track'],datasets:[{data:[lateCount,notLate],backgroundColor:[state.comp.late?'#0A1930':'#D6394A','#E7ECF4']}]},
+    options:{plugins:{legend:{position:'bottom'}},onClick:()=>{state.comp.late=!state.comp.late;logAction('comp_late');renderSubview();}}});
+  const hrCount=f.filter(r=>r.risk==='High'&&r.status!=='Approved').length, other=f.length-hrCount;
+  mkChart('chHighRisk',{type:'doughnut',data:{labels:['High Risk Open','Other'],datasets:[{data:[hrCount,other],backgroundColor:[state.comp.risk==='High'?'#0A1930':'#D6394A','#E7ECF4']}]},
+    options:{plugins:{legend:{position:'bottom'}},onClick:()=>{state.comp.risk=state.comp.risk==='High'?null:'High';logAction('comp_highrisk');renderSubview();}}});
+  const rejByReason=REJECT_REASONS.map(rs=>f.filter(r=>r.rejectionReason===rs).length);
+  mkChart('chRejReason',{type:'pie',data:{labels:REJECT_REASONS,datasets:[{data:rejByReason,backgroundColor:PALETTE}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:9}}}}}});
+  const autoPct = f.length? Math.round(f.filter(r=>r.autoRecon).length/f.length*100):0;
+  mkChart('chAutoPct',{type:'doughnut',data:{labels:['Auto','Manual'],datasets:[{data:[autoPct,100-autoPct],backgroundColor:['#0D9E8C','#E7ECF4']}]},options:{plugins:{legend:{position:'bottom'}}}});
+  mkChart('chUnexp2',{type:'line',data:{labels:PERIODS,datasets:[{data:TREND_UNEXPLAINED,borderColor:'#D6394A',backgroundColor:'#D6394A22',fill:true,tension:.35}]},options:{plugins:{legend:{display:false}}}});
+  mkChart('chPoP',{type:'bar',data:{labels:PERIODS,datasets:[{data:TREND_COMPLETION,backgroundColor:'#2158C4'}]},options:{plugins:{legend:{display:false}}}});
+}
+
+/* =====================================================================
+   7.3 TRANSACTION MATCHING DASHBOARD
+   ===================================================================== */
+function matchFiltered(){
+  return TXNS.filter(t=>{
+    if(state.match.rule && t.rule!==state.match.rule) return false;
+    if(state.match.source && t.source!==state.match.source) return false;
+    if(state.match.bucket){
+      const [lo,hi]=state.match.bucket;
+      if(!(t.matchType==='Unmatched' && t.ageDays>=lo && t.ageDays<=hi)) return false;
+    }
+    return true;
+  });
+}
+const AGING_BUCKETS=[[0,7,'0–7 Days'],[8,30,'8–30 Days'],[31,60,'31–60 Days'],[61,90,'61–90 Days'],[91,9999,'90+ Days']];
+function renderMatching(){
+  const k=computeTxnKPIs(TXNS);
+  const f=matchFiltered();
+  const active=[state.match.rule,state.match.source,state.match.bucket?AGING_BUCKETS.find(b=>b[0]===state.match.bucket[0])[2]:null].filter(Boolean);
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / 7.3</div>
+  <div class="pagehead"><h2>Transaction Matching Dashboard</h2><div class="sub">Auto-match performance &amp; exception aging</div></div>
+  <div class="illus-tag">Illustrative Training Data</div>
+
+  <div class="grid grid-4">
+    <div class="card kpi good"><div class="label">Imported Transactions</div><div class="value">${k.total.toLocaleString()}</div></div>
+    <div class="card kpi good"><div class="label">Auto-Match Rate</div><div class="value">${k.autoRate}%</div></div>
+    <div class="card kpi warn"><div class="label">Manual-Match Rate</div><div class="value">${k.manualRate}%</div></div>
+    <div class="card kpi risk"><div class="label">Unmatched Count</div><div class="value">${k.unmatchedCount}</div></div>
+    <div class="card kpi risk"><div class="label">Unmatched Amount</div><div class="value">${fmtC2(k.unmatchedAmt)}</div></div>
+    <div class="card kpi"><div class="label">Suggested Matches</div><div class="value">${k.suggested}</div></div>
+    <div class="card kpi"><div class="label">Adjustments Created</div><div class="value">${k.adjustments}</div></div>
+    <div class="card kpi risk"><div class="label">Old Unmatched (90+)</div><div class="value">${k.old90}</div></div>
+    <div class="card kpi"><div class="label">Matching Job Duration</div><div class="value">${k.jobDuration} min</div></div>
+    <div class="card kpi good"><div class="label">Avg. Source Data Quality</div><div class="value">92%</div></div>
+  </div>
+
+  ${active.length?`<div class="notice">Active filters: <b>${active.join(' · ')}</b> <span style="cursor:pointer;text-decoration:underline;" id="clearMatch">Clear filters</span></div>`:''}
+
+  <h3 style="margin:22px 0 10px;font-size:15px;">Transaction Matching Charts</h3>
+  <div class="grid grid-3">
+    <div class="card"><h3>Auto vs Manual Match</h3><div class="chartbox"><canvas id="chAutoManual"></canvas></div></div>
+    <div class="card"><h3>Unmatched Amount by Source</h3><div class="chartbox"><canvas id="chUnmatchedAmt"></canvas></div></div>
+    <div class="card"><h3>Matches by Rule <span class="n">click a rule</span></h3><div class="chartbox"><canvas id="chByRule"></canvas></div></div>
+    <div class="card"><h3>Aging Unmatched Items <span class="n">click a bucket</span></h3><div class="chartbox"><canvas id="chAgeUnmatched"></canvas></div></div>
+    <div class="card"><h3>Job Duration (min, last 6 runs)</h3><div class="chartbox"><canvas id="chJobDuration"></canvas></div></div>
+    <div class="card"><h3>Adjustments Created (trend)</h3><div class="chartbox"><canvas id="chAdjustments"></canvas></div></div>
+  </div>
+
+  <h3 style="margin:22px 0 10px;font-size:15px;">Source-Level Data Quality <span class="n">click a source for detail</span></h3>
+  <div class="grid grid-3" id="sourceCards">
+    ${SOURCES.map(s=>{
+      const st=TXNS.filter(t=>t.source===s);
+      const valid=st.filter(t=>t.valid).length, rejected=st.length-valid, dup=st.filter(t=>t.duplicate).length, miss=st.filter(t=>t.missingFields).length;
+      const qual=st.length?Math.round(valid/st.length*100):0;
+      return `<div class="card kpi ${qual<90?'warn':'good'} ${state.match.source===s?'selected':''}" data-source="${s}">
+        <div class="label">${s}</div>
+        <div class="value">${qual}%</div>
+        <div class="trend flat">Records: ${st.length} · Rejected: ${rejected} · Dup: ${dup} · Missing: ${miss}</div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Transaction List <span class="n">${f.length} matching current filters</span></h3>
+    <div class="tblwrap"><table>
+      <thead><tr><th>ID</th><th>Source</th><th>Match Type</th><th>Rule</th><th>Amount</th><th>Age (days)</th></tr></thead>
+      <tbody>
+      ${f.slice(0,60).map(t=>`<tr><td class="mono">${t.id}</td><td>${t.source.split(' — ')[0]}</td>
+        <td><span class="chip ${t.matchType==='Auto'?'Approved':t.matchType==='Unmatched'?'Rejected':'Submitted'}">${t.matchType}</span></td>
+        <td>${t.rule||'—'}</td><td class="mono">${fmtC(t.amount)}</td><td>${t.ageDays}</td></tr>`).join('') ||
+        '<tr><td colspan="6" style="text-align:center;color:#8A96AC;padding:20px;">No transactions match this filter</td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+function drawMatchingCharts(){
+  const auto=TXNS.filter(t=>t.matchType==='Auto').length, manual=TXNS.filter(t=>t.matchType==='Manual').length, un=TXNS.filter(t=>t.matchType==='Unmatched').length;
+  mkChart('chAutoManual',{type:'doughnut',data:{labels:['Auto','Manual','Unmatched'],datasets:[{data:[auto,manual,un],backgroundColor:['#0D9E8C','#E5A421','#D6394A']}]},options:{plugins:{legend:{position:'bottom'}}}});
+  const bySrc=SOURCES.map(s=>TXNS.filter(t=>t.source===s && t.matchType==='Unmatched').reduce((sum,t)=>sum+Math.abs(t.amount),0));
+  mkChart('chUnmatchedAmt',{type:'bar',data:{labels:SOURCES.map(s=>s.split(' — ')[0]),datasets:[{data:bySrc,backgroundColor:'#D6394A'}]},options:{plugins:{legend:{display:false}}}});
+  const byRule=MATCH_RULES.map(r=>TXNS.filter(t=>t.rule===r).length);
+  mkChart('chByRule',{type:'bar',data:{labels:MATCH_RULES,datasets:[{data:byRule,backgroundColor:MATCH_RULES.map(r=>r===state.match.rule?'#0A1930':'#2158C4')}]},
+    options:{plugins:{legend:{display:false}},indexAxis:'y',onClick:(e,els)=>{if(!els.length)return;const r=MATCH_RULES[els[0].index];state.match.rule=state.match.rule===r?null:r;logAction('match_rule_'+r);renderSubview();}}});
+  const ageVals=AGING_BUCKETS.map(b=>TXNS.filter(t=>t.matchType==='Unmatched' && t.ageDays>=b[0] && t.ageDays<=b[1]).length);
+  mkChart('chAgeUnmatched',{type:'bar',data:{labels:AGING_BUCKETS.map(b=>b[2]),datasets:[{data:ageVals,backgroundColor:AGING_BUCKETS.map(b=>state.match.bucket&&state.match.bucket[0]===b[0]?'#0A1930':'#E5A421')}]},
+    options:{plugins:{legend:{display:false}},onClick:(e,els)=>{if(!els.length)return;const b=AGING_BUCKETS[els[0].index];state.match.bucket=(state.match.bucket&&state.match.bucket[0]===b[0])?null:[b[0],b[1]];logAction('match_bucket_'+b[2]);renderSubview();}}});
+  mkChart('chJobDuration',{type:'line',data:{labels:PERIODS,datasets:[{data:[18,17,16,15,14,14],borderColor:'#7C5CD6',backgroundColor:'#7C5CD622',fill:true,tension:.3}]},options:{plugins:{legend:{display:false}}}});
+  mkChart('chAdjustments',{type:'bar',data:{labels:PERIODS,datasets:[{data:[22,19,17,15,13,12],backgroundColor:'#3AA0D9'}]},options:{plugins:{legend:{display:false}}}});
+}
+
+/* =====================================================================
+   ANALYTICS (deeper trend view)
+   ===================================================================== */
+function renderAnalytics(){
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Analytics</div>
+  <div class="pagehead"><h2>Analytics</h2><div class="sub">Period-over-period correlation across reconciliation &amp; matching KPIs</div></div>
+  <div class="illus-tag">Illustrative Training Data</div>
+  <div class="grid grid-2">
+    <div class="card"><h3>Completion % vs Match Rate %</h3><div class="chartbox"><canvas id="anCombo"></canvas></div></div>
+    <div class="card"><h3>Unexplained Difference vs Aging Exposure</h3><div class="chartbox"><canvas id="anCombo2"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>Key Observations</h3>
+    <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.8;color:#33415C;">
+      <li>Completion percentage has trended from ${TREND_COMPLETION[0]}% to ${TREND_COMPLETION[TREND_COMPLETION.length-1]}% over six periods.</li>
+      <li>Match rate improved alongside completion, moving from ${TREND_MATCHRATE[0]}% to ${TREND_MATCHRATE[TREND_MATCHRATE.length-1]}%.</li>
+      <li>Unexplained difference exposure has declined as completion improved — a typical inverse relationship in mature reconciliation programs.</li>
+    </ul>
+  </div>`;
+}
+function drawAnalyticsCharts(){
+  mkChart('anCombo',{type:'line',data:{labels:PERIODS,datasets:[
+    {label:'Completion %',data:TREND_COMPLETION,borderColor:'#0D9E8C',tension:.3},
+    {label:'Match Rate %',data:TREND_MATCHRATE,borderColor:'#2158C4',tension:.3}
+  ]},options:{scales:{y:{min:60,max:100}}}});
+  const agingSeries=[210000,190000,170000,150000,130000,110000];
+  mkChart('anCombo2',{type:'line',data:{labels:PERIODS,datasets:[
+    {label:'Unexplained $',data:TREND_UNEXPLAINED,borderColor:'#D6394A',tension:.3},
+    {label:'Aging Exposure $',data:agingSeries,borderColor:'#E5A421',tension:.3}
+  ]}});
+}
+
+/* =====================================================================
+   7.4 CUSTOM DASHBOARD BUILDER
+   ===================================================================== */
+const WIDGET_TYPES=[
+  {t:'kpi',label:'KPI Tile'},{t:'bar',label:'Bar Chart'},{t:'line',label:'Line Chart'},
+  {t:'donut',label:'Pie / Donut'},{t:'pivot',label:'Pivot View'},{t:'list',label:'List View'},
+  {t:'table',label:'Table'},{t:'filter',label:'Filter'},{t:'drill',label:'Drill-through Panel'},{t:'prompt',label:'Saved Prompt'}
+];
+function addWidget(type){
+  const id='w'+Math.random().toString(36).slice(2,8);
+  const base={id,type};
+  if(type==='kpi') Object.assign(base,{metric:'matchRate',title:'Match Rate',threshold:90});
+  if(type==='bar') Object.assign(base,{dimension:'orgUnit',measure:'count'});
+  if(type==='line') Object.assign(base,{measure:'unexplained'});
+  if(type==='donut') Object.assign(base,{});
+  if(type==='pivot') Object.assign(base,{rows:'preparer',cols:'status'});
+  if(type==='list') Object.assign(base,{cols:['account','orgUnit','risk','balance']});
+  if(type==='table') Object.assign(base,{});
+  if(type==='drill') Object.assign(base,{enabled:true,segment:null});
+  if(type==='prompt') Object.assign(base,{name:'',cond:{}});
+  state.builder.components.push(base);
+  logAction('builder_add_'+type);
+}
+function builderFilteredRecords(){
+  const f=state.builder.filters;
+  return RECORDS.filter(r=>{
+    if(f.period && r.period!==f.period) return false;
+    if(f.orgUnit && r.orgUnit!==f.orgUnit) return false;
+    if(f.accountType && r.accountType!==f.accountType) return false;
+    if(f.status && r.status!==f.status) return false;
+    if(f.risk && r.risk!==f.risk) return false;
+    if(f.preparer && r.preparer!==f.preparer) return false;
+    if(f.reviewer && r.reviewer!==f.reviewer) return false;
+    return true;
+  });
+}
+function builderFlowStep(){
+  const b=state.builder;
+  if(b.savedDashboards.length) return 7;
+  if(b.components.some(c=>c.type==='drill')) return 6;
+  if(b.savedPrompts.length) return 5;
+  if(Object.keys(b.filters).length) return 4;
+  if(b.components.length) return 3;
+  return 1;
+}
+function renderBuilder(){
+  const step=builderFlowStep();
+  const steps=['Select Data','Select Component','Configure','Add Filter','Add Prompt','Enable Drill-through','Save Dashboard'];
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / 7.4</div>
+  <div class="pagehead"><h2>Custom Dashboard Builder</h2><div class="sub">Assemble your own dashboard from reconciliation &amp; matching data</div></div>
+  <div class="illus-tag">Illustrative Training Data</div>
+
+  <div class="card">
+    <h3>Dashboard Builder Workflow</h3>
+    <div class="flow">
+      ${steps.map((s,i)=>`<div class="flow-step ${i+1<=step?'on':''}">${s}</div>${i<steps.length-1?'<div class="flow-arrow">→</div>':''}`).join('')}
+    </div>
+    <small class="hint">Data source: Reconciliation dataset (${RECORDS.length} records, current + prior periods). This flow highlights automatically as you build below.</small>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Global Filter Builder</h3>
+    <div class="filterbar" style="box-shadow:none;border:none;padding:0;">
+      <div class="fld"><label>Period</label><select id="bf_period"><option value="">Any</option>${PERIODS.map(p=>`<option ${state.builder.filters.period===p?'selected':''}>${p}</option>`).join('')}</select></div>
+      <div class="fld"><label>Entity</label><select id="bf_orgUnit"><option value="">Any</option>${ORG_UNITS.map(o=>`<option ${state.builder.filters.orgUnit===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="fld"><label>Account</label><select id="bf_accountType"><option value="">Any</option>${ACCOUNT_TYPES.map(o=>`<option ${state.builder.filters.accountType===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="fld"><label>Status</label><select id="bf_status"><option value="">Any</option>${STATUSES.map(o=>`<option ${state.builder.filters.status===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="fld"><label>Risk</label><select id="bf_risk"><option value="">Any</option>${RISKS.map(o=>`<option ${state.builder.filters.risk===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="fld"><label>Preparer</label><select id="bf_preparer"><option value="">Any</option>${PREPARERS.map(o=>`<option ${state.builder.filters.preparer===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="fld"><label>Reviewer</label><select id="bf_reviewer"><option value="">Any</option>${REVIEWERS.map(o=>`<option ${state.builder.filters.reviewer===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <button class="btn" id="applyFilter">APPLY</button>
+      <button class="btn ghost" id="clearFilter">Clear</button>
+    </div>
+    <small class="hint">${builderFilteredRecords().length} of ${RECORDS.length} records match current filter — applies to all filter-aware widgets below.</small>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Saved Prompts</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;">
+      <div class="fld"><label>Prompt Name</label><input type="text" id="promptName" placeholder="e.g. Current Month High Risk"></div>
+      <button class="btn orange" id="savePrompt">SAVE PROMPT</button>
+    </div>
+    ${state.builder.savedPrompts.length? `<div class="pillrow">${state.builder.savedPrompts.map((p,i)=>`<span class="pill-btn" data-run="${i}">▶ ${p.name} <span style="opacity:.6">(${p.summary})</span></span>`).join('')}</div>`
+      : '<small class="hint">No saved prompts yet — set a filter above and click Save Prompt to capture it (e.g. Period = Current Month, Risk = High, Status = Open).</small>'}
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Add Components</h3>
+    <div class="palette">${WIDGET_TYPES.map(w=>`<button class="pal-btn" data-add="${w.t}">+ ${w.label}</button>`).join('')}</div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:16px;" id="widgetCanvas">
+    ${state.builder.components.length? state.builder.components.map(renderWidget).join('') : '<div class="empty">Your dashboard canvas is empty. Add a component above to get started.</div>'}
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Save Dashboard</h3>
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <div class="fld"><label>Dashboard Name</label><input type="text" id="dashName" placeholder="e.g. Regional Controller View"></div>
+      <button class="btn" id="saveDash" ${state.builder.components.length?'':'disabled'}>SAVE DASHBOARD</button>
+    </div>
+    ${state.builder.savedDashboards.length?`<div style="margin-top:12px;">${state.builder.savedDashboards.map(d=>`<span class="badge-done" style="margin-right:8px;">✓ ${d}</span>`).join('')}</div>`:''}
+  </div>
+  `;
+}
+function renderWidget(w){
+  const head=`<div class="widget-head"><h4>${WIDGET_TYPES.find(x=>x.t===w.type).label}</h4><button class="x-btn" data-remove="${w.id}">✕ remove</button></div>`;
+  if(w.type==='kpi'){
+    const map={matchRate:{v:computeExecKPIs(builderFilteredRecords()).matchRate+'%',trend:'+3%'},total:{v:builderFilteredRecords().length,trend:'—'},
+      highRisk:{v:builderFilteredRecords().filter(r=>r.risk==='High').length,trend:'-2'},completed:{v:builderFilteredRecords().filter(r=>r.status==='Approved').length,trend:'+5'}};
+    const m=map[w.metric]||map.matchRate;
+    return `<div class="widget-card">${head}
+      <div class="widget-cfg">
+        <select data-cfg="${w.id}:metric"><option value="matchRate" ${w.metric==='matchRate'?'selected':''}>Match Rate</option>
+          <option value="total" ${w.metric==='total'?'selected':''}>Total Reconciliations</option>
+          <option value="highRisk" ${w.metric==='highRisk'?'selected':''}>High Risk</option>
+          <option value="completed" ${w.metric==='completed'?'selected':''}>Completed</option></select>
+        <input type="text" data-cfg="${w.id}:title" value="${w.title}" placeholder="Tile title">
+      </div>
+      <div class="kpi" style="border:none;padding:0;"><div class="label">${w.title}</div><div class="value">${m.v}</div><div class="trend up">Trend ${m.trend} · Threshold ${w.threshold}%</div></div>
+    </div>`;
+  }
+  if(w.type==='bar'){
+    const dims={orgUnit:ORG_UNITS,accountType:ACCOUNT_TYPES,preparer:PREPARERS,reviewer:REVIEWERS,status:STATUSES,risk:RISKS};
+    return `<div class="widget-card">${head}
+      <div class="widget-cfg">
+        <select data-cfg="${w.id}:dimension">${Object.keys(dims).map(d=>`<option value="${d}" ${w.dimension===d?'selected':''}>${d}</option>`).join('')}</select>
+        <select data-cfg="${w.id}:measure"><option value="count" ${w.measure==='count'?'selected':''}>Count</option><option value="balance" ${w.measure==='balance'?'selected':''}>Balance Sum</option><option value="difference" ${w.measure==='difference'?'selected':''}>Difference Sum</option></select>
+      </div>
+      <div class="chartbox"><canvas id="${w.id}"></canvas></div>
+    </div>`;
+  }
+  if(w.type==='line'){
+    return `<div class="widget-card">${head}
+      <div class="widget-cfg"><select data-cfg="${w.id}:measure">
+        <option value="unexplained" ${w.measure==='unexplained'?'selected':''}>Unexplained Difference</option>
+        <option value="completion" ${w.measure==='completion'?'selected':''}>Completion %</option>
+        <option value="matchrate" ${w.measure==='matchrate'?'selected':''}>Match Rate %</option></select></div>
+      <div class="chartbox"><canvas id="${w.id}"></canvas></div>
+    </div>`;
+  }
+  if(w.type==='donut'){
+    return `<div class="widget-card">${head}<small class="hint">Auto-Reconciled / Manual / Exception</small><div class="chartbox"><canvas id="${w.id}"></canvas></div></div>`;
+  }
+  if(w.type==='pivot'){
+    const rowsSrc = w.rows==='preparer'?PREPARERS:w.rows==='reviewer'?REVIEWERS:ORG_UNITS;
+    const colsSrc = w.cols==='status'?STATUSES:RISKS;
+    const data=builderFilteredRecords();
+    return `<div class="widget-card">${head}
+      <div class="widget-cfg">
+        <select data-cfg="${w.id}:rows"><option value="preparer" ${w.rows==='preparer'?'selected':''}>Preparer</option><option value="reviewer" ${w.rows==='reviewer'?'selected':''}>Reviewer</option><option value="orgUnit" ${w.rows==='orgUnit'?'selected':''}>Org Unit</option></select>
+        <select data-cfg="${w.id}:cols"><option value="status" ${w.cols==='status'?'selected':''}>Status</option><option value="risk" ${w.cols==='risk'?'selected':''}>Risk</option></select>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>${w.rows}</th>${colsSrc.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${rowsSrc.map(rw=>`<tr><td>${rw}</td>${colsSrc.map(c=>{
+        const n=data.filter(r=>r[w.rows]===rw && r[w.cols]===c).length;
+        return `<td class="mono">${n||'—'}</td>`;
+      }).join('')}</tr>`).join('')}</tbody></table></div>
+    </div>`;
+  }
+  if(w.type==='list'){
+    const data=builderFilteredRecords().slice(0,12);
+    const cols=['account','orgUnit','risk','balance','difference','owner'];
+    return `<div class="widget-card">${head}
+      <div class="tblwrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${data.map(r=>`<tr>${cols.map(c=>`<td>${c==='balance'||c==='difference'?fmtC(r[c]):r[c]}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="6">No data</td></tr>`}</tbody></table></div>
+    </div>`;
+  }
+  if(w.type==='table'){
+    const data=builderFilteredRecords().slice(0,15);
+    return `<div class="widget-card">${head}
+      <div class="tblwrap"><table><thead><tr><th>Account</th><th>Entity</th><th>Status</th><th>Preparer</th><th>Balance</th></tr></thead>
+      <tbody>${data.map(r=>`<tr><td class="mono">${r.account}</td><td>${r.orgUnit}</td><td><span class="chip ${r.status.replace(' ','')}">${r.status}</span></td><td>${r.preparer}</td><td class="mono">${fmtC(r.balance)}</td></tr>`).join('') || `<tr><td colspan="5">No data</td></tr>`}</tbody></table></div>
+    </div>`;
+  }
+  if(w.type==='filter'){
+    return `<div class="widget-card">${head}<small class="hint">This widget mirrors the Global Filter Builder above. Use it to scope every filter-aware widget on this canvas.</small></div>`;
+  }
+  if(w.type==='drill'){
+    const seg=w.segment;
+    const data = seg? builderFilteredRecords().filter(r=>r.orgUnit===seg) : [];
+    return `<div class="widget-card">${head}
+      <label style="font-size:12px;"><input type="checkbox" data-drillenable="${w.id}" ${w.enabled?'checked':''}> Drill-through enabled</label>
+      <div class="chartbox" style="height:180px;margin-top:8px;"><canvas id="${w.id}"></canvas></div>
+      ${seg? `<div class="tblwrap" style="margin-top:8px;"><table><thead><tr><th>Account</th><th>Risk</th><th>Balance</th></tr></thead>
+        <tbody>${data.slice(0,8).map(r=>`<tr><td class="mono">${r.account}</td><td><span class="chip ${r.risk}">${r.risk}</span></td><td class="mono">${fmtC(r.balance)}</td></tr>`).join('')}</tbody></table></div>`
+        : '<small class="hint">Click a bar to drill through to record-level detail.</small>'}
+    </div>`;
+  }
+  if(w.type==='prompt'){
+    return `<div class="widget-card">${head}<small class="hint">Configure and save prompts from the "Saved Prompts" panel above — this tile is a placeholder for a prompt shortcut on your canvas.</small>
+      <div class="pillrow">${state.builder.savedPrompts.map((p,i)=>`<span class="pill-btn" data-run="${i}">▶ ${p.name}</span>`).join('') || '<span style="color:#8A96AC;font-size:12px;">No prompts saved yet.</span>'}</div>
+    </div>`;
+  }
+  return `<div class="widget-card">${head}</div>`;
+}
+function drawBuilderCharts(){
+  state.builder.components.forEach(w=>{
+    const data=builderFilteredRecords();
+    if(w.type==='bar'){
+      const dims={orgUnit:ORG_UNITS,accountType:ACCOUNT_TYPES,preparer:PREPARERS,reviewer:REVIEWERS,status:STATUSES,risk:RISKS};
+      const cats=dims[w.dimension];
+      const vals=cats.map(c=>{
+        const rows=data.filter(r=>r[w.dimension]===c);
+        if(w.measure==='count') return rows.length;
+        if(w.measure==='balance') return rows.reduce((s,r)=>s+r.balance,0);
+        return rows.reduce((s,r)=>s+r.difference,0);
+      });
+      mkChart(w.id,{type:'bar',data:{labels:cats,datasets:[{data:vals,backgroundColor:'#2158C4'}]},options:{plugins:{legend:{display:false}}}});
+    }
+    if(w.type==='line'){
+      const series = w.measure==='unexplained'?TREND_UNEXPLAINED : w.measure==='completion'?TREND_COMPLETION : TREND_MATCHRATE;
+      mkChart(w.id,{type:'line',data:{labels:PERIODS,datasets:[{data:series,borderColor:'#0D9E8C',backgroundColor:'#0D9E8C22',fill:true,tension:.3}]},options:{plugins:{legend:{display:false}}}});
+    }
+    if(w.type==='donut'){
+      const auto=data.filter(r=>r.autoRecon).length, manual=data.filter(r=>r.status==='Approved'&&!r.autoRecon).length, exc=data.filter(r=>r.status==='Rejected'||r.risk==='High').length;
+      mkChart(w.id,{type:'doughnut',data:{labels:['Auto-Reconciled','Manual','Exception'],datasets:[{data:[auto,manual,exc],backgroundColor:['#0D9E8C','#2158C4','#D6394A']}]},options:{plugins:{legend:{position:'bottom'}}}});
+    }
+    if(w.type==='drill'){
+      const byOrg=ORG_UNITS.map(o=>data.filter(r=>r.orgUnit===o).length);
+      mkChart(w.id,{type:'bar',data:{labels:ORG_UNITS,datasets:[{data:byOrg,backgroundColor:ORG_UNITS.map(o=>o===w.segment?'#0A1930':'#E5A421')}]},
+        options:{plugins:{legend:{display:false}},onClick:(e,els)=>{if(!els.length||!w.enabled)return;w.segment=ORG_UNITS[els[0].index];logAction('builder_drill');renderSubview();}}});
+    }
+  });
+}
+
+/* =====================================================================
+   TRAINING SCENARIOS
+   ===================================================================== */
+const SCENARIOS=[
+  {id:1,title:'CFO Executive Review',view:'executive',goal:'Identify total reconciliations, completion, late, high risk and unmatched value, then determine which area needs attention.',
+   steps:['Open Executive Overview','Review the Total Reconciliations, Completed and Late KPI cards','Click the High Risk KPI to drill into detail','Note the Unmatched Value KPI','Decide which area most needs management attention'],
+   required:['exec_kpi_click']},
+  {id:2,title:'Late Reconciliations Review',view:'compliance',goal:'Open Compliance, select Late Reconciliations, identify high-risk items, and drill into detail.',
+   steps:['Open Compliance Dashboard','Click the Late Reconciliations chart','Cross-reference with High-Risk Open Accounts','Drill into a record for full detail'],
+   required:['comp_late']},
+  {id:3,title:'High-Risk Account Investigation',view:'compliance',goal:'Filter High Risk, review balance and difference, then open a record detail.',
+   steps:['Open Compliance Dashboard','Click High-Risk Open Accounts to filter','Review Balance and Difference in the High-Risk List','Click a row to open Record Detail'],
+   required:['comp_highrisk']},
+  {id:4,title:'Rejection Analysis',view:'compliance',goal:'Open Rejections by Reason, identify the dominant reason, and drill into records.',
+   steps:['Open Compliance Dashboard','Review the Rejections by Reason chart','Identify the most common rejection reason','Drill into a rejected record'],
+   required:[]},
+  {id:5,title:'Match Rate Analysis',view:'matching',goal:'Analyze Auto, Manual and Unmatched, then determine whether matching performance improved.',
+   steps:['Open Transaction Matching Dashboard','Review Auto vs Manual Match','Review the Unmatched Count and Amount','Check Job Duration trend for efficiency'],
+   required:[]},
+  {id:6,title:'Unmatched Aging Review',view:'matching',goal:'Identify 90+ day unmatched items and drill through to details.',
+   steps:['Open Transaction Matching Dashboard','Click the 90+ Days bucket in Aging Unmatched Items','Review the filtered transaction list'],
+   required:['match_bucket_90+ Days']},
+  {id:7,title:'Data Quality Assessment',view:'matching',goal:'Identify which source has the lowest data quality.',
+   steps:['Open Transaction Matching Dashboard','Compare the three Source-Level Data Quality cards','Click the lowest-quality source for detail'],
+   required:['source_click']},
+  {id:8,title:'Build a Custom Dashboard',view:'builder',goal:'Select a KPI, add a chart, add a filter, enable drill-through, and save the dashboard.',
+   steps:['Open Custom Dashboard Builder','Add a KPI Tile','Add a Bar or Line Chart','Apply a Global Filter','Add a Drill-through Panel and enable it','Save the dashboard'],
+   required:['builder_add_kpi','builder_add_bar','builder_save']},
+];
+function renderScenarioList(){
+  const done=Object.values(state.scenarioProgress).filter(Boolean).length;
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Training Scenarios</div>
+  <div class="pagehead"><h2>Real Business Scenarios</h2><div class="sub">${done} of ${SCENARIOS.length} completed</div></div>
+  <div class="progressbar"><div style="width:${done/SCENARIOS.length*100}%"></div></div>
+  <div class="grid grid-2" style="margin-top:16px;">
+    ${SCENARIOS.map(s=>`
+      <div class="card scn-card ${state.scenarioProgress[s.id]?'complete':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <h3 style="font-size:14.5px;">Scenario ${s.id} — ${s.title}</h3>
+          ${state.scenarioProgress[s.id]?'<span class="badge-done">✓ Complete</span>':''}
+        </div>
+        <p style="font-size:12.8px;color:var(--muted);margin:6px 0 12px;">${s.goal}</p>
+        <button class="btn small" data-start="${s.id}">${state.scenarioProgress[s.id]?'Review Scenario':'Start Scenario'}</button>
+      </div>`).join('')}
+  </div>`;
+}
+function renderScenarioDetail(){
+  const s=SCENARIOS.find(x=>x.id===state.activeScenario);
+  if(!s) return renderScenarioList();
+  const progressCount=state.actionLog.filter(a=>a.t>=state.scenarioStartIdx).length;
+  return `
+  <div class="crumbtop">Training Scenarios / Scenario ${s.id}</div>
+  <div class="pagehead"><h2>${s.title}</h2><div class="sub">${s.goal}</div></div>
+  <div class="card">
+    <h3>Guided Steps</h3>
+    <div class="stepline">
+      ${s.steps.map((st,i)=>`<div class="step">${st}</div>`).join('')}
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" data-goto="${s.view}">Open ${NAV.find(n=>n.id===s.view).label}</button>
+      <button class="btn ghost" id="checkScenario">Check My Progress</button>
+      <button class="btn ghost" id="backScenarios">Back to Scenarios</button>
+    </div>
+    <div id="scnResult" style="margin-top:12px;"></div>
+  </div>`;
+}
+function checkScenarioComplete(s){
+  if(!s.required.length) return true; // exploratory scenario — considered complete on visit + check
+  const log=state.actionLog.filter(a=>a.t>=state.scenarioStartIdx).map(a=>a.key);
+  return s.required.every(req=>log.some(k=>k.startsWith(req) || k===req));
+}
+
+/* =====================================================================
+   TRAINING MODE (guided walkthrough)
+   ===================================================================== */
+const TRAIN_STEPS=[
+  {view:'executive',title:'Open Executive Overview',desc:'Navigate to Executive Overview using the left sidebar.',check:()=>state.visited.has('executive')},
+  {view:'executive',title:'Find the High Risk KPI',desc:'Locate the High Risk KPI card among the twelve Executive KPI tiles.',check:()=>true},
+  {view:'executive',title:'Click High Risk',desc:'Click the High Risk KPI tile to drill into related chart, filtered data and detail list.',check:()=>state.exec.selectedKPI==='highRisk'},
+  {view:'compliance',title:'Review High-Risk Open Accounts',desc:'Open Compliance Dashboard and click High-Risk Open Accounts to filter the High-Risk List.',check:()=>state.comp.risk==='High'},
+  {view:'matching',title:'Review Matching Performance',desc:'Open Transaction Matching Dashboard and review Auto vs Manual Match.',check:()=>state.visited.has('matching')},
+  {view:'builder',title:'Build a Component',desc:'Open Custom Dashboard Builder and add a KPI Tile component.',check:()=>state.builder.components.some(c=>c.type==='kpi')},
+];
+function renderTraining(){
+  const i=state.training.step;
+  const st=TRAIN_STEPS[i];
+  const passed=st.check();
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Training Mode</div>
+  <div class="pagehead"><h2>Training Mode</h2><div class="sub">Step-by-step guidance through core dashboard workflows</div></div>
+  <div class="progressbar"><div style="width:${(i)/TRAIN_STEPS.length*100}%"></div></div>
+  <div class="sub" style="margin-bottom:14px;">Step ${i+1} of ${TRAIN_STEPS.length}</div>
+  <div class="card">
+    <h3>Step ${i+1}: ${st.title}</h3>
+    <p style="font-size:13.5px;color:#33415C;margin:10px 0 16px;">${st.desc}</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" data-goto="${st.view}">Go to ${NAV.find(n=>n.id===st.view).label}</button>
+      <button class="btn ghost" id="trainBack" ${i===0?'disabled':''}>Back</button>
+      <button class="btn ${passed?'':'ghost'}" id="trainNext" ${passed?'':'disabled'}>${i===TRAIN_STEPS.length-1?'Finish Training':'Next Step'}</button>
+    </div>
+    ${passed?'<div class="notice" style="margin-top:14px;">Step complete — you may continue.</div>':'<small class="hint">Complete the action described above, then return here to continue (this panel re-checks automatically when you navigate back).</small>'}
+  </div>`;
+}
+
+/* =====================================================================
+   PRACTICE MODE
+   ===================================================================== */
+function buildPracticePool(){
+  const lateByOrg={}; ORG_UNITS.forEach(o=>lateByOrg[o]=RECORDS.filter(r=>r.orgUnit===o && r.late).length);
+  const topLateOrg=Object.entries(lateByOrg).sort((a,b)=>b[1]-a[1])[0][0];
+  const rejByReason={}; REJECT_REASONS.forEach(r=>rejByReason[r]=RECORDS.filter(x=>x.rejectionReason===r).length);
+  const topReason=Object.entries(rejByReason).sort((a,b)=>b[1]-a[1])[0][0];
+  const qualBySrc=SOURCES.map(s=>{const st=TXNS.filter(t=>t.source===s);return [s,st.length?st.filter(t=>t.valid).length/st.length:1];});
+  const worstSrc=qualBySrc.sort((a,b)=>a[1]-b[1])[0][0];
+  const prepApproved={}; PREPARERS.forEach(p=>prepApproved[p]=RECORDS.filter(r=>r.preparer===p&&r.status==='Approved').length);
+  const topPreparer=Object.entries(prepApproved).sort((a,b)=>b[1]-a[1])[0][0];
+  return [
+    {q:'Which organizational unit has the highest number of late reconciliations?',opts:shuffle([topLateOrg,...sampleOthers(ORG_UNITS,topLateOrg,3)]),ans:topLateOrg},
+    {q:'Which rejection reason occurs most frequently?',opts:shuffle([topReason,...sampleOthers(REJECT_REASONS,topReason,3)]),ans:topReason},
+    {q:'Which source has the lowest data quality?',opts:shuffle([worstSrc,...sampleOthers(SOURCES,worstSrc,2)]),ans:worstSrc},
+    {q:'Which preparer has completed (Approved) the most reconciliations?',opts:shuffle([topPreparer,...sampleOthers(PREPARERS,topPreparer,3)]),ans:topPreparer},
+    {q:'Based on the Executive Overview, is the current Match Rate above or below 90%?',opts:['Above 90%','Below 90%'],ans: computeExecKPIs(RECORDS).matchRate>=90?'Above 90%':'Below 90%'},
+    {q:'Which dashboard shows Auto-Match Rate and Unmatched Amount?',opts:shuffle(['Transaction Matching Dashboard','Compliance Dashboard','Executive Overview']),ans:'Transaction Matching Dashboard'},
+  ];
+}
+function sampleOthers(list,exclude,n){const rest=list.filter(x=>x!==exclude);const out=[];while(out.length<n&&rest.length){const i=Math.floor(rnd()*rest.length);out.push(rest.splice(i,1)[0]);}return out;}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function renderPractice(){
+  if(!state.practice.pool){state.practice.pool=buildPracticePool();state.practice.qIdx=0;state.practice.correct=0;state.practice.total=0;state.practice.answered=false;}
+  const p=state.practice;
+  if(p.qIdx>=p.pool.length){
+    return `
+    <div class="crumbtop">Dashboards &amp; Analytics / Practice Mode</div>
+    <div class="pagehead"><h2>Practice Mode</h2><div class="sub">Session complete</div></div>
+    <div class="card"><h3>Results</h3><p style="font-size:14px;margin:10px 0;">Score: <b class="mono">${p.correct}/${p.total}</b> (${Math.round(p.correct/p.total*100)}%)</p>
+    <button class="btn" id="restartPractice">Restart Practice</button></div>`;
+  }
+  const q=p.pool[p.qIdx];
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Practice Mode</div>
+  <div class="pagehead"><h2>Practice Mode</h2><div class="sub">Task ${p.qIdx+1} of ${p.pool.length} · Score ${p.correct}/${p.total}</div></div>
+  <div class="card">
+    <h3>${q.q}</h3>
+    <div class="mcq" id="mcqWrap" style="margin-top:14px;">
+      ${q.opts.map((o,i)=>`<label data-opt="${o.replace(/"/g,'&quot;')}"><input type="radio" name="pmcq" value="${o.replace(/"/g,'&quot;')}"> ${o}</label>`).join('')}
+    </div>
+    <button class="btn" id="submitPractice" ${p.answered?'disabled':''}>Submit Answer</button>
+    <button class="btn ghost" id="nextPractice" style="display:${p.answered?'inline-block':'none'};margin-left:8px;">Next Task</button>
+    <div id="pFeedback" style="margin-top:10px;"></div>
+  </div>`;
+}
+
+/* =====================================================================
+   EXAM MODE
+   ===================================================================== */
+const EXAM_BANK=[
+  {q:'Management wants to identify high-risk open accounts. Which dashboard component is most appropriate?',
+   opts:['KPI Tile','Filtered List View with drill-through','Saved Prompt name only','Login screen'],ans:1},
+  {q:'Which chart type is best suited to show Auto-Reconciled vs Manual vs Exception proportions?',
+   opts:['Line chart','Pie / Donut chart','Pivot view','Table'],ans:1},
+  {q:'A controller wants reconciliation counts broken out by Preparer across Status. Which builder component fits best?',
+   opts:['Pivot View','KPI Tile','Filter','Saved Prompt'],ans:0},
+  {q:'To repeatedly re-run the same set of conditions (Period, Risk, Status), which feature should be used?',
+   opts:['Bar Chart Builder','Saved Prompt','Donut Chart Builder','List View'],ans:1},
+  {q:'Which KPI most directly measures reconciliation timeliness?',
+   opts:['On Time','Match Rate','Unmatched Value','Aging Exposure'],ans:0},
+  {q:'In Transaction Matching, which metric indicates transactions waiting longest without resolution?',
+   opts:['Suggested Matches','Old Unmatched Items (90+ Days)','Auto-Match Rate','Job Duration'],ans:1},
+  {q:'Which dashboard is the correct place to review Rejections by Reason?',
+   opts:['Executive Overview','Compliance Dashboard','Custom Dashboard Builder','Login Screen'],ans:1},
+  {q:'The correct KPI → drill-through sequence in this simulator is:',
+   opts:['KPI → Chart → Filtered Data → Detail List → Record Detail','Chart → KPI → Record Detail','Filter → KPI → Chart only','Detail List → KPI'],ans:0},
+  {q:'Which widget type would you add to enable click-to-detail behavior on a custom dashboard?',
+   opts:['Table only','Drill-through Panel','Saved Prompt','Filter'],ans:1},
+  {q:'Source-Level Data Quality on the Transaction Matching Dashboard is primarily used to evaluate:',
+   opts:['Reviewer workload','Upstream feed reliability (valid, rejected, duplicate, missing fields)','Executive KPI trend','Login role permissions'],ans:1},
+];
+function renderExam(){
+  const ex=state.exam;
+  if(!ex.startTime) ex.startTime=Date.now();
+  if(ex.submitted){
+    const correct=EXAM_BANK.filter((q,i)=>ex.answers[i]===q.ans).length;
+    const pct=Math.round(correct/EXAM_BANK.length*100);
+    const mins=Math.round((Date.now()-ex.startTime)/60000);
+    const done=Object.values(state.scenarioProgress).filter(Boolean).length;
+    return `
+    <div class="crumbtop">Dashboards &amp; Analytics / Exam Mode</div>
+    <div class="pagehead"><h2>Exam Results</h2></div>
+    <div class="grid grid-4">
+      <div class="card kpi"><div class="label">Scenarios Completed</div><div class="value">${done}/${SCENARIOS.length}</div></div>
+      <div class="card kpi good"><div class="label">Correct</div><div class="value">${correct}</div></div>
+      <div class="card kpi risk"><div class="label">Incorrect</div><div class="value">${EXAM_BANK.length-correct}</div></div>
+      <div class="card kpi"><div class="label">Score</div><div class="value">${pct}%</div></div>
+    </div>
+    <div class="card" style="margin-top:16px;text-align:center;">
+      <h2 style="color:${pct>=80?'var(--teal)':'var(--red)'};">${pct>=80?'PASSED':'RETRY RECOMMENDED'}</h2>
+      <p class="sub">Time taken: ${mins} min</p>
+      <button class="btn" id="retakeExam">Retake Exam</button>
+      <button class="btn orange" id="gotoFinal">View Completion Summary</button>
+    </div>`;
+  }
+  const i=ex.qIdx; const q=EXAM_BANK[i];
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Exam Mode</div>
+  <div class="pagehead"><h2>Exam Mode</h2><div class="sub">Scenario-based question ${i+1} of ${EXAM_BANK.length}</div></div>
+  <div class="progressbar"><div style="width:${i/EXAM_BANK.length*100}%"></div></div>
+  <div class="card">
+    <h3>${q.q}</h3>
+    <div class="mcq" style="margin-top:14px;">
+      ${q.opts.map((o,oi)=>`<label><input type="radio" name="examq" value="${oi}" ${ex.answers[i]===oi?'checked':''}> ${o}</label>`).join('')}
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;">
+      <button class="btn ghost" id="examBack" ${i===0?'disabled':''}>Back</button>
+      <button class="btn" id="examNext">${i===EXAM_BANK.length-1?'Submit Exam':'Next Question'}</button>
+    </div>
+  </div>`;
+}
+
+/* =====================================================================
+   REPORTS / HELP
+   ===================================================================== */
+function renderReports(){
+  const k=computeExecKPIs(RECORDS); const tk=computeTxnKPIs(TXNS);
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Reports</div>
+  <div class="pagehead"><h2>Reports</h2><div class="sub">Generated summary — illustrative training data</div></div>
+  <div class="card">
+    <h3>Period Summary — ${CUR_PERIOD}</h3>
+    <div class="kv">
+      <div><div class="k">Total Reconciliations</div><div class="v">${k.total}</div></div>
+      <div><div class="k">Completion Rate</div><div class="v">${Math.round(k.completed/k.total*100)}%</div></div>
+      <div><div class="k">High Risk Open</div><div class="v">${k.highRisk}</div></div>
+      <div><div class="k">Unexplained Difference</div><div class="v">${fmtC2(k.unexplained)}</div></div>
+      <div><div class="k">Auto-Match Rate</div><div class="v">${tk.autoRate}%</div></div>
+      <div><div class="k">Unmatched Amount</div><div class="v">${fmtC2(tk.unmatchedAmt)}</div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>Scenario &amp; Assessment Progress</h3>
+    <p style="font-size:13px;color:var(--muted);">Scenarios completed: ${Object.values(state.scenarioProgress).filter(Boolean).length} / ${SCENARIOS.length}. Visit Exam Mode for a formal score report.</p>
+  </div>`;
+}
+function renderHelp(){
+  const terms=[
+    ['KPI Tile','A single summary metric with a trend indicator, used across dashboards.'],
+    ['Drill-through','Clicking a KPI or chart segment to reveal filtered, more detailed data down to the record level.'],
+    ['Match Rate','The percentage of reconciliations or transactions successfully matched or completed.'],
+    ['Aging Exposure','The dollar exposure of items that have remained open beyond a defined threshold (e.g., 60 days).'],
+    ['Pivot View','A cross-tabulated summary of data by two dimensions, such as Preparer by Status.'],
+    ['Saved Prompt','A stored combination of filter conditions that can be re-run on demand.'],
+    ['Auto-Reconciled','Items matched or approved automatically by system rules without manual intervention.'],
+  ];
+  return `
+  <div class="crumbtop">Dashboards &amp; Analytics / Help</div>
+  <div class="pagehead"><h2>Help &amp; Glossary</h2></div>
+  <div class="card">
+    <h3>Quick Reference</h3>
+    <div class="kv" style="grid-template-columns:1fr;">
+      ${terms.map(t=>`<div><div class="k">${t[0]}</div><div style="font-size:12.8px;margin-top:4px;color:#33415C;">${t[1]}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>Getting Started</h3>
+    <p style="font-size:13px;color:#33415C;line-height:1.7;">Use Training Mode for guided steps, Practice Mode for scored tasks with instant feedback, and Exam Mode for a formal scenario-based assessment. Training Scenarios walks through eight real business situations end-to-end.</p>
+  </div>`;
+}
+
+/* =====================================================================
+   FINAL COMPLETION SCREEN
+   ===================================================================== */
+function renderFinal(){
+  const done=Object.values(state.scenarioProgress).filter(Boolean).length;
+  const dashboardsExplored=state.visited.size;
+  const customBuilt=state.builder.savedDashboards.length>0;
+  const examCorrect = EXAM_BANK.filter((q,i)=>state.exam.answers[i]===q.ans).length;
+  const examPct = state.exam.submitted? Math.round(examCorrect/EXAM_BANK.length*100) : null;
+  const mins = state.startTime? Math.round((Date.now()-state.startTime)/60000):0;
+  return `
+  <div class="final-wrap">
+    <div class="trophy">🏆</div>
+    <h1>CONGRATULATIONS!</h1>
+    <p class="sub" style="font-size:14px;">You completed</p>
+    <h2 style="margin:4px 0 24px;color:var(--blue-2);">DASHBOARDS AND ANALYTICS</h2>
+    <div class="grid grid-3" style="max-width:760px;margin:0 auto;text-align:left;">
+      <div class="card kpi"><div class="label">Scenarios Completed</div><div class="value">${done}/${SCENARIOS.length}</div></div>
+      <div class="card kpi"><div class="label">Dashboards Explored</div><div class="value">${dashboardsExplored}</div></div>
+      <div class="card kpi ${customBuilt?'good':'warn'}"><div class="label">Custom Dashboard Created</div><div class="value">${customBuilt?'Yes':'Not Yet'}</div></div>
+      <div class="card kpi good"><div class="label">Practice Correct</div><div class="value">${state.practice.correct}/${state.practice.total}</div></div>
+      <div class="card kpi ${examPct!==null&&examPct>=80?'good':'warn'}"><div class="label">Exam Score</div><div class="value">${examPct!==null?examPct+'%':'Not Taken'}</div></div>
+      <div class="card kpi"><div class="label">Time Taken</div><div class="value">${mins} min</div></div>
+    </div>
+    <div style="margin:30px 0 6px;"><img src="${LOGO}" style="height:44px;"></div>
+    <p style="font-weight:700;">BISP Trainings</p>
+    <p class="sub">www.bisptrainings.com</p>
+    <p class="sub">Call Us: +91 769-409-5404</p>
+    <p style="color:#8A96AC;font-size:11px;margin-top:18px;">© BISP Trainings | www.bisptrainings.com</p>
+  </div>`;
+}
+
+/* =====================================================================
+   RECORD DETAIL MODAL
+   ===================================================================== */
+function renderRecordModal(id){
+  const r=RECORDS.find(x=>x.id===id); if(!r) return '';
+  return `<div class="modal-bg" id="modalBg"><div class="modal">
+    <button class="close" id="modalClose">✕</button>
+    <h3>Record Detail — ${r.account}</h3>
+    <div class="sub" style="font-size:12px;">${r.orgUnit} · ${r.accountType} · ${r.period}</div>
+    <div class="kv">
+      <div><div class="k">Status</div><div class="v"><span class="chip ${r.status.replace(' ','')}">${r.status}</span></div></div>
+      <div><div class="k">Risk</div><div class="v"><span class="chip ${r.risk}">${r.risk}</span></div></div>
+      <div><div class="k">Balance</div><div class="v">${fmtC(r.balance)}</div></div>
+      <div><div class="k">Difference</div><div class="v">${fmtC(r.difference)}</div></div>
+      <div><div class="k">Days Open</div><div class="v">${r.daysOpen}</div></div>
+      <div><div class="k">Owner</div><div class="v">${r.owner}</div></div>
+      <div><div class="k">Preparer</div><div class="v">${r.preparer}</div></div>
+      <div><div class="k">Reviewer</div><div class="v">${r.reviewer}</div></div>
+      ${r.rejectionReason?`<div style="grid-column:1/-1;"><div class="k">Rejection Reason</div><div class="v">${r.rejectionReason}</div></div>`:''}
+    </div>
+  </div></div>`;
+}
+function bindModal(){
+  document.getElementById('modalClose').addEventListener('click',()=>{state.detailRecord=null;document.getElementById('modalBg').remove();});
+  document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg'){state.detailRecord=null;e.target.remove();}});
+}
+
+/* =====================================================================
+   BIND SUBVIEW EVENTS + chart draw dispatch
+   ===================================================================== */
+function bindSubview(sub){
+  document.querySelectorAll('[data-rec]').forEach(el=>el.addEventListener('click',()=>{state.detailRecord=el.dataset.rec;logAction('record_detail');renderSubview();}));
+  document.querySelectorAll('[data-goto]').forEach(el=>el.addEventListener('click',()=>{state.sub=el.dataset.goto;state.visited.add(state.sub);render();}));
+
+  if(sub==='executive'){
+    document.querySelectorAll('[data-kpi]').forEach(el=>el.addEventListener('click',()=>{
+      const k=el.dataset.kpi; state.exec.selectedKPI = state.exec.selectedKPI===k? null : k; logAction('exec_kpi_click_'+k); renderSubview();
+    }));
+    drawExecCharts();
+  }
+  if(sub==='compliance'){
+    const clr=document.getElementById('clearComp'); if(clr) clr.addEventListener('click',()=>{state.comp={orgUnit:null,risk:null,late:false};renderSubview();});
+    drawComplianceCharts();
+  }
+  if(sub==='matching'){
+    const clr=document.getElementById('clearMatch'); if(clr) clr.addEventListener('click',()=>{state.match={rule:null,bucket:null,source:null};renderSubview();});
+    document.querySelectorAll('[data-source]').forEach(el=>el.addEventListener('click',()=>{
+      const s=el.dataset.source; state.match.source = state.match.source===s?null:s; logAction('source_click_'+s); renderSubview();
+    }));
+    drawMatchingCharts();
+  }
+  if(sub==='analytics'){ drawAnalyticsCharts(); }
+  if(sub==='builder'){
+    document.querySelectorAll('[data-add]').forEach(el=>el.addEventListener('click',()=>{addWidget(el.dataset.add);renderSubview();}));
+    document.querySelectorAll('[data-remove]').forEach(el=>el.addEventListener('click',()=>{
+      state.builder.components=state.builder.components.filter(c=>c.id!==el.dataset.remove); renderSubview();
+    }));
+    document.querySelectorAll('[data-cfg]').forEach(el=>el.addEventListener('change',()=>{
+      const [id,field]=el.dataset.cfg.split(':'); const w=state.builder.components.find(c=>c.id===id); if(w){w[field]=el.value; renderSubview();}
+    }));
+    document.querySelectorAll('[data-drillenable]').forEach(el=>el.addEventListener('change',()=>{
+      const w=state.builder.components.find(c=>c.id===el.dataset.drillenable); if(w) w.enabled=el.checked;
+    }));
+    const apply=document.getElementById('applyFilter');
+    if(apply) apply.addEventListener('click',()=>{
+      const f={};
+      ['period','orgUnit','accountType','status','risk','preparer','reviewer'].forEach(k=>{
+        const v=document.getElementById('bf_'+k).value; if(v) f[k]=v;
+      });
+      state.builder.filters=f; logAction('builder_filter_apply'); renderSubview();
+    });
+    const clrF=document.getElementById('clearFilter'); if(clrF) clrF.addEventListener('click',()=>{state.builder.filters={};renderSubview();});
+    const savePrompt=document.getElementById('savePrompt');
+    if(savePrompt) savePrompt.addEventListener('click',()=>{
+      const name=document.getElementById('promptName').value.trim(); if(!name) return;
+      const cond=state.builder.filters;
+      const summary=Object.keys(cond).length? Object.entries(cond).map(([k,v])=>`${k}=${v}`).join(', ') : 'no active filter';
+      state.builder.savedPrompts.push({name,cond:{...cond},summary});
+      logAction('builder_save_prompt'); renderSubview();
+    });
+    document.querySelectorAll('[data-run]').forEach(el=>el.addEventListener('click',()=>{
+      const p=state.builder.savedPrompts[+el.dataset.run]; state.builder.filters={...p.cond}; logAction('builder_run_prompt'); renderSubview();
+    }));
+    const saveDash=document.getElementById('saveDash');
+    if(saveDash) saveDash.addEventListener('click',()=>{
+      const name=document.getElementById('dashName').value.trim()||'Untitled Dashboard '+(state.builder.savedDashboards.length+1);
+      state.builder.savedDashboards.push(name); logAction('builder_save'); renderSubview();
+    });
+    drawBuilderCharts();
+  }
+  if(sub==='scenarios'){
+    document.querySelectorAll('[data-start]').forEach(el=>el.addEventListener('click',()=>{
+      state.activeScenario=+el.dataset.start; state.scenarioStartIdx=Date.now(); state.sub='scenarioDetail'; render();
+    }));
+  }
+  if(sub==='scenarioDetail'){
+    const s=SCENARIOS.find(x=>x.id===state.activeScenario);
+    const chk=document.getElementById('checkScenario');
+    if(chk) chk.addEventListener('click',()=>{
+      const ok=checkScenarioComplete(s);
+      if(ok) state.scenarioProgress[s.id]=true;
+      document.getElementById('scnResult').innerHTML = ok?
+        `<div class="notice" style="background:#E4F5F1;border-color:#BFE7DD;color:#0D9E8C;">✓ Scenario complete — nice work.</div>`:
+        `<div class="notice" style="background:#FCE4E6;border-color:#F3C1C7;color:#B23246;">Not quite yet — complete the steps above (click the relevant KPI / chart / filter) then check again.</div>`;
+    });
+    const back=document.getElementById('backScenarios'); if(back) back.addEventListener('click',()=>{state.sub='scenarios';render();});
+  }
+  if(sub==='training'){
+    const next=document.getElementById('trainNext');
+    if(next) next.addEventListener('click',()=>{
+      if(state.training.step<TRAIN_STEPS.length-1){state.training.step++;render();}
+      else {state.sub='final';render();}
+    });
+    const back=document.getElementById('trainBack');
+    if(back) back.addEventListener('click',()=>{if(state.training.step>0){state.training.step--;render();}});
+  }
+  if(sub==='practice'){
+    const submit=document.getElementById('submitPractice');
+    if(submit) submit.addEventListener('click',()=>{
+      const sel=document.querySelector('input[name="pmcq"]:checked');
+      const p=state.practice; const q=p.pool[p.qIdx];
+      if(!sel){return;}
+      const val=sel.value;
+      p.answered=true; p.total++;
+      const correct = val===q.ans;
+      if(correct) p.correct++;
+      document.querySelectorAll('#mcqWrap label').forEach(l=>{
+        if(l.dataset.opt===q.ans) l.classList.add('correct');
+        else if(l.dataset.opt===val) l.classList.add('incorrect');
+      });
+      document.getElementById('pFeedback').innerHTML = correct? '<b style="color:var(--teal);">Correct!</b>' : `<b style="color:var(--red);">Not quite.</b> Correct answer: ${q.ans}`;
+      submit.disabled=true;
+      document.getElementById('nextPractice').style.display='inline-block';
+    });
+    const nextBtn=document.getElementById('nextPractice');
+    if(nextBtn) nextBtn.addEventListener('click',()=>{state.practice.qIdx++; state.practice.answered=false; render();});
+    const restart=document.getElementById('restartPractice');
+    if(restart) restart.addEventListener('click',()=>{state.practice.pool=null; render();});
+  }
+  if(sub==='exam'){
+    const next=document.getElementById('examNext');
+    if(next) next.addEventListener('click',()=>{
+      const sel=document.querySelector('input[name="examq"]:checked');
+      if(sel) state.exam.answers[state.exam.qIdx]=+sel.value;
+      if(state.exam.qIdx<EXAM_BANK.length-1){state.exam.qIdx++;render();}
+      else {state.exam.submitted=true;render();}
+    });
+    const back=document.getElementById('examBack');
+    if(back) back.addEventListener('click',()=>{
+      const sel=document.querySelector('input[name="examq"]:checked'); if(sel) state.exam.answers[state.exam.qIdx]=+sel.value;
+      state.exam.qIdx--; render();
+    });
+    const retake=document.getElementById('retakeExam');
+    if(retake) retake.addEventListener('click',()=>{state.exam={qIdx:0,answers:{},submitted:false,startTime:Date.now()};render();});
+    const gf=document.getElementById('gotoFinal');
+    if(gf) gf.addEventListener('click',()=>{state.sub='final';render();});
+  }
+}
+
+render();
+</script>
+</body>
+</html>
