@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BISP Reconciliation Compliance Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B2A4A;
+  --navy-2:#123a63;
+  --blue:#1B5FAE;
+  --blue-light:#E8F1FC;
+  --orange:#F26522;
+  --orange-light:#FDECE1;
+  --green:#2E9E5B;
+  --green-light:#E7F7EE;
+  --red:#D6483F;
+  --red-light:#FBEAE9;
+  --purple:#7B4FA0;
+  --purple-light:#F1E9F7;
+  --gray-50:#F6F8FB;
+  --gray-100:#EEF1F6;
+  --gray-200:#DEE4EC;
+  --gray-400:#9AA7B8;
+  --gray-600:#5B6B80;
+  --gray-800:#28323F;
+  --white:#fff;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(11,42,74,.06), 0 4px 14px rgba(11,42,74,.06);
+  font-family:'IBM Plex Sans', sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--gray-50);color:var(--gray-800);font-family:'IBM Plex Sans',sans-serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit;cursor:pointer;}
+::-webkit-scrollbar{height:8px;width:8px;}
+::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:4px;}
+
+/* ===== Login ===== */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 20% 20%, #123a63 0%, #0B2A4A 55%, #081b32 100%);}
+.login-card{width:400px;background:var(--white);border-radius:16px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.login-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:4px;}
+.login-logo img.bisp-logo{height:44px;width:auto;flex-shrink:0;}
+.brand-word{font-weight:700;font-size:22px;color:var(--navy);letter-spacing:.5px;}
+.brand-word span{color:var(--orange);}
+.login-sub{text-align:center;color:var(--gray-600);font-size:13px;margin-bottom:22px;}
+.app-title{text-align:center;font-weight:600;font-size:15px;color:var(--navy);margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--gray-100);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px;}
+.field select, .field input{width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:14px;background:var(--gray-50);color:var(--gray-800);}
+.field select:focus, .field input:focus{outline:2px solid var(--blue);outline-offset:1px;}
+.btn{border:none;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:600;transition:.15s;}
+.btn-primary{background:var(--blue);color:#fff;width:100%;}
+.btn-primary:hover{background:var(--navy-2);}
+.btn-ghost{background:var(--gray-100);color:var(--navy);width:100%;margin-top:8px;}
+.btn-ghost:hover{background:var(--gray-200);}
+.demo-users{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.demo-user-btn{border:1px solid var(--gray-200);background:var(--white);border-radius:8px;padding:9px 8px;font-size:12px;text-align:left;color:var(--gray-800);}
+.demo-user-btn b{display:block;font-size:12.5px;color:var(--navy);}
+.demo-user-btn:hover{border-color:var(--blue);background:var(--blue-light);}
+.login-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--gray-400);}
+
+/* ===== App shell ===== */
+#appScreen{display:none;min-height:100vh;flex-direction:column;}
+header.topbar{background:var(--navy);color:#fff;display:flex;align-items:center;padding:0 20px;height:56px;gap:18px;flex-shrink:0;box-shadow:var(--shadow);position:sticky;top:0;z-index:50;}
+.topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;cursor:pointer;}
+.topbar .brand img.bisp-logo{height:26px;width:auto;background:#fff;border-radius:5px;padding:3px 6px;}
+.topbar-app-name{font-size:13px;color:#B9CBE3;border-left:1px solid #2c4a6e;padding-left:14px;margin-left:2px;}
+.topbar-search{flex:1;max-width:340px;position:relative;}
+.topbar-search input{width:100%;padding:7px 12px 7px 30px;border-radius:7px;border:1px solid #2c4a6e;background:#0f3357;color:#fff;font-size:12.5px;}
+.topbar-search input::placeholder{color:#8ba5c4;}
+.topbar-search svg{position:absolute;left:9px;top:8px;width:14px;height:14px;stroke:#8ba5c4;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+.pill-btn{background:#0f3357;border:1px solid #2c4a6e;color:#dce8f7;padding:6px 11px;border-radius:7px;font-size:12px;position:relative;display:flex;align-items:center;gap:6px;}
+.pill-btn:hover{background:#164370;}
+.badge-dot{position:absolute;top:-4px;right:-4px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;border-radius:10px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:12.5px;}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+.user-meta b{display:block;font-size:12.5px;}
+.user-meta span{font-size:10.5px;color:#9db3cc;}
+.env-tag{font-size:10.5px;background:#164370;padding:3px 8px;border-radius:5px;color:#bcd3ec;}
+
+main{flex:1;padding:22px 26px 60px;max-width:1360px;margin:0 auto;width:100%;}
+.crumbs{font-size:12px;color:var(--gray-600);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.crumbs b{color:var(--navy);cursor:pointer;}
+.crumbs .sep{color:var(--gray-400);}
+
+footer.appfooter{text-align:center;font-size:11.5px;color:var(--gray-400);padding:22px 0 30px;}
+footer.appfooter b{color:var(--gray-600);}
+
+/* ===== dropdown/notif panel ===== */
+.dropdown{position:absolute;top:52px;right:20px;width:330px;background:#fff;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.18);border:1px solid var(--gray-200);z-index:100;overflow:hidden;display:none;}
+.dropdown.open{display:block;}
+.dropdown-head{padding:12px 14px;font-weight:600;font-size:13px;border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;color:var(--navy);}
+.dropdown-head a{font-size:11px;color:var(--blue);font-weight:500;cursor:pointer;}
+.notif-item{padding:11px 14px;border-bottom:1px solid var(--gray-100);font-size:12.5px;color:var(--gray-800);cursor:pointer;position:relative;}
+.notif-item:hover{background:var(--gray-50);}
+.notif-item.unread{background:var(--blue-light);}
+.notif-item .t{font-size:10.5px;color:var(--gray-400);margin-top:3px;}
+
+/* ===== Home ===== */
+.section-title{font-size:16px;font-weight:700;color:var(--navy);margin:26px 0 12px;}
+.illus-tag{font-size:10.5px;font-weight:600;color:var(--orange);background:var(--orange-light);padding:2px 8px;border-radius:12px;margin-left:8px;vertical-align:middle;}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+.kpi-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;border-top:3px solid var(--blue);}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(11,42,74,.12);}
+.kpi-card .v{font-size:22px;font-weight:700;color:var(--navy);font-family:'IBM Plex Mono',monospace;}
+.kpi-card .l{font-size:11.5px;color:var(--gray-600);margin-top:3px;}
+.kpi-card.warn{border-top-color:var(--orange);}
+.kpi-card.danger{border-top-color:var(--red);}
+.kpi-card.good{border-top-color:var(--green);}
+
+.flow-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:0;overflow-x:auto;padding:6px 0;}
+.flow-step{background:var(--blue);color:#fff;padding:11px 16px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s;flex-shrink:0;}
+.flow-step:hover{filter:brightness(1.1);transform:scale(1.03);}
+.flow-arrow{color:var(--gray-400);padding:0 8px;font-size:15px;flex-shrink:0;}
+.flow-step.c1{background:#1B5FAE;} .flow-step.c2{background:#2E9E5B;} .flow-step.c3{background:#F26522;}
+.flow-step.c4{background:#7B4FA0;} .flow-step.c5{background:#0B2A4A;} .flow-step.c6{background:#B4552F;}
+
+.nav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+.nav-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;}
+.nav-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 10px 24px rgba(11,42,74,.12);}
+.nav-card .ic{width:38px;height:38px;border-radius:9px;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:18px;}
+.nav-card .n{font-weight:600;font-size:13.5px;color:var(--navy);}
+.nav-card .d{font-size:11.5px;color:var(--gray-600);margin-top:4px;line-height:1.4;}
+
+/* ===== generic card/panel ===== */
+.panel{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--gray-100);}
+.panel-head h2{font-size:15px;margin:0;color:var(--navy);font-weight:700;}
+.panel-body{padding:20px;}
+.status-badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.3px;}
+.status-badge.active{background:var(--green-light);color:var(--green);}
+.status-badge.review{background:var(--orange-light);color:var(--orange);}
+.status-badge.prep{background:var(--blue-light);color:var(--blue);}
+.status-badge.approved{background:var(--purple-light);color:var(--purple);}
+.status-badge.closed{background:var(--gray-100);color:var(--gray-600);}
+.status-badge.rejected{background:var(--red-light);color:var(--red);}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;}
+.form-field label{display:block;font-size:11.5px;font-weight:600;color:var(--gray-600);margin-bottom:5px;}
+.form-field input,.form-field select{width:100%;padding:9px 11px;border:1px solid var(--gray-200);border-radius:7px;font-size:13px;background:var(--gray-50);}
+.form-field input:focus,.form-field select:focus{outline:2px solid var(--blue);background:#fff;}
+
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+.btn-sm{padding:9px 15px;border-radius:7px;font-size:12.5px;font-weight:600;border:1px solid transparent;}
+.btn-blue{background:var(--blue);color:#fff;} .btn-blue:hover{background:var(--navy-2);}
+.btn-green{background:var(--green);color:#fff;} .btn-green:hover{filter:brightness(.92);}
+.btn-orange{background:var(--orange);color:#fff;} .btn-orange:hover{filter:brightness(.92);}
+.btn-red{background:var(--red);color:#fff;} .btn-red:hover{filter:brightness(.92);}
+.btn-purple{background:var(--purple);color:#fff;} .btn-purple:hover{filter:brightness(.92);}
+.btn-outline{background:#fff;color:var(--navy);border-color:var(--gray-200);} .btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+.btn-sm:disabled{opacity:.4;cursor:not-allowed;}
+
+.toast-wrap{position:fixed;top:70px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--navy);color:#fff;padding:12px 16px;border-radius:8px;font-size:12.5px;box-shadow:0 8px 22px rgba(0,0,0,.25);min-width:240px;display:flex;align-items:center;gap:9px;animation:slidein .2s ease;}
+.toast.success{background:var(--green);} .toast.error{background:var(--red);} .toast.info{background:var(--blue);}
+@keyframes slidein{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;background:var(--gray-50);color:var(--gray-600);font-weight:600;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--gray-200);}
+td{padding:10px 12px;border-bottom:1px solid var(--gray-100);}
+tr:hover td{background:var(--gray-50);}
+.table-wrap{overflow-x:auto;}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--gray-200);margin-bottom:18px;flex-wrap:wrap;}
+.tab{padding:10px 14px;font-size:12.5px;font-weight:600;color:var(--gray-600);cursor:pointer;border-bottom:2px solid transparent;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab:hover{color:var(--navy);}
+
+.workbench-layout{display:grid;grid-template-columns:190px 1fr;gap:0;}
+.wb-side{border-right:1px solid var(--gray-200);padding:10px 0;}
+.wb-side .item{padding:10px 18px;font-size:12.5px;color:var(--gray-600);cursor:pointer;border-left:3px solid transparent;font-weight:500;}
+.wb-side .item:hover{background:var(--gray-50);color:var(--navy);}
+.wb-side .item.active{background:var(--blue-light);color:var(--blue);border-left-color:var(--blue);font-weight:700;}
+.wb-main{padding:20px;}
+
+.bal-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.bal-card{border:1px solid;border-radius:9px;padding:14px;text-align:center;}
+.bal-card .v{font-size:19px;font-weight:700;font-family:'IBM Plex Mono',monospace;}
+.bal-card .l{font-size:11px;color:var(--gray-600);margin-top:4px;font-weight:600;}
+.bal-card.source{border-color:#B7CFEC;background:var(--blue-light);} .bal-card.source .v{color:var(--blue);}
+.bal-card.sub{border-color:#B9E4CB;background:var(--green-light);} .bal-card.sub .v{color:var(--green);}
+.bal-card.adj{border-color:#F6CBA6;background:var(--orange-light);} .bal-card.adj .v{color:var(--orange);}
+.bal-card.unexp{border-color:#F0BAB6;background:var(--red-light);} .bal-card.unexp .v{color:var(--red);}
+
+.chart-bars{display:flex;align-items:flex-end;gap:16px;height:180px;padding:10px 6px 0;}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;}
+.chart-col .bar{width:70%;border-radius:5px 5px 0 0;transition:.2s;}
+.chart-col:hover .bar{filter:brightness(1.1);}
+.chart-col .val{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px;font-family:'IBM Plex Mono',monospace;}
+.chart-col .lab{font-size:10.5px;color:var(--gray-600);margin-top:6px;}
+
+.timeline{position:relative;padding-left:26px;}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--gray-200);}
+.tl-item{position:relative;padding-bottom:20px;}
+.tl-item::before{content:'';position:absolute;left:-26px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue);}
+.tl-item .h{font-weight:600;font-size:13px;color:var(--navy);}
+.tl-item .m{font-size:11.5px;color:var(--gray-600);margin-top:2px;}
+.tl-item .m b{color:var(--gray-800);}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(8,20,40,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:12px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--gray-100);font-weight:700;color:var(--navy);font-size:15px;display:flex;justify-content:space-between;align-items:center;}
+.modal-head .x{cursor:pointer;color:var(--gray-400);font-size:18px;}
+.modal-body{padding:20px;font-size:13px;color:var(--gray-800);line-height:1.6;}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--gray-100);display:flex;gap:10px;justify-content:flex-end;}
+
+.calc-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:18px;}
+.calc-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;}
+.calc-row label{font-size:12.5px;font-weight:600;color:var(--gray-700);flex-shrink:0;}
+.calc-row input{width:150px;padding:8px 10px;border:1px solid var(--gray-200);border-radius:7px;font-family:'IBM Plex Mono',monospace;text-align:right;}
+.calc-result{margin-top:14px;padding:14px;border-radius:8px;text-align:center;font-size:14px;font-weight:700;}
+.calc-result.ok{background:var(--green-light);color:var(--green);}
+.calc-result.bad{background:var(--red-light);color:var(--red);}
+
+.format-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.format-pick{border:2px solid var(--gray-200);border-radius:9px;padding:14px;text-align:center;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--gray-700);}
+.format-pick:hover{border-color:var(--blue);}
+.format-pick.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border:1px solid var(--gray-200);border-radius:8px;margin-bottom:8px;font-size:12.5px;background:#fff;}
+.item-row .desc{font-weight:600;color:var(--navy);}
+.item-row .age{color:var(--gray-400);font-size:11px;}
+.item-row .amt{font-family:'IBM Plex Mono',monospace;font-weight:700;}
+
+.progress-bar{height:8px;background:var(--gray-100);border-radius:5px;overflow:hidden;margin-top:8px;}
+.progress-bar .fill{height:100%;background:var(--green);transition:width .3s;}
+
+.wf-lifecycle{display:flex;flex-wrap:wrap;gap:0;align-items:center;margin-bottom:16px;}
+.wf-node{padding:9px 14px;border-radius:7px;font-size:11.5px;font-weight:700;background:var(--gray-100);color:var(--gray-600);white-space:nowrap;}
+.wf-node.done{background:var(--green-light);color:var(--green);}
+.wf-node.current{background:var(--blue);color:#fff;box-shadow:0 0 0 3px var(--blue-light);}
+.wf-arrow2{padding:0 6px;color:var(--gray-400);}
+
+.comment-item{padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:12.5px;}
+.comment-item b{color:var(--navy);}
+.comment-item .t{color:var(--gray-400);font-size:10.5px;}
+
+.entity-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+.entity-card{background:var(--blue-light);border:1px solid #C6D9F0;border-radius:9px;padding:14px;text-align:center;cursor:pointer;}
+.entity-card:hover{background:#dbe9fa;}
+.entity-card .v{font-weight:700;color:var(--blue);font-family:'IBM Plex Mono',monospace;font-size:15px;}
+.entity-card .l{font-size:11.5px;color:var(--gray-600);margin-top:3px;}
+
+.help-fab{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:80;border:none;}
+.help-fab:hover{background:var(--blue);}
+
+.mode-toggle{display:flex;background:var(--gray-100);border-radius:8px;padding:3px;gap:2px;}
+.mode-toggle button{background:transparent;border:none;padding:7px 14px;font-size:12px;font-weight:600;border-radius:6px;color:var(--gray-600);}
+.mode-toggle button.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+.guide-banner{background:linear-gradient(90deg,#0B2A4A,#1B5FAE);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+.guide-banner .step{font-size:11px;color:#B9CBE3;font-weight:600;letter-spacing:.5px;}
+.guide-banner .instr{font-size:14.5px;font-weight:600;margin-top:4px;}
+.guide-banner button{background:#fff;color:var(--navy);border:none;padding:9px 16px;border-radius:7px;font-weight:700;font-size:12.5px;}
+
+.qcard{background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:18px;margin-bottom:14px;}
+.qcard .qtext{font-weight:600;font-size:13.5px;color:var(--navy);margin-bottom:12px;}
+.qopt{display:block;width:100%;text-align:left;padding:10px 14px;border:1px solid var(--gray-200);border-radius:8px;margin-bottom:8px;font-size:12.5px;background:#fff;}
+.qopt:hover{border-color:var(--blue);}
+.qopt.correct{background:var(--green-light);border-color:var(--green);color:var(--green);font-weight:600;}
+.qopt.wrong{background:var(--red-light);border-color:var(--red);color:var(--red);font-weight:600;}
+.qexp{margin-top:10px;font-size:12px;color:var(--gray-600);background:var(--gray-50);padding:10px 12px;border-radius:7px;display:none;}
+
+.job-status{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:12px;}
+.job-status.completed{background:var(--green-light);color:var(--green);}
+.job-status.rejected{background:var(--red-light);color:var(--red);}
+.job-status.running{background:var(--orange-light);color:var(--orange);}
+.job-status.queued{background:var(--gray-100);color:var(--gray-600);}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--gray-400);font-size:13px;}
+
+@media(max-width:820px){
+  .form-grid{grid-template-columns:1fr;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .bal-cards{grid-template-columns:repeat(2,1fr);}
+  .format-grid{grid-template-columns:repeat(2,1fr);}
+  .entity-grid{grid-template-columns:repeat(2,1fr);}
+  .workbench-layout{grid-template-columns:1fr;}
+  .wb-side{display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--gray-200);}
+  .nav-grid{grid-template-columns:repeat(2,1fr);}
+  .topbar-search{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img class="bisp-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAQEBAQFBAUGBgUHCAcIBwoKCQkKChALDAsMCxAYDxEPDxEPGBUZFRMVGRUmHhoaHiYsJSMlLDUvLzVDP0NXV3UBBAQEBAUEBQYGBQcIBwgHCgoJCQoKEAsMCwwLEBgPEQ8PEQ8YFRkVExUZFSYeGhoeJiwlIyUsNS8vNUM/Q1dXdf/CABEIAEAAwAMBIgACEQEDEQH/xAAdAAACAgMBAQEAAAAAAAAAAAAABwYIAwQFAgEJ/9oACAEBAAAAAL/ALvn5AOU5QAAAK74AisqPk3bKzgPL92DQ7G2YzIc639sRYPcFmz/AlrArKmb3WM/Rdk1HdRO+EbZWrLze4c2C+xYNvr0kma7uRTyyMSVL479fGhryx7gAJawJ+cz3jsJili5Xv1If6jvTt1edAAYF3YQo52+E8UM89La4EzUlxCC8DBnNfJha26eebv8AnPzNvY1Nsx5Ko9rLj9S6B7XJ7JMYbscGSd/h5+LhncVl3//EABsBAAIDAQEBAAAAAAAAAAAAAAAEAwUGBwIB/9oACAECEAAAALYQmQkt00q/yamqU9WF/pYeU5lCTrdWfXbW2Z5rhY981KCIAB//xAAbAQACAwEBAQAAAAAAAAAAAAAABQMEBgcBCP/aAAgBAxAAAABYamjc8yttg2kMczfx0EGNl7brXcHz0yPKS1VX6p1OfilWMLnoAH//xAA0EAABBAIBAAYIBQUBAAAAAAAEAgMFBgEHAAgSExYXNxARFBU1VVZXICMwNlMiJCYxMlH/2gAIAQEAAQwA/BsuWkI6t/2T2WnmtQ1HqJ7b255zwipn8JfPCKmfwl88IqZ/CXzwipn8JfBIlNSu8KHHlk5A/VsdkuFsuh9Zrh+I4Xwrv33MkOeFd++5khzwrv33MkOW+h2yKjhHzLsWe3nVV++5khzwrv33MkOZ1lshj8wbZJantXXWSnxZICWZw1L8tX7+o3Lbvxmv2OSiVV9x7IfSHMNSrIlJOfwD0k4fJWGj4AwZMJNxc3GMHxxSHxrL0gmYOwycXmvLezrfYaLtHGlpjlC4t+xICs9Vp9S3y87Itqme3RQJHsKdseGsr7omG3RTr3eG6mIE+sFZPEb8ZdWlDdcIUpzfTLK+o9Wyms1LYtdsyltDLW0VqzzB2b+Da2erX43Of9L/AO1enWfmts30WjPq2DRv/dt+ZFl50ZPhtk50ghRWNiOLaxjGejI+Z/kbOcq9l2b5g2jnRlz6q3P8Ysamr0mZMRl7kNPRMyEkmPLbfbt1YsD+youWio5WUb9+DwvKB+9a9zcwQr9JJfW0nLtWLeEskO+1nOF6s8wdm/gl4kGXjyQDGuuO3QJphCW2LzMoa7i2D69mOdxbB9ezHKXXJQ2+3UJixmjPeH9k+vpjleozEXJqky5IyRP235kWXmnZHYwYUx3Zigi27qRYiraW/Z2XmC9NGUddYyNXlu+vZvmBZ+dGf9uTXNo0A6Iky5MRnK44M0wR9L4xDrDlE3GegkcCcyl5rfvwiE5WJMeKsEYc/hWWtg7THskZ7rjgX0Na11xNHTQUkaKsYLVnmDs39DWnmts307b8yLLzoyfDbJzpMtoxM15WMY6+hSyGdjgNtqz1dm+YFn50b8u4qliy2nGVawu05aT5hqSUP2dp0/W5ZDrwSPYSzxHgiiRn09V3bmXc0in5e9fbURCV3OBQvGFIbCDa/qbHaTnkFKh0za9uFmXcCs97ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOFXemisOPvWCOw3ppL0rO3Kz4ZW2H6Nk63vcpep8wOBKeH12xtekinsj0lwnlrp237tYPbTYBbOdS6lzUcvHnvNvSV/1te5C6WEsSAKcH0LW56AgpZmUj3BXJah26t2Z+cq/UdZd2JsjqdhijvpIqOppo6XxK2L1ITuSvzUxFxLUcCshVNoVyCtUKSRCkNs+iRaoFvW7GEuxki74Hat+n+M6X1O/h3sYZtfPA7Vv0/zwO1b9P8APBjU+Scj+5m+38EtW9fqe40dfwm1EER+ZGBpcDaDaFYQKhpLHoWtKG1KVnGExU3CTA7r0dJCloQQMt51lL7eXnDRUrShZDSV8lJmHiWEvyUgMG0GaEYK2QMQ0+zxB4KhfaMFM5Y9AxA76MOsvNup5G1S7tvuoEAlEFzuNiSLJ5bMfYG2y4DYZOZZ3KZZhx2L2Os2x4U9MIWILsPBtXeyDLeq4VywGXhJAiDEByVYvjBuSRRZVa2qvdXeqS4GY6+4XcclKAANkvf8dXryaw2089OthPBbJXGH5wzO4sMBETxFCswciCYY3HRlrR7S5mLmlRUDH3+KkGpUuPlnUgVrZbKH3mhZFEyNA2uQNbabRYxYOXr9tmYfWuHMqaPJodiiFntxpcu80iJvS22Mge+GI9MDc3XmmpICYexCwOziu1Ykn5lPKMHaQrlNpMak1ggVS5sNnLwiTY5TvfwMiYqUBn3Sv//EADoQAAIBBAADBgMEBwkAAAAAAAECAwAEERITFCEFEDFBdLJRcdIVIHLRBiIwMmFikiMkM0JDgZGjs//aAAgBAQANPwD7l1dw2ol84xMcFhWP1pGupMufMnBr1Uleqkr1UleqkrtOO5WS1lkMgR4U3DoT+27OH9+vsZcuemq1+F/rr8D/AF1+B/rp76CJYnVgEdzgSdWPVa/C/wBdfgf66UZQSK+hPwOWNdlT8C7xgB/IOB3b3/8A5VaShDILgLtkA+GtKQGMUpkA/pSs4cq4kKfNSFqUHR1+I8QR5EVaXDw8QXIUNr541qCcQ4Mgk26A5plyttD1br4FvICsZyW64+WtICWtpsZIHjqfOp5WQBXCYwM+YNMcBROCfbXmDKAf+CtBdjbyjDkfFSMgiufT3v8AcHbFkT/VWT38eLuzfH/qrml9grmrf2mpbCB5fx9VpeAw+AlOa+0Zq54ewUnaLSSJ4kqGIwM/AeFEDOp6r/Bh4g1AIGnmyqKxDEN8zrXNyeyuejqCWJo3x1BLhTS3sOMdMgsAa59Pe/3JRhhnBBHUEHyIoDCIdW1XyGa+S18lq0mQS3cYXe5/i9fJK4ZjWe5bPDQ+SAeFc0vsFGaIz8dwpDanGASKcpxUVQpWMDCiME4xUTbXSTgC43b/ADOBX2jLX2gPYKnkMhKjPBdj1DfBaXqHjYqenyqRwiXfg6E9Bv5EVzknsq2uEkcIASQPhTyI0jyY2YKcgBVzVtKso4q6tMynICqfKufT3v8AsONF380vsFc1b+001pOCf4BxU9tcJKB5qEL19oy0L3I+YjqCCLWFI9RlyQ2c5NHJBj/wmP8AMlQSPHIo8mQ4NYj3+fBFNfRggjNfFUA7u1nS4tLmTpGRsTgtXqo/zr1Uf516qP8AOvVR/nXqo/zr1Uf50gy2LhHP+yqSSa7RvQtruMF1QnJ75bkNHKCuGAQVdyI7GSRVKlARWgSJDIixQoPIEtU0egEfVIE8wCfEmp76R4nGmGU096HQPjJXQCpWYvak4/fOWTBwCtMMA6SMoJozmZ7cnZ5nJz+vjooqK5d2CY6ApUN2jSOdcKo74CxaATI8sRU6t+4dlwa9RL9VJIyPrcyNq6nBU4bxFeol+qvUS/VQQOY+Zk2CHoDjasA45iXOP6qjAYpLcv4HOCVZ/wCU0EXhCMAJoR01x0x3qpJJOAAOuTUb6s8EqyqGHkSpODUaqXQMCyb+Gw8s4ouEWPYAsxBbAHxwCe5nCK88qxKWIzgFiOtOMxyRsHRh8QR0PdtoJQ41L76a5+O3T59+7LlGDLsh1YdPMEYPdAf0h0M0VtbwQc4JuDJbTxkSPIWZcbU1xb8taszIX1tArbcGVHi/tfBuoB6kVHa9oz2cUF5oObNwjQ50ID4XIGehFML4l4AWWRHnUwCHecLkJ5IEOMgnNRyBDbm5lEQjFycyu7SlkPD/ANOYPlcKDmpYex4J57eYwsYo7id5k3UhgMMM01nb28s3GeVns7W/nLRnWVGMhiZCMEMRmuRiEckmFlXQX3DU7SSHKCVPEk0yX8KnnVa1AjssxRmLfCujfFRhqEl8yoZ5baVCLUCPLGeWQgy5Iy3jUlqDBcC5VbNYjbIGTTcLxt8+Wd+uauGnW0s7l3tpWgeMKYxJJJO67NnBc0s1kty7QQ2fa00MYkBhzalOJHGShz0JGaa6tOMiuslzLbCG6SNJeo3eMvHvVza2DvPLMHQvFYTwkMSxG6y4ozyERXF66XSsLRgxdw5fQy41Gf3qtpUk7QuJYUuOC5spEcujHBJdsVFYRzJy9wLYT3N1dPJeaRoVQScI4TyFXt7JZiK5uSbizs5eHJzJ3YnKlHC5O2GFc/ayWPCnxbQpF2g0svMqHAOUwRkHpTz2aX7JI8IduZzK8MvGYheHkHhhRisT6XF3M2AeNmNAu7o408HQL06MM1Bx57OKK4McTTydqTzFiithyYSM7dMUzyJdyNOJLSR5LjEb28ZY4VUOSVxha//EADsRAAIBBAADAgoFDQAAAAAAAAECAwAEBRESEzEGIRUiQVFUcZGSk9EHEBRTYSMkMDI0QlVyc4GhsbL/2gAIAQIBAT8AGNiRENxexQuyhghVmIB6b4RX2HH/AMVi+HJ8qGOx0t5Osl/EVRI+EmNyPG3vQ1XgTDeS+tvhP8qucXDbzvFJBHxL5gCCD3gisXj7m6luIbaLi4G3rYGhoeej2ezA3+a7I6gOpPsBq1x17dSyRQwkug8ZSQpHtq/1YNIt0RGUOm2flUeTspJEjEhDN+qGVl36tgVcZfH28xilnCuNbHCT19QqDL46eQRx3Clz0BBU/wCazX7e39KH/gfURLHO7LGXDKvQgEa9dc6f0ZveX51lbi5N0vFZup5EPcXU/uDzGuwyv4QvGYaLx717oq1tHHaS8n5seuWBwBtv0HUVipud2iyT8po/yYHCw0e7Q2a+kaK5OSeaIEiKbib2DRpM5aZBYobpWhYSKwdemx/qs2yrnwxOgGiJ/tqsiwv8zCbQF9BAWA7gQetZeGV7tZFjZkeGIqwBIICAVyJ/un901yJ/un900Le4JAEMhP8AKazPdflfKsUKt+BVACK7JTww305klRAYSNsQPKKjjiXtHLetdW4h13Hmrs+KF6Va5SwmztzIsyKgtlQOxChiG33brtfLOM59ogLSQLIeYsZ3xAqAD3ddVk7O3vp4hY2zq5J5jcBRAPx3WTtLg5uMrDIyAw+MFJHdqgAOgFQ3t5CvDFcyovmVyBXhTJem3HxGrwpkvTbj4jV4UyXps/xGrv2Sf0H/xAA7EQACAQMCBAEIBA8AAAAAAAABAgMABAUREgYTITFRBxUiMkFUkpMQU1XRFBYjJDA0QmFyc5GUobLS/9oACAEDAQE/ADkJHZ+RaSSqrFS4KqCR301Nfhl99myfGn30MzmMfgMc9pbzwvNcXPNMciqx2bAupB7da/HHi0d3yH9wPvq34szk8KyJlbzQ+MjAiuJclFHb4m7u5vyk1qd8hGpdlldQTp3OgoZ3FdPzgAHsSrAf5FXOQtLaJJJZQEf1SASD/SsZDNk2jWyjaYuCVCj2Crjh7LwW8kzQBo4/XMciSbP4ghOlWPDGdvrVbi2sy8Ta6NvQduh7kVe8MZ6ytzPPYuIgNS4KuAPE7SaxH6iv8yX/AHP0Qvj7vF2tvNerbyQSzNq0bMrrJt7bAdCNtebsV9twfJm/4rGYvEC2IGet2HNl68iYftnxWvKFPavYYuCCUypbryzJtKhiWdzoD109Kri5U8P2kPKk1367yui9z2NZOIRYHHpzA/pk6g6jrqa8kFxYC1ktbghWurbYhJ016nVQfE1Nwfk8HJc3eOdLpDBIjQyAhtjd+3rVwjG8nBBRFJZo7kAeJJNYFGwfCd0uUIiLNKVjdhqQygBQPE1ipoktTG0iq6SyBlJ0I1YmufB9anxCufB9anxCjcW4BJmT4hWJ62Yb2NJIw/eGYkGuKIZZbOERxs5EvZRr7DUjyNgIrRbacy6jUctunpa1c469iwsCNE5czl9oGpUEVwNFYSYG5s7nlQ3UkKm3lmG0IysSV1Pqk1w9lb7C2dycxfxPEqjkIJllkY+C7SelcPZOwHCE6vdQRyMl0RGZAGG4sQAKLMx1JJqWztJW3SW8bt4soJrzbj/dIPlrXm3H+6QfLWvN2P8AdIfgFAADQfoP/9k=" alt="BISP logo">
+    </div>
+    <div class="login-sub">BISP Trainings</div>
+    <div class="app-title">Reconciliation Compliance Management</div>
+
+    <div class="field">
+      <label>Environment</label>
+      <select id="envSelect"><option>Development</option><option>Test</option><option>Production (Training)</option></select>
+    </div>
+    <div class="field">
+      <label>Username</label>
+      <input id="userField" placeholder="Enter username" value="john.p">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="passField" placeholder="Enter password" value="••••••••">
+    </div>
+    <button class="btn btn-primary" onclick="doLogin('Preparer','John')">Log In</button>
+    <button class="btn btn-ghost" onclick="doLogin('Preparer','John')">Training / Demo Mode</button>
+
+    <div class="demo-users">
+      <button class="demo-user-btn" onclick="doLogin('Preparer','John')"><b>John</b>Preparer</button>
+      <button class="demo-user-btn" onclick="doLogin('Reviewer','Sarah')"><b>Sarah</b>Reviewer</button>
+      <button class="demo-user-btn" onclick="doLogin('Recon Manager','Amit')"><b>Amit</b>Reconciliation Mgr</button>
+      <button class="demo-user-btn" onclick="doLogin('Administrator','Admin')"><b>Admin</b>Administrator</button>
+    </div>
+    <div class="login-footer">Oracle-inspired training simulation.<br>Independent BISP Trainings educational simulator.</div>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="appScreen">
+  <header class="topbar">
+    <div class="brand" onclick="go('home')">
+      <img class="bisp-logo" src="data:image/jpeg;base64,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" alt="BISP logo">
+    </div>
+    <div class="topbar-app-name">Reconciliation Compliance</div>
+    <div class="topbar-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="globalSearch" placeholder="Search Profile, Reconciliation, Account, Job ID..." onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <div class="topbar-right">
+      <span class="env-tag" id="envTag">Development</span>
+      <button class="pill-btn" onclick="resetDemo()" title="Reset Demo">⟲ Reset</button>
+      <div style="position:relative;">
+        <button class="pill-btn" onclick="toggleDrop('jobsDrop')">⚙ Jobs<span class="badge-dot" id="jobsBadge">3</span></button>
+        <div class="dropdown" id="jobsDrop"></div>
+      </div>
+      <div style="position:relative;">
+        <button class="pill-btn" onclick="toggleDrop('notifDrop')">🔔<span class="badge-dot" id="notifBadge">5</span></button>
+        <div class="dropdown" id="notifDrop"></div>
+      </div>
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatar">J</div>
+        <div class="user-meta"><b id="userName">John</b><span id="userRole">Preparer</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="mainArea"></main>
+
+  <footer class="appfooter">© <b>BISP Trainings</b> | www.bisptrainings.com | Call Us: +91 769-409-5404<br>
+  Oracle-inspired training simulation — independent BISP Trainings educational simulator.</footer>
+</div>
+
+<button class="help-fab" onclick="openHelp()" title="Help">?</button>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <div class="modal-head"><span id="helpTitle">Help</span><span class="x" onclick="closeModal('helpModal')">✕</span></div>
+    <div class="modal-body" id="helpBody"></div>
+    <div class="modal-foot"><button class="btn-sm btn-blue" onclick="closeModal('helpModal')">Got it</button></div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-head"><span id="confirmTitle">Confirm</span><span class="x" onclick="closeModal('confirmModal')">✕</span></div>
+    <div class="modal-body" id="confirmBody"></div>
+    <div class="modal-foot">
+      <button class="btn-sm btn-outline" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn-sm btn-blue" id="confirmYesBtn">Yes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+const initialState = () => ({
+  user:{name:'John', role:'Preparer'},
+  env:'Development',
+  currentScreen:'home',
+  wbTab:'summary',
+  reconStatus:'Pending Review',
+  history:[
+    {d:'01-May-2025 08:02', u:'Admin', a:'Profile Created', s:'Active', c:'Profile CASH-US-1100 created'},
+    {d:'01-May-2025 08:10', u:'Admin', a:'Period Opened', s:'Open', c:'May-2025 period opened for reconciliation'},
+    {d:'01-May-2025 08:15', u:'Admin', a:'Reconciliation Created', s:'Pending Preparation', c:'Instance CASH-US-1100 / May-2025 created via JOB-1045'},
+    {d:'02-May-2025 09:20', u:'System', a:'Balance Loaded', s:'Pending Preparation', c:'Source $1,000,000 and Subsystem $990,000 loaded'},
+    {d:'02-May-2025 09:21', u:'System', a:'Difference Calculated', s:'Pending Preparation', c:'Unexplained difference of $10,000 identified'},
+  ],
+  comments:[
+    {u:'John', t:'02-May-2025 14:10', c:'Investigating the $10,000 gap — appears to be an outstanding check plus timing items.'},
+  ],
+  attachments:[],
+  items:[
+    {desc:'Outstanding Check', amt:7000, age:42, type:'Timing'},
+    {desc:'Timing Difference', amt:2000, age:18, type:'Timing'},
+    {desc:'Other', amt:1000, age:9, type:'Other'},
+  ],
+  jobs:[
+    {id:'JOB-1045', type:'Balance Load / Creation', status:'Completed'},
+    {id:'JOB-1046', type:'Balance Load', status:'Completed'},
+    {id:'JOB-1048', type:'Balance Load', status:'Rejected'},
+  ],
+  notifications:[
+    {t:'Reconciliation CASH-US-1100 requires review.', time:'10 min ago', unread:true},
+    {t:'Balance load JOB-1045 completed.', time:'1 hr ago', unread:true},
+    {t:'Reconciliation AR-US-2200 is overdue.', time:'3 hr ago', unread:true},
+    {t:'Reviewer rejected reconciliation AP-US-3300.', time:'Yesterday', unread:true},
+    {t:'Auto-reconciliation completed for FX-CLR-9001.', time:'Yesterday', unread:true},
+  ],
+  quizAnswered:{},
+  guidedStep:0,
+  guidedActive:false,
+});
+let S = initialState();
+
+const GUIDED_STEPS = [
+  {instr:'Open the CASH-US-1100 profile.', target:'profiles', screen:'profiles'},
+  {instr:'Select the Balance Comparison format.', target:'format-bc', screen:'formats'},
+  {instr:'Run "Create All" to generate May 2025 reconciliations.', target:'create-all', screen:'creation'},
+  {instr:'Open the Workbench and review the loaded balances.', target:'wb-balances', screen:'workbench'},
+  {instr:'Investigate the $10,000 unexplained difference on the Summary tab.', target:'wb-summary', screen:'workbench'},
+  {instr:'Add the reconciling items that explain the difference.', target:'wb-transactions', screen:'workbench'},
+  {instr:'Attach supporting evidence.', target:'wb-attachments', screen:'workbench'},
+  {instr:'Submit the reconciliation for review.', target:'submit-btn', screen:'workbench'},
+  {instr:'As Reviewer, approve the reconciliation.', target:'approve-btn', screen:'workbench'},
+  {instr:'Check the Audit History to confirm the trail is complete.', target:'audit', screen:'audit'},
+];
+
+/* ================= UTIL ================= */
+function fmt(n){return '$'+Number(n).toLocaleString('en-US');}
+function toast(msg,type='info'){
+  const w=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.innerHTML=(type==='success'?'✓ ':type==='error'?'⚠ ':'ℹ ')+msg;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},2800);
+}
+function toggleDrop(id){
+  ['jobsDrop','notifDrop'].forEach(d=>{if(d!==id)document.getElementById(d).classList.remove('open');});
+  document.getElementById(id).classList.toggle('open');
+  if(id==='jobsDrop')renderJobsDrop();
+  if(id==='notifDrop')renderNotifDrop();
+}
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.pill-btn') && !e.target.closest('.dropdown')){
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+  }
+});
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openHelp(){
+  const help = HELP_CONTENT[S.currentScreen] || HELP_CONTENT.default;
+  document.getElementById('helpTitle').textContent = help.title;
+  document.getElementById('helpBody').innerHTML = help.body;
+  document.getElementById('helpModal').classList.add('open');
+}
+function confirmAction(title,body,onYes){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmBody').innerHTML=body;
+  const btn=document.getElementById('confirmYesBtn');
+  const newBtn=btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn,btn);
+  newBtn.onclick=()=>{closeModal('confirmModal');onYes();};
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+const HELP_CONTENT = {
+  home:{title:'Home — What am I looking at?', body:'<p><b>Purpose:</b> The command center for the reconciliation cycle — KPIs, the end-to-end process map, and navigation to every functional area.</p><p><b>Typical user:</b> All roles.</p><p><b>Tip:</b> Click any KPI card or process step to jump straight into that area.</p>'},
+  profiles:{title:'Profiles — What am I looking at?', body:'<p><b>Purpose:</b> A profile is the permanent, reusable configuration template used to generate period reconciliations.</p><p><b>Business meaning:</b> Profile = Blueprint. A period reconciliation is the working instance copied from it each period.</p><p><b>Typical user:</b> Administrator.</p><p><b>Example:</b> CASH-US-1100 generates a new working reconciliation every month while preserving its control structure.</p>'},
+  formats:{title:'Formats — What am I looking at?', body:'<p><b>Purpose:</b> Formats define the layout, calculation logic and behavior a reconciliation follows.</p><p><b>Types:</b> Balance Comparison, Account Analysis, Variance Analysis, Transaction Matching-Linked.</p><p><b>Tip:</b> Edit the numbers in the calculator to see the result recalculate live.</p>'},
+  creation:{title:'Reconciliation Creation — What am I looking at?', body:'<p><b>Purpose:</b> A controlled batch process that converts eligible active profiles into period-specific reconciliations.</p><p><b>Typical user:</b> Administrator.</p><p><b>Flow:</b> Select Eligible Profiles → Validate → Copy Profile Config → Load Balances → Calculate Due Dates → Assign Users → Apply Rules → Create Tasks → Notifications → Record Job.</p>'},
+  workbench:{title:'Workbench — What am I looking at?', body:'<p><b>Purpose:</b> The structured workspace where preparation, review and evidence collection happen for one reconciliation.</p><p><b>Typical user:</b> Preparer, Reviewer.</p><p><b>Tip:</b> Use the left rail to move between Summary, Balances, Transactions, Aging, Workflow, Attachments, Comments and History.</p>'},
+  autorecon:{title:'Auto-Reconciliation — What am I looking at?', body:'<p><b>Purpose:</b> Rules that automatically close low-risk or objectively-matching reconciliations without manual review.</p><p><b>Example rule:</b> IF |Source − Subsystem| ≤ Tolerance AND Unexplained = 0 THEN Auto-Reconcile.</p><p><b>Tip:</b> Adjust the values to see whether the case qualifies.</p>'},
+  group:{title:'Group Reconciliation — What am I looking at?', body:'<p><b>Purpose:</b> Combines multiple segment/entity balances into one reconciliation while preserving drill-down to each sub-segment.</p><p><b>Typical user:</b> Reconciliation Manager, Reviewer.</p><p><b>Tip:</b> Click an entity card to drill down into its detail.</p>'},
+  audit:{title:'Audit History — What am I looking at?', body:'<p><b>Purpose:</b> A full timeline proving the reconciliation followed the required control process end-to-end, from profile through close.</p><p><b>Typical user:</b> Auditor, Reconciliation Manager.</p>'},
+  training:{title:'Training Scenarios — What am I looking at?', body:'<p><b>Purpose:</b> Guided, step-by-step practice of the full reconciliation lifecycle, plus knowledge-check questions.</p><p><b>Tip:</b> Toggle Guided Training mode to get step instructions with validation.</p>'},
+  default:{title:'Help', body:'<p>Use the navigation cards on Home to explore Profiles, Formats, Creation, Workbench, Balances, Aging, Workflow, Auto-Reconciliation, Group Reconciliations, Reports and Audit.</p>'}
+};
+
+/* ================= LOGIN ================= */
+function doLogin(role,name){
+  S.user={name,role};
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').style.display='flex';
+  document.getElementById('userName').textContent=name;
+  document.getElementById('userRole').textContent=role;
+  document.getElementById('userAvatar').textContent=name[0];
+  document.getElementById('envTag').textContent=document.getElementById('envSelect').value;
+  toast('Welcome, '+name+' ('+role+')','success');
+  go('home');
+}
+
+/* ================= ROUTER ================= */
+function go(screen){
+  S.currentScreen=screen;
+  document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+  const renderers={
+    home:renderHome, profiles:renderProfiles, formats:renderFormats, creation:renderCreation,
+    workbench:renderWorkbench, balances:renderBalancesScreen, aging:renderAging, workflow:renderWorkflowScreen,
+    autorecon:renderAutoRecon, group:renderGroup, audit:renderAudit, training:renderTraining, reports:renderReports
+  };
+  (renderers[screen]||renderHome)();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function crumbs(items){
+  return '<div class="crumbs">'+items.map((it,i)=>{
+    const isLast = i===items.length-1;
+    return (i>0?'<span class="sep">›</span>':'')+(isLast?'<span>'+it.label+'</span>':'<b onclick="go(\''+it.go+'\')">'+it.label+'</b>');
+  }).join('')+'</div>';
+}
+
+/* ================= HOME ================= */
+function renderHome(){
+  const kpis=[
+    {v:'12', l:'Active Profiles', screen:'profiles', c:''},
+    {v:'34', l:'Open Reconciliations', screen:'workbench', c:''},
+    {v:'9', l:'Pending Preparation', screen:'workbench', c:'warn'},
+    {v:'7', l:'Pending Review', screen:'workbench', c:'warn'},
+    {v:'3', l:'Overdue Items', screen:'aging', c:'danger'},
+    {v:'4', l:'High Risk Reconciliations', screen:'workbench', c:'danger'},
+    {v:'$3,000', l:'Unexplained Difference', screen:'workbench', c:'danger'},
+    {v:'18', l:'Auto-Reconciled', screen:'autorecon', c:'good'},
+    {v:'11', l:'Open Reconciling Items', screen:'aging', c:'warn'},
+  ];
+  const navCards=[
+    {n:'Profiles', d:'Reusable configuration templates', ic:'▤', s:'profiles'},
+    {n:'Formats', d:'Layout & calculation logic designer', ic:'▦', s:'formats'},
+    {n:'Reconciliation Creation', d:'Batch-generate period reconciliations', ic:'✚', s:'creation'},
+    {n:'Workbench', d:'Prepare, review & submit reconciliations', ic:'🗂', s:'workbench'},
+    {n:'Balances', d:'Source, subsystem & adjusted balances', ic:'⚖', s:'balances'},
+    {n:'Transactions', d:'Explanations, adjustments & reconciling items', ic:'≡', s:'workbench'},
+    {n:'Aging', d:'Outstanding item age analysis', ic:'⏱', s:'aging'},
+    {n:'Workflow', d:'Preparer → Reviewer → Approver lifecycle', ic:'⇄', s:'workflow'},
+    {n:'Auto-Reconciliation', d:'Rule-based automatic closure', ic:'⚡', s:'autorecon'},
+    {n:'Group Reconciliations', d:'Multi-entity segment consolidation', ic:'⛓', s:'group'},
+    {n:'Reports', d:'Analytics dashboards', ic:'📊', s:'reports'},
+    {n:'Audit', d:'End-to-end evidence timeline', ic:'🛡', s:'audit'},
+  ];
+  const html=`
+  ${crumbs([{label:'Home'}])}
+  <div class="panel-head" style="border:none;padding:0 0 6px;">
+    <h2 style="font-size:20px;">Reconciliation Compliance</h2>
+    <div class="mode-toggle">
+      <button class="active" onclick="go('home')">Live Simulation</button>
+      <button onclick="go('training')">Guided Training</button>
+    </div>
+  </div>
+  <div class="section-title" style="margin-top:6px;">Key Metrics <span class="illus-tag">Illustrative Training Data</span></div>
+  <div class="kpi-grid">
+    ${kpis.map(k=>`<div class="kpi-card ${k.c}" onclick="go('${k.screen}')"><div class="v">${k.v}</div><div class="l">${k.l}</div></div>`).join('')}
+  </div>
+
+  <div class="section-title">End-to-End Process Map</div>
+  <div class="panel"><div class="panel-body">
+    <div class="flow-wrap">
+      ${['PROFILE','FORMAT','OPEN PERIOD','CREATE RECON.','LOAD BALANCES','INVESTIGATE','EXPLAIN','ATTACH EVIDENCE','SUBMIT','REVIEW','APPROVE','CLOSE','AUDIT']
+        .map((s,i)=>{
+          const map={0:'profiles',1:'formats',2:'creation',3:'creation',4:'balances',5:'workbench',6:'workbench',7:'workbench',8:'workbench',9:'workbench',10:'workbench',11:'workbench',12:'audit'};
+          return `<div class="flow-step c${(i%6)+1}" onclick="go('${map[i]}')">${s}</div>`+(i<12?'<span class="flow-arrow">→</span>':'');
+        }).join('')}
+    </div>
+  </div></div>
+
+  <div class="section-title">Navigate</div>
+  <div class="nav-grid">
+    ${navCards.map(c=>`<div class="nav-card" onclick="go('${c.s}')"><div class="ic">${c.ic}</div><div class="n">${c.n}</div><div class="d">${c.d}</div></div>`).join('')}
+  </div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+
+/* ================= PROFILES ================= */
+let profileState={id:'CASH-US-1100',account:'1100 - Operating Cash',entity:'US Operations Inc.',currency:'USD',risk:'High',method:'Balance Comparison',freq:'Monthly',preparer:'John',reviewer:'Sarah',materiality:'10000',status:'ACTIVE'};
+function renderProfiles(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Profiles'}])}
+  <div class="panel-head"><h2>Reconciliation Profile Management</h2><span class="status-badge active" id="profStatusBadge">${profileState.status}</span></div>
+  <div class="panel"><div class="panel-body">
+    <div class="tabs">
+      <div class="tab active">Identity</div><div class="tab">Setup</div><div class="tab">Workflow</div><div class="tab">Governance</div>
+    </div>
+    <div class="form-grid">
+      <div class="form-field"><label>Profile ID</label><input id="p_id" value="${profileState.id}"></div>
+      <div class="form-field"><label>Account</label><input id="p_acc" value="${profileState.account}"></div>
+      <div class="form-field"><label>Legal Entity</label><input id="p_ent" value="${profileState.entity}"></div>
+      <div class="form-field"><label>Currency</label><input id="p_cur" value="${profileState.currency}"></div>
+      <div class="form-field"><label>Risk Rating</label>
+        <select id="p_risk"><option ${profileState.risk=='High'?'selected':''}>High</option><option ${profileState.risk=='Medium'?'selected':''}>Medium</option><option ${profileState.risk=='Low'?'selected':''}>Low</option></select></div>
+      <div class="form-field"><label>Method</label><input id="p_method" value="${profileState.method}"></div>
+      <div class="form-field"><label>Frequency</label>
+        <select id="p_freq"><option ${profileState.freq=='Monthly'?'selected':''}>Monthly</option><option ${profileState.freq=='Quarterly'?'selected':''}>Quarterly</option><option ${profileState.freq=='Yearly'?'selected':''}>Yearly</option></select></div>
+      <div class="form-field"><label>Preparer</label><input id="p_prep" value="${profileState.preparer}"></div>
+      <div class="form-field"><label>Reviewer</label><input id="p_rev" value="${profileState.reviewer}"></div>
+      <div class="form-field"><label>Materiality</label><input id="p_mat" value="${profileState.materiality}"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn-sm btn-blue" onclick="profileSave()">Save</button>
+      <button class="btn-sm btn-green" onclick="profileValidate()">Validate</button>
+      <button class="btn-sm btn-outline" onclick="profileClone()">Clone</button>
+      <button class="btn-sm btn-outline" onclick="profileToggleActive()">${profileState.status==='ACTIVE'?'Deactivate':'Activate'}</button>
+    </div>
+  </div></div>
+
+  <div class="section-title">Profile → Period Reconciliation</div>
+  <div class="panel"><div class="panel-body">
+    <p style="font-size:12.5px;color:var(--gray-600);margin-top:0;">Mental model: <b>Profile = Blueprint</b> → copy configuration → <b>Period Instance</b> → working reconciliation.</p>
+    <div class="flow-wrap">
+      <div class="flow-step c5">PROFILE (${profileState.id})</div><span class="flow-arrow">→</span>
+      <div class="flow-step c2">COPY CONFIGURATION</div><span class="flow-arrow">→</span>
+      <div class="flow-step c1">PERIOD INSTANCE (May-2025)</div><span class="flow-arrow">→</span>
+      <div class="flow-step c3" onclick="go('workbench')">WORKING RECONCILIATION</div>
+    </div>
+  </div></div>
+
+  <div class="section-title">Profile Administration</div>
+  <div class="panel"><div class="panel-body">
+    <div class="btnrow" style="margin-top:0;">
+      <button class="btn-sm btn-outline" onclick="toast('CSV/XLSX import simulated — 12 profiles queued.','info')">Import CSV/XLSX</button>
+      <button class="btn-sm btn-outline" onclick="toast('Bulk update applied to selected profiles.','info')">Bulk Update</button>
+      <button class="btn-sm btn-outline" onclick="toast('Effective date set to 01-Jun-2025.','info')">Effective Date</button>
+    </div>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+function readProfileForm(){
+  profileState.id=document.getElementById('p_id').value;
+  profileState.account=document.getElementById('p_acc').value;
+  profileState.entity=document.getElementById('p_ent').value;
+  profileState.currency=document.getElementById('p_cur').value;
+  profileState.risk=document.getElementById('p_risk').value;
+  profileState.method=document.getElementById('p_method').value;
+  profileState.freq=document.getElementById('p_freq').value;
+  profileState.preparer=document.getElementById('p_prep').value;
+  profileState.reviewer=document.getElementById('p_rev').value;
+  profileState.materiality=document.getElementById('p_mat').value;
+}
+function profileSave(){
+  readProfileForm();
+  if(!profileState.id||!profileState.account){toast('Profile ID and Account are required.','error');return;}
+  toast('Profile '+profileState.id+' saved successfully.','success');
+  markGuidedComplete('profiles');
+}
+function profileValidate(){
+  readProfileForm();
+  toast('Validation passed — configuration is complete and consistent.','success');
+}
+function profileClone(){
+  readProfileForm();
+  toast('Cloned as '+profileState.id+'-COPY (inactive, pending review).','info');
+}
+function profileToggleActive(){
+  profileState.status = profileState.status==='ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+  toast('Profile status changed to '+profileState.status+'.','success');
+  renderProfiles();
+}
+
+/* ================= FORMATS ================= */
+let activeFormat='bc';
+function renderFormats(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Formats'}])}
+  <div class="panel-head"><h2>Reconciliation Format Designer</h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="format-grid">
+      <div class="format-pick ${activeFormat==='bc'?'active':''}" id="format-bc" onclick="pickFormat('bc')">Balance Comparison</div>
+      <div class="format-pick ${activeFormat==='aa'?'active':''}" onclick="pickFormat('aa')">Account Analysis</div>
+      <div class="format-pick ${activeFormat==='va'?'active':''}" onclick="pickFormat('va')">Variance Analysis</div>
+      <div class="format-pick ${activeFormat==='tm'?'active':''}" onclick="pickFormat('tm')">Transaction Matching-Linked</div>
+    </div>
+    <div id="formatCalc"></div>
+  </div></div>
+  <div class="panel"><div class="panel-body">
+    <div class="section-title" style="margin-top:0;">Transaction Matching-Linked Flow</div>
+    <div class="flow-wrap">
+      ${['ERP SOURCE','TRANSACTIONS','MATCHING','MATCHED / UNMATCHED','RECONCILIATION','REVIEW'].map((s,i)=>`<div class="flow-step c${(i%6)+1}">${s}</div>`+(i<5?'<span class="flow-arrow">→</span>':'')).join('')}
+    </div>
+    <p style="font-size:12px;color:var(--gray-600);margin-bottom:0;"><b>Key learning:</b> Balance Comparison answers "Do the balances agree?"; Account Analysis answers "What makes up this balance?"; Variance Analysis answers "Why did the balance move?"; Transaction Matching answers "Which transactions match?"</p>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+  renderFormatCalc();
+}
+function pickFormat(f){activeFormat=f;renderFormats();markGuidedComplete('format-bc');}
+function renderFormatCalc(){
+  const el=document.getElementById('formatCalc');
+  if(activeFormat==='bc'){
+    el.innerHTML=`
+    <div class="calc-box">
+      <div class="calc-row"><label>Source Balance ($)</label><input type="number" id="bc_src" value="1000000" oninput="calcBC()"></div>
+      <div class="calc-row"><label>Subsystem Balance ($)</label><input type="number" id="bc_sub" value="990000" oninput="calcBC()"></div>
+      <div class="calc-row"><label>Valid Adjustments ($)</label><input type="number" id="bc_adj" value="7000" oninput="calcBC()"></div>
+      <div class="calc-result" id="bc_result"></div>
+    </div>`;
+    calcBC();
+  }else if(activeFormat==='aa'){
+    el.innerHTML=`
+    <div class="calc-box">
+      <div class="calc-row"><label>Source ($)</label><input type="number" id="aa_src" value="500000" oninput="calcAA()"></div>
+      <div class="calc-row"><label>Explained ($)</label><input type="number" id="aa_exp" value="498000" oninput="calcAA()"></div>
+      <div class="calc-result" id="aa_result"></div>
+    </div>`;
+    calcAA();
+  }else if(activeFormat==='va'){
+    el.innerHTML=`
+    <div class="calc-box">
+      <div class="calc-row"><label>Current ($)</label><input type="number" id="va_cur" value="120000" oninput="calcVA()"></div>
+      <div class="calc-row"><label>Prior ($)</label><input type="number" id="va_pri" value="100000" oninput="calcVA()"></div>
+      <div class="calc-result" id="va_result"></div>
+    </div>`;
+    calcVA();
+  }else{
+    el.innerHTML=`<div class="calc-box"><p style="margin:0;font-size:12.5px;color:var(--gray-600);">Transaction Matching-Linked combines Balance Comparison or Account Analysis with transaction-level matching. See the flow below for the ERP → Matching → Reconciliation pattern.</p></div>`;
+  }
+}
+function calcBC(){
+  const s=+document.getElementById('bc_src').value||0, sub=+document.getElementById('bc_sub').value||0, a=+document.getElementById('bc_adj').value||0;
+  const u=s-sub-a;
+  document.getElementById('bc_result').className='calc-result '+(u===0?'ok':'bad');
+  document.getElementById('bc_result').textContent='Unexplained Difference = '+fmt(u);
+}
+function calcAA(){
+  const s=+document.getElementById('aa_src').value||0, e=+document.getElementById('aa_exp').value||0;
+  const u=s-e;
+  document.getElementById('aa_result').className='calc-result '+(u===0?'ok':'bad');
+  document.getElementById('aa_result').textContent='Unexplained = '+fmt(u);
+}
+function calcVA(){
+  const c=+document.getElementById('va_cur').value||0, p=+document.getElementById('va_pri').value||0;
+  const v=c-p, pct=p!==0?((v/p)*100).toFixed(1):'0.0';
+  document.getElementById('va_result').className='calc-result '+(Math.abs(v)<0.01?'ok':'bad');
+  document.getElementById('va_result').textContent='Variance = '+fmt(v)+'  ('+pct+'%)';
+}
+
+/* ================= CREATION ================= */
+function renderCreation(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Reconciliation Creation'}])}
+  <div class="panel-head"><h2>Reconciliation Creation</h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="btnrow" style="margin-top:0;">
+      <button class="btn-sm btn-blue" id="create-all" onclick="runCreationJob()">Create All</button>
+      <button class="btn-sm btn-outline" onclick="toast('Selected profiles generated.','success')">Create Selected</button>
+      <button class="btn-sm btn-outline" onclick="toast('Selected instances recreated.','info')">Recreate</button>
+      <button class="btn-sm btn-outline" onclick="confirmAction('Delete Selected','Remove the selected reconciliation instances? This requires administrative permission.',()=>toast('Selected instances deleted.','error'))">Delete Selected</button>
+      <button class="btn-sm btn-outline" onclick="toast('Configuration refreshed from profile.','info')">Update from Profile</button>
+      <button class="btn-sm btn-outline" onclick="toast('Prior-period transactions copied forward.','info')">Copy Prior-Period Transactions</button>
+      <button class="btn-sm btn-outline" onclick="toast('Attributes refreshed.','info')">Refresh Attributes</button>
+      <button class="btn-sm btn-outline" onclick="toast('Due dates recalculated.','info')">Recalculate Due Dates</button>
+    </div>
+    <div class="section-title">Creation Flow</div>
+    <div class="flow-wrap">
+      ${['SELECT ELIGIBLE PROFILES','VALIDATE','COPY CONFIG','LOAD BALANCES','CALC DUE DATES','ASSIGN USERS','APPLY RULES','CREATE TASKS','NOTIFY','RECORD JOB']
+        .map((s,i)=>`<div class="flow-step c${(i%6)+1}" id="cstep-${i}">${s}</div>`+(i<9?'<span class="flow-arrow">→</span>':'')).join('')}
+    </div>
+    <div id="creationProgressWrap" style="display:none;">
+      <div class="progress-bar"><div class="fill" id="creationFill" style="width:0%;"></div></div>
+      <p style="font-size:12px;color:var(--gray-600);" id="creationProgressText"></p>
+    </div>
+    <div id="creationResult"></div>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+function runCreationJob(){
+  markGuidedComplete('create-all');
+  document.getElementById('creationResult').innerHTML='';
+  document.getElementById('creationProgressWrap').style.display='block';
+  let step=0;
+  const steps=10;
+  const timer=setInterval(()=>{
+    document.getElementById('cstep-'+step)?.style.setProperty('outline','2px solid #fff');
+    step++;
+    const pct=Math.round((step/steps)*100);
+    document.getElementById('creationFill').style.width=pct+'%';
+    document.getElementById('creationProgressText').textContent='Processing step '+step+' of '+steps+'…';
+    if(step>=steps){
+      clearInterval(timer);
+      const jobId='JOB-'+(1050+Math.floor(Math.random()*900));
+      S.jobs.unshift({id:jobId,type:'Reconciliation Creation',status:'Completed'});
+      document.getElementById('creationProgressText').textContent='Completed.';
+      document.getElementById('creationResult').innerHTML=`
+        <div class="panel" style="margin-top:16px;"><div class="panel-body" style="display:flex;justify-content:space-between;align-items:center;">
+          <div><b style="color:var(--navy);">${jobId}</b><div style="font-size:12px;color:var(--gray-600);">12 eligible profiles converted into May-2025 reconciliations.</div></div>
+          <span class="job-status completed">Completed</span>
+        </div></div>`;
+      toast('Reconciliation creation job '+jobId+' completed.','success');
+    }
+  },220);
+}
+
+/* ================= WORKBENCH ================= */
+function renderWorkbench(){
+  const tabs=['summary','balances','transactions','explanations','adjustments','variance','questions','attachments','comments','workflow','history'];
+  const labels={summary:'Summary',balances:'Balances',transactions:'Transactions',explanations:'Explanations',adjustments:'Adjustments',variance:'Variance',questions:'Questions',attachments:'Attachments',comments:'Comments',workflow:'Workflow',history:'History'};
+  const statusClassMap={'Pending Preparation':'prep','Pending Review':'review','Approved':'approved','Closed':'closed','Rejected':'rejected'};
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Workbench'}])}
+  <div class="panel-head">
+    <div><h2>Reconciliation Workbench — CASH-US-1100 | May 2025</h2></div>
+    <span class="status-badge ${statusClassMap[S.reconStatus]||'prep'}">${S.reconStatus}</span>
+  </div>
+  <div class="panel"><div class="panel-body" style="padding:0;">
+    <div class="workbench-layout">
+      <div class="wb-side">
+        ${tabs.map(t=>`<div class="item ${S.wbTab===t?'active':''}" id="wb-${t}" onclick="setWbTab('${t}')">${labels[t]}</div>`).join('')}
+      </div>
+      <div class="wb-main" id="wbMain"></div>
+    </div>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+  renderWbTab();
+}
+function setWbTab(t){S.wbTab=t;renderWorkbench();
+  if(t==='balances')markGuidedComplete('wb-balances');
+  if(t==='summary')markGuidedComplete('wb-summary');
+  if(t==='transactions')markGuidedComplete('wb-transactions');
+  if(t==='attachments')markGuidedComplete('wb-attachments');
+}
+function explainedTotal(){return S.items.reduce((a,b)=>a+b.amt,0);}
+function renderWbTab(){
+  const el=document.getElementById('wbMain');
+  const source=1000000, subsystem=990000;
+  const explained=explainedTotal();
+  const adjusted=subsystem+explained;
+  const unexplained=source-adjusted;
+  if(S.wbTab==='summary'){
+    el.innerHTML=`
+    <div class="bal-cards">
+      <div class="bal-card source"><div class="v">${fmt(source)}</div><div class="l">Source</div></div>
+      <div class="bal-card sub"><div class="v">${fmt(subsystem)}</div><div class="l">Subsystem</div></div>
+      <div class="bal-card adj"><div class="v">${fmt(adjusted)}</div><div class="l">Adjusted</div></div>
+      <div class="bal-card unexp"><div class="v">${fmt(unexplained)}</div><div class="l">Unexplained</div></div>
+    </div>
+    <h3 style="font-size:13.5px;color:var(--navy);">Outstanding Reconciling Items</h3>
+    ${S.items.map(it=>`<div class="item-row"><span class="desc">${it.desc}</span><span class="age">${it.age} days</span><span class="amt">${fmt(it.amt)}</span></div>`).join('')}
+    ${wbActionRow()}
+    `;
+  }else if(S.wbTab==='balances'){
+    el.innerHTML=`
+    <div class="table-wrap"><table>
+      <tr><th>Data Source</th><th>Currency</th><th>Amount</th><th>Load Job</th><th>Load Date</th><th>Status</th></tr>
+      <tr><td>ERP-GL</td><td>USD</td><td class="mono">${fmt(source)}</td><td>JOB-1045</td><td>31-May</td><td><span class="job-status completed">Loaded</span></td></tr>
+      <tr><td>BANK</td><td>USD</td><td class="mono">${fmt(subsystem)}</td><td>JOB-1046</td><td>31-May</td><td><span class="job-status completed">Loaded</span></td></tr>
+      <tr><td>ADJ</td><td>USD</td><td class="mono">${fmt(7000)}</td><td>JOB-1047</td><td>31-May</td><td><span class="job-status completed">Loaded</span></td></tr>
+    </table></div>
+    <div class="btnrow"><button class="btn-sm btn-blue" onclick="loadBalanceFlow()">Load Balance</button></div>
+    <div id="loadBalanceFlowResult"></div>
+    `;
+  }else if(S.wbTab==='transactions'){
+    el.innerHTML=`
+    <p style="font-size:12.5px;color:var(--gray-600);">Record balance explanations, adjustments, reconciling items and action plans.</p>
+    <div id="txItemsList">${S.items.map((it,i)=>`<div class="item-row"><span class="desc">${it.desc} <span style="color:var(--gray-400);font-weight:400;">(${it.type})</span></span><span class="age">${it.age} days</span><span class="amt">${fmt(it.amt)}</span></div>`).join('')}</div>
+    <div class="form-grid" style="margin-top:14px;">
+      <div class="form-field"><label>Description</label><input id="tx_desc" placeholder="e.g. Deposit in Transit"></div>
+      <div class="form-field"><label>Amount ($)</label><input id="tx_amt" type="number" placeholder="0"></div>
+    </div>
+    <div class="btnrow"><button class="btn-sm btn-blue" onclick="addReconItem()">Add Reconciling Item</button></div>
+    <p style="font-size:12.5px;color:var(--gray-600);margin-top:12px;">Total explained: <b class="mono">${fmt(explained)}</b> — Unexplained remaining: <b class="mono" style="color:${unexplained===0?'var(--green)':'var(--red)'};">${fmt(unexplained)}</b></p>
+    `;
+  }else if(S.wbTab==='explanations'){
+    el.innerHTML=`<p style="font-size:12.5px;color:var(--gray-600);">Balance Explanation: The $10,000 difference between Source and Subsystem is attributable to timing items — an outstanding check ($7,000), a general timing difference ($2,000) and a minor other item ($1,000), all cleared in early June.</p>`;
+  }else if(S.wbTab==='adjustments'){
+    el.innerHTML=`<div class="table-wrap"><table><tr><th>Adjustment Type</th><th>Amount</th><th>Owner</th><th>Status</th></tr>
+    <tr><td>Subsystem Correction</td><td class="mono">${fmt(7000)}</td><td>John</td><td><span class="job-status completed">Posted</span></td></tr></table></div>`;
+  }else if(S.wbTab==='variance'){
+    el.innerHTML=`<div class="calc-box"><div class="calc-row"><label>Current Period</label><span class="mono">$120,000</span></div><div class="calc-row"><label>Prior Period</label><span class="mono">$100,000</span></div><div class="calc-result ok">Variance = $20,000 (20.0%)</div></div>`;
+  }else if(S.wbTab==='questions'){
+    el.innerHTML=`
+    <div class="qcard"><div class="qtext">Q1. Has this account had any unusual activity this period?</div>
+    <label style="font-size:12px;color:var(--gray-600);"><input type="radio" name="q1"> Yes &nbsp;&nbsp;<input type="radio" name="q1" checked> No</label></div>
+    <div class="qcard"><div class="qtext">Q2. Are all reconciling items supported by evidence?</div>
+    <label style="font-size:12px;color:var(--gray-600);"><input type="radio" name="q2" checked> Yes &nbsp;&nbsp;<input type="radio" name="q2"> No</label></div>
+    `;
+  }else if(S.wbTab==='attachments'){
+    el.innerHTML=`
+    <div class="btnrow" style="margin-top:0;"><button class="btn-sm btn-blue" onclick="attachEvidence()">Attach Evidence</button></div>
+    <div class="table-wrap" style="margin-top:12px;"><table>
+      <tr><th>File Name</th><th>Uploaded By</th><th>Date</th><th>Type</th></tr>
+      ${S.attachments.length===0?'<tr><td colspan="4" style="color:var(--gray-400);">No attachments yet.</td></tr>':S.attachments.map(a=>`<tr><td>${a.name}</td><td>${a.by}</td><td>${a.date}</td><td>${a.type}</td></tr>`).join('')}
+    </table></div>
+    `;
+  }else if(S.wbTab==='comments'){
+    el.innerHTML=`
+    ${S.comments.map(c=>`<div class="comment-item"><b>${c.u}</b> <span class="t">${c.t}</span><div>${c.c}</div></div>`).join('')}
+    <div class="form-grid" style="margin-top:14px;grid-template-columns:1fr;">
+      <div class="form-field"><label>Add Comment</label><input id="newComment" placeholder="Type a comment..."></div>
+    </div>
+    <div class="btnrow"><button class="btn-sm btn-blue" onclick="addComment()">Add Comment</button></div>
+    `;
+  }else if(S.wbTab==='workflow'){
+    el.innerHTML=renderWorkflowMini();
+  }else if(S.wbTab==='history'){
+    el.innerHTML=`<div class="timeline">${S.history.slice().reverse().map(h=>`<div class="tl-item"><div class="h">${h.a}</div><div class="m"><b>${h.u}</b> · ${h.d} — ${h.c}</div></div>`).join('')}</div>`;
+  }
+}
+function wbActionRow(){
+  return `<div class="btnrow">
+    <button class="btn-sm btn-outline" onclick="wfAction('claim')">Claim</button>
+    <button class="btn-sm btn-outline" onclick="wfAction('release')">Release</button>
+    <button class="btn-sm btn-blue" id="submit-btn" onclick="wfAction('submit')" ${S.reconStatus!=='Pending Preparation'?'disabled':''}>Submit</button>
+    <button class="btn-sm btn-red" onclick="wfAction('reject')" ${S.reconStatus!=='Pending Review'?'disabled':''}>Reject</button>
+    <button class="btn-sm btn-green" id="approve-btn" onclick="wfAction('approve')" ${S.reconStatus!=='Pending Review'?'disabled':''}>Approve</button>
+    <button class="btn-sm btn-outline" onclick="wfAction('reopen')">Reopen</button>
+    <button class="btn-sm btn-outline" onclick="toast('Reconciliation reassigned to backup reviewer.','info')">Reassign</button>
+    <button class="btn-sm btn-outline" onclick="toast('Information requested from preparer.','info')">Request Info</button>
+    <button class="btn-sm btn-purple" onclick="wfAction('certify')" ${S.reconStatus!=='Approved'?'disabled':''}>Certify</button>
+    <button class="btn-sm btn-outline" onclick="toast('Reconciliation exported to PDF.','info')">Export</button>
+  </div>`;
+}
+function logHistory(a,c){
+  const now=new Date();
+  const d=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  S.history.push({d,u:S.user.name,a,s:S.reconStatus,c});
+}
+function wfAction(type){
+  const map={
+    claim:()=>{toast('Reconciliation claimed by '+S.user.name+'.','success');logHistory('Claimed','Owner set to '+S.user.name);},
+    release:()=>{toast('Reconciliation released — now available to the team.','info');logHistory('Released','Task released back to pool');},
+    submit:()=>{
+      if(explainedTotal()!==10000){toast('Cannot submit — unexplained difference is not fully resolved.','error');return;}
+      S.reconStatus='Pending Review';toast('Submitted for review.','success');logHistory('Submitted','Moved to Pending Review');
+      S.notifications.unshift({t:'Reconciliation CASH-US-1100 submitted for review.',time:'Just now',unread:true});
+    },
+    reject:()=>{S.reconStatus='Pending Preparation';toast('Reconciliation rejected — returned to preparer.','error');logHistory('Rejected','Reviewer rejected — returned to Preparer');},
+    approve:()=>{S.reconStatus='Approved';toast('Reconciliation approved.','success');logHistory('Approved','Reviewer approved the reconciliation');},
+    reopen:()=>{S.reconStatus='Pending Preparation';toast('Reconciliation reopened.','info');logHistory('Reopened','Administrator reopened the reconciliation');},
+    certify:()=>{S.reconStatus='Closed';toast('Certified and closed.','success');logHistory('Certified / Closed','Final certification recorded — reconciliation closed');},
+  };
+  (map[type]||(()=>{}))();
+  renderWorkbench();
+}
+function addReconItem(){
+  const d=document.getElementById('tx_desc').value.trim();
+  const a=+document.getElementById('tx_amt').value;
+  if(!d||!a){toast('Enter a description and amount.','error');return;}
+  S.items.push({desc:d,amt:a,age:0,type:'Other'});
+  toast('Reconciling item added.','success');
+  logHistory('Explanation Added','Added item: '+d+' ('+fmt(a)+')');
+  renderWbTab();
+}
+function attachEvidence(){
+  S.attachments.push({name:'Bank_Statement_May.pdf',by:S.user.name,date:'02-May-2025',type:'PDF'});
+  toast('Evidence attached: Bank_Statement_May.pdf','success');
+  logHistory('Evidence Attached','Bank_Statement_May.pdf uploaded');
+  renderWbTab();
+}
+function addComment(){
+  const v=document.getElementById('newComment').value.trim();
+  if(!v){toast('Enter a comment first.','error');return;}
+  S.comments.push({u:S.user.name,t:'Just now',c:v});
+  toast('Comment added.','success');
+  renderWbTab();
+}
+function loadBalanceFlow(){
+  const seq=['Import','Validate','Duplicate Check','Load','Reconcile'];
+  document.getElementById('loadBalanceFlowResult').innerHTML=`<p style="font-size:12px;color:var(--gray-600);margin-top:10px;">${seq.join(' → ')} — <b style="color:var(--green);">Completed</b></p>`;
+  toast('Balances loaded and reconciled.','success');
+}
+function renderWorkflowMini(){
+  const stages=['Pending','Open / Preparer','Submitted','Reviewer 1','Reviewer 2','Approved','Closed'];
+  const idx = {'Pending Preparation':1,'Pending Review':2,'Approved':5,'Closed':6}[S.reconStatus] ?? 0;
+  return `<div class="wf-lifecycle">
+    ${stages.map((s,i)=>`<div class="wf-node ${i<idx?'done':i===idx?'current':''}">${s}</div>`+(i<stages.length-1?'<span class="wf-arrow2">→</span>':'')).join('')}
+  </div>
+  <p style="font-size:12.5px;color:var(--gray-600);">Current status: <b style="color:var(--navy);">${S.reconStatus}</b></p>
+  ${wbActionRow()}`;
+}
+
+/* ================= BALANCES SCREEN (Load Monitor) ================= */
+function renderBalancesScreen(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Balances'}])}
+  <div class="panel-head"><h2>Balance Load Monitor</h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="section-title" style="margin-top:0;">Balance Data Flow</div>
+    <div class="flow-wrap">
+      ${['SOURCE ERP','IMPORT','VALIDATE','DUPLICATE CHECK','LOAD','RECONCILE','DRILL-THROUGH / REJECT'].map((s,i)=>`<div class="flow-step c${(i%6)+1}">${s}</div>`+(i<6?'<span class="flow-arrow">→</span>':'')).join('')}
+    </div>
+    <div class="table-wrap" style="margin-top:18px;"><table>
+      <tr><th>Profile</th><th>Data Source</th><th>Currency</th><th>Amount</th><th>Load Job</th><th>Status</th></tr>
+      <tr><td>CASH-US-1100</td><td>ERP-GL</td><td>USD</td><td class="mono">$1,000,000</td><td>JOB-1045</td><td><span class="job-status completed">Loaded</span></td></tr>
+      <tr><td>CASH-US-1100</td><td>BANK</td><td>USD</td><td class="mono">$990,000</td><td>JOB-1046</td><td><span class="job-status completed">Loaded</span></td></tr>
+      <tr><td>AR-US-2200</td><td>ERP-GL</td><td>USD</td><td class="mono">$540,000</td><td>JOB-1048</td><td><span class="job-status rejected">Rejected: 2</span></td></tr>
+      <tr><td>AP-US-3300</td><td>ERP-GL</td><td>USD</td><td class="mono">$212,400</td><td>JOB-1049</td><td><span class="job-status running">Running</span></td></tr>
+    </table></div>
+    <p style="font-size:12px;color:var(--gray-600);">Validation <span style="color:var(--green);font-weight:700;">83% records processed</span></p>
+    <div class="progress-bar"><div class="fill" style="width:83%;"></div></div>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+
+/* ================= AGING ================= */
+function renderAging(){
+  const buckets=[{l:'0–30',v:50000,c:'#F26522'},{l:'31–60',v:25000,c:'#F26522'},{l:'61–90',v:15000,c:'#F26522'},{l:'91–180',v:10000,c:'#D6483F'},{l:'181–365',v:7000,c:'#D6483F'},{l:'>365',v:3000,c:'#8a2a24'}];
+  const max=Math.max(...buckets.map(b=>b.v));
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Aging'}])}
+  <div class="panel-head"><h2>Outstanding Items by Aging Bucket <span class="illus-tag">Illustrative Training Data</span></h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="form-grid" style="margin-bottom:18px;">
+      <div class="form-field"><label>Account</label><select><option>All Accounts</option><option>CASH-US-1100</option></select></div>
+      <div class="form-field"><label>Entity</label><select><option>All Entities</option><option>US Operations Inc.</option></select></div>
+      <div class="form-field"><label>Risk</label><select><option>All Risk</option><option>High</option><option>Medium</option></select></div>
+      <div class="form-field"><label>Preparer</label><select><option>All Preparers</option><option>John</option></select></div>
+    </div>
+    <div class="chart-bars">
+      ${buckets.map(b=>`<div class="chart-col" onclick="filterAging('${b.l}')"><div class="val">${fmt(b.v)}</div><div class="bar" style="height:${(b.v/max)*130}px;background:${b.c};"></div><div class="lab">${b.l}</div></div>`).join('')}
+    </div>
+  </div></div>
+  <div class="kpi-grid" style="margin-bottom:18px;">
+    ${buckets.map(b=>`<div class="kpi-card"><div class="v">${fmt(b.v)}</div><div class="l">${b.l} days</div></div>`).join('')}
+  </div>
+  <div class="panel"><div class="panel-body">
+    <h3 style="font-size:13.5px;color:var(--navy);margin-top:0;" id="agingItemsTitle">Oldest Outstanding Items</h3>
+    <div id="agingItemsList">
+      <div class="item-row"><span class="desc">FX Revaluation Diff — FX-CLR-9001</span><span class="age">402 days</span><span class="amt">$3,000</span></div>
+      <div class="item-row"><span class="desc">Unmatched Wire — CASH-US-1100</span><span class="age">210 days</span><span class="amt">$7,000</span></div>
+      <div class="item-row"><span class="desc">Suspense Item — AP-US-3300</span><span class="age">96 days</span><span class="amt">$10,000</span></div>
+    </div>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+function filterAging(bucket){
+  toast('Filtered outstanding items to bucket: '+bucket+' days.','info');
+  document.getElementById('agingItemsTitle').textContent='Outstanding Items — '+bucket+' days';
+}
+
+/* ================= WORKFLOW SCREEN ================= */
+function renderWorkflowScreen(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Workflow'}])}
+  <div class="panel-head"><h2>Workflow Engine</h2></div>
+  <div class="panel"><div class="panel-body">
+    <p style="font-size:12.5px;color:var(--gray-600);margin-top:0;">Typical lifecycle — actual configuration can vary by business process.</p>
+    <div class="wf-lifecycle">
+      ${['Pending','Open / Preparer','Submitted','Reviewer 1','Reviewer 2','Approved','Closed'].map((s,i)=>`<div class="wf-node ${i<2?'done':i===2?'current':''}">${s}</div>`+(i<6?'<span class="wf-arrow2">→</span>':'')).join('')}
+    </div>
+    <div class="panel" style="background:var(--red-light);border-color:#f0cfcd;box-shadow:none;"><div class="panel-body" style="padding:14px 18px;">
+      <b style="color:var(--red);font-size:12.5px;">Exception path:</b> <span style="font-size:12.5px;">Reviewer Rejects → Returned to Preparer → Correct / Explain → Resubmit.</span>
+    </div></div>
+  </div></div>
+  <div class="nav-grid">
+    <div class="nav-card"><div class="ic">👥</div><div class="n">Multi-Level Review</div><div class="d">Sequential reviewers provide more than one control layer.</div></div>
+    <div class="nav-card"><div class="ic">🖐</div><div class="n">Claim / Release</div><div class="d">Team members can claim work and release it when required.</div></div>
+    <div class="nav-card"><div class="ic">🔁</div><div class="n">Backup / Delegation</div><div class="d">Backup users and delegated responsibilities support continuity.</div></div>
+    <div class="nav-card"><div class="ic">⏰</div><div class="n">Escalation</div><div class="d">Due dates, late status and escalations help prevent missed deadlines.</div></div>
+    <div class="nav-card"><div class="ic">✔</div><div class="n">Certification</div><div class="d">The final responsible user certifies the completed reconciliation.</div></div>
+    <div class="nav-card" onclick="go('audit')"><div class="ic">🛡</div><div class="n">Audit History</div><div class="d">Workflow comments, actions and status changes provide traceability.</div></div>
+  </div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+
+/* ================= AUTO-RECONCILIATION ================= */
+function renderAutoRecon(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Auto-Reconciliation'}])}
+  <div class="panel-head"><h2>Auto-Reconciliation Rule Tester</h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="flow-wrap" style="margin-bottom:18px;">
+      <div class="flow-step c1">IF |Source − Subsystem| ≤ Tolerance AND Unexplained = 0</div><span class="flow-arrow">→</span>
+      <div class="flow-step c2">THEN AUTO-RECONCILE</div><span class="flow-arrow">→</span>
+      <div class="flow-step c5">CLOSE</div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-row"><label>Source Balance ($)</label><input type="number" id="ar_src" value="100000" oninput="calcAutoRecon()"></div>
+      <div class="calc-row"><label>Subsystem Balance ($)</label><input type="number" id="ar_sub" value="99995" oninput="calcAutoRecon()"></div>
+      <div class="calc-row"><label>Amount Tolerance ($)</label><input type="number" id="ar_tol" value="10" oninput="calcAutoRecon()"></div>
+      <div class="calc-row"><label>Unexplained Items ($)</label><input type="number" id="ar_une" value="0" oninput="calcAutoRecon()"></div>
+      <div class="calc-result" id="ar_result"></div>
+    </div>
+  </div></div>
+  <div class="section-title">Auto-Reconciliation Conditions</div>
+  <div class="panel"><div class="panel-body">
+    <div class="table-wrap"><table>
+      <tr><th>Condition</th><th>Possible Outcome</th><th>Enabled</th></tr>
+      ${[['Both balances equal zero','Auto-reconcile',true],['Source and subsystem balances match','Auto-reconcile',true],
+         ['Difference within amount tolerance','Auto-reconcile',true],['Difference within percentage tolerance','Auto-reconcile',false],
+         ['Current balance equals prior balance','Potential auto-reconcile',true],['No activity occurred','Potential auto-reconcile',true],
+         ['Balance below materiality','Potential auto-reconcile',false],['No unexplained transactions','Potential auto-reconcile',true],
+         ['Transaction Matching unmatched amount = zero','Potential auto-reconcile',false]]
+        .map((r,i)=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td><label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" ${r[2]?'checked':''} onchange="toggleAutoRule(this,${i})"></label></td></tr>`).join('')}
+    </table></div>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+  calcAutoRecon();
+}
+const AUTO_RULE_NAMES=['Both balances equal zero','Source and subsystem balances match','Difference within amount tolerance','Difference within percentage tolerance','Current balance equals prior balance','No activity occurred','Balance below materiality','No unexplained transactions','Transaction Matching unmatched amount = zero'];
+function toggleAutoRule(el,i){
+  toast('Rule "'+AUTO_RULE_NAMES[i]+'" '+(el.checked?'enabled':'disabled')+'.','info');
+}
+function calcAutoRecon(){
+  const s=+document.getElementById('ar_src').value||0, sub=+document.getElementById('ar_sub').value||0;
+  const tol=+document.getElementById('ar_tol').value||0, une=+document.getElementById('ar_une').value||0;
+  const diff=Math.abs(s-sub);
+  const qualifies = diff<=tol && une===0;
+  const r=document.getElementById('ar_result');
+  r.className='calc-result '+(qualifies?'ok':'bad');
+  r.innerHTML='Difference = '+fmt(diff)+' — '+(qualifies?'QUALIFIES FOR AUTO-RECONCILIATION':'DOES NOT QUALIFY');
+}
+
+/* ================= GROUP RECONCILIATION ================= */
+let groupBreadcrumb=['CASH GROUP'];
+function renderGroup(){
+  const entities=[{n:'Entity 100',v:100000,pct:'18.2%'},{n:'Entity 200',v:150000,pct:'27.3%'},{n:'Entity 300',v:125000,pct:'22.7%'},{n:'Entity 400',v:175000,pct:'31.8%'}];
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Group Reconciliation'}])}
+  <div class="panel-head"><h2>Group Reconciliation — CASH GROUP</h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="crumbs" id="groupCrumbs" style="margin-bottom:14px;">${groupBreadcrumb.map((b,i)=>(i>0?' <span class="sep">›</span> ':'')+'<b>'+b+'</b>').join('')}</div>
+    ${groupBreadcrumb.length>1?'<button class="btn-sm btn-outline" onclick="groupBack()">← Back</button>':''}
+    <div style="text-align:center;margin:18px 0;">
+      <div class="bal-card source" style="display:inline-block;min-width:220px;"><div class="v">$550,000</div><div class="l">GROUP BALANCE</div></div>
+    </div>
+    <div class="entity-grid">
+      ${entities.map(e=>`<div class="entity-card" onclick="drillEntity('${e.n}',${e.v},'${e.pct}')"><div class="v">$${(e.v/1000).toFixed(0)}K</div><div class="l">${e.n}</div></div>`).join('')}
+    </div>
+    <div class="table-wrap"><table>
+      <tr><th>Entity</th><th>Balance (USD)</th><th>Group Share</th></tr>
+      ${entities.map(e=>`<tr><td>${e.n}</td><td class="mono">${fmt(e.v)}</td><td>${e.pct}</td></tr>`).join('')}
+      <tr style="font-weight:700;"><td>Group Total</td><td class="mono">$550,000</td><td>100%</td></tr>
+    </table></div>
+  </div></div>
+  <div id="groupDrillPanel"></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+function drillEntity(name,val,pct){
+  groupBreadcrumb=['CASH GROUP',name];
+  renderGroup();
+  document.getElementById('groupDrillPanel').innerHTML=`
+  <div class="panel"><div class="panel-head"><h2>${name} — Detail</h2></div><div class="panel-body">
+    <div class="bal-cards" style="grid-template-columns:repeat(3,1fr);">
+      <div class="bal-card source"><div class="v">${fmt(val)}</div><div class="l">Balance</div></div>
+      <div class="bal-card adj"><div class="v">${pct}</div><div class="l">Share %</div></div>
+      <div class="bal-card sub"><div class="v">Low</div><div class="l">Risk</div></div>
+    </div>
+    <p style="font-size:12.5px;color:var(--gray-600);">Status: <span class="status-badge approved">Approved</span></p>
+  </div></div>`;
+}
+function groupBack(){groupBreadcrumb=['CASH GROUP'];renderGroup();}
+
+/* ================= AUDIT ================= */
+function renderAudit(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Audit'}])}
+  <div class="panel-head"><h2>Audit History — CASH-US-1100 / May 2025</h2></div>
+  <div class="panel"><div class="panel-body">
+    <div class="timeline">
+      ${S.history.map(h=>`<div class="tl-item"><div class="h">${h.a}</div><div class="m"><b>${h.u}</b> · ${h.d} — ${h.c}</div></div>`).join('')}
+    </div>
+  </div></div>
+  <div class="panel"><div class="panel-body">
+    <p style="font-size:12.5px;color:var(--gray-600);margin:0;">An auditor can trace the configuration, period instance, balance source/load, reconciling items, evidence, workflow actions and final certification/history end-to-end.</p>
+  </div></div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+  markGuidedComplete('audit');
+}
+
+/* ================= REPORTS ================= */
+function renderReports(){
+  const statusData=[{l:'Prep',v:9,c:'#1B5FAE'},{l:'Review',v:7,c:'#F26522'},{l:'Approved',v:11,c:'#7B4FA0'},{l:'Closed',v:22,c:'#2E9E5B'}];
+  const riskData=[{l:'High',v:4,c:'#D6483F'},{l:'Medium',v:14,c:'#F26522'},{l:'Low',v:16,c:'#2E9E5B'}];
+  const max1=Math.max(...statusData.map(d=>d.v)), max2=Math.max(...riskData.map(d=>d.v));
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Reports'}])}
+  <div class="panel-head"><h2>Analytics Dashboard <span class="illus-tag">Illustrative Training Data</span></h2></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div class="panel"><div class="panel-body">
+      <h3 style="font-size:13px;color:var(--navy);margin-top:0;">Reconciliations by Status</h3>
+      <div class="chart-bars" style="height:140px;">
+        ${statusData.map(d=>`<div class="chart-col" onclick="go('workbench')"><div class="val">${d.v}</div><div class="bar" style="height:${(d.v/max1)*100}px;background:${d.c};"></div><div class="lab">${d.l}</div></div>`).join('')}
+      </div>
+    </div></div>
+    <div class="panel"><div class="panel-body">
+      <h3 style="font-size:13px;color:var(--navy);margin-top:0;">Risk Distribution</h3>
+      <div class="chart-bars" style="height:140px;">
+        ${riskData.map(d=>`<div class="chart-col"><div class="val">${d.v}</div><div class="bar" style="height:${(d.v/max2)*100}px;background:${d.c};"></div><div class="lab">${d.l}</div></div>`).join('')}
+      </div>
+    </div></div>
+    <div class="panel"><div class="panel-body">
+      <h3 style="font-size:13px;color:var(--navy);margin-top:0;">Auto-Reconciled vs Manual</h3>
+      <div class="chart-bars" style="height:140px;">
+        <div class="chart-col" onclick="go('autorecon')"><div class="val">18</div><div class="bar" style="height:100px;background:#2E9E5B;"></div><div class="lab">Auto</div></div>
+        <div class="chart-col"><div class="val">16</div><div class="bar" style="height:89px;background:#1B5FAE;"></div><div class="lab">Manual</div></div>
+      </div>
+    </div></div>
+    <div class="panel"><div class="panel-body">
+      <h3 style="font-size:13px;color:var(--navy);margin-top:0;">Group Reconciliation Distribution</h3>
+      <div class="chart-bars" style="height:140px;">
+        <div class="chart-col" onclick="go('group')"><div class="val">18%</div><div class="bar" style="height:60px;background:#1B5FAE;"></div><div class="lab">Ent 100</div></div>
+        <div class="chart-col" onclick="go('group')"><div class="val">27%</div><div class="bar" style="height:90px;background:#2E9E5B;"></div><div class="lab">Ent 200</div></div>
+        <div class="chart-col" onclick="go('group')"><div class="val">23%</div><div class="bar" style="height:75px;background:#F26522;"></div><div class="lab">Ent 300</div></div>
+        <div class="chart-col" onclick="go('group')"><div class="val">32%</div><div class="bar" style="height:105px;background:#7B4FA0;"></div><div class="lab">Ent 400</div></div>
+      </div>
+    </div></div>
+  </div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+
+/* ================= TRAINING / GUIDED / QUIZ ================= */
+const QUIZ=[
+  {q:'Source = $100,000, Subsystem = $99,995, Tolerance = $10, Unexplained = $0. Does it qualify for auto-reconciliation?',opts:['Yes','No'],correct:0,exp:'Difference is $5, which is within the $10 tolerance, and unexplained is $0 — it qualifies.'},
+  {q:'What is a Reconciliation Profile?',opts:['A one-time reconciliation record','A permanent, reusable configuration template','A workflow status'],correct:1,exp:'A profile is the permanent blueprint from which period reconciliations are created.'},
+  {q:'Unexplained Difference (Balance Comparison) = ?',opts:['Source − Subsystem − Valid Adjustments','Source + Subsystem','Subsystem − Source'],correct:0,exp:'Unexplained Difference = Source − Subsystem − Valid Adjustments.'},
+  {q:'Which format answers "Why did the balance move?"',opts:['Balance Comparison','Variance Analysis','Account Analysis'],correct:1,exp:'Variance Analysis compares current vs. prior period balances to explain movement.'},
+  {q:'What happens when a Reviewer rejects a reconciliation?',opts:['It closes automatically','It is returned to the Preparer to correct and resubmit','It is deleted'],correct:1,exp:'Reject sends the reconciliation back to the Preparer for correction and resubmission.'},
+  {q:'What does a Group Reconciliation combine?',opts:['Multiple unrelated accounts','Multiple segment/entity balances into one reconciliation with drill-down','Only prior-period balances'],correct:1,exp:'Group Reconciliations consolidate sub-segment balances while preserving drill-down.'},
+  {q:'What triggers Auto-Reconciliation eligibility (typical rule)?',opts:['Difference within tolerance AND Unexplained = 0','Any difference under $1,000,000','Preparer marks it complete'],correct:0,exp:'The classic rule: |Source − Subsystem| ≤ tolerance AND Unexplained = 0.'},
+  {q:'What is stored in Balance Management?',opts:['Only the source balance','Source, subsystem, adjusted, explained, unexplained, prior & current period values','Only workflow comments'],correct:1,exp:'Balance Management stores the full set of balance perspectives plus load metadata.'},
+  {q:'What is the purpose of Aging Analysis?',opts:['To calculate materiality','To show how long unresolved items have remained open','To assign preparers'],correct:1,exp:'Aging distinguishes normal timing items from persistent, higher-risk exceptions.'},
+  {q:'Profile vs. Reconciliation — which statement is correct?',opts:['They are the same thing','Profile is the blueprint; Reconciliation is the period-specific working instance','Reconciliation is created before the Profile'],correct:1,exp:'Profile = Blueprint. Period Reconciliation = the working instance copied from it.'},
+];
+function renderTraining(){
+  const html=`
+  ${crumbs([{label:'Home',go:'home'},{label:'Training Scenarios'}])}
+  <div class="panel-head"><h2>Training Scenarios</h2>
+    <div class="mode-toggle">
+      <button onclick="go('home')">Live Simulation</button>
+      <button class="active">Guided Training</button>
+    </div>
+  </div>
+
+  <div class="panel"><div class="panel-body">
+    <h3 style="font-size:14px;color:var(--navy);margin-top:0;">Scenario 1 — Monthly US Operating Cash Reconciliation</h3>
+    <p style="font-size:12.5px;color:var(--gray-600);">Profile <b>CASH-US-1100</b>, Period <b>May-2025</b>. Source $1,000,000 vs Subsystem $990,000 — a $10,000 difference explained by an outstanding check ($7,000), a timing difference ($2,000) and another item ($1,000).</p>
+    ${S.guidedActive ? `
+      <div class="guide-banner">
+        <div><div class="step">STEP ${S.guidedStep+1} OF ${GUIDED_STEPS.length}</div><div class="instr">${GUIDED_STEPS[S.guidedStep].instr}</div></div>
+        <button onclick="go('${GUIDED_STEPS[S.guidedStep].screen}')">Go</button>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:${((S.guidedStep)/GUIDED_STEPS.length)*100}%;"></div></div>
+    ` : `<div class="btnrow" style="margin-top:6px;"><button class="btn-sm btn-blue" onclick="startGuided()">Start Guided Training</button><button class="btn-sm btn-outline" onclick="runFullDemo()">Run Complete Reconciliation Demo</button></div>`}
+    <div id="fullDemoProgress"></div>
+  </div></div>
+
+  <div class="section-title">Knowledge Check <span class="illus-tag">10 Questions</span></div>
+  <div id="quizArea">${QUIZ.map((q,i)=>renderQuizCard(i)).join('')}</div>
+  `;
+  document.getElementById('mainArea').innerHTML=html;
+}
+function renderQuizCard(i){
+  const q=QUIZ[i];
+  const answered=S.quizAnswered[i];
+  return `<div class="qcard">
+    <div class="qtext">Q${i+1}. ${q.q}</div>
+    ${q.opts.map((o,oi)=>`<button class="qopt ${answered!==undefined?(oi===q.correct?'correct':(oi===answered&&oi!==q.correct?'wrong':'')):''}" ${answered!==undefined?'disabled':''} onclick="answerQuiz(${i},${oi})">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}
+    <div class="qexp" style="${answered!==undefined?'display:block;':''}">${q.exp}</div>
+  </div>`;
+}
+function answerQuiz(i,oi){
+  S.quizAnswered[i]=oi;
+  const el=document.getElementById('quizArea');
+  el.children[i].outerHTML=renderQuizCard(i);
+  toast(oi===QUIZ[i].correct?'Correct!':'Not quite — see the explanation.', oi===QUIZ[i].correct?'success':'error');
+}
+function startGuided(){S.guidedActive=true;S.guidedStep=0;renderTraining();}
+function markGuidedComplete(target){
+  if(!S.guidedActive)return;
+  if(GUIDED_STEPS[S.guidedStep] && GUIDED_STEPS[S.guidedStep].target===target){
+    toast('✓ Step '+(S.guidedStep+1)+' completed','success');
+    S.guidedStep++;
+    if(S.guidedStep>=GUIDED_STEPS.length){
+      S.guidedActive=false;
+      toast('🎉 Guided training scenario complete!','success');
+    }
+  }
+}
+function runFullDemo(){
+  const stages=['Profile','Format','Period','Reconciliation Creation','Balance Load','Difference Calculation','Reconciling Items','Evidence','Submission','Review','Approval','Close','Audit'];
+  let i=0;
+  const wrap=document.getElementById('fullDemoProgress');
+  wrap.innerHTML='<div class="progress-bar"><div class="fill" id="demoFill" style="width:0%;"></div></div><p style="font-size:12px;color:var(--gray-600);" id="demoText"></p>';
+  const timer=setInterval(()=>{
+    i++;
+    document.getElementById('demoFill').style.width=(i/stages.length*100)+'%';
+    document.getElementById('demoText').textContent=i+'/'+stages.length+' — '+stages[i-1];
+    if(i>=stages.length){
+      clearInterval(timer);
+      document.getElementById('demoText').innerHTML='<b style="color:var(--green);">Reconciliation Completed Successfully</b>';
+      toast('Full end-to-end demo completed.','success');
+    }
+  },260);
+}
+
+/* ================= JOBS / NOTIFICATIONS DROPDOWNS ================= */
+function renderJobsDrop(){
+  document.getElementById('jobsDrop').innerHTML=`
+    <div class="dropdown-head">Recent Jobs <a onclick="go('creation')">View all</a></div>
+    ${S.jobs.map(j=>`<div class="notif-item"><b>${j.id}</b> — ${j.type}<div class="t"><span class="job-status ${j.status.toLowerCase()}">${j.status}</span></div></div>`).join('')}
+  `;
+}
+function renderNotifDrop(){
+  const unread=S.notifications.filter(n=>n.unread).length;
+  document.getElementById('notifBadge').textContent=unread;
+  document.getElementById('notifBadge').style.display=unread?'flex':'none';
+  document.getElementById('notifDrop').innerHTML=`
+    <div class="dropdown-head">Notifications <a onclick="markAllRead()">Mark all read</a></div>
+    ${S.notifications.map((n,i)=>`<div class="notif-item ${n.unread?'unread':''}" onclick="readNotif(${i})">${n.t}<div class="t">${n.time}</div></div>`).join('')}
+  `;
+}
+function markAllRead(){S.notifications.forEach(n=>n.unread=false);renderNotifDrop();}
+function readNotif(i){S.notifications[i].unread=false;renderNotifDrop();}
+
+/* ================= SEARCH ================= */
+function doSearch(){
+  const q=document.getElementById('globalSearch').value.trim();
+  if(!q){return;}
+  toast('Search results for "'+q+'": Profile, Reconciliation & Job matches found.','info');
+  go('workbench');
+}
+
+/* ================= RESET ================= */
+function resetDemo(){
+  confirmAction('Reset Demo','Reset all training data and return to the initial state? This clears tasks, workflow status, balances, comments, attachments and history.',()=>{
+    S=initialState();
+    S.user=S.user; // keep logged in user context via re-login not required
+    toast('Demo data reset.','success');
+    go('home');
+  });
+}
+
+/* ================= INIT ================= */
+renderJobsDrop();
+renderNotifDrop();
+</script>
+</body>
+</html>
