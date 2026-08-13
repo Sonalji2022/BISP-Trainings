@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BISP Trainings | Worklist &amp; Task Management Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F2A43;
+  --navy-light:#173A5C;
+  --blue:#2E6DA4;
+  --blue-light:#4C8FC7;
+  --orange:#E8792D;
+  --orange-dark:#C8601C;
+  --green:#2F9E44;
+  --green-bg:#E7F6EB;
+  --red:#E03131;
+  --red-bg:#FDECEC;
+  --amber:#B8710A;
+  --amber-bg:#FFF3DC;
+  --purple:#6741D9;
+  --purple-bg:#F0EBFD;
+  --slate-bg:#EEF2F6;
+  --card:#FFFFFF;
+  --border:#DAE1E9;
+  --text:#182634;
+  --text-muted:#5B6B7C;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(15,42,67,.06), 0 4px 14px rgba(15,42,67,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--slate-bg);
+  color:var(--text);
+  min-height:100vh;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit;cursor:pointer;}
+a{color:inherit;}
+#app{min-height:100vh;display:flex;flex-direction:column;}
+
+/* ============ LOGIN ============ */
+.login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(76,143,199,.25), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(232,121,45,.18), transparent 40%),
+    linear-gradient(160deg,var(--navy) 0%,var(--navy-light) 55%,#0B2138 100%);
+  padding:24px;
+}
+.login-card{
+  width:100%;max-width:440px;background:var(--card);border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;
+}
+.login-brand{padding:28px 32px 20px;text-align:center;border-bottom:1px solid var(--border);}
+.login-brand img{height:42px;object-fit:contain;}
+.login-brand .tagline{margin-top:10px;font-size:12.5px;color:var(--text-muted);letter-spacing:.02em;}
+.login-body{padding:28px 32px 32px;}
+.login-title{font-size:19px;font-weight:800;color:var(--navy);margin:0 0 2px;letter-spacing:-.01em;}
+.login-sub{font-size:12.5px;color:var(--text-muted);margin:0 0 22px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.field-label{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:6px;display:block;}
+.text-input{
+  width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;margin-bottom:18px;background:#FBFCFD;transition:border-color .15s;
+}
+.text-input:focus{outline:none;border-color:var(--blue);background:#fff;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;}
+.role-btn{
+  padding:12px 10px;border:1.5px solid var(--border);border-radius:8px;background:#FBFCFD;
+  font-size:13px;font-weight:600;color:var(--text);text-align:left;transition:all .15s;
+  display:flex;align-items:center;gap:8px;
+}
+.role-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;}
+.role-btn:hover{border-color:var(--blue-light);}
+.role-btn.selected{border-color:var(--blue);background:var(--blue);color:#fff;}
+.role-btn.selected .dot{background:#fff;}
+.btn-primary{
+  width:100%;padding:13px;border:none;border-radius:8px;background:var(--orange);color:#fff;
+  font-size:14.5px;font-weight:700;letter-spacing:.02em;transition:background .15s;
+}
+.btn-primary:hover{background:var(--orange-dark);}
+.btn-primary:disabled{background:#C7CFD8;cursor:not-allowed;}
+.login-foot{padding:16px 32px;background:var(--slate-bg);text-align:center;font-size:11.5px;color:var(--text-muted);}
+.login-foot b{color:var(--navy);}
+
+/* ============ SHELL / HEADER ============ */
+.topbar{
+  background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;height:60px;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.15);position:sticky;top:0;z-index:50;
+}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+.topbar-logo{background:#fff;border-radius:6px;padding:4px 8px;display:flex;align-items:center;}
+.topbar-logo img{height:22px;display:block;}
+.topbar-title{font-size:14px;font-weight:700;letter-spacing:.01em;}
+.topbar-title span{display:block;font-size:10px;font-weight:500;color:#A9C2DA;letter-spacing:.06em;text-transform:uppercase;}
+.topbar-nav{display:flex;gap:2px;}
+.nav-btn{
+  background:transparent;border:none;color:#C3D3E2;padding:9px 14px;border-radius:7px;font-size:13px;font-weight:600;
+  transition:all .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-btn.active{background:var(--orange);color:#fff;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:6px 12px;border-radius:20px;font-size:12.5px;}
+.user-chip .av{width:22px;height:22px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.logout-btn{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;}
+.logout-btn:hover{background:rgba(255,255,255,.1);}
+
+.main-content{flex:1;padding:22px 26px 60px;max-width:1360px;margin:0 auto;width:100%;}
+.page-eyebrow{font-size:11.5px;font-weight:700;color:var(--orange-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.page-title{font-size:22px;font-weight:800;color:var(--navy);margin:0 0 4px;letter-spacing:-.01em;}
+.page-desc{font-size:13.5px;color:var(--text-muted);margin:0 0 20px;max-width:760px;line-height:1.5;}
+.illustrative-tag{
+  display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--amber);
+  background:var(--amber-bg);padding:3px 9px;border-radius:20px;letter-spacing:.03em;text-transform:uppercase;
+}
+
+/* footer */
+.app-footer{background:var(--navy);color:#9FB4C8;text-align:center;padding:16px;font-size:11.5px;margin-top:auto;}
+.app-footer b{color:#fff;}
+
+/* ============ KPI CARDS ============ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:24px;}
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 15px;
+  box-shadow:var(--shadow);cursor:pointer;transition:transform .12s,box-shadow .12s;text-align:left;
+  border-left:4px solid var(--blue);
+}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(15,42,67,.14);}
+.kpi-card.active{outline:2px solid var(--orange);outline-offset:-1px;}
+.kpi-card .num{font-size:22px;font-weight:800;color:var(--navy);line-height:1;}
+.kpi-card .lbl{font-size:11.5px;color:var(--text-muted);margin-top:6px;font-weight:600;}
+.kpi-card.c-red{border-left-color:var(--red);}
+.kpi-card.c-amber{border-left-color:var(--amber);}
+.kpi-card.c-green{border-left-color:var(--green);}
+.kpi-card.c-purple{border-left-color:var(--purple);}
+.kpi-card.c-orange{border-left-color:var(--orange);}
+
+/* section card */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:20px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.panel-title{font-size:15px;font-weight:700;color:var(--navy);margin:0;}
+
+/* ============ FILTERS ============ */
+.filter-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.filter-chip{
+  padding:7px 13px;border:1.5px solid var(--border);border-radius:20px;background:#FBFCFD;font-size:12.5px;
+  font-weight:600;color:var(--text);transition:all .15s;
+}
+.filter-chip:hover{border-color:var(--blue-light);}
+.filter-chip.selected{background:var(--blue);border-color:var(--blue);color:#fff;}
+.filter-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn-sm{padding:8px 14px;border-radius:7px;font-size:12.5px;font-weight:700;border:1.5px solid var(--border);background:#fff;color:var(--text);}
+.btn-sm:hover{border-color:var(--blue-light);}
+.btn-sm.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+.btn-sm.primary:hover{background:#265d8f;}
+.btn-sm.warn{background:var(--red);border-color:var(--red);color:#fff;}
+.btn-sm.ghost{background:transparent;}
+
+/* search */
+.search-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.search-box{flex:1;min-width:220px;position:relative;}
+.search-box input{width:100%;padding:9px 12px 9px 34px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;}
+.search-box:before{content:"⌕";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;}
+
+/* ============ TABLE ============ */
+.table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+table.worklist{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1180px;}
+table.worklist thead th{
+  background:var(--slate-bg);color:var(--navy);text-align:left;padding:10px 10px;font-weight:700;font-size:11px;
+  text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;
+}
+table.worklist thead th:hover{color:var(--orange-dark);}
+table.worklist tbody td{padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--text);}
+table.worklist tbody tr:hover{background:#F7FAFD;}
+table.worklist tbody tr.overdue-row{background:#FFF9F5;}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.01em;}
+.badge-prep{background:#E4ECF5;color:var(--blue);}
+.badge-review{background:var(--purple-bg);color:var(--purple);}
+.badge-approval{background:var(--amber-bg);color:var(--amber);}
+.badge-completed{background:var(--green-bg);color:var(--green);}
+.badge-rejected{background:var(--red-bg);color:var(--red);}
+.badge-reopened{background:#FDE8F0;color:#C2255C;}
+.risk-high{color:var(--red);font-weight:700;}
+.risk-medium{color:var(--amber);font-weight:700;}
+.risk-low{color:var(--green);font-weight:700;}
+.diff-nonzero{color:var(--red);font-weight:700;}
+.link-btn{background:none;border:none;color:var(--blue);font-weight:700;font-size:12.5px;padding:0;}
+.link-btn:hover{text-decoration:underline;}
+.unclaimed-tag{color:var(--text-muted);font-style:italic;font-size:11.5px;}
+.pager{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:12.5px;color:var(--text-muted);}
+.pager .pbtns{display:flex;gap:6px;}
+.pager button{padding:5px 10px;border:1px solid var(--border);background:#fff;border-radius:6px;font-size:12px;}
+.pager button:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ============ TASK DETAIL ============ */
+.detail-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;}
+@media(max-width:900px){.detail-grid{grid-template-columns:1fr;}}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;}
+.kv{padding:8px 0;border-bottom:1px dashed var(--border);}
+.kv .k{font-size:10.5px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+.kv .v{font-size:13.5px;font-weight:600;color:var(--text);}
+.action-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.action-btn{
+  padding:9px 15px;border-radius:8px;font-size:12.5px;font-weight:700;border:1.5px solid var(--border);background:#fff;
+  display:flex;align-items:center;gap:6px;transition:all .15s;
+}
+.action-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.08);}
+.action-btn.claim{background:var(--blue);color:#fff;border-color:var(--blue);}
+.action-btn.release{background:#fff;color:var(--text);}
+.action-btn.submit{background:var(--navy);color:#fff;border-color:var(--navy);}
+.action-btn.approve{background:var(--green);color:#fff;border-color:var(--green);}
+.action-btn.reject{background:var(--red);color:#fff;border-color:var(--red);}
+.action-btn.reassign{background:var(--orange);color:#fff;border-color:var(--orange);}
+.action-btn.comment{background:#fff;color:var(--text);}
+.action-btn.export{background:var(--purple);color:#fff;border-color:var(--purple);}
+.action-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* timeline */
+.timeline{position:relative;padding-left:22px;}
+.timeline:before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--border);}
+.tl-item{position:relative;padding-bottom:16px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item:before{content:"";position:absolute;left:-22px;top:3px;width:11px;height:11px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue);}
+.tl-item.rejected:before{background:var(--red);box-shadow:0 0 0 2px var(--red);}
+.tl-item.approved:before{background:var(--green);box-shadow:0 0 0 2px var(--green);}
+.tl-time{font-size:10.5px;color:var(--text-muted);font-weight:600;}
+.tl-text{font-size:12.5px;color:var(--text);margin-top:1px;}
+.comment-box{background:var(--slate-bg);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.comment-box .who{font-size:11.5px;font-weight:700;color:var(--navy);}
+.comment-box .when{font-size:10px;color:var(--text-muted);}
+.comment-box .txt{font-size:12.5px;margin-top:3px;}
+
+/* smartart lifecycle mini in detail */
+.lifecycle-strip{display:flex;align-items:center;gap:0;overflow-x:auto;padding:6px 0 10px;}
+.lc-node{
+  flex-shrink:0;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;min-width:96px;
+  background:var(--slate-bg);color:var(--text-muted);border:1.5px solid var(--border);
+}
+.lc-node.current{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:0 3px 10px rgba(232,121,45,.35);}
+.lc-node.done{background:var(--green-bg);color:var(--green);border-color:var(--green);}
+.lc-arrow{flex-shrink:0;width:22px;text-align:center;color:var(--text-muted);font-weight:700;}
+
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,20,32,.55);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal{background:#fff;border-radius:12px;max-width:440px;width:100%;box-shadow:0 30px 70px rgba(0,0,0,.4);overflow:hidden;}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);font-weight:800;color:var(--navy);font-size:15px;}
+.modal-body{padding:18px 20px;}
+.modal-body label{font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:5px;margin-top:12px;}
+.modal-body label:first-child{margin-top:0;}
+.modal-body textarea,.modal-body select,.modal-body input[type=text]{
+  width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;
+}
+.modal-body textarea{resize:vertical;min-height:70px;}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;
+  border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:300;
+  display:flex;align-items:center;gap:8px;max-width:90vw;
+}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+.toast .icon{font-weight:800;}
+
+/* ============ CHARTS ============ */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.chart-card h4{margin:0 0 3px;font-size:13.5px;color:var(--navy);font-weight:700;}
+.chart-card .sub{font-size:10.5px;color:var(--text-muted);margin-bottom:10px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;cursor:pointer;}
+.bar-row:hover .bar-lbl{color:var(--orange-dark);}
+.bar-lbl{width:110px;flex-shrink:0;font-size:11.5px;font-weight:600;color:var(--text);transition:color .1s;}
+.bar-track{flex:1;background:var(--slate-bg);border-radius:5px;height:16px;position:relative;overflow:hidden;}
+.bar-fill{height:100%;border-radius:5px;transition:width .3s;}
+.bar-val{width:26px;text-align:right;font-size:11px;font-weight:700;color:var(--text-muted);flex-shrink:0;}
+
+/* ============ SMARTART / FLOWCHARTS ============ */
+.flow-row{display:flex;flex-direction:column;align-items:center;gap:0;}
+.flow-box{
+  background:var(--card);border:2px solid var(--blue);color:var(--navy);font-weight:700;font-size:12.5px;
+  padding:10px 18px;border-radius:8px;text-align:center;min-width:180px;box-shadow:var(--shadow);
+}
+.flow-box.hilite{border-color:var(--orange);background:#FFF6EF;}
+.flow-box.danger{border-color:var(--red);background:var(--red-bg);color:var(--red);}
+.flow-down{color:var(--text-muted);font-size:16px;line-height:1;padding:2px 0;}
+.flow-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;margin-top:6px;}
+
+/* ============ ROLE INFO ============ */
+.role-banner{
+  display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,var(--navy),var(--blue));
+  color:#fff;border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;
+}
+.role-banner .rtag{background:var(--orange);padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.03em;}
+.role-banner .rtxt{font-size:12.5px;color:#DCE8F2;}
+
+/* ============ TRAINING / PRACTICE / EXAM ============ */
+.progress-bar-wrap{background:var(--slate-bg);border-radius:20px;height:8px;overflow:hidden;margin:12px 0 18px;}
+.progress-bar-fill{height:100%;background:var(--orange);border-radius:20px;transition:width .3s;}
+.step-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);
+}
+.step-card.done{border-color:var(--green);background:var(--green-bg);}
+.step-num{
+  display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  background:var(--navy);color:#fff;font-size:12px;font-weight:800;margin-right:8px;
+}
+.step-card.done .step-num{background:var(--green);}
+.scenario-box{background:#FFF6EF;border:1.5px solid #F3D6BB;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13.5px;line-height:1.55;}
+.scenario-box b{color:var(--orange-dark);}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13px;}
+.checklist-item .cbox{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:800;}
+.checklist-item.on .cbox{background:var(--green);border-color:var(--green);}
+.exam-q{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;}
+.exam-q .qtitle{font-weight:700;font-size:13.5px;margin-bottom:12px;color:var(--navy);}
+.opt-btn{
+  display:block;width:100%;text-align:left;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
+  background:#FBFCFD;font-size:13px;margin-bottom:8px;font-weight:500;transition:all .15s;
+}
+.opt-btn:hover{border-color:var(--blue-light);}
+.opt-btn.correct{background:var(--green-bg);border-color:var(--green);color:#1c6b32;font-weight:700;}
+.opt-btn.incorrect{background:var(--red-bg);border-color:var(--red);color:#a11a1a;font-weight:700;}
+.opt-btn:disabled{cursor:default;}
+.score-hero{
+  text-align:center;background:linear-gradient(160deg,var(--navy),var(--blue));color:#fff;border-radius:14px;
+  padding:34px 20px;margin-bottom:20px;
+}
+.score-hero .big{font-size:44px;font-weight:800;}
+.score-hero .tag{margin-top:6px;font-size:13px;color:#CFE0EE;}
+.pass-pill{display:inline-block;margin-top:12px;padding:6px 18px;border-radius:20px;font-weight:800;font-size:12.5px;letter-spacing:.03em;}
+.pass-pill.pass{background:var(--green);}
+.pass-pill.retry{background:var(--red);}
+
+/* ============ HELP ============ */
+.help-item{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+.help-q{width:100%;text-align:left;padding:13px 16px;background:#FBFCFD;border:none;font-weight:700;font-size:13px;color:var(--navy);display:flex;justify-content:space-between;align-items:center;}
+.help-a{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .25s ease, padding .25s ease;font-size:12.5px;line-height:1.7;}
+.help-a.open{padding:4px 16px 16px;max-height:600px;}
+.help-a .row{margin-bottom:6px;}
+.help-a b{color:var(--navy);}
+
+/* ============ COMPLETION ============ */
+.complete-wrap{max-width:640px;margin:20px auto 0;text-align:center;}
+.trophy{font-size:52px;}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:22px 0;text-align:left;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.stat-box .n{font-size:20px;font-weight:800;color:var(--navy);}
+.stat-box .l{font-size:11px;color:var(--text-muted);font-weight:600;margin-top:3px;}
+
+.orig-note{font-size:11px;color:var(--text-muted);font-style:italic;margin-top:4px;}
+.hint-banner{background:#EAF2FB;border:1px solid #C9DDF0;color:var(--blue);border-radius:8px;padding:10px 14px;font-size:12.5px;margin-bottom:16px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ======================================================================
+   BISP TRAININGS — WORKLIST & TASK MANAGEMENT SIMULATOR
+   Original BISP Oracle-inspired training simulator. Illustrative data only.
+====================================================================== */
+const LOGO_SRC = "data:image/jpeg;base64,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";
+
+/* ---------------- STATE ---------------- */
+const STATE = {
+  view:'login',
+  username:'',
+  role:'',
+  loginTime:null,
+  activeKpi:null,
+  activeFilters:new Set(),
+  search:'',
+  sortKey:'dueDate',
+  sortDir:'asc',
+  page:1,
+  pageSize:8,
+  openTaskId:null,
+  toast:null,
+  modal:null,
+  training:{step:1,claimedId:null},
+  practice:{stage:0,filterApplied:false,openedId:null,claimedId:null,correct:0,incorrect:0,done:false},
+  exam:{i:0,answers:[],finished:false},
+  actionsTaken:0,
+  scenariosCompleted:0
+};
+
+const ROLES = [
+  {id:'Preparer',desc:'Preparation-related tasks'},
+  {id:'Reviewer',desc:'Review-related tasks'},
+  {id:'Approver',desc:'Approval-related tasks'},
+  {id:'Administrator',desc:'Administrative task-management view'},
+  {id:'Viewer',desc:'Accessible / read-only worklist view'}
+];
+
+/* ---------------- DATA (illustrative) ---------------- */
+function daysFromToday(n){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+n);
+  return d;
+}
+function fmtDate(d){
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function overdueDays(dueDate){
+  const t = new Date(); t.setHours(0,0,0,0);
+  const diff = Math.round((t-dueDate)/86400000);
+  return diff>0?diff:0;
+}
+
+const ENTITIES = ['US-East LLC','EU-Holdings BV','APAC Trading Pte','UK Services Ltd','LATAM Corp'];
+const ACCOUNTS = ['Cash & Equivalents','Accounts Receivable','Accrued Liabilities','Fixed Assets','Intercompany','Prepaid Expenses','Inventory Reserve','Payroll Clearing'];
+const PREPS = ['A. Sharma','J. Mehta','R. Fernandes','T. Nakamura'];
+const REVS = ['S. Rao','K. O\'Brien','P. Singh'];
+
+const RAW = [
+  {recon:'REC-1001',account:ACCOUNTS[0],entity:ENTITIES[0],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'High',balance:482300,difference:0,due:-3,preparer:PREPS[0],reviewer:REVS[0],assignee:null,alert:false},
+  {recon:'REC-1002',account:ACCOUNTS[1],entity:ENTITIES[1],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'Medium',balance:118750,difference:2100,due:0,preparer:PREPS[1],reviewer:REVS[1],assignee:'ME',alert:false},
+  {recon:'REC-1003',account:ACCOUNTS[2],entity:ENTITIES[2],period:'Jul-2026',role:'Reviewer',status:'Pending Review',risk:'High',balance:993200,difference:0,due:1,preparer:PREPS[2],reviewer:REVS[0],assignee:'ME',alert:true},
+  {recon:'REC-1004',account:ACCOUNTS[3],entity:ENTITIES[0],period:'Jul-2026',role:'Approver',status:'Pending Approval',risk:'Low',balance:65400,difference:0,due:4,preparer:PREPS[3],reviewer:REVS[2],assignee:'ME',alert:false},
+  {recon:'REC-1005',account:ACCOUNTS[4],entity:ENTITIES[3],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'High',balance:271900,difference:15200,due:-7,preparer:PREPS[0],reviewer:REVS[1],assignee:null,alert:false},
+  {recon:'REC-1006',account:ACCOUNTS[5],entity:ENTITIES[1],period:'Jul-2026',role:'Reviewer',status:'Rejected',risk:'Medium',balance:87200,difference:3400,due:-1,preparer:PREPS[1],reviewer:REVS[0],assignee:'ME',alert:false},
+  {recon:'REC-1007',account:ACCOUNTS[6],entity:ENTITIES[4],period:'Jun-2026',role:'Preparer',status:'Completed',risk:'Low',balance:34200,difference:0,due:-12,preparer:PREPS[2],reviewer:REVS[2],assignee:'ME',alert:false},
+  {recon:'REC-1008',account:ACCOUNTS[7],entity:ENTITIES[2],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'Medium',balance:156800,difference:0,due:2,preparer:PREPS[3],reviewer:REVS[1],assignee:null,alert:false},
+  {recon:'REC-1009',account:ACCOUNTS[0],entity:ENTITIES[3],period:'Jul-2026',role:'Reviewer',status:'Pending Review',risk:'Low',balance:52100,difference:0,due:5,preparer:PREPS[0],reviewer:REVS[2],assignee:'S. Rao',alert:false},
+  {recon:'REC-1010',account:ACCOUNTS[1],entity:ENTITIES[4],period:'Jul-2026',role:'Approver',status:'Pending Approval',risk:'High',balance:604000,difference:0,due:-2,preparer:PREPS[1],reviewer:REVS[0],assignee:'ME',alert:true},
+  {recon:'REC-1011',account:ACCOUNTS[2],entity:ENTITIES[0],period:'Jun-2026',role:'Preparer',status:'Reopened',risk:'Medium',balance:98700,difference:1100,due:0,preparer:PREPS[2],reviewer:REVS[1],assignee:'ME',alert:false},
+  {recon:'REC-1012',account:ACCOUNTS[3],entity:ENTITIES[1],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'Low',balance:41500,difference:0,due:6,preparer:PREPS[3],reviewer:REVS[2],assignee:null,alert:false},
+  {recon:'REC-1013',account:ACCOUNTS[4],entity:ENTITIES[2],period:'Jul-2026',role:'Reviewer',status:'Pending Review',risk:'High',balance:721300,difference:8900,due:-5,preparer:PREPS[0],reviewer:REVS[0],assignee:'ME',alert:false},
+  {recon:'REC-1014',account:ACCOUNTS[5],entity:ENTITIES[3],period:'Jul-2026',role:'Preparer',status:'Completed',risk:'Medium',balance:132400,difference:0,due:-9,preparer:PREPS[1],reviewer:REVS[1],assignee:'ME',alert:false},
+  {recon:'REC-1015',account:ACCOUNTS[6],entity:ENTITIES[4],period:'Jul-2026',role:'Approver',status:'Pending Approval',risk:'Low',balance:29800,difference:0,due:3,preparer:PREPS[2],reviewer:REVS[2],assignee:'ME',alert:false},
+  {recon:'REC-1016',account:ACCOUNTS[7],entity:ENTITIES[0],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'High',balance:389600,difference:22100,due:-1,preparer:PREPS[3],reviewer:REVS[0],assignee:null,alert:false},
+  {recon:'REC-1017',account:ACCOUNTS[0],entity:ENTITIES[1],period:'Jul-2026',role:'Reviewer',status:'Pending Review',risk:'Medium',balance:76500,difference:0,due:0,preparer:PREPS[0],reviewer:REVS[1],assignee:'ME',alert:false},
+  {recon:'REC-1018',account:ACCOUNTS[1],entity:ENTITIES[2],period:'Jun-2026',role:'Preparer',status:'Rejected',risk:'High',balance:214700,difference:9700,due:-4,preparer:PREPS[1],reviewer:REVS[0],assignee:'ME',alert:false},
+  {recon:'REC-1019',account:ACCOUNTS[2],entity:ENTITIES[3],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'Low',balance:18300,difference:0,due:8,preparer:PREPS[2],reviewer:REVS[2],assignee:null,alert:false},
+  {recon:'REC-1020',account:ACCOUNTS[3],entity:ENTITIES[4],period:'Jul-2026',role:'Approver',status:'Completed',risk:'Medium',balance:145000,difference:0,due:-15,preparer:PREPS[3],reviewer:REVS[1],assignee:'ME',alert:false},
+  {recon:'REC-1021',account:ACCOUNTS[4],entity:ENTITIES[0],period:'Jul-2026',role:'Reviewer',status:'Reopened',risk:'High',balance:558200,difference:4300,due:1,preparer:PREPS[0],reviewer:REVS[2],assignee:'ME',alert:true},
+  {recon:'REC-1022',account:ACCOUNTS[5],entity:ENTITIES[1],period:'Jul-2026',role:'Preparer',status:'Pending Preparation',risk:'Medium',balance:63200,difference:0,due:-2,preparer:PREPS[1],reviewer:REVS[0],assignee:null,alert:false},
+  {recon:'REC-1023',account:ACCOUNTS[6],entity:ENTITIES[2],period:'Jul-2026',role:'Reviewer',status:'Pending Review',risk:'Low',balance:24900,difference:0,due:7,preparer:PREPS[2],reviewer:REVS[1],assignee:'ME',alert:false},
+  {recon:'REC-1024',account:ACCOUNTS[7],entity:ENTITIES[3],period:'Jul-2026',role:'Approver',status:'Pending Approval',risk:'High',balance:812600,difference:0,due:-6,preparer:PREPS[3],reviewer:REVS[2],assignee:'ME',alert:false}
+];
+
+let TASKS = RAW.map((r,i)=>{
+  const due = daysFromToday(r.due);
+  return {
+    id:'T'+(i+1),
+    recon:r.recon, account:r.account, entity:r.entity, period:r.period, role:r.role,
+    status:r.status, risk:r.risk, balance:r.balance, difference:r.difference,
+    dueDate:due, preparer:r.preparer, reviewer:r.reviewer, assignee:r.assignee, alert:r.alert,
+    history:[{ts:daysFromToday(r.due-6),event:'Task Created',note:'Reconciliation task generated for period '+r.period+'.'}],
+    comments:[]
+  };
+});
+
+/* ---------------- FILTER DEFINITIONS ---------------- */
+const FILTER_DEFS = [
+  {key:'myTasks', label:'My Tasks', test:t=>t.assignee==='ME'},
+  {key:'dueToday', label:'Due Today', test:t=>sameDay(t.dueDate,new Date())},
+  {key:'dueWeek', label:'Due This Week', test:t=>{const d=diffDays(t.dueDate);return d>=0 && d<=7;}},
+  {key:'overdue', label:'Overdue', test:t=>diffDays(t.dueDate)<0 && !['Completed'].includes(t.status)},
+  {key:'highRisk', label:'High Risk', test:t=>t.risk==='High'},
+  {key:'rejected', label:'Rejected', test:t=>t.status==='Rejected'},
+  {key:'unclaimed', label:'Unclaimed', test:t=>t.assignee===null},
+  {key:'pendPrep', label:'Pending Preparation', test:t=>t.status==='Pending Preparation'},
+  {key:'pendReview', label:'Pending Review', test:t=>t.status==='Pending Review'},
+  {key:'pendApproval', label:'Pending Approval', test:t=>t.status==='Pending Approval'},
+  {key:'completed', label:'Completed', test:t=>t.status==='Completed'},
+  {key:'reopened', label:'Reopened', test:t=>t.status==='Reopened'},
+  {key:'alerts', label:'Alerts Assigned to Me', test:t=>t.alert && t.assignee==='ME'}
+];
+function diffDays(d){const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/86400000);}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+
+const STATUS_BADGE = {
+  'Pending Preparation':'badge-prep','Pending Review':'badge-review','Pending Approval':'badge-approval',
+  'Completed':'badge-completed','Rejected':'badge-rejected','Reopened':'badge-reopened'
+};
+const RISK_CLASS = {High:'risk-high',Medium:'risk-medium',Low:'risk-low'};
+
+/* ---------------- UTIL ---------------- */
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function money(n){return '$'+n.toLocaleString('en-US');}
+function h(){document.getElementById('app').innerHTML = buildView();}
+function goTo(view){STATE.view=view; STATE.activeKpi=null; window.scrollTo(0,0); h();}
+function showToast(msg,type){
+  const root=document.getElementById('toast-root');
+  root.innerHTML = `<div class="toast ${type||''}"><span class="icon">${type==='success'?'✓':type==='error'?'!':'ℹ'}</span>${esc(msg)}</div>`;
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>{root.innerHTML='';},2600);
+}
+function closeModal(){document.getElementById('modal-root').innerHTML='';}
+
+/* ---------------- LOGIN ---------------- */
+function renderLogin(){
+  let selRole = STATE.__loginRole || '';
+  return `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="${LOGO_SRC}" alt="BISP Trainings logo">
+        <div class="tagline">Business Intelligence Solution Providers Inc. — BISP Trainings</div>
+      </div>
+      <div class="login-body">
+        <p class="login-sub">Worklist &amp; Task Management</p>
+        <h1 class="login-title">Training Simulator</h1>
+        <div style="height:16px"></div>
+        <label class="field-label">Username</label>
+        <input class="text-input" type="text" id="loginUser" placeholder="Enter username" value="${esc(STATE.__loginUser||'')}">
+        <label class="field-label">Select your role for this session</label>
+        <div class="role-grid">
+          ${ROLES.map(r=>`
+            <button class="role-btn ${selRole===r.id?'selected':''}" onclick="pickRole('${r.id}')">
+              <span class="dot"></span>${r.id}
+            </button>`).join('')}
+        </div>
+        <button class="btn-primary" id="loginBtn" onclick="doLogin()">LOGIN</button>
+      </div>
+      <div class="login-foot">
+        <b>BISP Trainings</b> &nbsp;|&nbsp; www.bisptrainings.com &nbsp;|&nbsp; Call Us: +91 769-409-5404
+      </div>
+    </div>
+  </div>`;
+}
+function pickRole(r){STATE.__loginRole=r; h(); const el=document.getElementById('loginUser'); if(el) el.focus();}
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  STATE.__loginUser = u;
+  if(!u || !STATE.__loginRole){ showToast('Enter a username and select a role to continue.','error'); h(); return; }
+  STATE.username = u;
+  STATE.role = STATE.__loginRole;
+  STATE.loginTime = Date.now();
+  goTo('dashboard');
+}
+function doLogout(){
+  Object.assign(STATE,{
+    view:'login',username:'',role:'',loginTime:null,activeKpi:null,activeFilters:new Set(),search:'',
+    page:1,openTaskId:null,training:{step:1,claimedId:null},
+    practice:{stage:0,filterApplied:false,openedId:null,claimedId:null,correct:0,incorrect:0,done:false},
+    exam:{i:0,answers:[],finished:false},actionsTaken:0,scenariosCompleted:0
+  });
+  STATE.__loginRole=''; STATE.__loginUser='';
+  h();
+}
+
+/* ---------------- SHELL ---------------- */
+const NAV_ITEMS = [
+  {id:'dashboard',label:'Dashboard'},
+  {id:'worklist',label:'Worklist'},
+  {id:'analytics',label:'Analytics'},
+  {id:'smartart',label:'Process Maps'},
+  {id:'training',label:'Training Mode'},
+  {id:'practice',label:'Practice Mode'},
+  {id:'exam',label:'Exam Mode'},
+  {id:'help',label:'Help'}
+];
+function renderShell(inner){
+  return `
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><img src="${LOGO_SRC}" alt="BISP logo"></div>
+      <div class="topbar-title">Worklist &amp; Task Management<span>BISP Oracle-inspired Training Simulator</span></div>
+    </div>
+    <div class="topbar-nav">
+      ${NAV_ITEMS.map(n=>`<button class="nav-btn ${STATE.view===n.id?'active':''}" onclick="goTo('${n.id}')">${n.label}</button>`).join('')}
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip"><span class="av">${esc(STATE.username.charAt(0).toUpperCase()||'U')}</span>${esc(STATE.username)} · ${esc(STATE.role)}</div>
+      <button class="logout-btn" onclick="doLogout()">Log Out</button>
+    </div>
+  </div>
+  <div class="main-content">${inner}</div>
+  <div class="app-footer">© <b>BISP Trainings</b> | www.bisptrainings.com | Call Us: +91 769-409-5404</div>
+  `;
+}
+function roleBanner(){
+  const map = {
+    Preparer:'You see preparation-related tasks that need to be completed and submitted for review.',
+    Reviewer:'You see tasks pending review, along with items you have previously reviewed.',
+    Approver:'You see tasks pending final approval before they are marked complete.',
+    Administrator:'You have an administrative view across all worklist tasks for oversight and reassignment.',
+    Viewer:'You have read-only access to the worklist for monitoring purposes. (Illustrative role behavior.)'
+  };
+  return `<div class="role-banner"><span class="rtag">${esc(STATE.role)}</span><span class="rtxt">${map[STATE.role]}</span></div>`;
+}
+
+/* ---------------- KPI COMPUTE ---------------- */
+function kpiCounts(){
+  const c = {};
+  FILTER_DEFS.forEach(f=>{ c[f.key]=TASKS.filter(f.test).length; });
+  c.total = TASKS.length;
+  return c;
+}
+const KPI_DISPLAY = [
+  {key:'myTasks',label:'My Tasks',cls:'c-orange'},
+  {key:'dueToday',label:'Due Today',cls:''},
+  {key:'dueWeek',label:'Due This Week',cls:''},
+  {key:'overdue',label:'Overdue',cls:'c-red'},
+  {key:'highRisk',label:'High Risk',cls:'c-red'},
+  {key:'rejected',label:'Rejected',cls:'c-amber'},
+  {key:'unclaimed',label:'Unclaimed',cls:'c-amber'},
+  {key:'pendPrep',label:'Pending Preparation',cls:''},
+  {key:'pendReview',label:'Pending Review',cls:'c-purple'},
+  {key:'pendApproval',label:'Pending Approval',cls:'c-amber'},
+  {key:'completed',label:'Completed',cls:'c-green'},
+  {key:'reopened',label:'Reopened',cls:'c-purple'},
+  {key:'alerts',label:'Alerts Assigned to Me',cls:'c-red'}
+];
+
+/* ---------------- DASHBOARD ---------------- */
+function renderDashboard(){
+  const c = kpiCounts();
+  return renderShell(`
+    <div class="page-eyebrow">Worklist &amp; Task Management</div>
+    <h1 class="page-title">My Worklist Dashboard</h1>
+    <p class="page-desc">A role-specific snapshot of task volume across the reconciliation lifecycle. Click any KPI card to jump to a pre-filtered worklist. <span class="illustrative-tag">Illustrative Training Data</span></p>
+    ${roleBanner()}
+    <div class="kpi-grid">
+      ${KPI_DISPLAY.map(k=>`
+        <button class="kpi-card ${k.cls}" onclick="applyKpi('${k.key}')">
+          <div class="num">${c[k.key]}</div>
+          <div class="lbl">${k.label}</div>
+        </button>`).join('')}
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title">Task Lifecycle — Illustrative Worklist Task Lifecycle</h3>
+      </div>
+      ${lifecycleDiagram(null)}
+    </div>
+    <div class="chart-grid">
+      ${chartCard('Tasks by Status','status')}
+      ${chartCard('Tasks by Risk','risk')}
+    </div>
+  `);
+}
+function applyKpi(key){
+  STATE.activeFilters = new Set([key]);
+  STATE.activeKpi = key;
+  STATE.page=1;
+  goTo('worklist');
+}
+
+/* ---------------- LIFECYCLE SMARTART ---------------- */
+function lifecycleDiagram(currentStatus){
+  const stages = ['Pending Preparation','Pending Review','Pending Approval','Completed'];
+  const labels = ['Pending Preparation','Submit','Pending Review','Approve','Pending Approval','Approve','Completed'];
+  let idx = stages.indexOf(currentStatus);
+  return `<div class="lifecycle-strip">
+    ${labels.map((l,i)=>{
+      const isStage = i%2===0;
+      let cls='lc-node';
+      if(isStage){
+        const stageIdx = i/2;
+        if(currentStatus && stageIdx<idx) cls+=' done';
+        if(currentStatus && stageIdx===idx) cls+=' current';
+      }
+      const arrow = i<labels.length-1?'<span class="lc-arrow">→</span>':'';
+      return `<div class="${cls}">${esc(l)}</div>${arrow}`;
+    }).join('')}
+  </div>
+  <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:6px;">
+    <div style="font-size:11.5px;color:var(--text-muted);"><b style="color:var(--red)">Exception —</b> Review → Reject → Preparation (return for correction)</div>
+    <div style="font-size:11.5px;color:var(--text-muted);"><b style="color:#C2255C">Exception —</b> Completed → Reopened → Processing</div>
+  </div>`;
+}
+
+/* ---------------- WORKLIST ---------------- */
+function matchesFilters(t){
+  if(STATE.activeFilters.size===0) return true;
+  for(const key of STATE.activeFilters){
+    const def = FILTER_DEFS.find(f=>f.key===key);
+    if(def && !def.test(t)) return false;
+  }
+  return true;
+}
+function matchesSearch(t){
+  if(!STATE.search) return true;
+  const s = STATE.search.toLowerCase();
+  return [t.recon,t.account,t.entity,t.period,t.preparer,t.reviewer,t.status].some(v=>String(v).toLowerCase().includes(s));
+}
+function getFilteredSorted(){
+  let list = TASKS.filter(matchesFilters).filter(matchesSearch);
+  const key = STATE.sortKey, dir = STATE.sortDir==='asc'?1:-1;
+  list = list.slice().sort((a,b)=>{
+    let av=a[key], bv=b[key];
+    if(key==='dueDate'){av=a.dueDate.getTime();bv=b.dueDate.getTime();}
+    if(key==='daysOverdue'){av=diffDays(a.dueDate)*-1;bv=diffDays(b.dueDate)*-1;}
+    if(typeof av==='string') return av.localeCompare(bv)*dir;
+    return (av-bv)*dir;
+  });
+  return list;
+}
+function toggleFilter(key){
+  if(STATE.activeFilters.has(key)) STATE.activeFilters.delete(key);
+  else STATE.activeFilters.add(key);
+  STATE.activeKpi=null; STATE.page=1; h();
+}
+function resetFilters(){STATE.activeFilters=new Set(); STATE.activeKpi=null; STATE.page=1; STATE.search=''; h();}
+function applyFilterBtn(){STATE.page=1; h(); showToast('Filter applied to worklist.','success');}
+function saveView(){showToast('View saved (illustrative — session only).','success');}
+function setSort(key){
+  if(STATE.sortKey===key) STATE.sortDir = STATE.sortDir==='asc'?'desc':'asc';
+  else {STATE.sortKey=key; STATE.sortDir='asc';}
+  h();
+}
+function setSearch(v){STATE.search=v; STATE.page=1;}
+
+function renderWorklist(){
+  const all = getFilteredSorted();
+  const totalPages = Math.max(1,Math.ceil(all.length/STATE.pageSize));
+  if(STATE.page>totalPages) STATE.page=totalPages;
+  const start=(STATE.page-1)*STATE.pageSize;
+  const pageItems = all.slice(start,start+STATE.pageSize);
+  const cols = ['Reconciliation','Account','Entity','Period','Role','Status','Risk','Balance','Difference','Due Date','Days Overdue','Preparer','Reviewer',''];
+  const sortMap = {Reconciliation:'recon',Account:'account',Entity:'entity',Period:'period',Role:'role',Status:'status',Risk:'risk',Balance:'balance',Difference:'difference','Due Date':'dueDate','Days Overdue':'daysOverdue',Preparer:'preparer',Reviewer:'reviewer'};
+
+  return renderShell(`
+    <div class="page-eyebrow">Worklist &amp; Task Management</div>
+    <h1 class="page-title">Worklist</h1>
+    <p class="page-desc">Filter, search, sort and act on reconciliation tasks. <span class="illustrative-tag">Illustrative Training Data</span></p>
+
+    <div class="panel">
+      <div class="panel-head"><h3 class="panel-title">Worklist Filters</h3></div>
+      <div class="filter-grid">
+        ${FILTER_DEFS.map(f=>`<button class="filter-chip ${STATE.activeFilters.has(f.key)?'selected':''}" onclick="toggleFilter('${f.key}')">${f.label} <span class="mono" style="opacity:.7">(${TASKS.filter(f.test).length})</span></button>`).join('')}
+      </div>
+      <div class="filter-actions">
+        <button class="btn-sm primary" onclick="applyFilterBtn()">APPLY FILTER</button>
+        <button class="btn-sm warn" onclick="resetFilters()">RESET FILTER</button>
+        <button class="btn-sm ghost" onclick="saveView()">SAVE VIEW</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="search-row">
+        <div class="search-box"><input type="text" placeholder="Search reconciliation, account, entity, preparer, reviewer, status..." value="${esc(STATE.search)}" oninput="setSearch(this.value); h(); this.focus(); this.setSelectionRange(this.value.length,this.value.length);"></div>
+        <button class="btn-sm" onclick="exportListPrompt()">⬇ EXPORT LIST</button>
+      </div>
+      <div class="table-scroll">
+        <table class="worklist">
+          <thead><tr>${cols.map(c=>`<th onclick="${sortMap[c]?`setSort('${sortMap[c]}')`:''}">${c}${sortMap[c]&&STATE.sortKey===sortMap[c]?(STATE.sortDir==='asc'?' ▲':' ▼'):''}</th>`).join('')}</tr></thead>
+          <tbody>
+            ${pageItems.length===0?`<tr><td colspan="14" style="text-align:center;padding:26px;color:var(--text-muted);">No tasks match the current filters.</td></tr>`:''}
+            ${pageItems.map(t=>{
+              const od = diffDays(t.dueDate);
+              const overdue = od<0 && t.status!=='Completed';
+              return `<tr class="${overdue?'overdue-row':''}">
+                <td><b>${t.recon}</b></td>
+                <td>${esc(t.account)}</td>
+                <td>${esc(t.entity)}</td>
+                <td>${esc(t.period)}</td>
+                <td>${esc(t.role)}</td>
+                <td><span class="badge ${STATUS_BADGE[t.status]}">${t.status}</span></td>
+                <td class="${RISK_CLASS[t.risk]}">${t.risk}</td>
+                <td>${money(t.balance)}</td>
+                <td class="${t.difference?'diff-nonzero':''}">${money(t.difference)}</td>
+                <td>${fmtDate(t.dueDate)}</td>
+                <td>${overdue?('<span class="risk-high">'+Math.abs(od)+'</span>'):'—'}</td>
+                <td>${esc(t.preparer)}</td>
+                <td>${esc(t.reviewer)}</td>
+                <td>${t.assignee?(t.assignee==='ME'?'<b style="color:var(--blue)">You</b>':esc(t.assignee)):'<span class="unclaimed-tag">Unclaimed</span>'} &nbsp;<button class="link-btn" onclick="openTask('${t.id}')">OPEN →</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <div>Showing ${pageItems.length?start+1:0}–${start+pageItems.length} of ${all.length} tasks</div>
+        <div class="pbtns">
+          <button ${STATE.page<=1?'disabled':''} onclick="STATE.page--; h();">‹ Prev</button>
+          <button ${STATE.page>=totalPages?'disabled':''} onclick="STATE.page++; h();">Next ›</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+function exportListPrompt(){
+  STATE.modal='export';
+  h(); renderModal();
+}
+
+/* ---------------- TASK ACTIONS ---------------- */
+function findTask(id){return TASKS.find(t=>t.id===id);}
+function pushHistory(t,event,note){t.history.push({ts:new Date(),event,note});}
+function openTask(id){STATE.openTaskId=id; goTo('taskDetail');
+  if(STATE.view==='taskDetail' && STATE.__mode==='practice') STATE.practice.openedId=id;
+}
+function backToWorklist(){goTo('worklist');}
+
+function claimTask(id){
+  const t=findTask(id);
+  if(!t || t.assignee!==null) return;
+  t.assignee='ME';
+  pushHistory(t,'Claimed','Task claimed by '+STATE.username+'.');
+  STATE.actionsTaken++;
+  showToast('Task '+t.recon+' claimed. Ownership updated: Unclaimed → Assigned to '+STATE.username+'.','success');
+  if(STATE.__mode==='training') trainingAfterClaim(id);
+  if(STATE.__mode==='practice') practiceAfterClaim(id);
+  h();
+}
+function releaseTask(id){
+  const t=findTask(id);
+  if(!t || t.assignee!=='ME') return;
+  t.assignee=null;
+  pushHistory(t,'Released','Task released by '+STATE.username+'. (Illustrative Simulator Behavior)');
+  STATE.actionsTaken++;
+  showToast('Task '+t.recon+' released and is now Unclaimed. (Illustrative Simulator Behavior)','success');
+  h();
+}
+function submitTask(id){
+  const t=findTask(id);
+  if(!t || t.status!=='Pending Preparation') return;
+  t.status='Pending Review';
+  pushHistory(t,'Submitted','Preparation submitted for review by '+STATE.username+'.');
+  STATE.actionsTaken++;
+  showToast('Task '+t.recon+' submitted: Pending Preparation → Pending Review.','success');
+  h();
+}
+function approveTask(id){
+  STATE.modal='approve'; STATE.modalTaskId=id; h(); renderModal();
+}
+function confirmApprove(id){
+  const t=findTask(id);
+  if(!t) return;
+  if(t.status==='Pending Review'){
+    t.status='Pending Approval';
+    pushHistory(t,'Reviewed & Approved','Reviewed and forwarded for final approval by '+STATE.username+'.');
+    showToast('Task '+t.recon+' approved: Pending Review → Pending Approval.','success');
+  } else if(t.status==='Pending Approval'){
+    t.status='Completed';
+    pushHistory(t,'Approved','Final approval granted by '+STATE.username+'. Task Completed.');
+    showToast('Task '+t.recon+' approved: Pending Approval → Completed.','success');
+  } else if(t.status==='Reopened'){
+    t.status='Completed';
+    pushHistory(t,'Re-approved','Reopened task re-approved by '+STATE.username+'. Task Completed.');
+    showToast('Task '+t.recon+' re-approved and marked Completed.','success');
+  }
+  STATE.actionsTaken++;
+  closeModal(); STATE.modal=null; h();
+}
+function rejectTaskPrompt(id){STATE.modal='reject'; STATE.modalTaskId=id; h(); renderModal();}
+function confirmReject(id){
+  const reasonEl = document.getElementById('rejectReason');
+  const reason = reasonEl?reasonEl.value.trim():'';
+  if(!reason){ showToast('Please enter a rejection reason.','error'); return; }
+  const t=findTask(id);
+  t.status='Rejected';
+  pushHistory(t,'Rejected','Rejected by '+STATE.username+'. Reason: '+reason);
+  t.comments.push({who:STATE.username,when:new Date(),text:reason});
+  STATE.actionsTaken++;
+  closeModal(); STATE.modal=null;
+  showToast('Task '+t.recon+' rejected and returned for correction.','success');
+  h();
+}
+function reassignPrompt(id){STATE.modal='reassign'; STATE.modalTaskId=id; h(); renderModal();}
+function confirmReassign(id){
+  const newA = document.getElementById('reassignNew').value.trim();
+  const reason = document.getElementById('reassignReason').value.trim();
+  if(!newA){ showToast('Enter a new assignee.','error'); return; }
+  const t=findTask(id);
+  const old = t.assignee==='ME'?STATE.username:(t.assignee||'Unclaimed');
+  t.assignee = newA;
+  pushHistory(t,'Reassigned','Reassigned from '+old+' to '+newA+(reason?' — Reason: '+reason:'')+'.');
+  STATE.actionsTaken++;
+  closeModal(); STATE.modal=null;
+  showToast('Task '+t.recon+' reassigned to '+newA+'.','success');
+  h();
+}
+function commentPrompt(id){STATE.modal='comment'; STATE.modalTaskId=id; h(); renderModal();}
+function confirmComment(id){
+  const txt = document.getElementById('commentText').value.trim();
+  if(!txt){ showToast('Enter a comment before adding.','error'); return; }
+  const t=findTask(id);
+  t.comments.push({who:STATE.username,when:new Date(),text:txt});
+  pushHistory(t,'Comment Added',txt);
+  STATE.actionsTaken++;
+  closeModal(); STATE.modal=null;
+  showToast('Comment added to task history.','success');
+  h();
+}
+function confirmExport(){
+  const scope = document.querySelector('input[name=exportScope]:checked').value;
+  const n = scope==='current'?getFilteredSorted().slice((STATE.page-1)*STATE.pageSize,(STATE.page-1)*STATE.pageSize+STATE.pageSize).length : scope==='filtered'?getFilteredSorted().length : TASKS.length;
+  closeModal(); STATE.modal=null;
+  showToast(n+' record(s) prepared for export ('+scope+' view). Illustrative Simulator Behavior.','success');
+}
+
+/* ---------------- MODALS ---------------- */
+function renderModal(){
+  const root=document.getElementById('modal-root');
+  if(!STATE.modal){root.innerHTML='';return;}
+  const t = STATE.modalTaskId?findTask(STATE.modalTaskId):null;
+  let inner='';
+  if(STATE.modal==='approve'){
+    inner=`<div class="modal-head">Approve Task ${t?esc(t.recon):''}</div>
+      <div class="modal-body"><p style="font-size:13.5px;">Approve this task? The status will advance to the next stage in the reconciliation lifecycle.</p></div>
+      <div class="modal-foot"><button class="btn-sm" onclick="closeModal(); STATE.modal=null; h();">Cancel</button><button class="btn-sm primary" onclick="confirmApprove('${t.id}')">Confirm Approve</button></div>`;
+  } else if(STATE.modal==='reject'){
+    inner=`<div class="modal-head">Reject Task ${t?esc(t.recon):''}</div>
+      <div class="modal-body">
+        <label>Rejection Reason</label>
+        <textarea id="rejectReason" placeholder="e.g. Supporting documentation requires correction."></textarea>
+      </div>
+      <div class="modal-foot"><button class="btn-sm" onclick="closeModal(); STATE.modal=null; h();">Cancel</button><button class="btn-sm warn" onclick="confirmReject('${t.id}')">Confirm Reject</button></div>`;
+  } else if(STATE.modal==='reassign'){
+    inner=`<div class="modal-head">Reassign Task ${t?esc(t.recon):''}</div>
+      <div class="modal-body">
+        <label>Current Assignee</label>
+        <input type="text" value="${t.assignee?(t.assignee==='ME'?STATE.username:t.assignee):'Unclaimed'}" disabled>
+        <label>New Assignee</label>
+        <input type="text" id="reassignNew" placeholder="e.g. S. Rao">
+        <label>Reason</label>
+        <textarea id="reassignReason" placeholder="e.g. Reassigning due to workload balancing."></textarea>
+      </div>
+      <div class="modal-foot"><button class="btn-sm" onclick="closeModal(); STATE.modal=null; h();">Cancel</button><button class="btn-sm primary" onclick="confirmReassign('${t.id}')">REASSIGN</button></div>`;
+  } else if(STATE.modal==='comment'){
+    inner=`<div class="modal-head">Add Comment — ${t?esc(t.recon):''}</div>
+      <div class="modal-body">
+        <label>Comment</label>
+        <textarea id="commentText" placeholder="e.g. Reviewed supporting balance documentation."></textarea>
+      </div>
+      <div class="modal-foot"><button class="btn-sm ghost" onclick="closeModal(); STATE.modal=null; h();">CANCEL</button><button class="btn-sm primary" onclick="confirmComment('${t.id}')">ADD COMMENT</button></div>`;
+  } else if(STATE.modal==='export'){
+    inner=`<div class="modal-head">Export Worklist</div>
+      <div class="modal-body">
+        <label>Select records to export</label>
+        <div style="margin-top:6px;">
+          <label style="display:flex;gap:8px;align-items:center;font-weight:500;"><input type="radio" name="exportScope" value="current" checked> Current View (this page)</label>
+          <label style="display:flex;gap:8px;align-items:center;font-weight:500;margin-top:8px;"><input type="radio" name="exportScope" value="filtered"> Filtered Results</label>
+          <label style="display:flex;gap:8px;align-items:center;font-weight:500;margin-top:8px;"><input type="radio" name="exportScope" value="all"> All Visible Records</label>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn-sm ghost" onclick="closeModal(); STATE.modal=null; h();">Cancel</button><button class="btn-sm primary" onclick="confirmExport()">Export</button></div>`;
+  }
+  root.innerHTML = `<div class="modal-backdrop" onclick="if(event.target===this){closeModal(); STATE.modal=null; h();}"><div class="modal">${inner}</div></div>`;
+}
+
+/* ---------------- TASK DETAIL ---------------- */
+function renderTaskDetail(){
+  const t = findTask(STATE.openTaskId);
+  if(!t) return renderShell(`<p>Task not found.</p><button class="btn-sm" onclick="goTo('worklist')">← Back</button>`);
+  const od = diffDays(t.dueDate);
+  const overdue = od<0 && t.status!=='Completed';
+  const isUnclaimed = t.assignee===null;
+  const isMine = t.assignee==='ME';
+  const canSubmit = t.status==='Pending Preparation' && isMine;
+  const canApprove = (t.status==='Pending Review' || t.status==='Pending Approval' || t.status==='Reopened') && isMine;
+  const canReject = (t.status==='Pending Review' || t.status==='Pending Approval') && isMine;
+
+  return renderShell(`
+    <button class="btn-sm ghost" style="margin-bottom:10px;" onclick="goTo('worklist')">← Back to Worklist</button>
+    <div class="page-eyebrow">Task Detail</div>
+    <h1 class="page-title">${t.recon} <span class="badge ${STATUS_BADGE[t.status]}" style="margin-left:8px;">${t.status}</span></h1>
+    <p class="page-desc">${esc(t.account)} · ${esc(t.entity)} · ${esc(t.period)}</p>
+
+    <div class="panel">
+      <h3 class="panel-title" style="margin-bottom:10px;">Task Lifecycle</h3>
+      ${lifecycleDiagram(t.status==='Rejected'?'Pending Preparation':t.status)}
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="panel">
+          <h3 class="panel-title">Task Information</h3>
+          <div class="kv-grid" style="margin-top:10px;">
+            <div class="kv"><div class="k">Reconciliation</div><div class="v">${t.recon}</div></div>
+            <div class="kv"><div class="k">Account</div><div class="v">${esc(t.account)}</div></div>
+            <div class="kv"><div class="k">Entity</div><div class="v">${esc(t.entity)}</div></div>
+            <div class="kv"><div class="k">Period</div><div class="v">${esc(t.period)}</div></div>
+            <div class="kv"><div class="k">Role</div><div class="v">${esc(t.role)}</div></div>
+            <div class="kv"><div class="k">Status</div><div class="v"><span class="badge ${STATUS_BADGE[t.status]}">${t.status}</span></div></div>
+            <div class="kv"><div class="k">Risk</div><div class="v"><span class="${RISK_CLASS[t.risk]}">${t.risk}</span></div></div>
+            <div class="kv"><div class="k">Balance</div><div class="v">${money(t.balance)}</div></div>
+            <div class="kv"><div class="k">Difference</div><div class="v" style="${t.difference?'color:var(--red)':''}">${money(t.difference)}</div></div>
+            <div class="kv"><div class="k">Due Date</div><div class="v">${fmtDate(t.dueDate)}</div></div>
+            <div class="kv"><div class="k">Days Overdue</div><div class="v">${overdue?('<span class="risk-high">'+Math.abs(od)+' days</span>'):'On track'}</div></div>
+            <div class="kv"><div class="k">Preparer</div><div class="v">${esc(t.preparer)}</div></div>
+            <div class="kv"><div class="k">Reviewer</div><div class="v">${esc(t.reviewer)}</div></div>
+            <div class="kv"><div class="k">Assignment</div><div class="v">${isUnclaimed?'<span class="unclaimed-tag">Unclaimed</span>':(isMine?'<b style="color:var(--blue)">You ('+esc(STATE.username)+')</b>':esc(t.assignee))}</div></div>
+          </div>
+
+          <div class="action-row">
+            <button class="action-btn claim" ${!isUnclaimed?'disabled':''} onclick="claimTask('${t.id}')">📥 Claim</button>
+            <button class="action-btn release" ${!isMine?'disabled':''} onclick="releaseTask('${t.id}')">↩ Release</button>
+            <button class="action-btn submit" ${!canSubmit?'disabled':''} onclick="submitTask('${t.id}')">➤ Submit</button>
+            <button class="action-btn approve" ${!canApprove?'disabled':''} onclick="approveTask('${t.id}')">✓ Approve</button>
+            <button class="action-btn reject" ${!canReject?'disabled':''} onclick="rejectTaskPrompt('${t.id}')">✕ Reject</button>
+            <button class="action-btn reassign" onclick="reassignPrompt('${t.id}')">⇄ Reassign</button>
+            <button class="action-btn comment" onclick="commentPrompt('${t.id}')">💬 Add Comment</button>
+            <button class="action-btn export" onclick="exportListPrompt()">⬇ Export List</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Comments</h3>
+          <div style="margin-top:10px;">
+            ${t.comments.length===0?'<p style="font-size:12.5px;color:var(--text-muted)">No comments yet.</p>':t.comments.map(c=>`
+              <div class="comment-box">
+                <span class="who">${esc(c.who)}</span> <span class="when">${c.when.toLocaleString()}</span>
+                <div class="txt">${esc(c.text)}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3 class="panel-title">Activity History</h3>
+          <div class="timeline" style="margin-top:12px;">
+            ${t.history.map(ev=>`
+              <div class="tl-item ${ev.event.toLowerCase().includes('reject')?'rejected':''} ${ev.event.toLowerCase().includes('approv')?'approved':''}">
+                <div class="tl-time">${ev.ts.toLocaleString()}</div>
+                <div class="tl-text"><b>${esc(ev.event)}</b> — ${esc(ev.note)}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+/* ---------------- ANALYTICS / GRAPHS ---------------- */
+function groupCount(field, fn){
+  const counts={};
+  TASKS.forEach(t=>{ const k=fn?fn(t):t[field]; counts[k]=(counts[k]||0)+1; });
+  return counts;
+}
+const CHART_COLORS = ['#2E6DA4','#E8792D','#2F9E44','#E03131','#6741D9','#B8710A','#4C8FC7','#C2255C'];
+function chartCard(title,type){
+  let data, sub='';
+  if(type==='status'){ data=groupCount(null,t=>t.status); sub='Distribution of tasks across lifecycle status'; }
+  if(type==='risk'){ data=groupCount(null,t=>t.risk); sub='Distribution of tasks by risk rating'; }
+  if(type==='role'){ data=groupCount(null,t=>t.role); sub='Distribution of tasks by assigned role'; }
+  if(type==='dueCat'){ data=groupCount(null,t=>{const d=diffDays(t.dueDate); if(d<0) return 'Overdue'; if(d===0) return 'Due Today'; if(d<=7) return 'Due This Week'; return 'Later';}); sub='Tasks grouped by due-date category'; }
+  if(type==='overdueDays'){ data=groupCount(null,t=>{const d=diffDays(t.dueDate); if(d>=0) return null; const ad=Math.abs(d); if(ad<=3) return '1–3 days'; if(ad<=7) return '4–7 days'; return '8+ days';}); delete data['null']; sub='Overdue tasks bucketed by days overdue'; }
+  if(type==='preparer'){ data=groupCount(null,t=>t.preparer); sub='Tasks grouped by preparer'; }
+  if(type==='reviewer'){ data=groupCount(null,t=>t.reviewer); sub='Tasks grouped by reviewer'; }
+  if(type==='period'){ data=groupCount(null,t=>t.period); sub='Tasks grouped by accounting period'; }
+  const entries = Object.entries(data).filter(([k])=>k!=='null' && k!=='undefined');
+  const max = Math.max(...entries.map(e=>e[1]),1);
+  return `<div class="chart-card">
+    <h4>${title}</h4>
+    <div class="sub">${sub} <span class="illustrative-tag" style="margin-left:4px;">Illustrative</span></div>
+    ${entries.map(([k,v],i)=>`
+      <div class="bar-row" onclick="chartFilter('${type}','${esc(k)}')">
+        <div class="bar-lbl">${esc(k)}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(0)}%;background:${CHART_COLORS[i%CHART_COLORS.length]}"></div></div>
+        <div class="bar-val">${v}</div>
+      </div>`).join('')}
+  </div>`;
+}
+function chartFilter(type,value){
+  let key=null;
+  if(type==='status'){
+    const map={'Pending Preparation':'pendPrep','Pending Review':'pendReview','Pending Approval':'pendApproval','Completed':'completed','Rejected':'rejected','Reopened':'reopened'};
+    key=map[value];
+  } else if(type==='risk' && value==='High'){ key='highRisk'; }
+  if(key){ STATE.activeFilters=new Set([key]); STATE.page=1; goTo('worklist'); }
+  else { showToast('Filtered view is available for status and high-risk segments in this simulator.','success'); }
+}
+function renderAnalytics(){
+  return renderShell(`
+    <div class="page-eyebrow">Worklist &amp; Task Management</div>
+    <h1 class="page-title">Analytics</h1>
+    <p class="page-desc">Original graphs built from fictional training data. Click a segment to filter the worklist where supported. <span class="illustrative-tag">Illustrative Training Data</span></p>
+    <div class="chart-grid">
+      ${chartCard('1. Tasks by Status','status')}
+      ${chartCard('2. Tasks by Risk','risk')}
+      ${chartCard('3. Tasks by Role','role')}
+      ${chartCard('4. Tasks by Due-Date Category','dueCat')}
+      ${chartCard('5. Overdue Tasks by Days','overdueDays')}
+      ${chartCard('6. Tasks by Preparer','preparer')}
+      ${chartCard('7. Tasks by Reviewer','reviewer')}
+      ${chartCard('8. Tasks by Period','period')}
+    </div>
+  `);
+}
+
+/* ---------------- SMARTART / FLOWCHART SCREEN ---------------- */
+function flow(boxes,extraCls){
+  return `<div class="flow-row">${boxes.map((b,i)=>`
+    <div class="flow-box ${extraCls&&extraCls[i]?extraCls[i]:''}">${esc(b)}</div>
+    ${i<boxes.length-1?'<div class="flow-down">↓</div>':''}
+  `).join('')}</div>`;
+}
+function renderSmartArt(){
+  return renderShell(`
+    <div class="page-eyebrow">Worklist &amp; Task Management</div>
+    <h1 class="page-title">Process Maps &amp; SmartArt Diagrams</h1>
+    <p class="page-desc">Original BISP Oracle-inspired process visuals for worklist and task-management concepts. <span class="illustrative-tag">Illustrative</span></p>
+    <div class="flow-cols">
+      <div class="panel"><h3 class="panel-title">1. Worklist Lifecycle</h3>${flow(['Task Created','Assigned','Prepared','Submitted','Reviewed','Approved','Completed'],[,,,,,,'hilite'])}</div>
+      <div class="panel"><h3 class="panel-title">2. Rejection Flow</h3>${flow(['Submitted','Review','Reject','Correction','Resubmit','Review'],[,,'danger',,,])}</div>
+      <div class="panel"><h3 class="panel-title">3. Reassignment Flow</h3>${flow(['Task','Current Assignee','Reassign','New Assignee','Continue'],[,,,'hilite',])}</div>
+      <div class="panel"><h3 class="panel-title">4. Overdue Management</h3>${flow(['Task Due','Due Today','Overdue','Prioritize','Action','Complete'],[,,'danger',,,])}</div>
+      <div class="panel"><h3 class="panel-title">5. Worklist Filtering</h3>${flow(['All Tasks','Filter','Select Criteria','Apply','Targeted Worklist'],[,,,,'hilite'])}</div>
+      <div class="panel"><h3 class="panel-title">6. Task Activity Timeline (Typical)</h3>${flow(['Task Created','Claimed','Prepared','Submitted','Reviewed','Approved','Completed'],[,,,,,,'hilite'])}</div>
+    </div>
+    <div class="panel" style="margin-top:18px;">
+      <h3 class="panel-title">Reopened Flow</h3>
+      ${flow(['Completed','Reopened','Processing','Completed'],[,'danger',,'hilite'])}
+    </div>
+    <p class="orig-note">Original BISP Oracle-inspired training simulator. Not affiliated with or reproduced from Oracle Corporation screenshots, source code, or logos.</p>
+  `);
+}
+
+/* ---------------- TRAINING MODE ---------------- */
+const TRAINING_STEPS = [
+  {n:1,text:"Select the 'Unclaimed' filter in the Worklist."},
+  {n:2,text:'Open an unclaimed task from the results.'},
+  {n:3,text:'Click Claim on the task detail screen.'},
+  {n:4,text:'Verify the task is now assigned to you.'}
+];
+function renderTraining(){
+  STATE.__mode='training';
+  const step = STATE.training.step;
+  const unclaimedApplied = STATE.activeFilters.has('unclaimed');
+  return renderShell(`
+    <div class="page-eyebrow">Guided Walkthrough</div>
+    <h1 class="page-title">Training Mode</h1>
+    <p class="page-desc">Follow the guided steps to practice claiming an unclaimed task. Progress: Step ${step} of 4</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${(step-1)/4*100+ (step<=4?12.5:0)}%;width:${((Math.min(step,4)-1)/4*100)+ (step<=4?25:0)}%"></div></div>
+    ${TRAINING_STEPS.map(s=>`
+      <div class="step-card ${step>s.n?'done':''}" style="margin-bottom:12px;">
+        <span class="step-num">${step>s.n?'✓':s.n}</span>${s.text}
+        ${step===s.n && s.n===1?`<div style="margin-top:12px;"><button class="btn-sm primary" onclick="trainingStep1()">Go to Worklist → Apply 'Unclaimed' Filter</button></div>`:''}
+        ${step===s.n && s.n===4?`<div style="margin-top:12px;"><button class="btn-sm primary" onclick="trainingComplete()">Finish Training Scenario</button></div>`:''}
+      </div>`).join('')}
+    ${step>4?`<div class="panel" style="border-color:var(--green);background:var(--green-bg);"><b style="color:var(--green)">Scenario complete!</b> You successfully claimed an unclaimed task. This scenario has been recorded in your progress.</div>`:''}
+  `);
+}
+function trainingStep1(){
+  STATE.__mode='training';
+  STATE.activeFilters=new Set(['unclaimed']);
+  STATE.page=1;
+  STATE.training.step=2;
+  goTo('worklist');
+}
+function trainingAfterClaim(id){
+  if(STATE.training.step===3){ STATE.training.claimedId=id; STATE.training.step=4; }
+}
+function trainingComplete(){
+  STATE.training.step=5;
+  STATE.scenariosCompleted++;
+  goTo('training');
+}
+// hook: when opening a task while in training mode at step 2, advance to 3
+const _openTask = openTask;
+openTask = function(id){
+  _openTask(id);
+  if(STATE.__mode==='training' && STATE.training.step===2){ STATE.training.step=3; }
+};
+
+/* ---------------- PRACTICE MODE ---------------- */
+function renderPractice(){
+  STATE.__mode='practice';
+  const p = STATE.practice;
+  const candidateIds = TASKS.filter(t=>t.assignee===null).map(t=>t.id);
+  return renderShell(`
+    <div class="page-eyebrow">Scenario Exercise</div>
+    <h1 class="page-title">Practice Mode</h1>
+    <div class="scenario-box">
+      <b>Scenario:</b> You are a preparer. You have several unclaimed tasks. One is due today and one is overdue.
+      Identify and claim the <b>highest-priority</b> unclaimed task (the most overdue, or due soonest).
+    </div>
+    <div class="panel">
+      <div class="checklist-item ${p.filterApplied?'on':''}"><span class="cbox">${p.filterApplied?'✓':''}</span> Apply the correct filter (Unclaimed)</div>
+      <div class="checklist-item ${p.openedId?'on':''}"><span class="cbox">${p.openedId?'✓':''}</span> Identify and open the highest-priority task</div>
+      <div class="checklist-item ${p.claimedId?'on':''}"><span class="cbox">${p.claimedId?'✓':''}</span> Claim the task</div>
+      <div style="margin-top:14px;">
+        ${!p.filterApplied?`<button class="btn-sm primary" onclick="practiceApplyFilter()">Apply 'Unclaimed' Filter</button>`:
+          !p.claimedId?`<button class="btn-sm primary" onclick="goTo('worklist')">Go to Worklist</button>`:''}
+      </div>
+      ${p.done?`<div style="margin-top:14px;padding:12px 14px;border-radius:8px;background:${p.correct? 'var(--green-bg)':'var(--red-bg)'};color:${p.correct?'var(--green)':'var(--red)'};font-weight:700;font-size:13px;">
+        ${p.correct? '✓ Correct! You claimed the highest-priority unclaimed task.' : '✕ Not quite — that was not the highest-priority unclaimed task. Review due dates and try again.'}
+        <div style="margin-top:8px;"><button class="btn-sm" onclick="resetPractice()">Try Another Scenario</button></div>
+      </div>`:''}
+    </div>
+  `);
+}
+function practiceApplyFilter(){
+  STATE.activeFilters=new Set(['unclaimed']);
+  STATE.page=1;
+  STATE.practice.filterApplied=true;
+  showToast("'Unclaimed' filter applied.",'success');
+  h();
+}
+function practiceAfterClaim(id){
+  if(!STATE.practice.filterApplied) return;
+  const t=findTask(id);
+  STATE.practice.openedId=id;
+  // determine correct highest-priority unclaimed task at time of claim (before this claim mutated assignee, so check others)
+  const unclaimedBefore = TASKS.filter(x=>x.id!==id && x.assignee===null || x.id===id);
+  // Best = most overdue, else soonest due
+  const scored = TASKS.filter(x=>x.id===id || x.assignee===null).map(x=>({id:x.id,score:diffDays(x.dueDate)}));
+  const best = scored.reduce((a,b)=> b.score<a.score? b:a, scored[0]);
+  STATE.practice.claimedId=id;
+  STATE.practice.done=true;
+  const correct = best.id===id;
+  STATE.practice.correct = correct?STATE.practice.correct+1:STATE.practice.correct;
+  STATE.practice.incorrect = !correct?STATE.practice.incorrect+1:STATE.practice.incorrect;
+  if(correct) STATE.scenariosCompleted++;
+  setTimeout(()=>{goTo('practice');},50);
+}
+function resetPractice(){
+  STATE.practice={stage:0,filterApplied:false,openedId:null,claimedId:null,correct:STATE.practice.correct,incorrect:STATE.practice.incorrect,done:false};
+  STATE.activeFilters=new Set();
+  goTo('practice');
+}
+
+/* ---------------- EXAM MODE ---------------- */
+const EXAM_QUESTIONS = [
+  {q:"A user wants to see only tasks that have not yet been claimed. Which filter should be used?",opts:['My Tasks','Unclaimed','Completed','Reopened'],a:1},
+  {q:"A reconciliation was returned by the reviewer for correction. What status does it now show?",opts:['Pending Approval','Completed','Rejected','Reopened'],a:2},
+  {q:"Which action moves a task from 'Pending Preparation' to 'Pending Review'?",opts:['Approve','Submit','Claim','Reassign'],a:1},
+  {q:"A preparer is going on leave and cannot finish an assigned task. Which action lets them hand it to a colleague?",opts:['Release','Reassign','Reject','Export List'],a:1},
+  {q:"Which KPI would a reviewer check to find reconciliations that are financially significant and need close attention?",opts:['Due Today','High Risk','Completed','Alerts Assigned to Me'],a:1},
+  {q:"After a task is completed, an issue is found and it needs further processing. What status reflects this?",opts:['Rejected','Pending Review','Reopened','Unclaimed'],a:2},
+  {q:"Which worklist feature lets a user download the currently filtered set of tasks?",opts:['Save View','Export List','Reset Filter','Add Comment'],a:1},
+  {q:"An approver reviews the final reconciliation and confirms it is correct. Which action should they take?",opts:['Submit','Approve','Reject','Release'],a:1}
+];
+function renderExam(){
+  const e = STATE.exam;
+  if(e.finished) return renderExamResult();
+  const q = EXAM_QUESTIONS[e.i];
+  const answered = e.answers[e.i]!==undefined;
+  return renderShell(`
+    <div class="page-eyebrow">Assessment</div>
+    <h1 class="page-title">Exam Mode</h1>
+    <p class="page-desc">Scenario-based assessment. Question ${e.i+1} of ${EXAM_QUESTIONS.length}.</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${(e.i/EXAM_QUESTIONS.length*100)}%"></div></div>
+    <div class="exam-q">
+      <div class="qtitle">Q${e.i+1}. ${esc(q.q)}</div>
+      ${q.opts.map((o,idx)=>{
+        let cls='';
+        if(answered){
+          if(idx===q.a) cls='correct';
+          else if(idx===e.answers[e.i] && idx!==q.a) cls='incorrect';
+        }
+        return `<button class="opt-btn ${cls}" ${answered?'disabled':''} onclick="examAnswer(${idx})">${String.fromCharCode(65+idx)}. ${esc(o)}</button>`;
+      }).join('')}
+      ${answered?`<div style="margin-top:12px;"><button class="btn-sm primary" onclick="examNext()">${e.i+1<EXAM_QUESTIONS.length?'Next Question →':'See Results →'}</button></div>`:''}
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);">Correct: ${e.answers.filter((a,i)=>a===EXAM_QUESTIONS[i].a).length} &nbsp;·&nbsp; Incorrect: ${e.answers.filter((a,i)=>a!==undefined && a!==EXAM_QUESTIONS[i].a).length}</div>
+  `);
+}
+function examAnswer(idx){
+  const e=STATE.exam;
+  if(e.answers[e.i]!==undefined) return;
+  e.answers[e.i]=idx;
+  STATE.actionsTaken++;
+  h();
+}
+function examNext(){
+  const e=STATE.exam;
+  if(e.i+1<EXAM_QUESTIONS.length){ e.i++; h(); }
+  else { e.finished=true; STATE.scenariosCompleted++; h(); }
+}
+function renderExamResult(){
+  const e=STATE.exam;
+  const correct = e.answers.filter((a,i)=>a===EXAM_QUESTIONS[i].a).length;
+  const total = EXAM_QUESTIONS.length;
+  const pct = Math.round(correct/total*100);
+  const passed = pct>=80;
+  return renderShell(`
+    <div class="page-eyebrow">Assessment Results</div>
+    <h1 class="page-title">Exam Results</h1>
+    <div class="score-hero">
+      <div class="big">${pct}%</div>
+      <div class="tag">${correct} of ${total} scenario-based questions answered correctly</div>
+      <div class="pass-pill ${passed?'pass':'retry'}">${passed?'PASSED':'RETRY RECOMMENDED'}</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="n">${total}</div><div class="l">Total Scenarios</div></div>
+      <div class="stat-box"><div class="n">${total}</div><div class="l">Completed</div></div>
+      <div class="stat-box"><div class="n">${correct}</div><div class="l">Correct Actions</div></div>
+      <div class="stat-box"><div class="n">${total-correct}</div><div class="l">Incorrect Actions</div></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-sm" onclick="retakeExam()">Retake Exam</button>
+      <button class="btn-sm primary" onclick="goTo('completion')">Go to Completion Screen →</button>
+    </div>
+  `);
+}
+function retakeExam(){STATE.exam={i:0,answers:[],finished:false}; h();}
+
+/* ---------------- HELP PANEL ---------------- */
+const HELP_TOPICS = [
+  {t:'My Tasks',what:'A filter showing every task currently assigned to you.',why:'Lets you quickly focus on your own workload.',ex:"A preparer clicks 'My Tasks' to see only their assigned reconciliations.",how:"Select the 'My Tasks' chip in Worklist Filters.",res:'The worklist narrows to tasks where you are the assignee.'},
+  {t:'Due Today',what:'Tasks whose due date is today.',why:'Helps prioritize same-day deadlines.',ex:'A reviewer checks Due Today each morning.',how:"Select the 'Due Today' filter.",res:'Only tasks due today are displayed.'},
+  {t:'Due This Week',what:'Tasks due within the next 7 days.',why:'Supports short-term planning.',ex:'A team lead plans staffing around Due This Week volume.',how:"Select the 'Due This Week' filter.",res:'Tasks due within 7 days are displayed.'},
+  {t:'Overdue',what:'Tasks whose due date has passed and are not yet complete.',why:'Surfaces items needing urgent attention.',ex:'An administrator monitors Overdue counts for escalation.',how:"Select the 'Overdue' filter or click the Overdue KPI card.",res:'Only overdue tasks are displayed, with Days Overdue shown.'},
+  {t:'High Risk',what:'Tasks flagged with a High risk rating.',why:'Focuses review effort on financially significant items.',ex:'A reviewer prioritizes High Risk reconciliations first.',how:"Select the 'High Risk' filter.",res:'Only High risk tasks are displayed.'},
+  {t:'Rejected',what:'Tasks returned by a reviewer or approver for correction.',why:'Identifies items requiring rework.',ex:'A preparer checks Rejected to see what needs correction.',how:"Select the 'Rejected' filter.",res:'Only rejected tasks are displayed.'},
+  {t:'Unclaimed',what:'Tasks with no assignee.',why:'Surfaces work available to be picked up.',ex:'A preparer filters Unclaimed to find available tasks.',how:"Select the 'Unclaimed' filter.",res:'Only unclaimed tasks are displayed.'},
+  {t:'Pending Preparation',what:'Tasks awaiting initial preparation.',why:'Identifies the earliest lifecycle stage.',ex:'A preparer filters this to find their next task.',how:"Select the 'Pending Preparation' filter.",res:'Only tasks in that status are shown.'},
+  {t:'Pending Review',what:'Tasks submitted and awaiting reviewer action.',why:'Helps reviewers manage their queue.',ex:'A reviewer filters Pending Review each morning.',how:"Select the 'Pending Review' filter.",res:'Only tasks in that status are shown.'},
+  {t:'Pending Approval',what:'Tasks reviewed and awaiting final approval.',why:'Helps approvers manage their queue.',ex:'An approver filters Pending Approval before period close.',how:"Select the 'Pending Approval' filter.",res:'Only tasks in that status are shown.'},
+  {t:'Completed',what:'Tasks that have finished the full lifecycle.',why:'Confirms closure for reporting.',ex:'An administrator reviews Completed tasks for the period.',how:"Select the 'Completed' filter.",res:'Only completed tasks are shown.'},
+  {t:'Reopened',what:'Completed tasks returned to processing after an issue was found.',why:'Tracks exceptions after close.',ex:'A reviewer reopens a task after finding a discrepancy.',how:"Select the 'Reopened' filter.",res:'Only reopened tasks are shown.'},
+  {t:'Alerts Assigned to Me',what:'Tasks with an active alert assigned to you.',why:'Surfaces items needing special attention.',ex:'A reviewer checks alerts before submitting review.',how:"Select the 'Alerts Assigned to Me' filter.",res:'Only alert-flagged tasks assigned to you are shown.'},
+  {t:'Claim',what:'Assigns an unclaimed task to yourself.',why:'Establishes ownership before work begins.',ex:'A preparer claims an unclaimed reconciliation.',how:"Open the task and click 'Claim'.",res:'Assignment changes from Unclaimed to you.'},
+  {t:'Release',what:'Removes your ownership, returning a task to Unclaimed.',why:'Used when you cannot continue the task.',ex:'A preparer releases a task before going on leave.',how:"Open the task and click 'Release'.",res:'Assignment changes from you to Unclaimed.'},
+  {t:'Open',what:'Opens the full Task Detail screen.',why:'Provides all information and actions for a task.',ex:'A user opens a task to review balance and history.',how:"Click 'Open' from the worklist row.",res:'The Task Detail screen is displayed.'},
+  {t:'Submit',what:'Moves a prepared task forward for review.',why:'Signals preparation work is complete.',ex:'A preparer submits after completing their reconciliation.',how:"Open the task and click 'Submit'.",res:'Status changes from Pending Preparation to Pending Review.'},
+  {t:'Approve',what:'Advances a task through review or final approval.',why:'Confirms the task meets requirements at that stage.',ex:'A reviewer approves a reconciliation to send it to the approver.',how:"Open the task and click 'Approve', then confirm.",res:'Status advances to the next lifecycle stage.'},
+  {t:'Reject',what:'Returns a task for correction with a reason.',why:'Ensures issues are documented and fixed.',ex:'A reviewer rejects a task citing missing documentation.',how:"Open the task, click 'Reject', and enter a reason.",res:'Status changes to Rejected and the reason is logged.'},
+  {t:'Reassign',what:'Transfers a task to a different user.',why:'Balances workload or covers absences.',ex:'An administrator reassigns a task during a team member\'s leave.',how:"Open the task, click 'Reassign', enter new assignee and reason.",res:'The task assignee updates to the new user.'},
+  {t:'Add Comment',what:'Attaches a note to the task activity history.',why:'Documents context for reviewers and auditors.',ex:'A preparer notes supporting documentation was updated.',how:"Open the task, click 'Add Comment', and enter text.",res:'The comment appears in the task\'s comment and history log.'},
+  {t:'Export List',what:'Prepares selected worklist records for export.',why:'Supports offline reporting and sharing.',ex:'An administrator exports all overdue tasks for a status meeting.',how:"Click 'Export List' and choose a scope.",res:'The simulator confirms the records prepared for export.'}
+];
+let helpOpen = new Set();
+function toggleHelp(i){ if(helpOpen.has(i)) helpOpen.delete(i); else helpOpen.add(i); h(); }
+function renderHelp(){
+  return renderShell(`
+    <div class="page-eyebrow">Reference</div>
+    <h1 class="page-title">Help &amp; Learning Panel</h1>
+    <p class="page-desc">What each feature is, why it matters, an example, how to use it, and the expected result.</p>
+    <div class="panel">
+      ${HELP_TOPICS.map((t,i)=>`
+        <div class="help-item">
+          <button class="help-q" onclick="toggleHelp(${i})">${esc(t.t)} <span>${helpOpen.has(i)?'−':'+'}</span></button>
+          <div class="help-a ${helpOpen.has(i)?'open':''}">
+            <div class="row"><b>What is it?</b> ${esc(t.what)}</div>
+            <div class="row"><b>Why is it used?</b> ${esc(t.why)}</div>
+            <div class="row"><b>Example:</b> ${esc(t.ex)}</div>
+            <div class="row"><b>How to use it:</b> ${esc(t.how)}</div>
+            <div class="row"><b>Expected result:</b> ${esc(t.res)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  `);
+}
+
+/* ---------------- COMPLETION ---------------- */
+function renderCompletion(){
+  const mins = STATE.loginTime? Math.max(1,Math.round((Date.now()-STATE.loginTime)/60000)) : 0;
+  const correctExam = STATE.exam.answers.filter((a,i)=>EXAM_QUESTIONS[i] && a===EXAM_QUESTIONS[i].a).length;
+  return renderShell(`
+    <div class="complete-wrap">
+      <div class="trophy">🏆</div>
+      <h1 class="page-title" style="text-align:center;">CONGRATULATIONS!</h1>
+      <p class="page-desc" style="text-align:center;margin:0 auto 6px;">You completed</p>
+      <p style="text-align:center;font-weight:800;color:var(--orange-dark);font-size:16px;">WORKLIST AND TASK MANAGEMENT</p>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="n">${STATE.scenariosCompleted}</div><div class="l">Scenarios Completed</div></div>
+        <div class="stat-box"><div class="n">${STATE.actionsTaken}</div><div class="l">Tasks / Actions Processed</div></div>
+        <div class="stat-box"><div class="n">${correctExam}</div><div class="l">Correct Exam Actions</div></div>
+        <div class="stat-box"><div class="n">${EXAM_QUESTIONS.length?Math.round(correctExam/EXAM_QUESTIONS.length*100):0}%</div><div class="l">Score</div></div>
+        <div class="stat-box"><div class="n">${mins}m</div><div class="l">Time Taken</div></div>
+        <div class="stat-box"><div class="n">${esc(STATE.role)}</div><div class="l">Role Practiced</div></div>
+      </div>
+      <div class="login-card" style="margin:20px auto 0;max-width:400px;">
+        <div class="login-brand" style="border-bottom:none;">
+          <img src="${LOGO_SRC}" alt="BISP logo">
+          <div class="tagline"><b>BISP Trainings</b><br>www.bisptrainings.com<br>Call Us: +91 769-409-5404</div>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;">
+        <button class="btn-sm" onclick="goTo('dashboard')">Back to Dashboard</button>
+        <button class="btn-sm primary" onclick="goTo('exam')">Retake Exam</button>
+      </div>
+    </div>
+  `);
+}
+
+/* ---------------- MASTER RENDER ---------------- */
+function buildView(){
+  renderModal();
+  switch(STATE.view){
+    case 'login': return renderLogin();
+    case 'dashboard': STATE.__mode=null; return renderDashboard();
+    case 'worklist': return renderWorklist();
+    case 'taskDetail': return renderTaskDetail();
+    case 'analytics': STATE.__mode=null; return renderAnalytics();
+    case 'smartart': STATE.__mode=null; return renderSmartArt();
+    case 'training': return renderTraining();
+    case 'practice': return renderPractice();
+    case 'exam': STATE.__mode=null; return renderExam();
+    case 'completion': STATE.__mode=null; return renderCompletion();
+    case 'help': STATE.__mode=null; return renderHelp();
+    default: return renderLogin();
+  }
+}
+h();
+</script>
+</body>
+</html>
