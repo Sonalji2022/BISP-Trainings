@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCS Period Management Simulator — BISP Trainings</title>
+<style>
+  :root{
+    --red:#C74634;
+    --red-dark:#8C2F22;
+    --dark:#1F1B19;
+    --charcoal:#312D2A;
+    --teal:#2E7D6B;
+    --teal-dark:#1F5A4D;
+    --grey:#8C8580;
+    --grey-dark:#5B5551;
+    --gold:#E08A3D;
+    --bg:#F6F3EE;
+    --card:#FFFFFF;
+    --line:#E3DDD3;
+    --text:#2B2723;
+    --text-soft:#6B655D;
+    --locked:#171412;
+    --radius:10px;
+    font-family:'Segoe UI', Arial, Helvetica, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    background:linear-gradient(115deg,var(--dark) 0%, var(--charcoal) 45%, var(--red) 130%);
+    color:#fff; padding:22px 28px; position:relative; overflow:hidden;
+  }
+  .topbar::after{
+    content:""; position:absolute; width:260px; height:260px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.18); right:-70px; top:-90px;
+  }
+  .brandrow{display:flex; align-items:center; gap:14px; position:relative; z-index:1;}
+  .logobadge{background:#fff; border-radius:8px; padding:6px 10px; display:flex; align-items:center; box-shadow:0 3px 10px rgba(0,0,0,0.25);}
+  .logobadge img{display:block; height:26px; width:auto;}
+  .brandtext{display:flex; align-items:baseline; gap:10px;}
+  .brand{font-weight:800; font-size:15px; letter-spacing:2.5px;}
+  .brand span{color:var(--gold);}
+  .brand-sep{color:rgba(255,255,255,0.35);}
+  .subbrand{font-size:12px; letter-spacing:1.5px; color:#D8D3CC; text-transform:uppercase;}
+  h1{margin:8px 0 4px 0; font-size:26px; font-weight:800; position:relative; z-index:1;}
+  .h1-desc{margin:0; color:#EBD9CC; font-size:13.5px; position:relative; z-index:1; max-width:640px;}
+
+  /* ---------- Lifecycle legend ---------- */
+  .legend{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    background:var(--card); margin:20px 28px 0 28px; padding:14px 18px;
+    border-radius:var(--radius); border:1px solid var(--line);
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .legend-title{font-size:11px; font-weight:800; letter-spacing:1.5px; color:var(--text-soft); text-transform:uppercase; margin-right:8px;}
+  .pill{
+    padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:700; color:#fff;
+    display:flex; align-items:center; gap:6px;
+  }
+  .pill.Pending{background:var(--grey);}
+  .pill.Open{background:var(--teal);}
+  .pill.Closed{background:var(--red);}
+  .pill.Locked{background:var(--locked);}
+  .arrow{color:var(--grey-dark); font-size:14px;}
+  .legend-note{margin-left:auto; font-size:11.5px; color:var(--text-soft); font-style:italic;}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin:16px 28px 0 28px;
+  }
+  button{
+    font-family:inherit; cursor:pointer; border:none; border-radius:8px;
+    font-size:13px; font-weight:700; padding:9px 16px; transition:transform .05s ease, opacity .15s ease;
+  }
+  button:active{transform:translateY(1px);}
+  button:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn-primary{background:var(--red); color:#fff;}
+  .btn-primary:hover:not(:disabled){background:var(--red-dark);}
+  .btn-secondary{background:#fff; color:var(--charcoal); border:1px solid var(--line);}
+  .btn-secondary:hover:not(:disabled){border-color:var(--red); color:var(--red);}
+  .btn-ghost{background:transparent; color:var(--grey-dark); border:1px dashed var(--line);}
+
+  select.bulk-select{
+    padding:9px 10px; border-radius:8px; border:1px solid var(--line); font-size:13px; font-weight:600; color:var(--text);
+    background:#fff;
+  }
+
+  .spacer{flex:1;}
+
+  .toggle-wrap{display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-soft);}
+  .toggle{
+    width:42px; height:24px; background:#D8D3CC; border-radius:999px; position:relative; cursor:pointer;
+    transition:background .18s ease; flex-shrink:0;
+  }
+  .toggle.on{background:var(--red);}
+  .toggle::after{
+    content:""; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%;
+    top:3px; left:3px; transition:left .18s ease; box-shadow:0 1px 2px rgba(0,0,0,0.3);
+  }
+  .toggle.on::after{left:21px;}
+  .admin-label.on{color:var(--red);}
+
+  /* ---------- Table card ---------- */
+  .table-card{
+    margin:16px 28px 28px 28px; background:var(--card); border-radius:var(--radius);
+    border:1px solid var(--line); overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .table-scroll{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; min-width:1180px;}
+  thead th{
+    text-align:left; font-size:10.5px; letter-spacing:0.8px; text-transform:uppercase;
+    color:#fff; background:var(--charcoal); padding:11px 12px; white-space:nowrap; font-weight:700;
+  }
+  tbody td{padding:11px 12px; font-size:13px; border-bottom:1px solid var(--line); vertical-align:middle; white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FBF8F4;}
+  tbody tr.row-locked{background:#FAF7F2;}
+  .period-name{font-weight:700; color:var(--charcoal);}
+  .muted{color:var(--text-soft); font-size:12.5px;}
+
+  .status-badge{
+    display:inline-block; padding:4px 11px; border-radius:999px; font-size:11.5px; font-weight:800; color:#fff;
+  }
+  .status-badge.Pending{background:var(--grey);}
+  .status-badge.Open{background:var(--teal);}
+  .status-badge.Closed{background:var(--red);}
+  .status-badge.Locked{background:var(--locked);}
+
+  .mini-flags{display:flex; gap:4px;}
+  .flag{
+    width:9px; height:9px; border-radius:2px; display:inline-block;
+  }
+  .flag.off{background:#E3DDD3;}
+  .flag.on{background:var(--teal);}
+  .flag-wrap{display:flex; flex-direction:column; gap:3px; font-size:9.5px; color:var(--text-soft);}
+  .flag-row{display:flex; align-items:center; gap:5px;}
+
+  .actions-cell{display:flex; gap:5px; flex-wrap:nowrap;}
+  .act-btn{
+    padding:5px 9px; font-size:11px; border-radius:6px; font-weight:700; border:1px solid transparent;
+  }
+  .act-open{background:#E4F1EE; color:var(--teal-dark);}
+  .act-open:hover:not(:disabled){background:var(--teal); color:#fff;}
+  .act-close{background:#F7E4E0; color:var(--red-dark);}
+  .act-close:hover:not(:disabled){background:var(--red); color:#fff;}
+  .act-lock{background:#EDEBE9; color:var(--locked);}
+  .act-lock:hover:not(:disabled){background:var(--locked); color:#fff;}
+  .act-reopen{background:#FCEFDF; color:#9A5A16;}
+  .act-reopen:hover:not(:disabled){background:var(--gold); color:#fff;}
+  .lock-note{font-size:10.5px; color:var(--red-dark); font-weight:700;}
+
+  input[type="checkbox"]{width:15px; height:15px; accent-color:var(--red); cursor:pointer;}
+
+  /* ---------- Toast ---------- */
+  #toastZone{position:fixed; bottom:22px; right:22px; display:flex; flex-direction:column; gap:8px; z-index:999;}
+  .toast{
+    background:var(--dark); color:#fff; padding:12px 16px; border-radius:8px; font-size:13px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25); border-left:4px solid var(--teal);
+    max-width:340px; animation:slideIn .18s ease-out;
+  }
+  .toast.warn{border-left-color:var(--gold);}
+  .toast.deny{border-left-color:var(--red);}
+  @keyframes slideIn{from{transform:translateY(8px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+
+  /* ---------- Modal ---------- */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(23,20,18,0.55); display:none; align-items:center; justify-content:center; z-index:998; padding:16px;
+  }
+  .modal-bg.show{display:flex;}
+  .modal{
+    background:#fff; border-radius:12px; width:100%; max-width:460px; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .modal h3{margin:0 0 4px 0; color:var(--charcoal); font-size:18px;}
+  .modal p.desc{margin:0 0 18px 0; color:var(--text-soft); font-size:12.5px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:11.5px; font-weight:700; color:var(--text-soft); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;}
+  .field input, .field select{
+    width:100%; padding:9px 10px; border-radius:7px; border:1px solid var(--line); font-size:13px; font-family:inherit;
+  }
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:18px;}
+
+  footer{
+    text-align:center; padding:18px; color:var(--text-soft); font-size:11.5px; border-top:1px solid var(--line); margin-top:6px;
+  }
+  footer strong{color:var(--red);}
+  footer .contact{margin-top:6px; font-weight:700; color:var(--red); font-size:12px;}
+  footer .contact a{color:var(--red); text-decoration:none;}
+
+  @media (max-width:720px){
+    .topbar{padding:18px;}
+    .legend, .toolbar, .table-card{margin-left:12px; margin-right:12px;}
+    .legend-note{display:none;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brandrow">
+      <div class="logobadge"><img src="data:image/jpeg;base64,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" alt="BISP logo"></div>
+      <div class="brandtext">
+        <span class="brand">BISP <span>TRAININGS</span></span>
+        <span class="brand-sep">|</span>
+        <span class="subbrand">Enterprise Performance Management Learning</span>
+      </div>
+    </div>
+    <h1>ARCS Period Management Simulator</h1>
+    <p class="h1-desc">Practice the period lifecycle from Oracle Account Reconciliation Cloud Service — create, open, close, lock and reopen periods, and try bulk status changes, in a safe sandbox.</p>
+  </div>
+
+  <div class="legend">
+    <span class="legend-title">Lifecycle</span>
+    <span class="pill Pending">Pending</span>
+    <span class="arrow">→</span>
+    <span class="pill Open">Open</span>
+    <span class="arrow">→</span>
+    <span class="pill Closed">Closed</span>
+    <span class="arrow">→</span>
+    <span class="pill Locked">Locked</span>
+    <span class="legend-note">Reopen returns Closed or Locked periods to Open. Locked periods require Privileged Admin Mode to change.</span>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn-primary" id="btnCreate">+ Create Period</button>
+    <button class="btn-secondary" id="btnCopy">⧉ Copy Selected</button>
+    <select class="bulk-select" id="bulkSelect">
+      <option value="">Bulk status change…</option>
+      <option value="Open">Set selected → Open</option>
+      <option value="Closed">Set selected → Closed</option>
+      <option value="Locked">Set selected → Locked</option>
+      <option value="ReopenOpen">Reopen selected → Open</option>
+    </select>
+    <button class="btn-secondary" id="btnBulkApply">Apply</button>
+
+    <div class="spacer"></div>
+
+    <div class="toggle-wrap">
+      <span id="adminLabel">Privileged Admin Mode: Off</span>
+      <div class="toggle" id="adminToggle"></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32px;"><input type="checkbox" id="selectAll"></th>
+            <th>Period</th>
+            <th>Fiscal Year</th>
+            <th>Quarter</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Close Date</th>
+            <th>Status</th>
+            <th>Load / Creation Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="periodBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    © BISP Trainings — ARCS Period Management Simulator. A sandbox training tool; no real Oracle data is used or affected. <strong>Not affiliated with Oracle Corporation.</strong>
+    <div class="contact"><a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a> &nbsp;•&nbsp; Call Us: +91 769-409-5404</div>
+  </footer>
+
+  <div id="toastZone"></div>
+
+  <!-- Create / Copy Modal -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h3 id="modalTitle">Create Period</h3>
+      <p class="desc" id="modalDesc">Add a new period to the calendar. It will start in Pending status.</p>
+      <div class="field">
+        <label>Period Name</label>
+        <input type="text" id="fName" placeholder="e.g. May-2026">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Fiscal Year</label>
+          <input type="text" id="fFY" placeholder="FY26">
+        </div>
+        <div class="field">
+          <label>Quarter</label>
+          <select id="fQ">
+            <option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Start Date</label>
+          <input type="date" id="fStart">
+        </div>
+        <div class="field">
+          <label>End Date</label>
+          <input type="date" id="fEnd">
+        </div>
+      </div>
+      <div class="field">
+        <label>Close Date</label>
+        <input type="date" id="fClose">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnModalCancel">Cancel</button>
+        <button class="btn-primary" id="btnModalSave">Save Period</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- State ----------
+  let periods = [
+    mk("Jan-2026","FY26","Q1","2026-01-01","2026-01-31","2026-02-05","Closed", true, true, true),
+    mk("Feb-2026","FY26","Q1","2026-02-01","2026-02-28","2026-03-05","Open", true, true, false),
+    mk("Mar-2026","FY26","Q1","2026-03-01","2026-03-31","2026-04-05","Pending", false, false, false),
+    mk("Dec-2025","FY25","Q4","2025-12-01","2025-12-31","2026-01-05","Locked", true, true, true),
+  ];
+  let adminMode = false;
+  let modalMode = "create"; // create | copy
+  let copySourceId = null;
+
+  function mk(name, fy, q, start, end, close, status, recon, bal, txn){
+    return {
+      id: 0,
+      name, fy, q, start, end, close, status,
+      recon: recon, bal: bal, txn: txn
+    };
+  }
+  // assign clean sequential ids after initial data is built
+  periods = periods.map((p, i) => Object.assign(p, {id: i + 1}));
+  let idSeq = periods.length + 1;
+
+  // ---------- DOM refs ----------
+  const tbody = document.getElementById("periodBody");
+  const selectAll = document.getElementById("selectAll");
+  const toastZone = document.getElementById("toastZone");
+  const adminToggle = document.getElementById("adminToggle");
+  const adminLabel = document.getElementById("adminLabel");
+  const modalBg = document.getElementById("modalBg");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDesc = document.getElementById("modalDesc");
+
+  // ---------- Toast ----------
+  function toast(msg, kind){
+    const el = document.createElement("div");
+    el.className = "toast" + (kind ? " " + kind : "");
+    el.textContent = msg;
+    toastZone.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity .3s"; setTimeout(()=>el.remove(), 300); }, 3200);
+  }
+
+  // ---------- Transition rules ----------
+  function canTransition(period, action){
+    const s = period.status;
+    if (action === "Open"){
+      if (s === "Pending") return true;
+      if ((s === "Closed" || s === "Locked") ) return false; // use Reopen instead
+      return false;
+    }
+    if (action === "Close"){
+      return s === "Open";
+    }
+    if (action === "Lock"){
+      return s === "Closed";
+    }
+    if (action === "Reopen"){
+      if (s === "Closed") return true;
+      if (s === "Locked") return adminMode;
+      return false;
+    }
+    return false;
+  }
+
+  function applyTransition(period, action){
+    if (!canTransition(period, action)){
+      if (period.status === "Locked" && !adminMode){
+        toast(`"${period.name}" is Locked. Enable Privileged Admin Mode to change it.`, "deny");
+      } else {
+        toast(`Cannot apply "${action}" to "${period.name}" from status ${period.status}.`, "warn");
+      }
+      return false;
+    }
+    if (action === "Open") period.status = "Open";
+    if (action === "Close") { period.status = "Closed"; period.recon = true; period.bal = true; period.txn = true; }
+    if (action === "Lock") period.status = "Locked";
+    if (action === "Reopen") period.status = "Open";
+    return true;
+  }
+
+  // ---------- Render ----------
+  function render(){
+    tbody.innerHTML = "";
+    periods.forEach(p => {
+      const tr = document.createElement("tr");
+      if (p.status === "Locked") tr.className = "row-locked";
+
+      tr.innerHTML = `
+        <td><input type="checkbox" class="rowChk" data-id="${p.id}"></td>
+        <td><span class="period-name">${p.name}</span></td>
+        <td>${p.fy}</td>
+        <td>${p.q}</td>
+        <td class="muted">${fmt(p.start)}</td>
+        <td class="muted">${fmt(p.end)}</td>
+        <td class="muted">${fmt(p.close)}</td>
+        <td><span class="status-badge ${p.status}">${p.status}</span>${p.status==="Locked" ? '<div class="lock-note">Admin only</div>' : ''}</td>
+        <td>${flags(p)}</td>
+        <td class="actions-cell">${actions(p)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    attachRowEvents();
+    selectAll.checked = false;
+  }
+
+  function fmt(d){
+    if(!d) return "—";
+    const dt = new Date(d + "T00:00:00");
+    if (isNaN(dt)) return d;
+    return dt.toLocaleDateString("en-US", {month:"short", day:"2-digit", year:"numeric"});
+  }
+
+  function flags(p){
+    return `
+      <div class="flag-wrap">
+        <div class="flag-row"><span class="flag ${p.recon?'on':'off'}"></span>Reconciliation created</div>
+        <div class="flag-row"><span class="flag ${p.bal?'on':'off'}"></span>Balance loaded</div>
+        <div class="flag-row"><span class="flag ${p.txn?'on':'off'}"></span>Transaction loaded</div>
+      </div>`;
+  }
+
+  function actions(p){
+    const openDis = !canTransition(p,"Open") ? "disabled" : "";
+    const closeDis = !canTransition(p,"Close") ? "disabled" : "";
+    const lockDis = !canTransition(p,"Lock") ? "disabled" : "";
+    const reopenDis = !canTransition(p,"Reopen") ? "disabled" : "";
+    return `
+      <button class="act-btn act-open" data-act="Open" data-id="${p.id}" ${openDis}>Open</button>
+      <button class="act-btn act-close" data-act="Close" data-id="${p.id}" ${closeDis}>Close</button>
+      <button class="act-btn act-lock" data-act="Lock" data-id="${p.id}" ${lockDis}>Lock</button>
+      <button class="act-btn act-reopen" data-act="Reopen" data-id="${p.id}" ${reopenDis}>Reopen</button>
+    `;
+  }
+
+  function attachRowEvents(){
+    document.querySelectorAll(".act-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.id);
+        const act = btn.dataset.act;
+        const p = periods.find(x => x.id === id);
+        if (!p) return;
+        const before = p.status;
+        const ok = applyTransition(p, act);
+        if (ok){
+          toast(`"${p.name}" moved from ${before} → ${p.status}.`);
+          render();
+        }
+      });
+    });
+  }
+
+  // ---------- Selection ----------
+  function getSelectedIds(){
+    return Array.from(document.querySelectorAll(".rowChk:checked")).map(c => Number(c.dataset.id));
+  }
+
+  selectAll.addEventListener("change", () => {
+    document.querySelectorAll(".rowChk").forEach(c => c.checked = selectAll.checked);
+  });
+
+  // ---------- Bulk apply ----------
+  document.getElementById("btnBulkApply").addEventListener("click", () => {
+    const action = document.getElementById("bulkSelect").value;
+    if (!action){ toast("Choose a bulk status action first.", "warn"); return; }
+    const ids = getSelectedIds();
+    if (ids.length === 0){ toast("Select at least one period to apply a bulk change.", "warn"); return; }
+
+    let success = 0, skipped = 0;
+    ids.forEach(id => {
+      const p = periods.find(x => x.id === id);
+      if (!p) return;
+      const act = action === "ReopenOpen" ? "Reopen" : action === "Open" ? "Open" : action === "Closed" ? "Close" : action === "Locked" ? "Lock" : null;
+      if (act && canTransition(p, act)){
+        applyTransition(p, act);
+        success++;
+      } else {
+        skipped++;
+      }
+    });
+
+    if (success > 0) toast(`Bulk update applied to ${success} period${success>1?'s':''}.`);
+    if (skipped > 0) toast(`${skipped} period${skipped>1?'s were':' was'} skipped — invalid transition or locked without admin mode.`, "warn");
+    document.getElementById("bulkSelect").value = "";
+    render();
+  });
+
+  // ---------- Admin toggle ----------
+  adminToggle.addEventListener("click", () => {
+    adminMode = !adminMode;
+    adminToggle.classList.toggle("on", adminMode);
+    adminLabel.textContent = "Privileged Admin Mode: " + (adminMode ? "On" : "Off");
+    adminLabel.classList.toggle("on", adminMode);
+    if (adminMode) toast("Privileged Admin Mode enabled — Locked periods can now be reopened.", "warn");
+    render();
+  });
+
+  // ---------- Modal: Create ----------
+  const btnCreate = document.getElementById("btnCreate");
+  const btnCopy = document.getElementById("btnCopy");
+  const btnModalCancel = document.getElementById("btnModalCancel");
+  const btnModalSave = document.getElementById("btnModalSave");
+
+  function openModal(mode){
+    modalMode = mode;
+    if (mode === "create"){
+      modalTitle.textContent = "Create Period";
+      modalDesc.textContent = "Add a new period to the calendar. It will start in Pending status.";
+      ["fName","fFY","fQ","fStart","fEnd","fClose"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("fFY").value = "FY26";
+    } else {
+      const ids = getSelectedIds();
+      if (ids.length !== 1){
+        toast("Select exactly one period to copy.", "warn");
+        return;
+      }
+      copySourceId = ids[0];
+      const src = periods.find(p => p.id === copySourceId);
+      modalTitle.textContent = "Copy Period";
+      modalDesc.textContent = `Duplicate configuration from "${src.name}" as a new Pending period.`;
+      document.getElementById("fName").value = src.name + " (copy)";
+      document.getElementById("fFY").value = src.fy;
+      document.getElementById("fQ").value = src.q;
+      document.getElementById("fStart").value = src.start;
+      document.getElementById("fEnd").value = src.end;
+      document.getElementById("fClose").value = src.close;
+    }
+    modalBg.classList.add("show");
+  }
+
+  btnCreate.addEventListener("click", () => openModal("create"));
+  btnCopy.addEventListener("click", () => openModal("copy"));
+  btnModalCancel.addEventListener("click", () => modalBg.classList.remove("show"));
+  modalBg.addEventListener("click", (e) => { if (e.target === modalBg) modalBg.classList.remove("show"); });
+
+  btnModalSave.addEventListener("click", () => {
+    const name = document.getElementById("fName").value.trim();
+    const fy = document.getElementById("fFY").value.trim() || "FY26";
+    const q = document.getElementById("fQ").value;
+    const start = document.getElementById("fStart").value;
+    const end = document.getElementById("fEnd").value;
+    const close = document.getElementById("fClose").value;
+
+    if (!name){ toast("Give the period a name before saving.", "warn"); return; }
+
+    const p = mk(name, fy, q, start, end, close, "Pending", false, false, false);
+    p.id = idSeq++;
+    periods.push(p);
+    toast(modalMode === "copy" ? `"${name}" created as a copy.` : `"${name}" created in Pending status.`);
+    modalBg.classList.remove("show");
+    render();
+  });
+
+  // ---------- Init ----------
+  render();
+})();
+</script>
+</body>
+</html>
