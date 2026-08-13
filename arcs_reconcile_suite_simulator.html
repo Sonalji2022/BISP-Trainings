@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reconcile Suite — BISP Trainings Demo</title>
+<style>
+:root{
+  --ink:#14213A;
+  --ink-soft:#3A465E;
+  --muted:#6B7688;
+  --navy-950:#0B1B33;
+  --navy-900:#11244A;
+  --navy-800:#17325F;
+  --brand-blue:#1D5FA8;
+  --brand-blue-dark:#154980;
+  --brand-orange:#E85C2B;
+  --brand-orange-dark:#C6481D;
+  --paper:#F2F5F9;
+  --paper-raised:#FFFFFF;
+  --line:#DEE4EE;
+  --line-soft:#EBEFF5;
+  --success:#1C8A5E;
+  --success-bg:#E5F5EE;
+  --warning:#C77700;
+  --warning-bg:#FCF1DD;
+  --danger:#C93131;
+  --danger-bg:#FBE7E7;
+  --focus:#1D5FA8;
+  --radius:10px;
+  --font-display:"IBM Plex Sans",-apple-system,Segoe UI,sans-serif;
+  --font-body:"Inter",-apple-system,Segoe UI,sans-serif;
+  --font-mono:"IBM Plex Mono",SFMono-Regular,Consolas,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+img{max-width:100%;display:block;}
+button{font-family:inherit;cursor:pointer;}
+a{color:inherit;}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+.hidden{display:none !important;}
+
+/* ---------- Motif: overlapping squares (signature element) ---------- */
+.motif{position:relative;width:1em;height:1em;display:inline-block;flex:none;}
+.motif span{position:absolute;width:0.66em;height:0.66em;border-radius:3px;border:2px solid currentColor;background:transparent;}
+.motif span.a{left:0;top:0.05em;color:var(--brand-blue);}
+.motif span.b{right:0;bottom:0.05em;color:var(--brand-orange);}
+.motif-spin{animation:motifspin 1.1s linear infinite;}
+@keyframes motifspin{to{transform:rotate(360deg);}}
+
+/* ================= LOGIN ================= */
+#login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(29,95,168,0.10), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(232,92,43,0.10), transparent 40%),
+    var(--navy-950);
+  padding:32px 16px;
+}
+.login-card{
+  width:100%;
+  max-width:560px;
+  background:var(--paper-raised);
+  border-radius:16px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,0.5);
+  overflow:hidden;
+}
+.login-brandbar{
+  padding:28px 32px 20px;
+  border-bottom:1px solid var(--line-soft);
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.login-brandbar img{height:34px;width:auto;}
+.login-brandbar .divider{width:1px;height:28px;background:var(--line);}
+.login-brandbar .suite-name{font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);letter-spacing:0.2px;}
+.login-brandbar .suite-tag{font-size:11px;color:var(--muted);margin-top:2px;}
+.login-body{padding:28px 32px 32px;}
+.login-body h1{font-family:var(--font-display);font-size:22px;margin:0 0 6px;font-weight:600;}
+.login-body p.lead{color:var(--muted);font-size:13.5px;margin:0 0 22px;line-height:1.5;}
+.role-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.role-tile{
+  text-align:left;
+  border:1.5px solid var(--line);
+  background:var(--paper);
+  border-radius:10px;
+  padding:14px 14px 12px;
+  transition:border-color .15s, background .15s, transform .1s;
+}
+.role-tile:hover{border-color:var(--brand-blue);background:#EEF4FB;}
+.role-tile:active{transform:scale(0.98);}
+.role-tile.selected{border-color:var(--brand-blue);background:#EEF4FB;box-shadow:0 0 0 3px rgba(29,95,168,0.12);}
+.role-tile .rt-name{font-family:var(--font-display);font-weight:600;font-size:13.5px;}
+.role-tile .rt-desc{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.login-footer-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;}
+.btn{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:13.5px;
+  border-radius:8px;
+  border:1.5px solid transparent;
+  padding:10px 18px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition:background .15s,border-color .15s,color .15s,opacity .15s;
+}
+.btn-primary{background:var(--brand-blue);color:#fff;}
+.btn-primary:hover{background:var(--brand-blue-dark);}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--ink-soft);}
+.btn-ghost:hover{border-color:var(--brand-blue);color:var(--brand-blue);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.login-env-note{font-size:11px;color:var(--muted);}
+.bisp-contact{font-size:11px;color:var(--muted);text-align:center;padding:14px 32px 26px;border-top:1px solid var(--line-soft);}
+.bisp-contact b{color:var(--ink-soft);}
+
+/* ================= APP SHELL ================= */
+#app-shell{min-height:100vh;display:flex;flex-direction:column;}
+
+/* ---- Environment ribbon ---- */
+.env-ribbon{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.6px;
+  text-align:center;
+  padding:5px 10px;
+  color:#fff;
+  font-weight:600;
+}
+.env-ribbon.env-development{background:#2E7D4F;}
+.env-ribbon.env-test{background:#B67300;}
+.env-ribbon.env-production{background:repeating-linear-gradient(135deg,#B32424,#B32424 10px,#9C1F1F 10px,#9C1F1F 20px);}
+.env-ribbon .prod-warn{font-family:var(--font-body);letter-spacing:normal;font-weight:600;}
+
+/* ---- Header ---- */
+header.topbar{
+  background:var(--navy-950);
+  color:#fff;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  height:58px;
+  flex-wrap:nowrap;
+  position:relative;
+  z-index:40;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.topbar-brand{display:flex;align-items:center;gap:10px;flex:none;}
+.topbar-brand img{height:24px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;}
+.topbar-brand .suite{font-family:var(--font-display);font-weight:600;font-size:14px;}
+.topbar-sep{width:1px;height:26px;background:rgba(255,255,255,0.15);flex:none;}
+
+.topbar-control{position:relative;flex:none;}
+.tb-btn{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
+  color:#fff;
+  border-radius:7px;
+  padding:7px 10px;
+  font-size:12.5px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap;
+}
+.tb-btn:hover{background:rgba(255,255,255,0.13);}
+.tb-btn .lbl{color:rgba(255,255,255,0.55);font-size:10.5px;}
+.tb-btn .val{font-weight:600;}
+.tb-icon{width:15px;height:15px;flex:none;}
+.tb-badge{
+  background:var(--brand-orange);
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  border-radius:999px;
+  padding:1px 6px;
+  min-width:16px;
+  text-align:center;
+  font-family:var(--font-mono);
+}
+
+.topbar-search{flex:1 1 auto;max-width:340px;position:relative;}
+.topbar-search input{
+  width:100%;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:7px;
+  color:#fff;
+  padding:8px 10px 8px 32px;
+  font-size:12.5px;
+  font-family:inherit;
+}
+.topbar-search input::placeholder{color:rgba(255,255,255,0.45);}
+.topbar-search .search-ic{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:rgba(255,255,255,0.5);}
+.topbar-spacer{flex:1 1 auto;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex:none;}
+
+.env-select{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.15);
+  color:#fff;
+  border-radius:7px;
+  padding:6px 8px;
+  font-size:11.5px;
+  font-family:var(--font-mono);
+  font-weight:600;
+}
+.env-select option{color:#000;}
+
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
+  border-radius:999px;
+  padding:5px 12px 5px 5px;
+}
+.user-avatar{
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand-blue),var(--brand-orange));
+  display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-weight:700;color:#fff;font-family:var(--font-display);
+}
+.user-chip .u-name{font-size:12px;font-weight:600;line-height:1.1;}
+.user-chip .u-role{font-size:10px;color:rgba(255,255,255,0.55);line-height:1.1;}
+
+/* dropdown panel shared */
+.dropdown-panel{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  background:var(--paper-raised);
+  color:var(--ink);
+  border-radius:10px;
+  box-shadow:0 20px 40px -12px rgba(11,27,51,0.35);
+  border:1px solid var(--line);
+  width:320px;
+  z-index:60;
+  overflow:hidden;
+}
+.dropdown-panel.left{right:auto;left:0;}
+.dropdown-panel .dp-head{
+  padding:12px 14px;border-bottom:1px solid var(--line-soft);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dropdown-panel .dp-head h4{margin:0;font-family:var(--font-display);font-size:13px;font-weight:600;}
+.dropdown-panel .dp-body{max-height:360px;overflow-y:auto;}
+.dropdown-panel .dp-foot{padding:9px 14px;border-top:1px solid var(--line-soft);text-align:center;}
+.dp-link{font-size:11.5px;color:var(--brand-blue);font-weight:600;background:none;border:none;padding:0;}
+
+/* period dropdown */
+.period-list{padding:6px;}
+.period-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 10px;border-radius:7px;font-size:12.5px;
+}
+.period-row:hover{background:var(--paper);}
+.period-row.active{background:#EEF4FB;}
+.period-row .pr-name{font-family:var(--font-mono);font-weight:600;}
+.status-pill{
+  font-size:10px;font-weight:700;letter-spacing:0.3px;
+  padding:2px 8px;border-radius:999px;font-family:var(--font-mono);
+}
+.status-pill.OPEN{background:var(--success-bg);color:var(--success);}
+.status-pill.CLOSED{background:var(--line-soft);color:var(--muted);}
+.status-pill.LOCKED{background:var(--danger-bg);color:var(--danger);}
+
+/* module dropdown */
+.module-row{padding:10px 14px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;}
+.module-row:hover{background:var(--paper);}
+.module-row.active{background:#EEF4FB;font-weight:600;}
+.module-row .tag-soon{font-size:9.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 6px;}
+
+/* notifications dropdown */
+.notif-row{padding:11px 14px;border-bottom:1px solid var(--line-soft);font-size:12px;display:flex;gap:10px;align-items:flex-start;}
+.notif-row:last-child{border-bottom:none;}
+.notif-row.unread{background:#F7FAFD;}
+.notif-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:none;}
+.notif-dot.info{background:var(--brand-blue);}
+.notif-dot.success{background:var(--success);}
+.notif-dot.warning{background:var(--warning);}
+.notif-dot.danger{background:var(--danger);}
+.notif-txt{flex:1;}
+.notif-txt .nt-title{font-weight:600;color:var(--ink);}
+.notif-txt .nt-time{color:var(--muted);font-size:10.5px;margin-top:2px;}
+.notif-actions{display:flex;gap:6px;margin-top:6px;}
+.notif-actions button{font-size:10px;border:none;background:none;color:var(--brand-blue);font-weight:600;padding:0;}
+.notif-actions button.clear{color:var(--muted);}
+.empty-note{padding:26px 14px;text-align:center;color:var(--muted);font-size:12px;}
+
+/* recent jobs dropdown */
+.jobs-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.jobs-table th{
+  text-align:left;padding:8px 10px;color:var(--muted);font-weight:600;
+  font-size:10px;text-transform:uppercase;letter-spacing:0.4px;
+  border-bottom:1px solid var(--line-soft);position:sticky;top:0;background:var(--paper-raised);
+}
+.jobs-table td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+.jobs-table tr:hover td{background:var(--paper);cursor:pointer;}
+.job-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;}
+.job-status.Completed{background:var(--success-bg);color:var(--success);}
+.job-status.Running{background:#E9F1FB;color:var(--brand-blue);}
+.job-status.Failed{background:var(--danger-bg);color:var(--danger);}
+.mono{font-family:var(--font-mono);}
+
+/* help dropdown */
+.help-list{padding:6px;}
+.help-item{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:7px;font-size:12px;}
+.help-item:hover{background:var(--paper);}
+.help-item .hi-ic{width:16px;height:16px;color:var(--brand-blue);flex:none;margin-top:1px;}
+.help-item b{display:block;font-size:12px;}
+.help-item span{color:var(--muted);font-size:11px;}
+
+/* search overlay */
+.search-overlay{
+  position:fixed;inset:0;background:rgba(11,27,51,0.55);
+  z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:80px 16px;
+}
+.search-panel{
+  width:100%;max-width:620px;background:var(--paper-raised);border-radius:14px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,0.5);overflow:hidden;max-height:70vh;display:flex;flex-direction:column;
+}
+.search-input-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line-soft);}
+.search-input-row .search-ic{width:18px;height:18px;color:var(--muted);flex:none;}
+.search-input-row input{flex:1;border:none;outline:none;font-size:15px;font-family:inherit;}
+.search-input-row .esc-hint{font-size:10.5px;color:var(--muted);border:1px solid var(--line);padding:2px 6px;border-radius:5px;}
+.search-results{overflow-y:auto;padding:8px;}
+.search-cat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);font-weight:700;padding:10px 10px 4px;}
+.search-result-row{display:flex;align-items:center;gap:12px;padding:10px 10px;border-radius:8px;}
+.search-result-row:hover{background:var(--paper);}
+.sr-icon{width:30px;height:30px;border-radius:7px;background:#EEF4FB;color:var(--brand-blue);display:flex;align-items:center;justify-content:center;flex:none;}
+.sr-icon svg{width:16px;height:16px;}
+.sr-main .sr-title{font-size:13px;font-weight:600;}
+.sr-main .sr-sub{font-size:11px;color:var(--muted);}
+
+/* ================= MAIN LAYOUT ================= */
+main.workspace{flex:1;padding:22px 26px 60px;max-width:1360px;margin:0 auto;width:100%;}
+.period-context-bar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  margin-bottom:18px;
+}
+.period-context-bar .ctx-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ctx-title{font-family:var(--font-display);font-size:20px;font-weight:600;}
+.ctx-sub{font-size:12.5px;color:var(--muted);}
+.period-readonly-banner{
+  display:flex;align-items:center;gap:8px;
+  background:var(--warning-bg);color:#8A5700;border:1px solid #F0DBA8;
+  padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:16px;font-weight:500;
+}
+.period-readonly-banner.locked{background:var(--danger-bg);color:#8A2323;border-color:#F0BEBE;}
+
+/* KPI strip */
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;}
+.kpi-card{
+  background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;
+  padding:14px 15px;text-align:left;transition:border-color .15s,transform .1s,box-shadow .15s;
+}
+.kpi-card:hover{border-color:var(--brand-blue);box-shadow:0 8px 20px -12px rgba(11,27,51,0.25);transform:translateY(-1px);}
+.kpi-card .kv{font-family:var(--font-mono);font-size:26px;font-weight:700;line-height:1;}
+.kpi-card .kl{font-size:11.5px;color:var(--muted);margin-top:6px;font-weight:500;}
+.kpi-card.tone-danger .kv{color:var(--danger);}
+.kpi-card.tone-warning .kv{color:var(--warning);}
+.kpi-card.tone-info .kv{color:var(--brand-blue);}
+.kpi-card.tone-neutral .kv{color:var(--ink);}
+
+/* content columns */
+.content-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
+.section-label{
+  font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:0.6px;margin:0 0 12px;
+}
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.nav-card{
+  text-align:left;background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;
+  padding:16px 16px 14px;position:relative;transition:border-color .15s,transform .1s,box-shadow .15s;
+  display:flex;flex-direction:column;gap:10px;min-height:132px;
+}
+.nav-card:hover{border-color:var(--brand-blue);box-shadow:0 10px 24px -14px rgba(11,27,51,0.3);transform:translateY(-2px);}
+.nav-card:active{transform:translateY(0);}
+.nav-card.locked{opacity:0.55;}
+.nav-card.locked:hover{border-color:var(--line);box-shadow:none;transform:none;}
+.nc-top{display:flex;align-items:flex-start;justify-content:space-between;}
+.nc-icon{
+  width:34px;height:34px;border-radius:8px;background:#EEF4FB;color:var(--brand-blue);
+  display:flex;align-items:center;justify-content:center;
+}
+.nc-icon svg{width:18px;height:18px;}
+.nav-card.locked .nc-icon{background:var(--line-soft);color:var(--muted);}
+.nc-status{width:8px;height:8px;border-radius:50%;margin-top:4px;flex:none;}
+.nc-status.ok{background:var(--success);}
+.nc-status.warn{background:var(--warning);}
+.nc-status.crit{background:var(--danger);}
+.nc-status.lock{background:var(--muted);}
+.nc-title{font-family:var(--font-display);font-weight:600;font-size:14px;}
+.nc-desc{font-size:11.5px;color:var(--muted);line-height:1.4;flex:1;}
+.nc-foot{display:flex;align-items:center;justify-content:space-between;}
+.nc-badge{
+  font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;
+}
+.nc-note{font-size:10.5px;color:var(--muted);}
+.lock-tag{
+  display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--muted);
+  background:var(--line-soft);padding:2px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:0.3px;
+}
+
+/* side column */
+.side-panel{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;}
+.side-panel .sp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.side-panel .sp-head h3{margin:0;font-family:var(--font-display);font-size:13px;font-weight:700;}
+.mini-job-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:11.5px;}
+.mini-job-row:last-child{border-bottom:none;}
+.mini-job-row .mj-name{font-weight:600;}
+.mini-job-row .mj-time{color:var(--muted);font-size:10.5px;}
+.mini-notif-row{padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:11.5px;}
+.mini-notif-row:last-child{border-bottom:none;}
+.mini-notif-row .mn-title{font-weight:600;}
+.mini-notif-row .mn-time{color:var(--muted);font-size:10px;}
+.help-mini a{font-size:11.5px;color:var(--brand-blue);font-weight:600;display:block;margin-bottom:8px;}
+
+footer.app-footer{
+  border-top:1px solid var(--line);padding:16px 26px;text-align:center;color:var(--muted);font-size:11px;
+  background:var(--paper-raised);
+}
+footer.app-footer b{color:var(--ink-soft);}
+
+/* ================= MODAL ================= */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(11,27,51,0.55);z-index:90;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.modal-panel{
+  width:100%;max-width:640px;max-height:82vh;background:var(--paper-raised);border-radius:14px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;
+}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;padding:16px 20px;
+  border-bottom:1px solid var(--line-soft);flex:none;
+}
+.modal-head .mh-left{display:flex;align-items:center;gap:10px;}
+.modal-head .mh-icon{width:32px;height:32px;border-radius:8px;background:#EEF4FB;color:var(--brand-blue);display:flex;align-items:center;justify-content:center;}
+.modal-head .mh-icon svg{width:17px;height:17px;}
+.modal-head h3{margin:0;font-family:var(--font-display);font-size:15px;font-weight:600;}
+.modal-head p{margin:1px 0 0;font-size:11px;color:var(--muted);}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;line-height:1;padding:4px;border-radius:6px;}
+.modal-close:hover{background:var(--paper);color:var(--ink);}
+.modal-body{padding:18px 20px;overflow-y:auto;font-size:13px;line-height:1.55;}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--line-soft);display:flex;justify-content:flex-end;gap:10px;flex:none;}
+
+.access-denied{text-align:center;padding:20px 10px 8px;}
+.access-denied .ad-icon{
+  width:52px;height:52px;border-radius:50%;background:var(--danger-bg);color:var(--danger);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+}
+.access-denied .ad-icon svg{width:26px;height:26px;}
+.access-denied h4{font-family:var(--font-display);font-size:15px;margin:0 0 6px;}
+.access-denied p{color:var(--muted);font-size:12.5px;margin:0 0 14px;}
+.access-denied .req-role{
+  display:inline-block;background:var(--paper);border:1px solid var(--line);border-radius:8px;
+  padding:8px 14px;font-size:11.5px;color:var(--ink-soft);
+}
+.access-denied .req-role b{font-family:var(--font-mono);color:var(--brand-orange-dark);}
+
+.mini-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
+.mini-table th{text-align:left;padding:7px 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.3px;color:var(--muted);border-bottom:1px solid var(--line-soft);}
+.mini-table td{padding:8px 8px;border-bottom:1px solid var(--line-soft);}
+.mini-table tr:last-child td{border-bottom:none;}
+.risk-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;}
+.risk-tag.High{background:var(--danger-bg);color:var(--danger);}
+.risk-tag.Medium{background:var(--warning-bg);color:var(--warning);}
+.risk-tag.Low{background:var(--success-bg);color:var(--success);}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 16px;}
+.stat-chip{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 12px;flex:1;min-width:110px;}
+.stat-chip .sc-v{font-family:var(--font-mono);font-weight:700;font-size:16px;}
+.stat-chip .sc-l{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+.empty-state{text-align:center;padding:30px 10px;color:var(--muted);}
+.empty-state svg{width:38px;height:38px;color:var(--line);margin-bottom:10px;}
+.empty-state p{font-size:12.5px;margin:0;}
+
+.loading-row{display:flex;align-items:center;gap:10px;justify-content:center;padding:30px 10px;color:var(--muted);font-size:12.5px;}
+
+/* ---- toast ---- */
+#toast-stack{position:fixed;bottom:20px;right:20px;z-index:120;display:flex;flex-direction:column;gap:10px;max-width:320px;}
+.toast{
+  background:var(--navy-950);color:#fff;border-radius:10px;padding:12px 14px;font-size:12.5px;
+  display:flex;align-items:flex-start;gap:10px;box-shadow:0 14px 30px -10px rgba(0,0,0,0.4);
+  animation:toastin .18s ease-out;
+}
+@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.toast .t-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex:none;}
+.toast.success .t-dot{background:#3FD98F;}
+.toast.danger .t-dot{background:#FF7A7A;}
+.toast.info .t-dot{background:#7AB6FF;}
+.toast .t-txt b{display:block;font-size:12.5px;}
+.toast .t-txt span{color:rgba(255,255,255,0.6);font-size:11px;}
+
+/* scrollbars */
+.dp-body::-webkit-scrollbar,.search-results::-webkit-scrollbar,.modal-body::-webkit-scrollbar{width:8px;}
+.dp-body::-webkit-scrollbar-thumb,.search-results::-webkit-scrollbar-thumb,.modal-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+
+/* responsive */
+@media (max-width:1080px){
+  .content-grid{grid-template-columns:1fr;}
+  .kpi-strip{grid-template-columns:repeat(3,1fr);}
+  .card-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:720px){
+  header.topbar{flex-wrap:wrap;height:auto;padding:10px 12px;gap:8px;}
+  .topbar-search{order:5;max-width:none;flex:1 1 100%;}
+  .kpi-strip{grid-template-columns:repeat(2,1fr);}
+  .card-grid{grid-template-columns:1fr;}
+  main.workspace{padding:16px 14px 40px;}
+  .role-pick{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brandbar">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <div class="divider"></div>
+      <div>
+        <div class="suite-name">Reconcile Suite</div>
+        <div class="suite-tag">Account Reconciliation &amp; Close — Training Simulation</div>
+      </div>
+    </div>
+    <div class="login-body">
+      <h1>Sign in to continue</h1>
+      <p class="lead">This is a simulated enterprise reconciliation application built for BISP Trainings demonstrations. Choose a demo role to sign in — the home page will adapt to the permissions of that role.</p>
+      <div class="role-pick" id="role-pick"></div>
+      <div class="login-footer-row">
+        <span class="login-env-note">Company: <b>BISP Global Services</b> (demo data only)</span>
+        <button class="btn btn-primary" id="btn-login" disabled>Sign In →</button>
+      </div>
+    </div>
+    <div class="bisp-contact">
+      <b>BISP Trainings</b> · www.bisptrainings.com · Call Us: +91 769-409-5404
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app-shell" class="hidden">
+
+  <div id="env-ribbon" class="env-ribbon env-development">
+    <span class="motif" style="vertical-align:-2px;margin-right:6px;"><span class="a"></span><span class="b"></span></span>
+    <span id="env-ribbon-text">DEVELOPMENT ENVIRONMENT</span>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <span class="suite">Reconcile Suite</span>
+    </div>
+    <div class="topbar-sep"></div>
+
+    <!-- 1. Application / Module selector -->
+    <div class="topbar-control" id="ctrl-module">
+      <button class="tb-btn" id="btn-module" onclick="toggleDropdown('module')">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="val" id="module-val">Account Reconciliation</span>
+      </button>
+      <div class="dropdown-panel hidden" id="dd-module">
+        <div class="dp-head"><h4>Switch Module</h4></div>
+        <div class="dp-body" id="module-list"></div>
+      </div>
+    </div>
+
+    <!-- 2. Current Period Selector -->
+    <div class="topbar-control" id="ctrl-period">
+      <button class="tb-btn" onclick="toggleDropdown('period')">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        <span class="lbl">Period</span>
+        <span class="val" id="period-val">Aug-2026</span>
+        <span class="status-pill OPEN" id="period-status-pill" style="margin-left:2px;">OPEN</span>
+      </button>
+      <div class="dropdown-panel hidden" id="dd-period" style="width:250px;">
+        <div class="dp-head"><h4>Select Accounting Period</h4></div>
+        <div class="dp-body"><div class="period-list" id="period-list"></div></div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="topbar-search">
+      <svg class="search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="global-search-input" placeholder="Search reconciliations, accounts, jobs…" onfocus="openSearchOverlay()" readonly>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="topbar-right">
+      <!-- Pending Task Counter -->
+      <div class="topbar-control" id="ctrl-tasks">
+        <button class="tb-btn" onclick="toggleDropdown('tasks')">
+          <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span class="val" id="task-counter-val">12</span>
+          <span class="lbl">Tasks</span>
+        </button>
+        <div class="dropdown-panel hidden" id="dd-tasks" style="width:250px;">
+          <div class="dp-head"><h4>Pending Task Breakdown</h4></div>
+          <div class="dp-body" id="task-breakdown"></div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="topbar-control" id="ctrl-notif">
+        <button class="tb-btn" onclick="toggleDropdown('notif')">
+          <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+          <span class="tb-badge" id="notif-badge">5</span>
+        </button>
+        <div class="dropdown-panel hidden" id="dd-notif">
+          <div class="dp-head"><h4>Notifications</h4><button class="dp-link" onclick="markAllNotifRead()">Mark all read</button></div>
+          <div class="dp-body" id="notif-list"></div>
+          <div class="dp-foot"><button class="dp-link" onclick="clearAllNotif()">Clear all</button></div>
+        </div>
+      </div>
+
+      <!-- Recent Jobs -->
+      <div class="topbar-control" id="ctrl-jobs">
+        <button class="tb-btn" onclick="toggleDropdown('jobs')">
+          <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+          <span class="lbl">Recent Jobs</span>
+        </button>
+        <div class="dropdown-panel hidden" id="dd-jobs" style="width:420px;">
+          <div class="dp-head"><h4>Recent Jobs</h4><button class="dp-link" onclick="openCardModal('jobs')">View all</button></div>
+          <div class="dp-body"><table class="jobs-table" id="jobs-table"></table></div>
+        </div>
+      </div>
+
+      <!-- Help -->
+      <div class="topbar-control" id="ctrl-help">
+        <button class="tb-btn" onclick="toggleDropdown('help')">
+          <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .3c0 1.7-2.3 1.7-2.5 3.2M12 17h.01"/></svg>
+        </button>
+        <div class="dropdown-panel hidden" id="dd-help" style="width:270px;">
+          <div class="dp-head"><h4>Help &amp; Resources</h4></div>
+          <div class="dp-body">
+            <div class="help-list">
+              <div class="help-item"><svg class="hi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><div><b>User Guide</b><span>Reconciliation &amp; close process walkthroughs</span></div></div>
+              <div class="help-item"><svg class="hi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><div><b>Video Training</b><span>Short lessons on worklists &amp; matching</span></div></div>
+              <div class="help-item"><svg class="hi-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><div><b>Contact BISP Trainings</b><span>+91 769-409-5404</span></div></div>
+            </div>
+          </div>
+          <div class="dp-foot" style="text-align:left;padding:10px 14px;">
+            <span style="font-size:10.5px;color:var(--muted);">www.bisptrainings.com</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Environment Indicator -->
+      <select class="env-select" id="env-select" onchange="setEnvironment(this.value)">
+        <option value="development">DEVELOPMENT</option>
+        <option value="test">TEST</option>
+        <option value="production">PRODUCTION</option>
+      </select>
+
+      <!-- User Role -->
+      <div class="topbar-control" id="ctrl-user">
+        <button class="user-chip" onclick="toggleDropdown('user')">
+          <span class="user-avatar" id="user-avatar">FP</span>
+          <span>
+            <span class="u-name" id="user-name-lbl" style="display:block;">Amara Fields</span>
+            <span class="u-role" id="user-role-lbl">Finance Preparer</span>
+          </span>
+        </button>
+        <div class="dropdown-panel hidden" id="dd-user" style="width:270px;">
+          <div class="dp-head"><h4>Switch Demo Role</h4></div>
+          <div class="dp-body" id="user-role-list"></div>
+          <div class="dp-foot"><button class="dp-link" onclick="signOut()">Sign out</button></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <div id="period-readonly-slot"></div>
+
+    <div class="period-context-bar">
+      <div class="ctx-left">
+        <div>
+          <div class="ctx-title">Good to see you, <span id="ctx-first-name">Amara</span></div>
+          <div class="ctx-sub" id="ctx-sub-line">BISP Global Services · Showing data for Aug-2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="section-label">Key Metrics</div>
+    <div class="kpi-strip" id="kpi-strip"></div>
+
+    <div class="content-grid">
+      <div>
+        <div class="section-label">Home</div>
+        <div class="card-grid" id="card-grid"></div>
+      </div>
+      <div>
+        <div class="side-panel">
+          <div class="sp-head"><h3>Recent Jobs</h3><button class="dp-link" onclick="openCardModal('jobs')">View all</button></div>
+          <div id="side-jobs"></div>
+        </div>
+        <div class="side-panel">
+          <div class="sp-head"><h3>Notifications</h3><button class="dp-link" onclick="toggleDropdown('notif')">View all</button></div>
+          <div id="side-notifs"></div>
+        </div>
+        <div class="side-panel">
+          <div class="sp-head"><h3>Need Help?</h3></div>
+          <div class="help-mini">
+            <a href="#" onclick="return false;">Reconciliation &amp; close user guide</a>
+            <a href="#" onclick="return false;">Video: Building a matching rule</a>
+            <a href="#" onclick="return false;">Contact BISP Trainings support</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    © BISP Trainings · www.bisptrainings.com · Call Us: +91 769-409-5404 &nbsp;|&nbsp; This is a simulated training environment. No real financial data is used.
+  </footer>
+</div>
+
+<div id="toast-stack"></div>
+
+<script>
+/* ============================================================
+   DEMO DATA
+   ============================================================ */
+const ROLES = {
+  preparer: { id:'preparer', name:'Finance Preparer', person:'Amara Fields', initials:'AF',
+    desc:'Prepares reconciliations and clears matching exceptions.',
+    access:['worklist','reconciliations','matching','alerts','dashboards','reports'] },
+  reviewer: { id:'reviewer', name:'Reviewer', person:'Devon Okafor', initials:'DO',
+    desc:'Reviews and approves completed reconciliations.',
+    access:['worklist','reconciliations','alerts','dashboards','reports'] },
+  manager: { id:'manager', name:'Reconciliation Manager', person:'Priya Nandan', initials:'PN',
+    desc:'Owns profiles, staffing and period-level oversight.',
+    access:['worklist','reconciliations','profiles','matching','alerts','dashboards','reports','jobs'] },
+  admin: { id:'admin', name:'Administrator', person:'Marcus Lindqvist', initials:'ML',
+    desc:'Full system configuration, security and audit access.',
+    access:['worklist','reconciliations','profiles','matching','dataLoads','periodMgmt','alerts','dashboards','reports','jobs','configuration','security','audit','administration'] },
+};
+const ROLE_ORDER = ['preparer','reviewer','manager','admin'];
+
+const ICONS = {
+  worklist:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
+  reconciliations:'<path d="M6 3v18M18 3v18"/><path d="M3 8l3-5 3 5M15 8l3-5 3 5"/><path d="M3 16h6M15 16h6"/>',
+  profiles:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0111 0"/><path d="M16 4h5M16 8h5M16 12h3"/>',
+  matching:'<path d="M17 3l4 4-4 4"/><path d="M3 7h18"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H3"/>',
+  dataLoads:'<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/>',
+  periodMgmt:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 14h2M14 14h2M8 17h2"/>',
+  alerts:'<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/>',
+  dashboards:'<rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="17" rx="1"/>',
+  reports:'<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/>',
+  jobs:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  configuration:'<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.6-2-3.4-2.4.7A7 7 0 0014.6 5L14 2.6h-4L9.4 5a7 7 0 00-1.8 1.1l-2.4-.7-2 3.4 2 1.6a7 7 0 000 3.2l-2 1.6 2 3.4 2.4-.7c.5.5 1.1.8 1.8 1.1l.6 2.4h4l.6-2.4c.7-.3 1.3-.6 1.8-1.1l2.4.7 2-3.4-2-1.6c.1-.5.2-1 .2-1.6z"/>',
+  security:'<path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  audit:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.3-4.3"/><path d="M8 10.5h5"/>',
+  administration:'<path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/>',
+};
+
+const CARD_DEFS = [
+  {id:'worklist', title:'My Worklist', desc:'Tasks requiring your action this period', badge:12, statusTone:'warn', note:'4 due today'},
+  {id:'reconciliations', title:'Reconciliations', desc:'Prepare, review and manage account reconciliations', badge:48, statusTone:'warn', note:'3 overdue'},
+  {id:'profiles', title:'Profiles', desc:'Define reconciliation profiles, formats and rules', badge:86, statusTone:'ok', note:'active profiles'},
+  {id:'matching', title:'Transaction Matching', desc:'Run and monitor automated matching rules', badge:3, statusTone:'ok', note:'rules running'},
+  {id:'dataLoads', title:'Data Loads', desc:'Load balances and transactions from source systems', badge:2, statusTone:'crit', note:'1 load failed'},
+  {id:'periodMgmt', title:'Period Management', desc:'Open, close and lock accounting periods', badge:null, statusTone:'ok', note:'Aug-2026 · Open'},
+  {id:'alerts', title:'Alerts', desc:'Review threshold and variance alerts', badge:5, statusTone:'warn', note:'1 high severity'},
+  {id:'dashboards', title:'Dashboards', desc:'Overview, compliance and match-metrics views', badge:3, statusTone:'ok', note:'dashboards available'},
+  {id:'reports', title:'Reports', desc:'Generate and schedule reconciliation reports', badge:12, statusTone:'ok', note:'scheduled'},
+  {id:'jobs', title:'Jobs', desc:'Monitor scheduled and on-demand batch jobs', badge:1, statusTone:'warn', note:'currently running'},
+  {id:'configuration', title:'Configuration', desc:'Configure system profiles, formats and rule sets', badge:null, statusTone:'ok', note:'admin area'},
+  {id:'security', title:'Security', desc:'Manage roles, users and access provisioning', badge:null, statusTone:'ok', note:'admin area'},
+  {id:'audit', title:'Audit', desc:'Review the audit trail of system activity', badge:null, statusTone:'ok', note:'admin area'},
+  {id:'administration', title:'Administration', desc:'System administration and maintenance tasks', badge:null, statusTone:'ok', note:'admin area'},
+];
+
+const PERIODS = [
+  {id:'2026-01', label:'Jan-2026', status:'CLOSED'},
+  {id:'2026-02', label:'Feb-2026', status:'CLOSED'},
+  {id:'2026-03', label:'Mar-2026', status:'CLOSED'},
+  {id:'2026-04', label:'Apr-2026', status:'CLOSED'},
+  {id:'2026-05', label:'May-2026', status:'CLOSED'},
+  {id:'2026-06', label:'Jun-2026', status:'CLOSED'},
+  {id:'2026-07', label:'Jul-2026', status:'LOCKED'},
+  {id:'2026-08', label:'Aug-2026', status:'OPEN'},
+];
+
+const KPI_DEFS = [
+  {id:'pendingTasks', label:'Pending Tasks', value:12, tone:'neutral', card:'worklist'},
+  {id:'overdue', label:'Overdue', value:3, tone:'danger', card:'worklist', filter:'Overdue'},
+  {id:'openRecon', label:'Open Reconciliations', value:48, tone:'info', card:'reconciliations'},
+  {id:'highRisk', label:'High Risk', value:7, tone:'warning', card:'reconciliations', filter:'High Risk'},
+  {id:'openAlerts', label:'Open Alerts', value:5, tone:'warning', card:'alerts'},
+  {id:'failedJobs', label:'Failed Jobs', value:2, tone:'danger', card:'jobs', filter:'Failed'},
+];
+
+let NOTIFICATIONS = [
+  {id:1, tone:'info', title:'Reconciliation REC-100245 pending your review', time:'10 min ago', read:false},
+  {id:2, tone:'danger', title:'Reconciliation REC-100198 was rejected by reviewer', time:'1 hr ago', read:false},
+  {id:3, tone:'success', title:'Data load "SAP GL Balances" completed', time:'2 hr ago', read:true},
+  {id:4, tone:'danger', title:'Data load "Bank Statement Feed" failed', time:'3 hr ago', read:false},
+  {id:5, tone:'success', title:'Matching job "Cash-Operating AutoMatch" completed', time:'4 hr ago', read:true},
+  {id:6, tone:'warning', title:'Alert assigned: variance threshold breach — Cash Operating', time:'5 hr ago', read:false},
+  {id:7, tone:'info', title:'Period Aug-2026 is closing in 5 days', time:'1 day ago', read:true},
+];
+
+const JOBS = [
+  {job:'Balance Load', type:'GL Data Load', status:'Completed', start:'13-Aug 06:02', duration:'00:04:12'},
+  {job:'Reconciliation Creation', type:'Batch Create', status:'Completed', start:'13-Aug 06:10', duration:'00:01:47'},
+  {job:'AutoMatch — Cash Operating', type:'Transaction Matching', status:'Running', start:'13-Aug 07:15', duration:'00:12:03'},
+  {job:'Report Generation', type:'Compliance Report', status:'Failed', start:'12-Aug 22:40', duration:'00:00:56'},
+];
+
+const SEARCH_INDEX = [
+  {cat:'Reconciliation', title:'REC-100245 · Cash – Operating Account', sub:'In Review · High Risk', card:'reconciliations'},
+  {cat:'Reconciliation', title:'REC-100198 · Accrued Payroll Liability', sub:'Rejected · Medium Risk', card:'reconciliations'},
+  {cat:'Reconciliation', title:'REC-100061 · Prepaid Insurance', sub:'Not Started · Low Risk', card:'reconciliations'},
+  {cat:'Account', title:'1000-100 · Cash – Operating Account', sub:'BISP Global Services · USD', card:'reconciliations'},
+  {cat:'Account', title:'2100-200 · Accrued Payroll Liability', sub:'BISP Global Services · USD', card:'reconciliations'},
+  {cat:'Profile', title:'Bank Account Reconciliation Profile', sub:'Standard · Monthly frequency', card:'profiles'},
+  {cat:'Profile', title:'Balance Sheet Recurring Profile', sub:'Standard · Monthly frequency', card:'profiles'},
+  {cat:'Transaction', title:'TXN-88213 · Wire Transfer $18,400.00', sub:'Unmatched · Cash Operating', card:'matching'},
+  {cat:'Transaction', title:'TXN-88240 · ACH Payment $2,150.00', sub:'Matched · Auto-match rule 3', card:'matching'},
+  {cat:'Alert', title:'Variance Threshold Breach', sub:'Cash Operating Account · High severity', card:'alerts'},
+  {cat:'Alert', title:'Missing Supporting Documentation', sub:'Accrued Payroll Liability · Medium', card:'alerts'},
+  {cat:'Job', title:'AutoMatch — Cash Operating', sub:'Running · started 07:15', card:'jobs'},
+  {cat:'Job', title:'Report Generation — Compliance Report', sub:'Failed · 12-Aug 22:40', card:'jobs'},
+  {cat:'Report', title:'Period Close Compliance Report', sub:'Scheduled · monthly', card:'reports'},
+  {cat:'Report', title:'Match Metrics Summary', sub:'Scheduled · weekly', card:'reports'},
+];
+
+const RECON_ROWS = [
+  {id:'REC-100245', account:'Cash – Operating Account', preparer:'Amara Fields', status:'In Review', risk:'High'},
+  {id:'REC-100198', account:'Accrued Payroll Liability', preparer:'Amara Fields', status:'Rejected', risk:'Medium'},
+  {id:'REC-100061', account:'Prepaid Insurance', preparer:'Kofi Boateng', status:'Not Started', risk:'Low'},
+  {id:'REC-100302', account:'Accounts Receivable – Trade', preparer:'Amara Fields', status:'Approved', risk:'Low'},
+  {id:'REC-100115', account:'Fixed Assets – Equipment', preparer:'Sana Iyer', status:'In Review', risk:'Medium'},
+  {id:'REC-100077', account:'Intercompany Receivable', preparer:'Kofi Boateng', status:'Overdue', risk:'High'},
+];
+
+const WORKLIST_ROWS = [
+  {task:'Prepare REC-100245 · Cash – Operating', type:'Preparation', due:'Today'},
+  {task:'Clear 3 unmatched transactions · Cash Operating', type:'Matching', due:'Today'},
+  {task:'Review REC-100302 · Accounts Receivable', type:'Review', due:'Tomorrow'},
+  {task:'Approve REC-100061 · Prepaid Insurance', type:'Approval', due:'Aug 15'},
+  {task:'Respond to alert · Variance threshold breach', type:'Alert', due:'Overdue'},
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  loggedIn:false,
+  role:'preparer',
+  period:'2026-08',
+  environment:'development',
+  module:'reconciliation',
+  loginSelectedRole:null,
+};
+
+const MODULES = [
+  {id:'reconciliation', name:'Account Reconciliation', active:true},
+  {id:'closemanager', name:'Financial Close Manager', active:false},
+  {id:'txmatching', name:'Transaction Matching Hub', active:false},
+];
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function renderLoginRoles(){
+  const wrap = document.getElementById('role-pick');
+  wrap.innerHTML = ROLE_ORDER.map(rid=>{
+    const r = ROLES[rid];
+    return `<button class="role-tile" data-role="${rid}" onclick="selectLoginRole('${rid}')">
+      <div class="rt-name">${r.name}</div>
+      <div class="rt-desc">${r.desc}</div>
+    </button>`;
+  }).join('');
+}
+function selectLoginRole(rid){
+  state.loginSelectedRole = rid;
+  document.querySelectorAll('.role-tile').forEach(el=>el.classList.toggle('selected', el.dataset.role===rid));
+  document.getElementById('btn-login').disabled = false;
+}
+document.getElementById('btn-login').addEventListener('click', ()=>{
+  if(!state.loginSelectedRole) return;
+  state.role = state.loginSelectedRole;
+  state.loggedIn = true;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app-shell').classList.remove('hidden');
+  renderAll();
+  showToast('success', 'Signed in', `Welcome, ${ROLES[state.role].person} (${ROLES[state.role].name})`);
+});
+function signOut(){
+  state.loggedIn = false;
+  state.loginSelectedRole = null;
+  document.getElementById('app-shell').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.querySelectorAll('.role-tile').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('btn-login').disabled = true;
+  closeAllDropdowns();
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderAll(){
+  renderUserChip();
+  renderModuleDD();
+  renderPeriodDD();
+  renderPeriodContext();
+  renderKpis();
+  renderCards();
+  renderNotifDD();
+  renderNotifSide();
+  renderJobsDD();
+  renderJobsSide();
+  renderTaskDD();
+  renderUserRoleDD();
+  renderEnvRibbon();
+}
+
+function iconSvg(key, extraClass){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="${extraClass||''}">${ICONS[key]||''}</svg>`;
+}
+
+function renderUserChip(){
+  const r = ROLES[state.role];
+  document.getElementById('user-avatar').textContent = r.initials;
+  document.getElementById('user-name-lbl').textContent = r.person;
+  document.getElementById('user-role-lbl').textContent = r.name;
+  document.getElementById('ctx-first-name').textContent = r.person.split(' ')[0];
+}
+
+function renderModuleDD(){
+  document.getElementById('module-val').textContent = MODULES.find(m=>m.id===state.module).name;
+  document.getElementById('module-list').innerHTML = MODULES.map(m=>`
+    <div class="module-row ${m.id===state.module?'active':''}" onclick="${m.active? `setModule('${m.id}')` : `moduleComingSoon('${m.name}')`}" style="cursor:pointer;">
+      <span>${m.name}</span>
+      ${m.active? '' : '<span class="tag-soon">Coming soon</span>'}
+    </div>`).join('');
+}
+function setModule(id){ state.module = id; renderModuleDD(); closeAllDropdowns(); }
+function moduleComingSoon(name){ closeAllDropdowns(); showToast('info', 'Not available in demo', `${name} is not part of this simulation.`); }
+
+function renderPeriodDD(){
+  const p = PERIODS.find(x=>x.id===state.period);
+  document.getElementById('period-val').textContent = p.label;
+  const pill = document.getElementById('period-status-pill');
+  pill.textContent = p.status; pill.className = 'status-pill '+p.status;
+  document.getElementById('period-list').innerHTML = PERIODS.map(pr=>`
+    <div class="period-row ${pr.id===state.period?'active':''}" onclick="setPeriod('${pr.id}')" style="cursor:pointer;">
+      <span class="pr-name">${pr.label}</span>
+      <span class="status-pill ${pr.status}">${pr.status}</span>
+    </div>`).join('');
+}
+function setPeriod(id){
+  state.period = id;
+  renderPeriodDD();
+  renderPeriodContext();
+  closeAllDropdowns();
+  const p = PERIODS.find(x=>x.id===id);
+  showToast('info', 'Period changed', `Home page now showing ${p.label} (${p.status})`);
+}
+function renderPeriodContext(){
+  const p = PERIODS.find(x=>x.id===state.period);
+  document.getElementById('ctx-sub-line').textContent = `BISP Global Services · Showing data for ${p.label}`;
+  const slot = document.getElementById('period-readonly-slot');
+  if(p.status==='CLOSED'){
+    slot.innerHTML = `<div class="period-readonly-banner">🔒 This period is closed. Data shown below is read-only.</div>`;
+  } else if(p.status==='LOCKED'){
+    slot.innerHTML = `<div class="period-readonly-banner locked">⛔ This period is locked for administrative changes only.</div>`;
+  } else {
+    slot.innerHTML = '';
+  }
+}
+
+function renderKpis(){
+  document.getElementById('kpi-strip').innerHTML = KPI_DEFS.map(k=>`
+    <button class="kpi-card tone-${k.tone}" onclick="kpiClick('${k.id}')">
+      <div class="kv">${k.value}</div>
+      <div class="kl">${k.label}</div>
+    </button>`).join('');
+}
+function kpiClick(id){
+  const k = KPI_DEFS.find(x=>x.id===id);
+  openCardModal(k.card, k.filter||null);
+}
+
+function renderCards(){
+  const access = ROLES[state.role].access;
+  document.getElementById('card-grid').innerHTML = CARD_DEFS.map(c=>{
+    const allowed = access.includes(c.id);
+    const statusClass = allowed ? c.statusTone : 'lock';
+    return `<button class="nav-card ${allowed?'':'locked'}" onclick="cardClick('${c.id}')" title="${c.title}">
+      <div class="nc-top">
+        <div class="nc-icon">${iconSvg(c.id)}</div>
+        ${allowed
+          ? `<span class="nc-status ${statusClass}"></span>`
+          : `<span class="lock-tag">🔒 Restricted</span>`}
+      </div>
+      <div>
+        <div class="nc-title">${c.title}</div>
+        <div class="nc-desc">${c.desc}</div>
+      </div>
+      <div class="nc-foot">
+        ${c.badge!==null ? `<span class="nc-badge">${c.badge}</span>` : `<span></span>`}
+        <span class="nc-note">${allowed ? c.note : ''}</span>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function renderNotifDD(){
+  const unread = NOTIFICATIONS.filter(n=>!n.read).length;
+  document.getElementById('notif-badge').textContent = unread;
+  document.getElementById('notif-badge').style.display = unread>0 ? 'inline-block':'none';
+  document.getElementById('task-counter-val').textContent = KPI_DEFS[0].value;
+  const list = document.getElementById('notif-list');
+  if(NOTIFICATIONS.length===0){
+    list.innerHTML = `<div class="empty-note">You're all caught up — no notifications.</div>`;
+    return;
+  }
+  list.innerHTML = NOTIFICATIONS.map(n=>`
+    <div class="notif-row ${n.read?'':'unread'}" id="notif-row-${n.id}">
+      <span class="notif-dot ${n.tone}"></span>
+      <div class="notif-txt">
+        <div class="nt-title">${n.title}</div>
+        <div class="nt-time">${n.time}</div>
+        <div class="notif-actions">
+          ${n.read? '' : `<button onclick="markNotifRead(${n.id})">Mark as read</button>`}
+          <button onclick="openNotif(${n.id})">Open</button>
+          <button class="clear" onclick="clearNotif(${n.id})">Clear</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function renderNotifSide(){
+  const top = NOTIFICATIONS.slice(0,4);
+  document.getElementById('side-notifs').innerHTML = top.map(n=>`
+    <div class="mini-notif-row">
+      <div class="mn-title">${n.title}</div>
+      <div class="mn-time">${n.time}</div>
+    </div>`).join('') || `<div class="empty-note">No notifications</div>`;
+}
+function markNotifRead(id){ const n=NOTIFICATIONS.find(x=>x.id===id); if(n){n.read=true;} renderNotifDD(); renderNotifSide(); }
+function markAllNotifRead(){ NOTIFICATIONS.forEach(n=>n.read=true); renderNotifDD(); renderNotifSide(); showToast('success','Notifications updated','All notifications marked as read.'); }
+function clearNotif(id){ NOTIFICATIONS = NOTIFICATIONS.filter(x=>x.id!==id); renderNotifDD(); renderNotifSide(); }
+function clearAllNotif(){ NOTIFICATIONS = []; renderNotifDD(); renderNotifSide(); closeAllDropdowns(); showToast('info','Notifications cleared','Your notification center is now empty.'); }
+function openNotif(id){
+  const n = NOTIFICATIONS.find(x=>x.id===id);
+  markNotifRead(id);
+  closeAllDropdowns();
+  genericModal('Notification', n.title, `<p style="color:var(--muted);">${n.time}</p><p>This is a simulated notification detail view. In the full application this would deep-link into the related reconciliation, data load, job, or alert record.</p>`, 'alerts');
+}
+
+function renderJobsDD(){
+  document.getElementById('jobs-table').innerHTML = `
+    <tr><th>Job</th><th>Status</th><th>Duration</th></tr>
+    ${JOBS.map(j=>`<tr onclick="openJobDetail('${j.job}')">
+      <td><b>${j.job}</b><br><span style="color:var(--muted);font-size:10.5px;">${j.type}</span></td>
+      <td><span class="job-status ${j.status}">${j.status}</span></td>
+      <td class="mono">${j.duration}</td>
+    </tr>`).join('')}`;
+}
+function renderJobsSide(){
+  document.getElementById('side-jobs').innerHTML = JOBS.map(j=>`
+    <div class="mini-job-row">
+      <div><div class="mj-name">${j.job}</div><div class="mj-time">${j.start}</div></div>
+      <span class="job-status ${j.status}">${j.status}</span>
+    </div>`).join('');
+}
+function openJobDetail(name){
+  const j = JOBS.find(x=>x.job===name);
+  closeAllDropdowns();
+  genericModal('jobs', j.job, `
+    <div class="stat-row">
+      <div class="stat-chip"><div class="sc-v">${j.status}</div><div class="sc-l">Status</div></div>
+      <div class="stat-chip"><div class="sc-v mono">${j.duration}</div><div class="sc-l">Duration</div></div>
+      <div class="stat-chip"><div class="sc-v mono">${j.start}</div><div class="sc-l">Start Time</div></div>
+    </div>
+    <p><b>Type:</b> ${j.type}</p>
+    <p style="color:var(--muted);">${j.status==='Failed' ? 'This job failed during processing. In the full application, an administrator could view the error log and re-run the job.' : j.status==='Running' ? 'This job is currently in progress. Duration shown reflects elapsed time so far.' : 'This job completed successfully with no errors.'}</p>
+  `);
+}
+
+function renderTaskDD(){
+  document.getElementById('task-breakdown').innerHTML = `
+    <div class="period-list">
+      ${[['Preparation',5],['Review',4],['Approval',2],['Alerts',1]].map(([lbl,val])=>`
+        <div class="period-row"><span>${lbl}</span><span class="mono" style="font-weight:700;">${val}</span></div>
+      `).join('')}
+    </div>`;
+}
+
+function renderUserRoleDD(){
+  document.getElementById('user-role-list').innerHTML = ROLE_ORDER.map(rid=>{
+    const r = ROLES[rid];
+    return `<div class="module-row ${rid===state.role?'active':''}" style="cursor:pointer;" onclick="switchRole('${rid}')">
+      <span>${r.name}<br><span style="color:var(--muted);font-size:10.5px;">${r.person}</span></span>
+      ${rid===state.role? '<span style="color:var(--brand-blue);font-weight:700;">✓</span>' : ''}
+    </div>`;
+  }).join('');
+}
+function switchRole(rid){
+  state.role = rid;
+  renderAll();
+  closeAllDropdowns();
+  showToast('info', 'Role switched', `Now viewing as ${ROLES[rid].name} — navigation updated.`);
+}
+
+function renderEnvRibbon(){
+  const ribbon = document.getElementById('env-ribbon');
+  const txt = document.getElementById('env-ribbon-text');
+  ribbon.className = 'env-ribbon env-'+state.environment;
+  document.getElementById('env-select').value = state.environment;
+  if(state.environment==='production'){
+    txt.innerHTML = 'PRODUCTION ENVIRONMENT — <span class="prod-warn">Exercise caution before performing administrative actions.</span>';
+  } else if(state.environment==='test'){
+    txt.textContent = 'TEST ENVIRONMENT — for validation and training use';
+  } else {
+    txt.textContent = 'DEVELOPMENT ENVIRONMENT — sandbox, safe to explore';
+  }
+}
+function setEnvironment(env){
+  state.environment = env;
+  renderEnvRibbon();
+  if(env==='production'){
+    showToast('danger','Production Environment','Exercise caution before performing administrative actions.');
+  } else {
+    showToast('info','Environment changed', `Switched to ${env.toUpperCase()}.`);
+  }
+}
+
+/* ============================================================
+   DROPDOWNS
+   ============================================================ */
+const DD_IDS = ['module','period','tasks','notif','jobs','help','user'];
+function closeAllDropdowns(){
+  DD_IDS.forEach(id=>document.getElementById('dd-'+id).classList.add('hidden'));
+}
+function toggleDropdown(name){
+  const el = document.getElementById('dd-'+name);
+  const wasOpen = !el.classList.contains('hidden');
+  closeAllDropdowns();
+  if(!wasOpen) el.classList.remove('hidden');
+}
+document.addEventListener('click', (e)=>{
+  const insideControl = e.target.closest('.topbar-control');
+  if(!insideControl) closeAllDropdowns();
+});
+
+/* ============================================================
+   SEARCH OVERLAY
+   ============================================================ */
+function openSearchOverlay(){
+  const overlay = document.createElement('div');
+  overlay.className = 'search-overlay';
+  overlay.id = 'search-overlay';
+  overlay.innerHTML = `
+    <div class="search-panel">
+      <div class="search-input-row">
+        <svg class="search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="search-live-input" placeholder="Search reconciliations, accounts, profiles, transactions, alerts, jobs, reports…" autocomplete="off">
+        <span class="esc-hint">ESC</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const input = document.getElementById('search-live-input');
+  input.focus();
+  input.addEventListener('input', ()=>runSearch(input.value));
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeSearchOverlay(); });
+  document.addEventListener('keydown', escCloseSearch);
+  runSearch('');
+}
+function escCloseSearch(e){ if(e.key==='Escape') closeSearchOverlay(); }
+function closeSearchOverlay(){
+  const overlay = document.getElementById('search-overlay');
+  if(overlay) overlay.remove();
+  document.removeEventListener('keydown', escCloseSearch);
+}
+function runSearch(q){
+  const results = document.getElementById('search-results');
+  q = q.trim().toLowerCase();
+  let items = SEARCH_INDEX;
+  if(q){
+    items = SEARCH_INDEX.filter(i => (i.title+' '+i.sub+' '+i.cat).toLowerCase().includes(q));
+  }
+  if(items.length===0){
+    results.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><p>No results for "${q}". Try "reconciliation", "cash", or "alert".</p></div>`;
+    return;
+  }
+  const cats = [...new Set(items.map(i=>i.cat))];
+  results.innerHTML = cats.map(cat=>`
+    <div class="search-cat-label">${cat}</div>
+    ${items.filter(i=>i.cat===cat).map(i=>`
+      <div class="search-result-row" onclick="selectSearchResult('${i.card}','${i.title.replace(/'/g,"\\'")}')">
+        <div class="sr-icon">${iconSvg(i.card)}</div>
+        <div class="sr-main"><div class="sr-title">${i.title}</div><div class="sr-sub">${i.sub}</div></div>
+      </div>`).join('')}
+  `).join('');
+}
+function selectSearchResult(card, title){
+  closeSearchOverlay();
+  openCardModal(card, null, title);
+}
+
+/* ============================================================
+   CARD CLICK / MODALS
+   ============================================================ */
+function cardClick(id){
+  const access = ROLES[state.role].access;
+  if(!access.includes(id)){
+    showAccessDenied(id);
+    return;
+  }
+  openCardModal(id);
+}
+function showAccessDenied(id){
+  const c = CARD_DEFS.find(x=>x.id===id);
+  const requiredRoles = ROLE_ORDER.filter(r=>ROLES[r].access.includes(id)).map(r=>ROLES[r].name).join(' or ');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal-panel" style="max-width:420px;">
+      <div class="modal-head"><div class="mh-left"><h3>Access Restricted</h3></div><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button></div>
+      <div class="modal-body">
+        <div class="access-denied">
+          <div class="ad-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 8l8 8M16 8l-8 8"/></svg></div>
+          <h4>Access Denied</h4>
+          <p>You do not have permission to access this area.</p>
+          <div class="req-role">${c.title} requires: <b>${requiredRoles}</b></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Close</button></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  showToast('danger','Access Denied','You do not have permission to access this area.');
+}
+
+function genericModal(iconKey, title, bodyHtml, subtitle){
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal-panel">
+      <div class="modal-head">
+        <div class="mh-left">
+          <div class="mh-icon">${iconSvg(iconKey)}</div>
+          <div><h3>${title}</h3>${subtitle?`<p>${subtitle}</p>`:''}</div>
+        </div>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Close</button>
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">Done</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function riskTag(r){ return `<span class="risk-tag ${r}">${r}</span>`; }
+function statusTag(s){
+  const map = {'In Review':'info','Rejected':'danger','Not Started':'neutral','Approved':'success','Overdue':'danger'};
+  const colors = {info:'var(--brand-blue)',danger:'var(--danger)',neutral:'var(--muted)',success:'var(--success)'};
+  return `<span style="font-size:11px;font-weight:600;color:${colors[map[s]||'neutral']}">${s}</span>`;
+}
+
+function openCardModal(id, filter, focusTitle){
+  const c = CARD_DEFS.find(x=>x.id===id);
+  let body = '';
+  const p = PERIODS.find(x=>x.id===state.period);
+
+  if(id==='worklist'){
+    let rows = WORKLIST_ROWS;
+    if(filter==='Overdue') rows = rows.filter(r=>r.due==='Overdue');
+    body = `<p style="color:var(--muted);">Tasks assigned to you for ${p.label}.</p>
+      <table class="mini-table"><tr><th>Task</th><th>Type</th><th>Due</th></tr>
+      ${rows.map(r=>`<tr><td>${r.task}</td><td>${r.type}</td><td>${r.due==='Overdue'?'<span style="color:var(--danger);font-weight:600;">Overdue</span>':r.due}</td></tr>`).join('')}
+      </table>`;
+  } else if(id==='reconciliations'){
+    let rows = RECON_ROWS;
+    if(filter==='High Risk') rows = rows.filter(r=>r.risk==='High');
+    body = `<div class="stat-row">
+        <div class="stat-chip"><div class="sc-v">48</div><div class="sc-l">Open</div></div>
+        <div class="stat-chip"><div class="sc-v" style="color:var(--danger);">3</div><div class="sc-l">Overdue</div></div>
+        <div class="stat-chip"><div class="sc-v" style="color:var(--warning);">7</div><div class="sc-l">High Risk</div></div>
+      </div>
+      <table class="mini-table"><tr><th>ID</th><th>Account</th><th>Status</th><th>Risk</th></tr>
+      ${rows.map(r=>`<tr><td class="mono">${r.id}</td><td>${r.account}</td><td>${statusTag(r.status)}</td><td>${riskTag(r.risk)}</td></tr>`).join('')}
+      </table>`;
+  } else if(id==='profiles'){
+    body = `<p style="color:var(--muted);">86 active reconciliation profiles define the format, frequency and rules used to generate reconciliations.</p>
+      <table class="mini-table"><tr><th>Profile</th><th>Frequency</th><th>Status</th></tr>
+      <tr><td>Bank Account Reconciliation</td><td>Monthly</td><td style="color:var(--success);font-weight:600;">Active</td></tr>
+      <tr><td>Balance Sheet Recurring</td><td>Monthly</td><td style="color:var(--success);font-weight:600;">Active</td></tr>
+      <tr><td>Intercompany Standard</td><td>Monthly</td><td style="color:var(--success);font-weight:600;">Active</td></tr>
+      <tr><td>Fixed Assets Rollforward</td><td>Quarterly</td><td style="color:var(--muted);font-weight:600;">Draft</td></tr>
+      </table>`;
+  } else if(id==='matching'){
+    body = `<div class="stat-row">
+        <div class="stat-chip"><div class="sc-v">3</div><div class="sc-l">Rules running</div></div>
+        <div class="stat-chip"><div class="sc-v">94%</div><div class="sc-l">Auto-match rate</div></div>
+        <div class="stat-chip"><div class="sc-v">18</div><div class="sc-l">Unmatched items</div></div>
+      </div>
+      <table class="mini-table"><tr><th>Transaction</th><th>Amount</th><th>Status</th></tr>
+      <tr><td class="mono">TXN-88213</td><td>$18,400.00</td><td style="color:var(--danger);font-weight:600;">Unmatched</td></tr>
+      <tr><td class="mono">TXN-88240</td><td>$2,150.00</td><td style="color:var(--success);font-weight:600;">Matched</td></tr>
+      <tr><td class="mono">TXN-88255</td><td>$610.25</td><td style="color:var(--success);font-weight:600;">Matched</td></tr>
+      </table>`;
+  } else if(id==='dataLoads'){
+    body = `<table class="mini-table"><tr><th>Source</th><th>Type</th><th>Status</th></tr>
+      <tr><td>SAP GL Balances</td><td>Balance Load</td><td style="color:var(--success);font-weight:600;">Completed</td></tr>
+      <tr><td>Bank Statement Feed</td><td>Transaction Load</td><td style="color:var(--danger);font-weight:600;">Failed</td></tr>
+      <tr><td>Intercompany Feed</td><td>Transaction Load</td><td style="color:var(--brand-blue);font-weight:600;">Scheduled</td></tr>
+      </table>
+      <p style="color:var(--muted);margin-top:10px;">The Bank Statement Feed load failed due to a file-format mismatch. In the full application you could view the error log and re-submit.</p>`;
+  } else if(id==='periodMgmt'){
+    body = `<table class="mini-table"><tr><th>Period</th><th>Status</th></tr>
+      ${PERIODS.map(pr=>`<tr><td class="mono">${pr.label}</td><td><span class="status-pill ${pr.status}">${pr.status}</span></td></tr>`).join('')}
+      </table>`;
+  } else if(id==='alerts'){
+    body = `<table class="mini-table"><tr><th>Alert</th><th>Account</th><th>Severity</th></tr>
+      <tr><td>Variance threshold breach</td><td>Cash – Operating</td><td>${riskTag('High')}</td></tr>
+      <tr><td>Missing supporting documentation</td><td>Accrued Payroll Liability</td><td>${riskTag('Medium')}</td></tr>
+      <tr><td>Late submission</td><td>Prepaid Insurance</td><td>${riskTag('Low')}</td></tr>
+      </table>`;
+  } else if(id==='dashboards'){
+    body = `<div class="stat-row">
+        <div class="stat-chip"><div class="sc-v">92%</div><div class="sc-l">On-time completion</div></div>
+        <div class="stat-chip"><div class="sc-v">94%</div><div class="sc-l">Match rate</div></div>
+        <div class="stat-chip"><div class="sc-v">3</div><div class="sc-l">Dashboards</div></div>
+      </div>
+      <p style="color:var(--muted);">Overview, Compliance, and Match Metrics dashboards are available for ${p.label}. In the full application these render live charts and drill-down views.</p>`;
+  } else if(id==='reports'){
+    body = `<table class="mini-table"><tr><th>Report</th><th>Frequency</th><th>Last Run</th></tr>
+      <tr><td>Period Close Compliance Report</td><td>Monthly</td><td class="mono">12-Aug 22:40</td></tr>
+      <tr><td>Match Metrics Summary</td><td>Weekly</td><td class="mono">11-Aug 09:00</td></tr>
+      <tr><td>Open Items Aging</td><td>Monthly</td><td class="mono">01-Aug 06:00</td></tr>
+      </table>`;
+  } else if(id==='jobs'){
+    let rows = JOBS;
+    if(filter==='Failed') rows = rows.filter(r=>r.status==='Failed');
+    body = `<table class="mini-table"><tr><th>Job</th><th>Status</th><th>Start</th><th>Duration</th></tr>
+      ${rows.map(r=>`<tr><td>${r.job}</td><td><span class="job-status ${r.status}">${r.status}</span></td><td class="mono">${r.start}</td><td class="mono">${r.duration}</td></tr>`).join('')}
+      </table>`;
+  } else if(id==='configuration'){
+    body = `<p style="color:var(--muted);">System configuration for profiles, formats, matching rules, and calendars used across the reconciliation module.</p>
+      <table class="mini-table"><tr><th>Setting</th><th>Value</th></tr>
+      <tr><td>Default currency</td><td class="mono">USD</td></tr>
+      <tr><td>Fiscal calendar</td><td class="mono">Standard 12-period</td></tr>
+      <tr><td>Auto-match tolerance</td><td class="mono">$0.50</td></tr>
+      </table>`;
+  } else if(id==='security'){
+    body = `<table class="mini-table"><tr><th>Role</th><th>Users</th></tr>
+      <tr><td>Finance Preparer</td><td class="mono">14</td></tr>
+      <tr><td>Reviewer</td><td class="mono">6</td></tr>
+      <tr><td>Reconciliation Manager</td><td class="mono">3</td></tr>
+      <tr><td>Administrator</td><td class="mono">2</td></tr>
+      </table>`;
+  } else if(id==='audit'){
+    body = `<table class="mini-table"><tr><th>Event</th><th>User</th><th>Time</th></tr>
+      <tr><td>Approved REC-100302</td><td>Devon Okafor</td><td class="mono">13-Aug 08:10</td></tr>
+      <tr><td>Rejected REC-100198</td><td>Devon Okafor</td><td class="mono">12-Aug 16:45</td></tr>
+      <tr><td>Role changed: Kofi Boateng → Preparer</td><td>Marcus Lindqvist</td><td class="mono">10-Aug 11:02</td></tr>
+      </table>`;
+  } else if(id==='administration'){
+    body = `<table class="mini-table"><tr><th>Task</th><th>Status</th></tr>
+      <tr><td>Nightly system backup</td><td style="color:var(--success);font-weight:600;">Completed</td></tr>
+      <tr><td>User provisioning sync</td><td style="color:var(--success);font-weight:600;">Completed</td></tr>
+      <tr><td>Storage cleanup</td><td style="color:var(--brand-blue);font-weight:600;">Scheduled</td></tr>
+      </table>`;
+  } else {
+    body = `<div class="empty-state"><p>No data available.</p></div>`;
+  }
+
+  genericModal(id, focusTitle || c.title, body, filter ? `Filtered: ${filter}` : c.desc);
+}
+
+/* ============================================================
+   TOASTS
+   ============================================================ */
+function showToast(tone, title, msg){
+  const stack = document.getElementById('toast-stack');
+  const el = document.createElement('div');
+  el.className = 'toast '+tone;
+  el.innerHTML = `<span class="t-dot"></span><div class="t-txt"><b>${title}</b><span>${msg}</span></div>`;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 4200);
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+renderLoginRoles();
+</script>
+</body>
+</html>
