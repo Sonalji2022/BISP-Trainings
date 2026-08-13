@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BISP Trainings | Alert &amp; Exception Management Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E2444;
+  --navy-2:#173A6B;
+  --blue:#1D5AA6;
+  --teal:#0E9C9C;
+  --teal-d:#0B7C7C;
+  --amber:#DD9A2B;
+  --coral:#D14B3D;
+  --green:#2E9E6C;
+  --bg:#EEF2F7;
+  --card:#FFFFFF;
+  --ink:#132038;
+  --muted:#5C6B80;
+  --border:#DCE4EE;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(14,36,68,.06), 0 6px 20px rgba(14,36,68,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.disp{font-family:'Space Grotesk',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:var(--teal);color:#fff;}
+
+/* ---------- LOGIN ---------- */
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(14,156,156,.18), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(29,90,166,.25), transparent 45%),
+    linear-gradient(160deg,var(--navy) 0%,#0A1A31 70%);
+  position:relative;
+  overflow:hidden;
+}
+#loginScreen:before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:42px 42px;
+  pointer-events:none;
+}
+.login-card{
+  position:relative;
+  width:400px;
+  max-width:92vw;
+  background:var(--card);
+  border-radius:16px;
+  padding:36px 34px 30px;
+  box-shadow:0 30px 60px rgba(0,0,0,.35);
+}
+.login-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.login-logo-row img{height:38px;}
+.brand-tag{font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-weight:600;}
+.login-card h1{font-size:21px;margin:2px 0 2px;color:var(--navy);}
+.login-card .sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px;letter-spacing:.02em;}
+.field input[type=text]{
+  width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:.15s;
+}
+.field input[type=text]:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,156,156,.15);}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.role-opt{
+  border:1.5px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;font-size:12.5px;font-weight:600;color:var(--navy-2);background:#fff;transition:.15s;
+}
+.role-opt:hover{border-color:var(--teal);}
+.role-opt.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn-primary{
+  width:100%;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;font-weight:700;font-size:14px;letter-spacing:.02em;margin-top:6px;box-shadow:0 8px 20px rgba(14,156,156,.35);
+}
+.btn-primary:hover{filter:brightness(1.06);}
+.login-foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--muted);line-height:1.6;}
+.orig-badge{
+  display:inline-block;margin-top:14px;font-size:10px;color:var(--teal-d);background:rgba(14,156,156,.1);padding:4px 10px;border-radius:20px;font-weight:600;letter-spacing:.02em;
+}
+
+/* ---------- SHELL ---------- */
+#mainApp{display:none;min-height:100vh;flex-direction:column;}
+.topbar{
+  height:60px;flex:none;background:var(--navy);color:#fff;display:flex;align-items:center;padding:0 18px;gap:16px;box-shadow:var(--shadow);position:relative;z-index:5;
+}
+.topbar img{height:30px;background:#fff;border-radius:4px;padding:2px 6px;}
+.topbar .title-block{line-height:1.15;}
+.topbar .title-block b{font-family:'Space Grotesk';font-size:14.5px;display:block;}
+.topbar .title-block span{font-size:10.5px;color:#9FB4CE;}
+.topbar .spacer{flex:1;}
+.role-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+.mode-toggle{display:flex;background:rgba(255,255,255,.1);border-radius:20px;padding:3px;}
+.mode-toggle button{border:none;background:transparent;color:#cfe0f2;font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:16px;}
+.mode-toggle button.active{background:var(--amber);color:#2a1d02;}
+.logout-btn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;padding:6px 12px;border-radius:8px;}
+
+.shell{display:flex;flex:1;min-height:0;}
+.sidebar{
+  width:196px;flex:none;background:#fff;border-right:1px solid var(--border);padding:14px 10px;
+}
+.sidebar button{
+  display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:none;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:600;color:var(--navy-2);margin-bottom:2px;
+}
+.sidebar button .ic{width:18px;text-align:center;font-size:13px;}
+.sidebar button:hover{background:#F1F5FA;}
+.sidebar button.active{background:var(--navy);color:#fff;}
+
+#content{flex:1;min-width:0;padding:22px 26px 60px;overflow-y:auto;}
+.footer{
+  flex:none;background:var(--navy);color:#9FB4CE;text-align:center;font-size:11px;padding:10px;letter-spacing:.02em;
+}
+.footer b{color:#fff;}
+
+/* ---------- GENERIC ---------- */
+.crumb{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:4px;}
+.pagetitle{font-size:22px;margin:0 0 4px;color:var(--navy);}
+.pagedesc{font-size:13px;color:var(--muted);margin-bottom:20px;max-width:760px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.02em;}
+.tag.sev-high, .tag.status-open{background:#FCE7E4;color:var(--coral);}
+.tag.sev-medium{background:#FDF1DD;color:var(--amber);}
+.tag.sev-low{background:#E4F5EE;color:var(--green);}
+.tag.status-assigned{background:#E7EEFA;color:var(--blue);}
+.tag.status-inprogress{background:#FDF1DD;color:var(--amber);}
+.tag.status-resolved{background:#E4F5EE;color:var(--green);}
+.tag.status-closed{background:#EAEDF2;color:var(--muted);}
+.illustrative{font-size:10.5px;color:var(--muted);font-style:italic;margin-top:4px;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-bottom:22px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;box-shadow:var(--shadow);}
+.kpi .num{font-family:'Space Grotesk';font-size:22px;font-weight:700;color:var(--navy);}
+.kpi .lbl{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.02em;margin-top:2px;}
+.kpi.warn .num{color:var(--coral);}
+
+.chart-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px;}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+.chart-box h4{margin:0 0 8px;font-size:13px;color:var(--navy);}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:11px;color:var(--muted);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:11px;margin-bottom:6px;}
+.bar-row .lb{width:118px;color:var(--navy-2);font-weight:600;flex:none;}
+.bar-track{flex:1;background:#EEF2F7;border-radius:5px;height:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:5px;}
+.bar-row .val{width:22px;text-align:right;color:var(--muted);flex:none;}
+
+/* alert type grid */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.type-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;position:relative;}
+.type-card:hover{border-color:var(--teal);transform:translateY(-2px);}
+.type-card .n{font-size:10px;color:var(--teal-d);font-weight:700;margin-bottom:4px;}
+.type-card h4{margin:0 0 4px;font-size:13.5px;color:var(--navy);}
+.type-card p{margin:0;font-size:11.5px;color:var(--muted);}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;background:#F4F7FB;color:var(--navy-2);font-weight:700;padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.02em;}
+td{padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--ink);}
+tr.alertrow:hover{background:#F7FAFD;}
+.actionbtn{border:1px solid var(--border);background:#fff;color:var(--navy-2);font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:6px;margin-right:3px;}
+.actionbtn:hover{border-color:var(--teal);color:var(--teal-d);}
+.actionbtn:disabled{opacity:.35;cursor:not-allowed;}
+.actionbtn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+.actionbtn.danger{background:var(--coral);border-color:var(--coral);color:#fff;}
+.actionbtn.ghost{background:transparent;}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.filter-bar select,.filter-bar input{padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--ink);background:#fff;}
+.filter-chip{background:var(--navy);color:#fff;font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.filter-chip button{background:transparent;border:none;color:#fff;font-weight:700;}
+
+/* detail */
+.detail-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;}
+.fitem{border-bottom:1px dashed var(--border);padding-bottom:8px;}
+.fitem .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.03em;margin-bottom:3px;}
+.fitem .v{font-size:13px;color:var(--ink);font-weight:600;}
+
+/* lifecycle rail - signature element */
+.rail{display:flex;align-items:center;margin:18px 0 22px;position:relative;}
+.rail .node{flex:1;text-align:center;position:relative;cursor:pointer;}
+.rail .node .dot{
+  width:30px;height:30px;border-radius:50%;background:#fff;border:2.5px solid var(--border);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);position:relative;z-index:2;transition:.2s;
+}
+.rail .node .line{position:absolute;top:15px;left:-50%;width:100%;height:3px;background:var(--border);z-index:1;}
+.rail .node:first-child .line{display:none;}
+.rail .node .lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;}
+.rail .node.done .dot{background:var(--teal);border-color:var(--teal);color:#fff;}
+.rail .node.done .line{background:var(--teal);}
+.rail .node.current .dot{background:var(--amber);border-color:var(--amber);color:#2a1d02;box-shadow:0 0 0 5px rgba(221,154,43,.25);}
+.rail .node.current .lbl{color:var(--navy);}
+
+.comment{background:#F7FAFD;border-radius:8px;padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--teal);}
+.comment .meta{font-size:10.5px;color:var(--muted);margin-bottom:3px;}
+.attach{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#F7FAFD;border-radius:8px;margin-bottom:6px;font-size:12px;}
+.attach .ic{color:var(--teal-d);}
+
+textarea,.selfield{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;font-family:inherit;}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+/* flowchart */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin:18px 0;}
+.flow .step{
+  background:#fff;border:2px solid var(--border);border-radius:10px;padding:12px 16px;font-size:12.5px;font-weight:700;color:var(--navy-2);min-width:140px;text-align:center;cursor:pointer;transition:.15s;
+}
+.flow .step.done{border-color:var(--teal);background:#F0FBFB;color:var(--teal-d);}
+.flow .step.current{border-color:var(--amber);background:#FEF8EC;color:#8a5c05;box-shadow:0 0 0 4px rgba(221,154,43,.18);}
+.flow .arrow{padding:0 10px;color:var(--muted);font-size:16px;}
+
+/* scenario */
+.scenario-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:14px;}
+.scenario-card h3{margin:0 0 4px;color:var(--navy);font-size:16px;}
+.scenario-meta{display:flex;gap:16px;margin:12px 0;flex-wrap:wrap;}
+.scenario-meta .m{background:#F4F7FB;border-radius:8px;padding:8px 14px;font-size:12px;}
+.scenario-meta .m b{display:block;font-family:'Space Grotesk';font-size:15px;color:var(--navy);}
+.step-list{margin:14px 0;}
+.step-list .s{display:flex;align-items:center;gap:10px;padding:8px 4px;font-size:12.5px;border-bottom:1px solid var(--border);}
+.step-list .s .chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.step-list .s.done{color:var(--muted);text-decoration:line-through;}
+.step-list .s.done .chk{background:var(--green);border-color:var(--green);color:#fff;}
+.step-list .s.current .chk{border-color:var(--amber);}
+.hint{background:#FEF8EC;border:1px dashed var(--amber);color:#8a5c05;font-size:12px;padding:9px 12px;border-radius:8px;margin-top:8px;}
+.progress-bar{height:8px;background:#EEF2F7;border-radius:5px;overflow:hidden;margin:8px 0 4px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:5px;transition:.3s;}
+
+/* exam */
+.qbox{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;max-width:680px;}
+.qbox .qn{font-size:10.5px;color:var(--teal-d);font-weight:700;text-transform:uppercase;margin-bottom:8px;}
+.qbox h3{margin:0 0 16px;font-size:15.5px;color:var(--navy);line-height:1.5;}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;font-size:13px;margin-bottom:9px;color:var(--ink);}
+.opt:hover{border-color:var(--teal);}
+.opt.correct{border-color:var(--green);background:#EAF8F1;color:#1b6b45;font-weight:600;}
+.opt.wrong{border-color:var(--coral);background:#FCEAE8;color:#9c2c21;font-weight:600;}
+.opt:disabled{cursor:default;}
+
+/* completion */
+.completion{
+  min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,var(--navy),#0A1A31);color:#fff;border-radius:16px;padding:50px 20px;
+}
+.completion img{height:42px;background:#fff;border-radius:6px;padding:4px 8px;margin-bottom:18px;}
+.completion h1{font-size:30px;margin:0 0 6px;}
+.completion .stats{display:flex;gap:14px;margin:26px 0;flex-wrap:wrap;justify-content:center;}
+.completion .stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:16px 26px;min-width:120px;}
+.completion .stat b{display:block;font-size:24px;font-family:'Space Grotesk';color:var(--teal);}
+.completion .stat span{font-size:11px;color:#B9C9DD;text-transform:uppercase;letter-spacing:.03em;}
+
+.badge-mode{display:inline-block;background:#EAF3FE;color:var(--blue);font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:8px;}
+.viewer-note{background:#F4F7FB;border-left:3px solid var(--blue);padding:10px 14px;font-size:12px;color:var(--navy-2);border-radius:6px;margin-bottom:14px;}
+.helpblock{max-width:820px;}
+.helpblock h4{color:var(--navy);margin:20px 0 6px;}
+.helpblock p,.helpblock li{font-size:13px;color:var(--ink);line-height:1.7;}
+@media(max-width:1000px){
+  .kpi-grid{grid-template-columns:repeat(4,1fr);}
+  .chart-row{grid-template-columns:1fr;}
+  .type-grid{grid-template-columns:1fr 1fr;}
+  .detail-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo-row">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <div>
+        <div class="brand-tag">BISP Trainings</div>
+      </div>
+    </div>
+    <h1>Alert &amp; Exception Management Simulator</h1>
+    <div class="sub">Oracle ARCS-style hands-on training module</div>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Enter Username" value="trainee01">
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <div class="role-grid" id="roleGrid">
+        <button class="role-opt active" data-role="Preparer">Preparer</button>
+        <button class="role-opt" data-role="Reviewer">Reviewer</button>
+        <button class="role-opt" data-role="Administrator">Administrator</button>
+        <button class="role-opt" data-role="Viewer">Viewer</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">LOGIN</button>
+    <div style="text-align:center;"><span class="orig-badge">Original BISP Oracle-inspired training simulator</span></div>
+    <div class="login-foot">
+      <b>BISP Trainings</b> &middot; www.bisptrainings.com<br>
+      Call Us: +91 769-409-5404
+    </div>
+  </div>
+</div>
+
+<!-- ================= MAIN APP ================= -->
+<div id="mainApp">
+  <div class="topbar">
+    <img src="data:image/jpeg;base64,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" alt="BISP logo">
+    <div class="title-block">
+      <b>Alert &amp; Exception Management Simulator</b>
+      <span>Original BISP Oracle-inspired training simulator</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="mode-toggle">
+      <button id="modeLearnBtn" class="active" onclick="setMode('learning')">LEARNING MODE</button>
+      <button id="modeExamBtn" onclick="setMode('exam')">EXAM MODE</button>
+    </div>
+    <div class="role-badge" id="roleBadgeTop">Preparer</div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main id="content"></main>
+  </div>
+
+  <div class="footer">&copy; <b>BISP Trainings</b> | www.bisptrainings.com &nbsp;|&nbsp; Call Us: +91 769-409-5404</div>
+</div>
+
+<script>
+/* =====================================================================
+   DATA MODEL
+===================================================================== */
+const USERS = ["A. Sharma","R. Mehta","K. Iyer","S. Gupta","P. Nair","Unassigned"];
+const LOGO = "data:image/jpeg;base64,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";
+
+const ALERT_TYPES = [
+  {id:"balance-mismatch", name:"Balance mismatch", severity:"High",
+    definition:"Raised when the source (bank/sub-ledger) balance and the GL balance for a reconciliation do not agree as of the period close date.",
+    example:"Bank statement shows $100,000 while the GL cash account shows $98,500, a $1,500 unexplained difference.",
+    impact:"Understated/overstated cash position can misstate the balance sheet and delay certification sign-off.",
+    action:"Investigate the variance, identify the missing or misposted transaction, attach evidence, and resolve before close."},
+  {id:"missing-balance", name:"Missing balance", severity:"Medium",
+    definition:"Raised when an expected source or GL balance was not loaded for a reconciliation in the current period.",
+    example:"The bank feed for the Payroll Clearing account did not load for the current period, leaving the source balance blank.",
+    impact:"Reconciliation cannot be completed or certified, risking a control gap for the period.",
+    action:"Confirm the data load, re-trigger the feed or manually enter the balance with supporting evidence."},
+  {id:"missing-attachment", name:"Missing attachment", severity:"Low",
+    definition:"Raised when a reconciliation or transaction requires supporting documentation that has not been attached.",
+    example:"A high-value reconciliation is marked complete but no bank statement PDF is attached as evidence.",
+    impact:"Audit trail is incomplete, which can trigger findings during internal or external audit.",
+    action:"Upload the required supporting document before the reconciliation can be certified."},
+  {id:"overdue-reconciliation", name:"Overdue reconciliation", severity:"High",
+    definition:"Raised when a reconciliation has not been completed by its scheduled due date.",
+    example:"The Accounts Receivable reconciliation for the current period is 3 days past its due date and still In Progress.",
+    impact:"Delays period close and financial reporting timelines.",
+    action:"Escalate to the preparer/owner, reassign if necessary, and expedite completion."},
+  {id:"overdue-review", name:"Overdue review", severity:"Medium",
+    definition:"Raised when a completed reconciliation has not been reviewed and approved by its due date.",
+    example:"A prepared reconciliation has been sitting in Submitted-for-Review status for 5 days past the review due date.",
+    impact:"Bottlenecks the certification process and increases close-cycle risk.",
+    action:"Notify the assigned reviewer, reassign to a backup reviewer if unavailable."},
+  {id:"aged-transaction", name:"Aged transaction", severity:"Medium",
+    definition:"Raised when an open, unmatched transaction remains outstanding beyond an acceptable aging threshold.",
+    example:"An unmatched GL entry of $4,200 has remained open for 95 days, beyond the 60-day policy threshold.",
+    impact:"Indicates a potential unresolved error, fraud risk, or process breakdown that compounds over time.",
+    action:"Investigate root cause, match or write off per policy, and document resolution."},
+  {id:"high-value-unmatched", name:"High-value unmatched transaction", severity:"High",
+    definition:"Raised when a transaction above a defined monetary threshold remains unmatched after auto-matching.",
+    example:"A $250,000 wire transfer could not be auto-matched to a corresponding GL entry.",
+    impact:"Material misstatement risk; requires priority attention before period close.",
+    action:"Manually investigate, match to the correct entry or transaction, and document justification."},
+  {id:"data-load-failure", name:"Data-load failure", severity:"High",
+    definition:"Raised when a scheduled source or GL data load job fails to complete successfully.",
+    example:"The nightly ERP-to-ARCS balance load job failed with a file-format error at 2:00 AM.",
+    impact:"Downstream reconciliations cannot proceed, risking a missed close deadline.",
+    action:"Review job logs, correct the source file/mapping, and re-run the load."},
+  {id:"auto-match-failure", name:"Auto-match failure", severity:"Medium",
+    definition:"Raised when a scheduled auto-match job completes but fails to match transactions that meet matching rules.",
+    example:"Auto-match Job #4471 ran successfully but left 18 transactions unmatched due to a rule mismatch.",
+    impact:"Increases manual matching workload and risk of missed matches before close.",
+    action:"Review the match rule configuration, adjust tolerances, and manually match remaining items."},
+  {id:"journal-export-failure", name:"Journal-export failure", severity:"High",
+    definition:"Raised when an approved adjusting journal entry fails to export to the downstream GL/ERP system.",
+    example:"A $1,500 adjusting entry approved in ARCS failed to post to the ERP due to a closed sub-period.",
+    impact:"GL remains out of sync with the reconciliation, risking inaccurate financial statements.",
+    action:"Correct the export/period issue and re-submit the journal export."},
+  {id:"policy-exception", name:"Policy exception", severity:"Medium",
+    definition:"Raised when a reconciliation or transaction deviates from configured close policy (e.g., threshold, frequency, or approval rule).",
+    example:"A reconciliation was certified without the required secondary approver, breaching segregation-of-duties policy.",
+    impact:"Control and compliance risk; may require disclosure to audit/compliance teams.",
+    action:"Document the exception, obtain retroactive approval where possible, and remediate the control gap."},
+  {id:"missing-preparer", name:"Missing preparer", severity:"Medium",
+    definition:"Raised when a reconciliation has no preparer assigned as the close cycle begins.",
+    action:"Assign a qualified preparer immediately to avoid missing the close deadline.",
+    example:"The Prepaid Expenses reconciliation rolled into the new period with no preparer field populated.",
+    impact:"Reconciliation work cannot begin, threatening the close calendar."},
+  {id:"missing-reviewer", name:"Missing reviewer", severity:"Medium",
+    definition:"Raised when a reconciliation has no reviewer assigned prior to submission for review.",
+    example:"A completed reconciliation is ready for review but no reviewer has been configured on the profile.",
+    impact:"Reconciliation cannot be certified, delaying sign-off.",
+    action:"Assign an authorized reviewer per the segregation-of-duties matrix."}
+];
+
+const STAGES = ["Open","Assigned","In Progress","Resolved","Closed"];
+
+function mkAlert(id,type,severity,title,recon,txn,owner,assignee,viewer,due,status,priority,created,comments,attachments,resolution,closed){
+  return {id,type,severity,title,description:title+" identified during the current close cycle and requires review.",
+    reconciliation:recon,transaction:txn,owner,assignee,viewer,dueDate:due,status,priority,
+    comments:comments||[], attachments:attachments||[], resolution:resolution||"", createdDate:created, closedDate:closed||""};
+}
+
+let ALERTS = [
+  mkAlert("ALT-1001","Balance mismatch","High","Bank vs GL balance mismatch - Operating Account","Operating Cash - US","TXN-88213","A. Sharma","A. Sharma","K. Iyer","2026-08-14","In Progress","Urgent","2026-08-10",
+    [{by:"A. Sharma",when:"2026-08-11 09:20",text:"Investigating $1,500 variance against May bank statement."}],[], "", ""),
+  mkAlert("ALT-1002","Missing attachment","Low","Missing evidence - Payroll Clearing","Payroll Clearing","-","R. Mehta","R. Mehta","P. Nair","2026-08-15","Open","Normal","2026-08-11",[],[],"",""),
+  mkAlert("ALT-1003","Overdue reconciliation","High","AR Reconciliation overdue","Accounts Receivable","-","K. Iyer","K. Iyer","S. Gupta","2026-08-09","Assigned","Urgent","2026-08-05",[],[],"",""),
+  mkAlert("ALT-1004","Overdue review","Medium","Prepaid Expenses review overdue","Prepaid Expenses","-","S. Gupta","P. Nair","A. Sharma","2026-08-10","In Progress","Normal","2026-08-06",[],[],"",""),
+  mkAlert("ALT-1005","Aged transaction","Medium","95-day aged unmatched entry","Intercompany - EU","TXN-77410","P. Nair","P. Nair","K. Iyer","2026-08-16","Open","Normal","2026-08-02",[],[],"",""),
+  mkAlert("ALT-1006","High-value unmatched transaction","High","$250,000 wire unmatched","Operating Cash - US","TXN-90044","A. Sharma","K. Iyer","R. Mehta","2026-08-13","Assigned","Urgent","2026-08-12",[],[],"",""),
+  mkAlert("ALT-1007","Data-load failure","High","Nightly ERP load failed","-","-","Administrator","Administrator","S. Gupta","2026-08-13","Open","Urgent","2026-08-13",[],[],"",""),
+  mkAlert("ALT-1008","Auto-match failure","Medium","Match Job #4471 left 18 unmatched","Accounts Receivable","-","R. Mehta","R. Mehta","-","2026-08-17","In Progress","Normal","2026-08-09",[],[],"",""),
+  mkAlert("ALT-1009","Journal-export failure","High","JE-2291 failed to export","Operating Cash - US","JE-2291","K. Iyer","A. Sharma","-","2026-08-14","Assigned","Urgent","2026-08-11",[],[],"",""),
+  mkAlert("ALT-1010","Policy exception","Medium","Certified without 2nd approver","Fixed Assets","-","S. Gupta","S. Gupta","P. Nair","2026-08-12","Resolved","Normal","2026-08-04",[],[],"Retroactive approval obtained from Controller; SOD gap logged with compliance.","2026-08-11"),
+  mkAlert("ALT-1011","Missing preparer","Medium","No preparer assigned","Prepaid Expenses","-","Unassigned","Unassigned","-","2026-08-18","Open","Normal","2026-08-12",[],[],"",""),
+  mkAlert("ALT-1012","Missing reviewer","Medium","No reviewer configured","Fixed Assets","-","P. Nair","P. Nair","-","2026-08-19","Open","Normal","2026-08-12",[],[],"",""),
+  mkAlert("ALT-1013","Missing balance","Medium","Payroll Clearing source balance missing","Payroll Clearing","-","R. Mehta","R. Mehta","-","2026-08-15","Closed","Normal","2026-07-30",
+    [{by:"R. Mehta",when:"2026-08-01 11:00",text:"Re-triggered bank feed; balance loaded successfully."}],
+    [{name:"Feed_Rerun_Log.txt",by:"R. Mehta",when:"2026-08-01"}],"Feed re-triggered and balance loaded.","2026-08-02"),
+  mkAlert("ALT-1014","Balance mismatch","High","Intercompany EU mismatch","Intercompany - EU","TXN-77522","P. Nair","P. Nair","K. Iyer","2026-08-05","Closed","Urgent","2026-07-28",[],[], "FX rate correction applied; balances agree.","2026-08-04"),
+  mkAlert("ALT-1015","Overdue reconciliation","High","Fixed Assets recon overdue","Fixed Assets","-","S. Gupta","S. Gupta","-","2026-08-08","Overdue" /*visual only*/,"Urgent","2026-08-01",[],[],"",""),
+];
+// normalize "Overdue" display alerts to Open status but flagged overdue via date
+ALERTS.forEach(a=>{ if(a.status==="Overdue"){a.status="Open";} });
+
+const EXAM_QUESTIONS = [
+ {q:"A balance mismatch alert is Assigned but no investigation has started. Which lifecycle status should represent active investigation?",
+  opts:["Open","In Progress","Resolved","Closed"], correct:1},
+ {q:"A Viewer opens an alert they are permitted to see. Which action can they typically still perform, per the configured viewer model?",
+  opts:["Close the alert","Reassign the owner","Add a comment (where configured)","Delete the alert"], correct:2},
+ {q:"An alert was Closed, but new evidence shows the issue was not actually fixed. What is the correct next lifecycle action?",
+  opts:["Create a brand-new duplicate alert","Reopen the alert","Leave it Closed and email the owner","Escalate to Data-load failure"], correct:1},
+ {q:"Which alert type is most directly triggered by a scheduled job failing to complete?",
+  opts:["Policy exception","Missing reviewer","Data-load failure","Aged transaction"], correct:2},
+ {q:"A reconciliation is complete but has no reviewer configured. Which alert type applies?",
+  opts:["Missing reviewer","Missing preparer","Overdue review","Policy exception"], correct:0},
+ {q:"A $250,000 wire could not be auto-matched. What severity would this High-value unmatched transaction alert typically carry?",
+  opts:["Low","Medium","High","No severity"], correct:2},
+ {q:"Before an alert can be Resolved with confidence, what should generally be attached?",
+  opts:["Nothing is required","Supporting evidence of the investigation/fix","A new alert","A policy exception waiver"], correct:1},
+ {q:"Who is responsible for taking ownership and driving an alert to closure?",
+  opts:["Assignee","Viewer","Guest","Auditor only"], correct:0},
+ {q:"An item has been open and unmatched for 95 days, beyond policy threshold. Which alert type is this?",
+  opts:["Aged transaction","Missing balance","Overdue review","Journal-export failure"], correct:0},
+ {q:"What is the correct order of the exception workflow?",
+  opts:["Assign \u2192 Classify \u2192 Detect \u2192 Resolve","Exception Detected \u2192 Alert Created \u2192 Classify \u2192 Assign \u2192 Investigate \u2192 Resolve \u2192 Close","Close \u2192 Investigate \u2192 Assign","Resolve \u2192 Investigate \u2192 Classify"], correct:1}
+];
+
+const SCENARIOS = [
+ {id:"sc1", title:"Scenario 1 \u2014 Balance Mismatch", type:"Balance mismatch", severity:"High",
+   context:"Bank Balance: $100,000 &nbsp;|&nbsp; GL Balance: $98,500 &nbsp;|&nbsp; Difference: $1,500",
+   steps:[
+    {label:"Open alert", hint:"Click Open on the alert row or detail page to begin working it."},
+    {label:"Review details", hint:"Read the alert fields \u2014 reconciliation, transaction, and description \u2014 before acting."},
+    {label:"Assign owner", hint:"Use the Assign action to set an owner responsible for investigating."},
+    {label:"Add comment", hint:"Document your investigation findings, e.g. the missing bank transaction."},
+    {label:"Attach evidence", hint:"Attach the supporting bank statement as evidence."},
+    {label:"Resolve", hint:"Once the variance is explained and evidenced, mark the alert Resolved."},
+    {label:"Close", hint:"After resolution is confirmed, Close the alert to complete the cycle."}
+   ]},
+ {id:"sc2", title:"Scenario 2 \u2014 Missing Attachment", type:"Missing attachment", severity:"Low",
+   context:"A completed reconciliation is missing its required supporting evidence.",
+   steps:[
+    {label:"Open", hint:"Open the Missing attachment alert."},
+    {label:"Investigate", hint:"Check which document is missing from the reconciliation."},
+    {label:"Add attachment", hint:"Upload the required supporting file."},
+    {label:"Comment", hint:"Note what was attached and why."},
+    {label:"Resolve", hint:"Mark Resolved once the evidence is on file."},
+    {label:"Close", hint:"Close the alert to finish."}
+   ]},
+ {id:"sc3", title:"Scenario 3 \u2014 Overdue Review", type:"Overdue review", severity:"Medium",
+   context:"A prepared reconciliation has passed its review due date with no reviewer action.",
+   steps:[
+    {label:"Identify overdue item", hint:"Locate the alert flagging the overdue review."},
+    {label:"Assign reviewer", hint:"Assign or reassign a qualified reviewer."},
+    {label:"Add comment", hint:"Note the escalation and new reviewer."},
+    {label:"Resolve", hint:"Resolve once the review is completed."},
+    {label:"Close", hint:"Close to finish the cycle."}
+   ]},
+ {id:"sc4", title:"Scenario 4 \u2014 Auto-Match Failure", type:"Auto-match failure", severity:"Medium",
+   context:"Job ID: MATCH-4471 &nbsp;|&nbsp; Failure reason: Rule tolerance mismatch &nbsp;|&nbsp; Affected process: AR Auto-Match",
+   steps:[
+    {label:"Review", hint:"Review the job failure details and affected transactions."},
+    {label:"Assign", hint:"Assign the alert to an analyst for follow-up."},
+    {label:"Investigate", hint:"Determine why the matching rule failed."},
+    {label:"Resolve", hint:"Resolve once the rule is corrected or items are manually matched."},
+    {label:"Close", hint:"Close to finish."}
+   ]},
+ {id:"sc5", title:"Scenario 5 \u2014 High-Value Unmatched Transaction", type:"High-value unmatched transaction", severity:"High",
+   context:"Transaction: $250,000 wire transfer, unmatched after nightly auto-match run.",
+   steps:[
+    {label:"Investigate", hint:"Trace the transaction to find its likely GL counterpart."},
+    {label:"Add comment", hint:"Document the investigation trail."},
+    {label:"Assign", hint:"Assign an owner accountable for closing this high-value item."},
+    {label:"Resolve", hint:"Resolve once matched or justified."}
+   ]}
+];
+
+/* =====================================================================
+   STATE
+===================================================================== */
+const state = {
+  user:"", role:"Preparer", mode:"learning", view:"dashboard",
+  filterType:null, filterSeverity:null, filterStatus:null,
+  currentAlertId:null, currentScenarioId:null, scenarioProgress:{},
+  scenariosCompletedCount:0, correctActions:0,
+  exam:{active:false, idx:0, answers:[], done:false},
+  loginTime:null
+};
+SCENARIOS.forEach(s=> state.scenarioProgress[s.id] = {stepIdx:0, done:false});
+
+const NAV = [
+  {k:"dashboard", ic:"\u25A4", label:"Dashboard"},
+  {k:"alerttypes", ic:"\u2261", label:"Alert Types"},
+  {k:"alerts", ic:"\u2637", label:"Alerts"},
+  {k:"myalerts", ic:"\u263A", label:"My Alerts"},
+  {k:"exceptions", ic:"\u21C4", label:"Exceptions"},
+  {k:"assignment", ic:"\u2699", label:"Assignment"},
+  {k:"resolution", ic:"\u2714", label:"Resolution"},
+  {k:"reports", ic:"\u25A6", label:"Reports"},
+  {k:"scenarios", ic:"\u2605", label:"Training Scenarios"},
+  {k:"help", ic:"?", label:"Help"}
+];
+
+/* =====================================================================
+   LOGIN / LOGOUT / NAV
+===================================================================== */
+document.getElementById('roleGrid').addEventListener('click',e=>{
+  const b=e.target.closest('.role-opt'); if(!b) return;
+  document.querySelectorAll('.role-opt').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+});
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim() || "trainee01";
+  const role=document.querySelector('.role-opt.active').dataset.role;
+  state.user=u; state.role=role; state.loginTime=Date.now();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='flex';
+  document.getElementById('roleBadgeTop').textContent=role;
+  buildSidebar();
+  navigate('dashboard');
+}
+function doLogout(){
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+function setMode(m){
+  state.mode=m;
+  document.getElementById('modeLearnBtn').classList.toggle('active', m==='learning');
+  document.getElementById('modeExamBtn').classList.toggle('active', m==='exam');
+  if(m==='exam'){ state.exam={active:true, idx:0, answers:[], done:false}; navigate('exam'); }
+  else { navigate('dashboard'); }
+}
+function buildSidebar(){
+  const sb=document.getElementById('sidebar');
+  sb.innerHTML = NAV.map(n=>`<button data-k="${n.k}" onclick="navigate('${n.k}')"><span class="ic">${n.ic}</span>${n.label}</button>`).join('')
+    + `<button data-k="completion" onclick="navigate('completion')" style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px;"><span class="ic">\u2691</span>Finish Training</button>`;
+}
+function navigate(view, extra){
+  state.view=view;
+  document.querySelectorAll('#sidebar button').forEach(b=>b.classList.toggle('active', b.dataset.k===view));
+  const c=document.getElementById('content');
+  if(view==='dashboard') c.innerHTML = renderDashboard();
+  else if(view==='alerttypes') c.innerHTML = renderAlertTypes();
+  else if(view==='alerts') c.innerHTML = renderAlertsList(false);
+  else if(view==='myalerts') c.innerHTML = renderAlertsList(true);
+  else if(view==='exceptions') c.innerHTML = renderExceptions();
+  else if(view==='assignment') c.innerHTML = renderAssignment();
+  else if(view==='resolution') c.innerHTML = renderResolutionQueue();
+  else if(view==='reports') c.innerHTML = renderReports();
+  else if(view==='scenarios') c.innerHTML = renderScenarios();
+  else if(view==='scenariorun') c.innerHTML = renderScenarioRun(extra);
+  else if(view==='detail') c.innerHTML = renderAlertDetail(extra);
+  else if(view==='exam') c.innerHTML = renderExam();
+  else if(view==='help') c.innerHTML = renderHelp();
+  else if(view==='completion') c.innerHTML = renderCompletion();
+  window.scrollTo(0,0);
+}
+
+/* =====================================================================
+   HELPERS
+===================================================================== */
+function sevTagClass(s){ return s==='High'?'sev-high':(s==='Medium'?'sev-medium':'sev-low'); }
+function statusTagClass(s){
+  return {Open:'status-open',Assigned:'status-assigned','In Progress':'status-inprogress',Resolved:'status-resolved',Closed:'status-closed'}[s]||'status-open';
+}
+function countBy(arr,key){ const m={}; arr.forEach(a=>{ m[a[key]]=(m[a[key]]||0)+1; }); return m; }
+function colorFor(i){ const P=['#0E9C9C','#1D5AA6','#DD9A2B','#D14B3D','#2E9E6C','#7B5EC7','#3AA0C9','#B8895A','#5C6B80','#C9527A','#4C8C4A','#9E6BC7','#C77B3A']; return P[i%P.length]; }
+
+function barChart(dataObj, opts){
+  opts=opts||{};
+  const entries=Object.entries(dataObj);
+  const max=Math.max(1,...entries.map(e=>e[1]));
+  return entries.map(([k,v],i)=>`
+    <div class="bar-row" style="cursor:pointer" onclick="${opts.onclick?opts.onclick+"('"+k+"')":''}">
+      <div class="lb">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(0)}%;background:${colorFor(i)}"></div></div>
+      <div class="val">${v}</div>
+    </div>`).join('');
+}
+function donut(dataObj, opts){
+  opts=opts||{};
+  const entries=Object.entries(dataObj);
+  const total=entries.reduce((a,b)=>a+b[1],0)||1;
+  let acc=0; const R=42, C=2*Math.PI*R;
+  const circles = entries.map(([k,v],i)=>{
+    const frac=v/total; const dash=frac*C;
+    const seg = `<circle cx="60" cy="60" r="${R}" fill="none" stroke="${colorFor(i)}" stroke-width="16"
+      stroke-dasharray="${dash} ${C-dash}" stroke-dashoffset="${-acc}" transform="rotate(-90 60 60)"
+      style="cursor:pointer" onclick="${opts.onclick?opts.onclick+"('"+k+"')":''}"><title>${k}: ${v}</title></circle>`;
+    acc += dash; return seg;
+  }).join('');
+  const legend = entries.map(([k,v],i)=>`<span><i style="background:${colorFor(i)}"></i>${k} (${v})</span>`).join('');
+  return `<svg width="120" height="120" viewBox="0 0 120 120">${circles}
+    <circle cx="60" cy="60" r="26" fill="#fff"/>
+    <text x="60" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#0E2444" font-family="Space Grotesk">${total}</text>
+    </svg><div class="legend">${legend}</div>`;
+}
+
+function canAct(){ return state.role!=='Viewer'; }
+
+/* =====================================================================
+   DASHBOARD
+===================================================================== */
+function renderDashboard(){
+  const total=ALERTS.length;
+  const kpi = {
+    "Total Alerts":total,
+    "Open":ALERTS.filter(a=>a.status==='Open').length,
+    "Assigned":ALERTS.filter(a=>a.status==='Assigned').length,
+    "In Progress":ALERTS.filter(a=>a.status==='In Progress').length,
+    "Resolved":ALERTS.filter(a=>a.status==='Resolved').length,
+    "Closed":ALERTS.filter(a=>a.status==='Closed').length,
+    "Overdue":ALERTS.filter(a=>a.status!=='Closed' && a.dueDate<'2026-08-13').length,
+    "High Severity":ALERTS.filter(a=>a.severity==='High').length
+  };
+  const byType=countBy(ALERTS,'type'), bySev=countBy(ALERTS,'severity'), byStatus=countBy(ALERTS,'status');
+  return `
+   <div class="crumb">Overview</div>
+   <h2 class="pagetitle">Alert Management Dashboard</h2>
+   <p class="pagedesc">Real-time snapshot of alert volume, severity mix and lifecycle status across the current close cycle. <span class="illustrative">(Illustrative Training Data)</span></p>
+   <div class="kpi-grid">
+     ${Object.entries(kpi).map(([k,v])=>`<div class="kpi ${k==='Overdue'||k==='High Severity'?'warn':''}"><div class="num">${v}</div><div class="lbl">${k}</div></div>`).join('')}
+   </div>
+   <div class="chart-row">
+     <div class="chart-box"><h4>Alerts by Type</h4>${barChart(byType,{onclick:'filterFromChart_type'})}</div>
+     <div class="chart-box"><h4>Alerts by Severity</h4>${donut(bySev,{onclick:'filterFromChart_severity'})}</div>
+     <div class="chart-box"><h4>Alerts by Status</h4>${donut(byStatus,{onclick:'filterFromChart_status'})}</div>
+   </div>
+   <div class="illustrative">Click any chart segment or bar to filter the Alerts list. Data shown is fictional and for training purposes only.</div>
+  `;
+}
+function filterFromChart_type(k){ state.filterType=k; state.filterSeverity=null; state.filterStatus=null; navigate('alerts'); }
+function filterFromChart_severity(k){ state.filterSeverity=k; state.filterType=null; state.filterStatus=null; navigate('alerts'); }
+function filterFromChart_status(k){ state.filterStatus=k; state.filterType=null; state.filterSeverity=null; navigate('alerts'); }
+
+/* =====================================================================
+   ALERT TYPES
+===================================================================== */
+function renderAlertTypes(){
+  return `
+   <div class="crumb">Reference</div>
+   <h2 class="pagetitle">Alert Types (13)</h2>
+   <p class="pagedesc">Select an alert type to view its definition, a worked example, business impact, default severity and recommended action.</p>
+   <div class="type-grid">
+    ${ALERT_TYPES.map((t,i)=>`
+      <div class="type-card" onclick="showTypeDetail('${t.id}')">
+        <div class="n">TYPE ${String(i+1).padStart(2,'0')}</div>
+        <h4>${t.name}</h4>
+        <p><span class="tag ${sevTagClass(t.severity)}">${t.severity}</span></p>
+      </div>`).join('')}
+   </div>
+   <div id="typeDetailBox" style="margin-top:18px;"></div>
+  `;
+}
+function showTypeDetail(id){
+  const t=ALERT_TYPES.find(x=>x.id===id);
+  document.getElementById('typeDetailBox').innerHTML = `
+    <div class="card" style="padding:20px;">
+      <div class="crumb">Alert Type Detail</div>
+      <h3 style="margin:2px 0 10px;color:var(--navy)">${t.name} <span class="tag ${sevTagClass(t.severity)}">${t.severity}</span></h3>
+      <div class="field-grid">
+        <div class="fitem" style="grid-column:1/-1"><div class="k">Definition</div><div class="v" style="font-weight:400">${t.definition}</div></div>
+        <div class="fitem" style="grid-column:1/-1"><div class="k">Example</div><div class="v" style="font-weight:400">${t.example}</div></div>
+        <div class="fitem"><div class="k">Business Impact</div><div class="v" style="font-weight:400">${t.impact}</div></div>
+        <div class="fitem"><div class="k">Recommended Action</div><div class="v" style="font-weight:400">${t.action}</div></div>
+      </div>
+    </div>`;
+  document.getElementById('typeDetailBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* =====================================================================
+   ALERTS LIST
+===================================================================== */
+function renderAlertsList(mine){
+  let list = ALERTS.slice();
+  if(mine) list = list.filter(a=> a.assignee===state.user || a.owner==='A. Sharma' || a.assignee==='A. Sharma');
+  if(state.filterType) list = list.filter(a=>a.type===state.filterType);
+  if(state.filterSeverity) list = list.filter(a=>a.severity===state.filterSeverity);
+  if(state.filterStatus) list = list.filter(a=>a.status===state.filterStatus);
+
+  const chip = (state.filterType||state.filterSeverity||state.filterStatus) ?
+    `<div class="filter-chip">Filter: ${state.filterType||state.filterSeverity||state.filterStatus}
+       <button onclick="clearFilters()">\u2715</button></div>` : '';
+
+  return `
+   <div class="crumb">${mine?'My Work Queue':'Alert Management'}</div>
+   <h2 class="pagetitle">${mine?'My Alerts':'Alerts'}</h2>
+   <p class="pagedesc">Interactive alert list. Use row actions to progress each alert through its lifecycle.</p>
+   <div class="filter-bar">
+     <select onchange="setFilter('type',this.value)">
+       <option value="">All Types</option>
+       ${ALERT_TYPES.map(t=>`<option ${state.filterType===t.name?'selected':''}>${t.name}</option>`).join('')}
+     </select>
+     <select onchange="setFilter('severity',this.value)">
+       <option value="">All Severities</option>
+       ${['High','Medium','Low'].map(s=>`<option ${state.filterSeverity===s?'selected':''}>${s}</option>`).join('')}
+     </select>
+     <select onchange="setFilter('status',this.value)">
+       <option value="">All Statuses</option>
+       ${STAGES.map(s=>`<option ${state.filterStatus===s?'selected':''}>${s}</option>`).join('')}
+     </select>
+     ${chip}
+   </div>
+   <div class="card" style="overflow:auto;">
+   <table>
+     <tr><th>Alert ID</th><th>Type</th><th>Sev</th><th>Title</th><th>Reconciliation</th><th>Owner</th><th>Assignee</th><th>Due</th><th>Status</th><th>Priority</th><th>Actions</th></tr>
+     ${list.map(a=>`
+      <tr class="alertrow">
+        <td class="mono">${a.id}</td>
+        <td>${a.type}</td>
+        <td><span class="tag ${sevTagClass(a.severity)}">${a.severity}</span></td>
+        <td>${a.title}</td>
+        <td>${a.reconciliation}</td>
+        <td>${a.owner}</td>
+        <td>${a.assignee}</td>
+        <td>${a.dueDate}</td>
+        <td><span class="tag ${statusTagClass(a.status)}">${a.status}</span></td>
+        <td>${a.priority}</td>
+        <td>
+          <button class="actionbtn primary" onclick="navigate('detail','${a.id}')">OPEN</button>
+          ${quickActionButtons(a)}
+        </td>
+      </tr>`).join('')}
+   </table>
+   ${list.length===0?'<div style="padding:20px;color:var(--muted);font-size:13px;">No alerts match the current filter.</div>':''}
+   </div>
+  `;
+}
+function quickActionButtons(a){
+  const dis = canAct()?'':'disabled';
+  let btns='';
+  if(a.status!=='Closed') btns+=`<button class="actionbtn" ${dis} onclick="quickAssign('${a.id}')">ASSIGN</button>`;
+  if(a.status==='Resolved') btns+=`<button class="actionbtn danger" ${dis} onclick="quickTransition('${a.id}','Closed')">CLOSE</button>`;
+  if(a.status==='Closed') btns+=`<button class="actionbtn ghost" ${dis} onclick="quickTransition('${a.id}','In Progress')">REOPEN</button>`;
+  return btns;
+}
+function setFilter(k,v){
+  state.filterType=null; state.filterSeverity=null; state.filterStatus=null;
+  if(v){ if(k==='type')state.filterType=v; if(k==='severity')state.filterSeverity=v; if(k==='status')state.filterStatus=v; }
+  navigate(state.view);
+}
+function clearFilters(){ state.filterType=null;state.filterSeverity=null;state.filterStatus=null; navigate('alerts'); }
+function quickAssign(id){ const a=ALERTS.find(x=>x.id===id); a.assignee = a.assignee==='Unassigned'? USERS[0] : a.assignee; if(a.status==='Open') a.status='Assigned'; navigate(state.view); }
+function quickTransition(id,newStatus){ const a=ALERTS.find(x=>x.id===id); a.status=newStatus; if(newStatus==='Closed') a.closedDate='2026-08-13'; state.correctActions++; navigate(state.view); }
+
+/* =====================================================================
+   ALERT DETAIL
+===================================================================== */
+function renderAlertDetail(id){
+  const a = ALERTS.find(x=>x.id===id) || ALERTS[0];
+  state.currentAlertId=a.id;
+  const stageIdx = STAGES.indexOf(a.status);
+  const dis = canAct()?'':'disabled';
+  const viewerOnlyNote = state.role==='Viewer' ? `<div class="viewer-note">You are in <b>Viewer</b> role. Per the alert viewer model, you may view this alert and, where configured, add a comment or enter accessible attributes \u2014 other actions are disabled.</div>` : '';
+  return `
+   <div class="crumb">Alert Detail</div>
+   <h2 class="pagetitle">${a.id} \u2014 ${a.title}</h2>
+   ${viewerOnlyNote}
+   <div class="rail">
+    ${STAGES.map((s,i)=>`
+      <div class="node ${i<stageIdx?'done':''} ${i===stageIdx?'current':''}" onclick="tryStage('${a.id}',${i})">
+        <div class="line"></div>
+        <div class="dot">${i<stageIdx?'\u2713':(i+1)}</div>
+        <div class="lbl">${s}</div>
+      </div>`).join('')}
+   </div>
+
+   <div class="detail-grid">
+     <div class="card" style="padding:18px;">
+       <div class="field-grid">
+         <div class="fitem"><div class="k">Alert Type</div><div class="v">${a.type}</div></div>
+         <div class="fitem"><div class="k">Severity</div><div class="v"><span class="tag ${sevTagClass(a.severity)}">${a.severity}</span></div></div>
+         <div class="fitem"><div class="k">Reconciliation</div><div class="v">${a.reconciliation}</div></div>
+         <div class="fitem"><div class="k">Transaction</div><div class="v">${a.transaction}</div></div>
+         <div class="fitem"><div class="k">Owner</div><div class="v">${a.owner}</div></div>
+         <div class="fitem"><div class="k">Assignee</div><div class="v">${a.assignee}</div></div>
+         <div class="fitem"><div class="k">Viewer</div><div class="v">${a.viewer||'-'}</div></div>
+         <div class="fitem"><div class="k">Due Date</div><div class="v">${a.dueDate}</div></div>
+         <div class="fitem"><div class="k">Status</div><div class="v"><span class="tag ${statusTagClass(a.status)}">${a.status}</span></div></div>
+         <div class="fitem"><div class="k">Priority</div><div class="v">${a.priority}</div></div>
+         <div class="fitem"><div class="k">Created Date</div><div class="v">${a.createdDate}</div></div>
+         <div class="fitem"><div class="k">Closed Date</div><div class="v">${a.closedDate||'-'}</div></div>
+         <div class="fitem" style="grid-column:1/-1"><div class="k">Description</div><div class="v" style="font-weight:400">${a.description}</div></div>
+         <div class="fitem" style="grid-column:1/-1"><div class="k">Resolution</div><div class="v" style="font-weight:400">${a.resolution||'-'}</div></div>
+       </div>
+
+       <div class="btnrow">
+         <button class="actionbtn primary" ${dis} onclick="openAssignPanel()">Assign</button>
+         <button class="actionbtn" ${dis} onclick="openAssignPanel()">Reassign</button>
+         <button class="actionbtn" ${dis||a.status==='Closed'?'disabled':''} onclick="transitionAlert('In Progress')">Start Investigation</button>
+         <button class="actionbtn" ${dis||!(a.status==='In Progress'||a.status==='Assigned')?'disabled':''} onclick="transitionAlert('Resolved')">Resolve</button>
+         <button class="actionbtn danger" ${dis||a.status!=='Resolved'?'disabled':''} onclick="transitionAlert('Closed')">Close</button>
+         <button class="actionbtn ghost" ${dis||a.status!=='Closed'?'disabled':''} onclick="transitionAlert('In Progress')">Reopen</button>
+       </div>
+       <div id="assignPanel"></div>
+     </div>
+
+     <div>
+       <div class="card" style="padding:16px;margin-bottom:14px;">
+         <h4 style="margin:0 0 10px;color:var(--navy);font-size:13px;">Add Comment</h4>
+         <textarea id="commentBox" rows="3" placeholder="e.g. Investigated balance mismatch and identified missing bank transaction."></textarea>
+         <div class="btnrow"><button class="actionbtn primary" onclick="addComment('${a.id}')">Add Comment</button></div>
+         <h4 style="margin:16px 0 8px;color:var(--navy);font-size:13px;">Comments Timeline</h4>
+         ${a.comments.length? a.comments.map(c=>`<div class="comment"><div class="meta">${c.by} \u00b7 ${c.when}</div>${c.text}</div>`).join(''):'<div style="font-size:12px;color:var(--muted)">No comments yet.</div>'}
+       </div>
+       <div class="card" style="padding:16px;">
+         <h4 style="margin:0 0 10px;color:var(--navy);font-size:13px;">Add Attachment</h4>
+         <div style="display:flex;gap:8px;">
+           <input type="text" id="attachName" class="selfield" placeholder="Bank_Statement_May2026.xlsx" ${dis}>
+           <button class="actionbtn primary" ${dis} onclick="addAttachment('${a.id}')">Attach</button>
+         </div>
+         <h4 style="margin:16px 0 8px;color:var(--navy);font-size:13px;">Attachments</h4>
+         ${a.attachments.length? a.attachments.map(f=>`<div class="attach"><span class="ic">\u2732</span>${f.name} <span style="color:var(--muted);margin-left:auto;">${f.by} \u00b7 ${f.when}</span></div>`).join(''):'<div style="font-size:12px;color:var(--muted)">No attachments yet.</div>'}
+       </div>
+     </div>
+   </div>
+  `;
+}
+function tryStage(id,idx){
+  const a=ALERTS.find(x=>x.id===id);
+  const cur=STAGES.indexOf(a.status);
+  if(idx===cur+1){ transitionAlert(STAGES[idx]); }
+}
+function transitionAlert(newStatus){
+  if(!canAct()) return;
+  const a=ALERTS.find(x=>x.id===state.currentAlertId);
+  a.status=newStatus;
+  if(newStatus==='Closed') a.closedDate='2026-08-13';
+  if(newStatus==='Resolved' && !a.resolution) a.resolution='Issue investigated and corrected; evidence attached.';
+  state.correctActions++;
+  navigate('detail', a.id);
+}
+function openAssignPanel(){
+  const a=ALERTS.find(x=>x.id===state.currentAlertId);
+  document.getElementById('assignPanel').innerHTML = `
+    <div class="card" style="padding:14px;margin-top:12px;background:#F7FAFD;">
+      <div class="field-grid">
+        <div><label style="font-size:11px;font-weight:700;color:var(--navy)">Owner</label>
+          <select id="ownerSel" class="selfield">${USERS.map(u=>`<option ${a.owner===u?'selected':''}>${u}</option>`).join('')}</select></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--navy)">Assignee</label>
+          <select id="assigneeSel" class="selfield">${USERS.map(u=>`<option ${a.assignee===u?'selected':''}>${u}</option>`).join('')}</select></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--navy)">Viewer</label>
+          <select id="viewerSel" class="selfield">${USERS.map(u=>`<option ${a.viewer===u?'selected':''}>${u}</option>`).join('')}</select></div>
+      </div>
+      <div class="btnrow">
+        <button class="actionbtn primary" onclick="doAssign()">ASSIGN</button>
+        <button class="actionbtn" onclick="doAssign()">REASSIGN</button>
+      </div>
+    </div>`;
+}
+function doAssign(){
+  const a=ALERTS.find(x=>x.id===state.currentAlertId);
+  a.owner=document.getElementById('ownerSel').value;
+  a.assignee=document.getElementById('assigneeSel').value;
+  a.viewer=document.getElementById('viewerSel').value;
+  if(a.status==='Open') a.status='Assigned';
+  state.correctActions++;
+  navigate('detail', a.id);
+}
+function addComment(id){
+  const box=document.getElementById('commentBox'); if(!box.value.trim()) return;
+  const a=ALERTS.find(x=>x.id===id);
+  a.comments.push({by:state.user||'Trainee', when:'2026-08-13 '+new Date().toTimeString().slice(0,5), text:box.value.trim()});
+  state.correctActions++;
+  navigate('detail', id);
+}
+function addAttachment(id){
+  const box=document.getElementById('attachName'); if(!box.value.trim()) return;
+  const a=ALERTS.find(x=>x.id===id);
+  a.attachments.push({name:box.value.trim(), by:state.user||'Trainee', when:'2026-08-13'});
+  state.correctActions++;
+  navigate('detail', id);
+}
+
+/* =====================================================================
+   EXCEPTIONS WORKFLOW
+===================================================================== */
+let excStep = 0;
+const EXC_STAGES = ["Exception Detected","Alert Created","Classify","Assign","Investigate","Resolve","Close"];
+function renderExceptions(){
+  return `
+   <div class="crumb">Process</div>
+   <h2 class="pagetitle">Exception Workflow</h2>
+   <p class="pagedesc">Walk through the standard exception-to-resolution workflow used across all alert types.</p>
+   <div class="flow" id="excFlow">${excFlowHtml()}</div>
+   <div class="btnrow">
+     <button class="actionbtn primary" onclick="advanceExc()">Advance Step \u25B8</button>
+     <button class="actionbtn" onclick="resetExc()">Reset</button>
+   </div>
+   ${state.mode==='learning'?`<div class="hint">Hint: The exception workflow always starts with detection and ends with formal closure \u2014 every alert type follows this same backbone.</div>`:''}
+  `;
+}
+function excFlowHtml(){
+  return EXC_STAGES.map((s,i)=>`${i>0?'<span class="arrow">\u2192</span>':''}<div class="step ${i<excStep?'done':''} ${i===excStep?'current':''}">${s}</div>`).join('');
+}
+function advanceExc(){ if(excStep<EXC_STAGES.length-1){ excStep++; state.correctActions++; } document.getElementById('excFlow').innerHTML=excFlowHtml(); }
+function resetExc(){ excStep=0; document.getElementById('excFlow').innerHTML=excFlowHtml(); }
+
+/* =====================================================================
+   ASSIGNMENT SIMULATION
+===================================================================== */
+let demoAssign = {owner:USERS[0], assignee:USERS[1], viewer:USERS[2]};
+function renderAssignment(){
+  return `
+   <div class="crumb">Ownership</div>
+   <h2 class="pagetitle">Assignment Simulation</h2>
+   <p class="pagedesc">Practice assigning and reassigning owner, assignee, and viewer roles on a demo alert.</p>
+   <div class="card" style="padding:20px;max-width:520px;">
+     <div class="field"><label>Owner</label><select id="da_owner" class="selfield">${USERS.map(u=>`<option ${demoAssign.owner===u?'selected':''}>${u}</option>`).join('')}</select></div>
+     <div class="field"><label>Assignee</label><select id="da_assignee" class="selfield">${USERS.map(u=>`<option ${demoAssign.assignee===u?'selected':''}>${u}</option>`).join('')}</select></div>
+     <div class="field"><label>Viewer</label><select id="da_viewer" class="selfield">${USERS.map(u=>`<option ${demoAssign.viewer===u?'selected':''}>${u}</option>`).join('')}</select></div>
+     <div class="btnrow">
+       <button class="actionbtn primary" onclick="demoAssignSave('ASSIGN')">ASSIGN</button>
+       <button class="actionbtn" onclick="demoAssignSave('REASSIGN')">REASSIGN</button>
+     </div>
+   </div>
+   <div class="card" style="padding:16px;max-width:520px;margin-top:14px;" id="assignRecord">${assignRecordHtml()}</div>
+  `;
+}
+function assignRecordHtml(){
+  return `<div class="crumb">Alert Record ALT-DEMO-01</div>
+    <div class="fitem"><div class="k">Owner</div><div class="v">${demoAssign.owner}</div></div>
+    <div class="fitem"><div class="k">Assignee</div><div class="v">${demoAssign.assignee}</div></div>
+    <div class="fitem"><div class="k">Viewer</div><div class="v">${demoAssign.viewer}</div></div>`;
+}
+function demoAssignSave(action){
+  demoAssign.owner=document.getElementById('da_owner').value;
+  demoAssign.assignee=document.getElementById('da_assignee').value;
+  demoAssign.viewer=document.getElementById('da_viewer').value;
+  document.getElementById('assignRecord').innerHTML = `<div class="tag status-assigned" style="margin-bottom:8px;">${action==='ASSIGN'?'Assigned':'Reassigned'}</div>` + assignRecordHtml();
+  state.correctActions++;
+}
+
+/* =====================================================================
+   RESOLUTION QUEUE / REPORTS
+===================================================================== */
+function renderResolutionQueue(){
+  const queue = ALERTS.filter(a=> a.status==='In Progress' || a.status==='Assigned');
+  return `
+   <div class="crumb">Resolution</div>
+   <h2 class="pagetitle">Resolution Queue</h2>
+   <p class="pagedesc">Alerts currently in progress or assigned, awaiting resolution.</p>
+   <div class="card" style="overflow:auto;">
+   <table>
+    <tr><th>Alert ID</th><th>Type</th><th>Sev</th><th>Assignee</th><th>Due</th><th>Status</th><th></th></tr>
+    ${queue.map(a=>`<tr class="alertrow"><td class="mono">${a.id}</td><td>${a.type}</td><td><span class="tag ${sevTagClass(a.severity)}">${a.severity}</span></td><td>${a.assignee}</td><td>${a.dueDate}</td><td><span class="tag ${statusTagClass(a.status)}">${a.status}</span></td><td><button class="actionbtn primary" onclick="navigate('detail','${a.id}')">OPEN</button></td></tr>`).join('')}
+   </table></div>
+  `;
+}
+function renderReports(){
+  const byOwner=countBy(ALERTS,'owner');
+  const ages = {"0-7 days":8, "8-30 days":4, "31-60 days":2, "60+ days":1};
+  return `
+   <div class="crumb">Analytics</div>
+   <h2 class="pagetitle">Reports</h2>
+   <p class="pagedesc">Distribution reports for the current close cycle. <span class="illustrative">(Illustrative Training Data)</span></p>
+   <div class="chart-row">
+     <div class="chart-box"><h4>Alerts by Owner</h4>${barChart(byOwner)}</div>
+     <div class="chart-box"><h4>Alerts by Age</h4>${barChart(ages)}</div>
+     <div class="chart-box"><h4>Alerts by Type</h4>${barChart(countBy(ALERTS,'type'))}</div>
+   </div>
+  `;
+}
+
+/* =====================================================================
+   TRAINING SCENARIOS
+===================================================================== */
+function renderScenarios(){
+  return `
+   <div class="crumb">Practice</div>
+   <h2 class="pagetitle">Training Scenarios</h2>
+   <p class="pagedesc">Five guided business scenarios covering the most common alert and exception situations.</p>
+   ${SCENARIOS.map(s=>{
+     const p=state.scenarioProgress[s.id];
+     const pct=Math.round(p.stepIdx/s.steps.length*100);
+     return `
+     <div class="scenario-card">
+       <h3>${s.title} <span class="tag ${sevTagClass(s.severity)}">${s.severity}</span> ${p.done?'<span class="tag sev-low">Completed</span>':''}</h3>
+       <div style="font-size:12.5px;color:var(--muted)">${s.context}</div>
+       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+       <div style="font-size:11px;color:var(--muted)">${p.stepIdx}/${s.steps.length} steps complete</div>
+       <div class="btnrow"><button class="actionbtn primary" onclick="navigate('scenariorun','${s.id}')">${p.done?'Review Scenario':'Start Scenario'}</button></div>
+     </div>`;
+   }).join('')}
+  `;
+}
+function renderScenarioRun(id){
+  const s=SCENARIOS.find(x=>x.id===id);
+  state.currentScenarioId=id;
+  const p=state.scenarioProgress[id];
+  return `
+   <div class="crumb">Training Scenario</div>
+   <h2 class="pagetitle">${s.title}</h2>
+   <div class="scenario-meta">
+     <div class="m"><b>${s.type}</b>Alert Type</div>
+     <div class="m"><b>${s.severity}</b>Severity</div>
+     <div class="m"><b>${p.stepIdx}/${s.steps.length}</b>Steps Complete</div>
+   </div>
+   <div class="card" style="padding:18px;">
+     <div style="font-size:13px;color:var(--navy-2);font-weight:600;margin-bottom:6px;">Scenario Context</div>
+     <div style="font-size:13px;color:var(--ink);margin-bottom:10px;">${s.context}</div>
+     <div class="step-list">
+       ${s.steps.map((st,i)=>`<div class="s ${i<p.stepIdx?'done':''} ${i===p.stepIdx?'current':''}"><div class="chk">${i<p.stepIdx?'\u2713':(i+1)}</div>${st.label}</div>`).join('')}
+     </div>
+     ${p.stepIdx<s.steps.length ? `
+       <button class="actionbtn primary" onclick="scenarioAdvance('${s.id}')">Perform: ${s.steps[p.stepIdx].label}</button>
+       ${state.mode==='learning'?`<div class="hint">Hint: ${s.steps[p.stepIdx].hint}</div>`:''}
+     ` : `<div class="hint" style="border-color:var(--green);background:#EAF8F1;color:#1b6b45;">Scenario complete! All steps performed correctly.</div>`}
+   </div>
+  `;
+}
+function scenarioAdvance(id){
+  const p=state.scenarioProgress[id];
+  const s=SCENARIOS.find(x=>x.id===id);
+  if(p.stepIdx<s.steps.length){
+    p.stepIdx++;
+    state.correctActions++;
+    if(p.stepIdx===s.steps.length && !p.done){ p.done=true; state.scenariosCompletedCount++; }
+  }
+  navigate('scenariorun', id);
+}
+
+/* =====================================================================
+   EXAM MODE
+===================================================================== */
+function renderExam(){
+  if(state.exam.done){
+    const correct = state.exam.answers.filter(a=>a.correct).length;
+    const pct = Math.round(correct/EXAM_QUESTIONS.length*100);
+    return `
+     <div class="crumb">Exam Mode</div>
+     <h2 class="pagetitle">Exam Results</h2>
+     <div class="qbox">
+       <div class="fitem"><div class="k">Total Scenarios</div><div class="v">${EXAM_QUESTIONS.length}</div></div>
+       <div class="fitem"><div class="k">Completed</div><div class="v">${state.exam.answers.length}</div></div>
+       <div class="fitem"><div class="k">Correct</div><div class="v">${correct}</div></div>
+       <div class="fitem"><div class="k">Incorrect</div><div class="v">${state.exam.answers.length-correct}</div></div>
+       <div class="fitem"><div class="k">Score</div><div class="v" style="font-size:20px;color:${pct>=80?'var(--green)':'var(--coral)'}">${pct}%</div></div>
+       <div style="margin:14px 0;">
+        ${pct>=80? `<span class="tag sev-low">PASSED</span>` : `<span class="tag sev-high">RETRY RECOMMENDED</span>`}
+       </div>
+       <div class="btnrow">
+        <button class="actionbtn primary" onclick="restartExam()">Retry Exam</button>
+        <button class="actionbtn" onclick="navigate('completion')">View Completion Screen</button>
+       </div>
+     </div>`;
+  }
+  const q = EXAM_QUESTIONS[state.exam.idx];
+  return `
+   <div class="crumb">Exam Mode</div>
+   <h2 class="pagetitle">Scenario-Based Assessment <span class="badge-mode">${state.exam.idx+1} / ${EXAM_QUESTIONS.length}</span></h2>
+   <div class="qbox">
+     <div class="qn">Question ${state.exam.idx+1}</div>
+     <h3>${q.q}</h3>
+     <div id="optWrap">
+      ${q.opts.map((o,i)=>`<button class="opt" onclick="answerExam(${i})">${o}</button>`).join('')}
+     </div>
+   </div>
+  `;
+}
+function answerExam(i){
+  const q=EXAM_QUESTIONS[state.exam.idx];
+  const correct = i===q.correct;
+  state.exam.answers.push({idx:state.exam.idx, correct});
+  if(correct) state.correctActions++;
+  document.querySelectorAll('#optWrap .opt').forEach((b,bi)=>{
+    b.disabled=true;
+    if(bi===q.correct) b.classList.add('correct');
+    else if(bi===i) b.classList.add('wrong');
+  });
+  setTimeout(()=>{
+    if(state.exam.idx < EXAM_QUESTIONS.length-1){ state.exam.idx++; navigate('exam'); }
+    else { state.exam.done=true; navigate('exam'); }
+  }, 950);
+}
+function restartExam(){ state.exam={active:true, idx:0, answers:[], done:false}; navigate('exam'); }
+
+/* =====================================================================
+   HELP
+===================================================================== */
+function renderHelp(){
+  return `
+   <div class="crumb">Reference</div>
+   <h2 class="pagetitle">Help &amp; Guidance</h2>
+   <div class="helpblock">
+    <h4>What is Alert &amp; Exception Management?</h4>
+    <p>Alert and exception management surfaces issues that need attention during the close cycle \u2014 mismatches, missing data, overdue tasks, and process failures \u2014 and routes them through a consistent lifecycle from detection to closure.</p>
+    <h4>Lifecycle</h4>
+    <p>Open \u2192 Assigned \u2192 In Progress \u2192 Resolved \u2192 Closed. Closed alerts can be Reopened if new information emerges, returning them to In Progress.</p>
+    <h4>Viewer Model</h4>
+    <p>Alert viewers are permitted to see alerts they are configured to access and, where configured, may add comments or enter accessible attributes \u2014 without full edit rights such as assignment, resolution or closure.</p>
+    <h4>Roles</h4>
+    <p><b>Preparer</b> investigates and works alerts day to day. <b>Reviewer</b> reviews and approves resolutions. <b>Administrator</b> manages configuration and can perform any action. <b>Viewer</b> has read access plus configured comment rights.</p>
+    <h4>Modes</h4>
+    <p><b>Learning Mode</b> shows contextual hints while you work scenarios. <b>Exam Mode</b> presents scenario-based questions and scores your understanding; 80% or higher is a Pass.</p>
+   </div>
+  `;
+}
+
+/* =====================================================================
+   COMPLETION SCREEN
+===================================================================== */
+function renderCompletion(){
+  const correct = state.exam.answers.filter(a=>a.correct).length;
+  const scorePct = state.exam.answers.length? Math.round(correct/state.exam.answers.length*100) : 0;
+  const mins = state.loginTime ? Math.max(1,Math.round((Date.now()-state.loginTime)/60000)) : 0;
+  return `
+   <div class="completion">
+     <img src="${LOGO}" alt="BISP logo">
+     <h1>CONGRATULATIONS!</h1>
+     <p style="color:#B9C9DD;max-width:480px;">You completed the training module:</p>
+     <div class="disp" style="font-size:18px;font-weight:700;letter-spacing:.03em;margin-top:2px;">ALERTS AND EXCEPTION MANAGEMENT</div>
+     <div class="stats">
+       <div class="stat"><b>${state.scenariosCompletedCount}/${SCENARIOS.length}</b><span>Scenarios Completed</span></div>
+       <div class="stat"><b>${scorePct}%</b><span>Exam Score</span></div>
+       <div class="stat"><b>${mins}m</b><span>Time in Simulator</span></div>
+       <div class="stat"><b>${state.correctActions}</b><span>Correct Actions</span></div>
+     </div>
+     <div style="font-weight:700;letter-spacing:.03em;">BISP Trainings</div>
+     <div style="font-size:12.5px;color:#B9C9DD;margin-top:4px;">www.bisptrainings.com &nbsp;&middot;&nbsp; Call Us: +91 769-409-5404</div>
+     <div class="btnrow" style="margin-top:22px;">
+       <button class="actionbtn" style="background:transparent;border-color:rgba(255,255,255,.4);color:#fff;" onclick="navigate('dashboard')">Back to Dashboard</button>
+     </div>
+   </div>
+  `;
+}
+</script>
+</body>
+</html>
