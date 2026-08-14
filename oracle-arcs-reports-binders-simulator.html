@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Oracle ARCS — Reports &amp; Report Binders Training Simulator | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B2340; --navy-2:#123A66; --teal:#0F6E6E; --amber:#E0A82E; --coral:#D3572F;
+  --bg:#F3F5F8; --panel:#FFFFFF; --line:#E1E6EC;
+  --ink:#101826; --ink-2:#3A4657; --ink-3:#7A8699;
+  --ok:#1E7A4C; --ok-bg:#E7F5EC; --warn:#B23B1E; --warn-bg:#FBEAE3;
+  --radius:10px;
+  --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --font-body:'Inter',ui-sans-serif,system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+#app{min-height:100%;}
+.dim{color:var(--ink-3);}
+.sm{font-size:12px;}
+.center{text-align:center;}
+
+/* ---- shell ---- */
+.shell{display:flex;flex-direction:column;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:var(--navy);color:#fff;padding:10px 22px;}
+.brandblock{display:flex;align-items:center;gap:12px;}
+.bisplogo{height:30px;background:#fff;padding:3px 6px;border-radius:6px;}
+.bisplogo.lg{height:44px;padding:6px 10px;}
+.brandtext .appname{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.03em;}
+.brandtext .appname .dim{color:#9FB4CE;font-weight:500;font-size:13px;}
+.brandtext .tag{font-size:11px;color:#8FA6C2;margin-top:1px;}
+.userblock{display:flex;align-items:center;gap:12px;}
+.userinfo{text-align:right;}
+.uname{font-size:13px;font-weight:600;}
+.urole{font-size:11px;color:#9FB4CE;}
+.subnav{display:flex;flex-wrap:wrap;gap:2px;background:var(--navy-2);padding:0 16px;}
+.navlink{background:transparent;border:none;color:#D8E3F0;padding:11px 14px;font-family:var(--font-body);font-size:13px;cursor:pointer;border-bottom:3px solid transparent;}
+.navlink:hover{color:#fff;}
+.navlink.active{color:#fff;border-bottom-color:var(--amber);font-weight:600;}
+.content{flex:1;padding:26px 30px 60px;max-width:1180px;margin:0 auto;width:100%;}
+.footer{background:var(--navy);color:#9FB4CE;font-size:11px;padding:14px 22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.footer a{color:#CFE0F5;}
+
+/* ---- generic components ---- */
+.pagetitle{font-family:var(--font-display);font-size:24px;margin:2px 0 6px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin:18px 0;}
+.panel h2{font-family:var(--font-display);font-size:15px;margin:0 0 12px;color:var(--navy);}
+.panel.center{text-align:center;}
+.btn{font-family:var(--font-body);font-weight:600;font-size:13px;border-radius:7px;padding:10px 18px;cursor:pointer;border:1px solid transparent;}
+.btn.primary{background:var(--teal);color:#fff;}
+.btn.primary:hover{background:#0C5A5A;}
+.btn.ghost{background:transparent;color:var(--navy);border-color:var(--line);}
+.btn.ghost:hover{background:#EEF1F5;}
+.btn.outline{background:#fff;color:var(--navy-2);border-color:var(--navy-2);}
+.btn.sm{padding:7px 12px;font-size:12px;}
+.btn.block{width:100%;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.btnrow.center{justify-content:center;}
+.linkback{background:none;border:none;color:var(--teal);font-size:13px;cursor:pointer;padding:0;margin-bottom:10px;}
+.flabel{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);margin-bottom:5px;font-weight:600;}
+input[type=text],select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:7px;font-family:var(--font-body);font-size:13px;background:#fff;color:var(--ink);}
+.fgroup{margin-bottom:4px;}
+.paramgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.badge{display:inline-block;background:var(--ok-bg);color:var(--ok);font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;}
+.badge.retry{background:var(--warn-bg);color:var(--warn);}
+
+/* ---- login ---- */
+.loginwrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%,#123A66 0%,#0B2340 55%,#081A30 100%);position:relative;overflow:hidden;}
+.loginmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.12;}
+.taccount{width:70vmin;height:70vmin;position:relative;}
+.tline{position:absolute;background:#fff;}
+.tline:not(.v){top:30%;left:0;right:0;height:3px;}
+.tline.v{top:30%;bottom:0;left:50%;width:3px;}
+.logincard{position:relative;background:#fff;border-radius:14px;padding:34px 36px 30px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center;}
+.logincard h1{font-family:var(--font-display);font-size:22px;letter-spacing:.05em;margin:14px 0 2px;color:var(--navy);}
+.loginsub{color:var(--ink-3);font-size:13px;margin:0 0 18px;line-height:1.5;}
+.logincard .flabel{text-align:left;}
+.logincard input,.logincard select{margin-bottom:14px;}
+
+/* ---- hero / menu ---- */
+.hero{padding:6px 0 18px;}
+.hero h1{font-family:var(--font-display);font-size:26px;margin:0 0 8px;color:var(--navy);}
+.hero p{color:var(--ink-2);max-width:640px;}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:8px;}
+.menucard{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;cursor:pointer;transition:box-shadow .15s,transform .15s;}
+.menucard:hover{box-shadow:0 8px 20px rgba(11,35,64,.1);transform:translateY(-2px);}
+.menucard-title{font-family:var(--font-display);font-weight:700;color:var(--navy);margin-bottom:6px;}
+.menucard-desc{font-size:12.5px;color:var(--ink-3);line-height:1.4;}
+.menucard-go{margin-top:10px;font-size:12px;color:var(--teal);font-weight:600;}
+
+/* ---- flow / smartart ---- */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.flowstep{display:flex;align-items:center;gap:6px;}
+.flowbox{background:#EEF3F8;border:1px solid var(--line);border-radius:7px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--navy-2);}
+.flowarrow{color:var(--ink-3);}
+.tree{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;}
+.treeroot{background:var(--navy);color:#fff;font-family:var(--font-display);font-weight:700;padding:9px 18px;border-radius:7px;font-size:13px;}
+.treekids{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.treekid{background:#EEF3F8;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--navy-2);}
+
+/* ---- report library ---- */
+.reportgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.reportcard{text-align:left;background:#F8FAFC;border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;}
+.reportcard:hover{border-color:var(--teal);background:#F0F8F7;}
+.reportcard-name{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px;}
+.reportcard-desc{font-size:11.5px;color:var(--ink-3);line-height:1.35;}
+
+/* ---- report preview ---- */
+.reportmeta{display:flex;gap:26px;flex-wrap:wrap;background:#EEF3F8;border-radius:8px;padding:12px 16px;margin-bottom:4px;}
+.rmv{font-family:var(--font-mono);font-weight:600;font-size:13px;color:var(--navy);}
+.kpirow{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 16px;}
+.kpi{background:#F8FAFC;border:1px solid var(--line);border-radius:8px;padding:12px 18px;min-width:110px;text-align:center;}
+.kpiv{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--navy);}
+.kpil{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.kpibtn{cursor:pointer;border:1px solid var(--line);}
+.kpibtn.active{border-color:var(--teal);background:#E9F6F5;}
+.chart{width:100%;height:auto;}
+.tabletools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;}
+.tabletools input{max-width:240px;}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;}
+table.datatable{border-collapse:collapse;width:100%;font-size:12.5px;}
+table.datatable th{background:#EEF3F8;color:var(--navy-2);text-align:left;padding:9px 12px;font-size:11.5px;cursor:pointer;white-space:nowrap;position:sticky;top:0;}
+table.datatable td{padding:8px 12px;border-top:1px solid var(--line);white-space:nowrap;}
+table.datatable td.num{font-family:var(--font-mono);text-align:right;}
+.risk-high{color:var(--warn);font-weight:600;}
+.risk-medium{color:var(--amber);font-weight:600;}
+.risk-low{color:var(--ok);font-weight:600;}
+.st-approved{color:var(--ok);}
+.st-rejected{color:var(--warn);}
+.empty{padding:20px;text-align:center;color:var(--ink-3);font-size:13px;}
+
+/* ---- balance bridge ---- */
+.bridge{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:10px 0 16px;}
+.bstep{background:#F8FAFC;border:1px solid var(--line);border-radius:8px;padding:12px 16px;min-width:130px;}
+.bstep.total{background:var(--navy);color:#fff;border-color:var(--navy);}
+.blabel{font-size:11px;color:inherit;opacity:.7;}
+.bval{font-family:var(--font-mono);font-weight:700;font-size:15px;margin-top:3px;}
+.bop{align-self:center;font-size:18px;color:var(--ink-3);font-weight:700;}
+
+/* ---- binder ---- */
+.compgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:6px;}
+.comptoggle{text-align:left;background:#F8FAFC;border:1px solid var(--line);border-radius:7px;padding:9px 12px;font-size:12.5px;cursor:pointer;color:var(--ink-2);}
+.comptoggle.on{background:#E9F6F5;border-color:var(--teal);color:var(--teal);font-weight:600;}
+.binderdoc{max-width:420px;margin:0 auto;background:#FBFCFD;border:1px solid var(--line);border-radius:8px;padding:22px;}
+.binderdoc-head{text-align:center;font-family:var(--font-display);font-weight:700;letter-spacing:.08em;color:var(--navy);font-size:13px;}
+.binderdoc-title{text-align:center;font-family:var(--font-display);font-weight:700;font-size:16px;margin:8px 0;color:var(--navy);}
+.binderdoc ol{font-size:13px;color:var(--ink-2);line-height:1.9;}
+.validbox{border-radius:8px;padding:12px 16px;font-weight:600;font-size:13px;margin-top:10px;}
+.validbox.ok{background:var(--ok-bg);color:var(--ok);}
+.validbox.warn{background:var(--warn-bg);color:var(--warn);}
+
+/* ---- scenarios ---- */
+.scenariolist{display:flex;flex-direction:column;gap:12px;}
+.scenariocard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;}
+.scenariocard.done{border-color:var(--ok);}
+.scenariocard-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.scnum{background:var(--navy);color:#fff;font-family:var(--font-mono);font-size:11px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.scname{font-weight:700;color:var(--navy);}
+.scenariobody{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;font-size:12.5px;color:var(--ink-2);}
+.scenariobody b{color:var(--navy-2);font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;}
+.scenariobody p{margin:3px 0 0;}
+.feedback{background:#EEF9F3;border-radius:6px;padding:8px 10px;}
+
+/* ---- practice / exam ---- */
+.tasklist{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2);line-height:1.9;}
+.examprogress{height:6px;background:var(--line);border-radius:4px;overflow:hidden;}
+.examprogress-fill{height:100%;background:var(--teal);}
+.examoptions{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.examopt{text-align:left;background:#F8FAFC;border:1px solid var(--line);border-radius:7px;padding:11px 14px;font-size:13px;cursor:pointer;}
+.examopt.selected{border-color:var(--teal);background:#E9F6F5;font-weight:600;}
+.reviewq{border-top:1px solid var(--line);padding:10px 0;font-size:13px;}
+.reviewq .ok{color:var(--ok);}
+.reviewq .bad{color:var(--warn);}
+.scorebig{font-family:var(--font-display);font-size:48px;font-weight:700;color:var(--navy);}
+.badge.pass{background:var(--ok-bg);color:var(--ok);}
+
+/* ---- analytics ---- */
+.anagrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+
+/* ---- completion ---- */
+.completewrap{max-width:520px;margin:60px auto;text-align:center;background:#fff;border-radius:14px;padding:40px;border:1px solid var(--line);}
+.completewrap h1{font-family:var(--font-display);color:var(--navy);margin:14px 0 0;}
+.completewrap h2{font-family:var(--font-display);color:var(--teal);margin:4px 0 0;}
+.completewrap .kpirow{justify-content:center;margin-top:20px;}
+
+/* ---- toast / fab ---- */
+#toastHost{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:50;}
+.toast{background:var(--navy);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);}
+.fab{position:fixed;right:18px;bottom:18px;background:var(--amber);color:#3A2A00;border:none;border-radius:24px;padding:12px 18px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.2);z-index:40;}
+.fab:hover{filter:brightness(0.95);}
+
+@media (max-width:700px){
+  .topbar{flex-direction:column;align-items:flex-start;gap:8px;}
+  .userblock{width:100%;justify-content:space-between;}
+  .content{padding:18px 14px 60px;}
+}
+
+/* ---- icons & original illustrations ---- */
+.icn{display:inline-flex;vertical-align:middle;}
+.icn svg{width:100%;height:100%;display:block;}
+.title-icon{width:22px;height:22px;margin-right:8px;color:var(--navy);}
+.cathead{display:flex;align-items:center;}
+.cathead-icon{width:18px;height:18px;margin-right:8px;color:var(--teal);}
+.reportcard-icon{width:20px;height:20px;color:var(--teal);margin-bottom:8px;}
+.menuicon{width:26px;height:26px;color:var(--teal);margin-bottom:10px;}
+.comp-icon{width:14px;height:14px;margin-right:6px;color:inherit;}
+.scenario-icon{width:20px;height:20px;color:var(--navy-2);flex-shrink:0;}
+.flowarrow .icn{width:16px;height:16px;color:var(--ink-3);}
+.flowarrow{display:flex;align-items:center;}
+
+.hero{display:flex;align-items:center;gap:26px;padding:6px 0 18px;}
+.hero-text{flex:1 1 320px;}
+.hero-text h1{font-family:var(--font-display);font-size:26px;margin:0 0 8px;color:var(--navy);}
+.hero-text p{color:var(--ink-2);max-width:520px;}
+.hero-image{flex:1 1 320px;max-width:420px;}
+.hero-illustration{width:100%;height:auto;border-radius:16px;box-shadow:0 14px 34px rgba(11,35,64,.18);}
+.loginmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.24;}
+.loginmark .hero-illustration{width:72vmin;max-width:640px;box-shadow:none;}
+
+@media (max-width:820px){
+  .hero{flex-direction:column;}
+  .hero-image{max-width:100%;}
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const LOGO_SRC = "data:image/jpeg;base64,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";
+</script>
+<script>
+/* ============================================================
+   ORACLE ARCS — REPORTS & REPORT BINDERS TRAINING SIMULATOR
+   Original BISP Trainings interactive simulator (not Oracle UI)
+   ============================================================ */
+
+/* ---------- seeded RNG for stable "fictional" data ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967295;};}
+function seededRand(seedStr){let h=0;for(let i=0;i<seedStr.length;i++){h=Math.imul(31,h)+seedStr.charCodeAt(i)|0;}return mulberry32(h);}
+function pick(rnd,arr){return arr[Math.floor(rnd()*arr.length)];}
+function money(n){const neg=n<0;n=Math.abs(n);const s=n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});return (neg?'(':'')+'$'+s+(neg?')':'');}
+
+const ENTITIES=['US-100 Corporate','US-210 East Region','EU-330 Germany','EU-410 France','APAC-500 Singapore','APAC-520 Australia'];
+const PREPARERS=['A. Menon','R. Okafor','S. Delacroix','T. Nakamura','J. Alvarez','P. Singh'];
+const REVIEWERS=['M. Whitfield','C. Boateng','L. Fitzgerald','K. Sato'];
+const ACCOUNTS=['1010-Cash Operating','1210-AR Trade','1400-Prepaid Expenses','2010-AP Trade','2310-Accrued Payroll','1610-Fixed Assets','2510-Deferred Revenue','1310-Intercompany Receivable'];
+const RISK=['Low','Medium','High'];
+const STATUS=['Not Started','In Progress','Submitted','Approved','Rejected'];
+
+/* ---------- 19 standard reports, grouped ---------- */
+const REPORT_CATALOG={
+  "Reconciliation":[
+    {id:'recon-status',name:'Reconciliation Status',desc:'Real-time status of every reconciliation in the selected period.'},
+    {id:'late-recon',name:'Late Reconciliations',desc:'Reconciliations past their due date, ranked by days late.'},
+    {id:'open-recon',name:'Open Reconciliations',desc:'KPI view of open, completed, late and high-risk reconciliations.'},
+    {id:'rejected-recon',name:'Rejected Reconciliations',desc:'Reconciliations sent back by a reviewer, with reasons.'},
+    {id:'recon-detail',name:'Reconciliation Detail',desc:'Full line-level detail for a single reconciliation.'}
+  ],
+  "Configuration":[
+    {id:'profile-config',name:'Profile Configuration',desc:'Reconciliation profile setup: frequency, format, risk rank.'},
+    {id:'workflow-assign',name:'Workflow Assignments',desc:'Preparer / reviewer assignments by profile.'}
+  ],
+  "Analysis":[
+    {id:'balance-analysis',name:'Balance Analysis',desc:'Beginning balance, activity, adjustments, ending balance.'},
+    {id:'unexplained-diff',name:'Unexplained Differences',desc:'Accounts where expected and actual balances do not tie out.'},
+    {id:'adjustment-detail',name:'Adjustment Detail',desc:'All manual adjustments posted during the period.'},
+    {id:'aging-analysis',name:'Aging Analysis',desc:'Open items bucketed by age.'}
+  ],
+  "Control":[
+    {id:'alert-status',name:'Alert Status',desc:'System-generated alerts and their resolution status.'},
+    {id:'audit-report',name:'Audit Report',desc:'Full audit trail of user actions.'}
+  ],
+  "Transaction Matching":[
+    {id:'tm-config',name:'Transaction Matching Configuration',desc:'Match rule set-up per source system.'},
+    {id:'match-rule-stats',name:'Match-Rule Statistics',desc:'Match rate and hit count by rule.'},
+    {id:'unmatched-txn',name:'Unmatched Transactions',desc:'Transactions with no matching counterpart.'},
+    {id:'matching-adj',name:'Matching Adjustments',desc:'Manual adjustments made during matching.'},
+    {id:'journal-export',name:'Journal Export',desc:'Journal entries generated from matched transactions.'},
+    {id:'data-load-results',name:'Data-Load Results',desc:'Source file load status and exception counts.'}
+  ]
+};
+const ALL_REPORTS=Object.values(REPORT_CATALOG).flat();
+function findReport(id){return ALL_REPORTS.find(r=>r.id===id);}
+function categoryOf(reportId){for(const [cat,reps] of Object.entries(REPORT_CATALOG)){if(reps.some(r=>r.id===reportId))return cat;}return null;}
+
+/* ============================================================
+   ORIGINAL ICON SET — simple line icons, currentColor, 24x24
+   (Original BISP artwork, not Oracle graphics)
+   ============================================================ */
+const ICONS={
+  recon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6M9 17l2 2 4-4"/></svg>`,
+  config:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.2 7.5l1.7 1M18.1 15.5l1.7 1M4.2 16.5l1.7-1M18.1 8.5l1.7-1M3 12h2M19 12h2"/></svg>`,
+  analysis:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/></svg>`,
+  control:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v5c0 5-3.2 7.7-7 9-3.8-1.3-7-4-7-9V6l7-3z"/><path d="M9.3 12.2l1.8 1.8 3.4-3.6"/></svg>`,
+  matching:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h9M4 8l3-3M4 8l3 3M20 16h-9M20 16l-3-3M20 16l-3 3"/></svg>`,
+  binder:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>`,
+  scenario:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3"/><path d="M5 20c0-3.9 3.1-6 7-6s7 2.1 7 6"/></svg>`,
+  practice:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v3M12 18v3M4.6 6.6l2.1 2.1M17.3 15.3l2.1 2.1M3 12h3M18 12h3M4.6 17.4l2.1-2.1M17.3 8.7l2.1-2.1"/><circle cx="12" cy="12" r="3.4"/></svg>`,
+  exam:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h7M8 13h7M8 16h4"/></svg>`,
+  dashboard:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="8" height="7" rx="1.2"/><rect x="13" y="4" width="8" height="4" rx="1.2"/><rect x="13" y="10" width="8" height="10" rx="1.2"/><rect x="3" y="13" width="8" height="7" rx="1.2"/></svg>`,
+  cover:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h5"/></svg>`,
+  toc:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h3M4 12h3M4 18h3M10 6h10M10 12h10M10 18h10"/></svg>`,
+  summary:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 15l3-4 3 2 4-6"/></svg>`,
+  detail:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>`,
+  attachment:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 6l-7.5 7.5a3 3 0 104.2 4.2L20 10.4"/></svg>`,
+  comment:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H9l-4 4V5z"/></svg>`,
+  workflow:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6.4 7.7L11 16.4M17.6 7.7L13 16.4"/></svg>`,
+  certification:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7 21l5-2.5L17 21l-2-7.5"/></svg>`,
+  exception:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 9.5v4M12 16.2v.1"/></svg>`,
+  arrow:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h15M13 6l6 6-6 6"/></svg>`
+};
+const CATEGORY_ICON={Reconciliation:'recon',Configuration:'config',Analysis:'analysis',Control:'control',"Transaction Matching":'matching'};
+const COMPONENT_ICON={Cover:'cover','Table of Contents':'toc','Reconciliation Summaries':'summary','Detailed Reconciliations':'detail',Attachments:'attachment',Comments:'comment','Workflow History':'workflow',Certifications:'certification',Exceptions:'exception'};
+function icon(name,cls){return `<span class="icn ${cls||''}">${ICONS[name]||''}</span>`;}
+
+/* ---------- fictional row generators ---------- */
+function genReconStatusRows(seed,n=14){
+  const rnd=seededRand(seed);const rows=[];
+  for(let i=0;i<n;i++){
+    const bal=Math.round((rnd()*900000-100000)*100)/100;
+    const diff=rnd()>0.72?Math.round((rnd()*4000-2000)*100)/100:0;
+    rows.push({Account:pick(rnd,ACCOUNTS),Entity:pick(rnd,ENTITIES),Period:'Jun-2026',Status:pick(rnd,STATUS),Risk:pick(rnd,RISK),Preparer:pick(rnd,PREPARERS),Reviewer:pick(rnd,REVIEWERS),Balance:bal,Difference:diff,'Due Date':`06/${10+Math.floor(rnd()*18)}/26`});
+  }
+  return rows;
+}
+function genLateRows(seed,n=10){
+  const rnd=seededRand(seed);const rows=[];
+  for(let i=0;i<n;i++){
+    const days=1+Math.floor(rnd()*22);
+    rows.push({Account:pick(rnd,ACCOUNTS),Entity:pick(rnd,ENTITIES),'Due Date':`06/${5+Math.floor(rnd()*15)}/26`,'Days Late':days,Risk:days>14?'High':days>6?'Medium':'Low',Owner:pick(rnd,PREPARERS),Status:'In Progress'});
+  }
+  return rows.sort((a,b)=>b['Days Late']-a['Days Late']);
+}
+function genRejectedRows(seed,n=8){
+  const rnd=seededRand(seed);const reasons=['Unsupported adjustment','Missing attachment','Balance not tied out','Incorrect risk rank','Stale supporting doc','Comment required'];
+  const rows=[];
+  for(let i=0;i<n;i++){rows.push({Reconciliation:pick(rnd,ACCOUNTS),Reviewer:pick(rnd,REVIEWERS),Reason:pick(rnd,reasons),Date:`06/${2+Math.floor(rnd()*20)}/26`,Comment:'See reviewer notes in workflow history',Status:'Returned to Preparer'});}
+  return rows;
+}
+function genUnexplainedRows(seed,n=9){
+  const rnd=seededRand(seed);const rows=[];
+  for(let i=0;i<n;i++){
+    const exp=Math.round(rnd()*500000*100)/100;
+    const act=exp+Math.round((rnd()*6000-3000)*100)/100;
+    rows.push({Account:pick(rnd,ACCOUNTS),Expected:exp,Actual:act,Difference:Math.round((act-exp)*100)/100,Owner:pick(rnd,PREPARERS),Status:pick(rnd,['Open','Investigating','Escalated']),'Days Open':1+Math.floor(rnd()*40)});
+  }
+  return rows;
+}
+function genAuditRows(seed,n=12){
+  const rnd=seededRand(seed);const actions=['Submitted','Approved','Rejected','Reopened','Attachment Added','Comment Added','Balance Updated'];
+  const rows=[];
+  for(let i=0;i<n;i++){rows.push({User:pick(rnd,PREPARERS.concat(REVIEWERS)),Action:pick(rnd,actions),Date:`06/${1+Math.floor(rnd()*27)}/26 ${8+Math.floor(rnd()*9)}:${(10+Math.floor(rnd()*49))}`,Object:pick(rnd,ACCOUNTS),'Old Value':'Draft','New Value':pick(rnd,STATUS),Comment:'Routine period-end activity'});}
+  return rows;
+}
+function genGenericRows(seed,n=10){
+  const rnd=seededRand(seed);const rows=[];
+  for(let i=0;i<n;i++){rows.push({Item:pick(rnd,ACCOUNTS),Entity:pick(rnd,ENTITIES),Period:'Jun-2026',Owner:pick(rnd,PREPARERS),Status:pick(rnd,STATUS),Value:Math.round(rnd()*250000*100)/100});}
+  return rows;
+}
+function genTMRows(seed,n=10){
+  const rnd=seededRand(seed);const src=['Bank Feed - Wells','Bank Feed - HSBC','ERP GL Export','Card Processor','Payroll Interface'];
+  const rows=[];
+  for(let i=0;i<n;i++){rows.push({'Txn ID':'TXN-'+(100000+Math.floor(rnd()*899999)),Source:pick(rnd,src),Entity:pick(rnd,ENTITIES),Amount:Math.round((rnd()*40000-5000)*100)/100,'Match Rule':'RULE-'+(1+Math.floor(rnd()*9)),Status:pick(rnd,['Matched','Unmatched','Suggested','Excluded'])});}
+  return rows;
+}
+
+function rowsForReport(id){
+  switch(id){
+    case 'recon-status': return genReconStatusRows(id);
+    case 'late-recon': return genLateRows(id);
+    case 'rejected-recon': return genRejectedRows(id);
+    case 'unexplained-diff': return genUnexplainedRows(id);
+    case 'audit-report': return genAuditRows(id);
+    case 'tm-config': case 'match-rule-stats': case 'unmatched-txn': case 'matching-adj': case 'journal-export': case 'data-load-results':
+      return genTMRows(id);
+    default: return genGenericRows(id);
+  }
+}
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+const S={
+  view:'login',
+  user:{name:'',role:'Finance Analyst'},
+  activeReport:null,
+  activeParams:{Period:'Jun-2026',Entity:'US-100 Corporate',Account:'All',Status:'All',Risk:'All',Preparer:'All',Reviewer:'All'},
+  tableSort:{col:null,dir:1},
+  tableFilter:'',
+  openKpiFilter:'All',
+  binder:{name:'',period:'Jun-2026',entity:'US-100 Corporate',desc:'',components:[]},
+  binderAllComponents:['Cover','Table of Contents','Reconciliation Summaries','Detailed Reconciliations','Attachments','Comments','Workflow History','Certifications','Exceptions'],
+  scenarios:[],
+  scenarioProgress:{},
+  exam:{qIndex:0,answers:[],submitted:false},
+  scoring:{reportsCompleted:0,binderTasksCompleted:0,correctActions:0,incorrectActions:0,scenariosCompleted:0,startTime:null},
+  toast:null
+};
+
+const SCENARIOS=[
+ {id:1,title:'Controller reviews status',situation:'You are the Controller and need a real-time view of reconciliation progress across all entities before the Friday close call.',objective:'Identify which reconciliations are not yet started or in progress.',action:'Open the Reconciliation Status report and filter by Status.',expected:'You can name every entity/account still open, ranked by risk.',feedback:'Reconciliation Status is the fastest way to get a period-wide pulse before a close meeting.',reportId:'recon-status'},
+ {id:2,title:'Manager investigates late reconciliations',situation:'Three reconciliations are flagged red on the dashboard.',objective:'Find the oldest high-risk late item and its owner.',action:'Run Late Reconciliations and sort by Days Late.',expected:'The oldest high-risk item and its owner are identified for escalation.',feedback:'Late Reconciliations ranks exposure by days late so the worst offenders surface first.',reportId:'late-recon'},
+ {id:3,title:'Reviewer investigates rejection',situation:'A reconciliation you submitted was rejected without explanation in the summary email.',objective:'Understand exactly why the reviewer rejected it.',action:'Open Rejected Reconciliations and read the Reason and Comment columns.',expected:'You know the specific gap to fix before resubmitting.',feedback:'Rejected Reconciliations captures reviewer reasoning so rework is targeted, not guesswork.',reportId:'rejected-recon'},
+ {id:4,title:'Analyst performs balance analysis',situation:'Finance leadership wants to know why the Cash Operating balance moved this period.',objective:'Break the ending balance into its components.',action:'Run Balance Analysis for the account.',expected:'You can explain the movement as beginning balance + activity + adjustments.',feedback:'Balance Analysis turns a single number into an auditable bridge.',reportId:'balance-analysis'},
+ {id:5,title:'Compliance reviews alert status',situation:'Internal audit asks whether any system alerts are still unresolved.',objective:'Confirm all alerts have been actioned before period close.',action:'Open Alert Status and check for anything not marked Resolved.',expected:'A clean list, or a documented remediation plan for open alerts.',feedback:'Alert Status is a control checkpoint, not just an FYI list.',reportId:'alert-status'},
+ {id:6,title:'Auditor reviews audit report',situation:'External audit requests evidence of who approved a specific reconciliation and when.',objective:'Produce a defensible audit trail.',action:'Run the Audit Report and locate the relevant Object and Action.',expected:'A timestamped, user-attributed trail is ready to hand to the auditor.',feedback:'The Audit Report is built for exactly this kind of evidentiary request.',reportId:'audit-report'},
+ {id:7,title:'Transaction Matching team reviews unmatched transactions',situation:'The bank feed loaded 40 transactions but only 33 matched automatically.',objective:'Identify the unmatched transactions and their source.',action:'Run Unmatched Transactions and review by Source.',expected:'The team can triage unmatched items before period close.',feedback:'Unmatched Transactions isolates exactly what automated rules could not resolve.',reportId:'unmatched-txn'},
+ {id:8,title:'Controller creates period-end binder',situation:'It is period close and the package for leadership sign-off is due.',objective:'Assemble and validate a complete period-end report binder.',action:'Open Report Binders, add all nine components, then validate.',expected:'The binder shows COMPLETE with no missing components.',feedback:'The Report Binder is the final, distributable package for the period.',reportId:null}
+];
+
+const EXAM_QUESTIONS=[
+ {q:'A reconciliation was returned to the preparer with comments. Which report shows why?',options:['Aging Analysis','Rejected Reconciliations','Data-Load Results','Profile Configuration'],a:1},
+ {q:'You need to know which open items are more than 90 days old. Which report do you run?',options:['Aging Analysis','Match-Rule Statistics','Alert Status','Journal Export'],a:0},
+ {q:'External audit asks who approved a reconciliation and when. Which report has that evidence?',options:['Balance Analysis','Audit Report','Workflow Assignments','Adjustment Detail'],a:1},
+ {q:'Which report bridges beginning balance, activity and adjustments to the ending balance?',options:['Balance Analysis','Unexplained Differences','Reconciliation Detail','Alert Status'],a:0},
+ {q:'A bank-feed transaction has no automated match. Which report surfaces it?',options:['Journal Export','Matching Adjustments','Unmatched Transactions','Transaction Matching Configuration'],a:2},
+ {q:'Which binder component documents sign-off, not supporting evidence?',options:['Attachments','Certifications','Comments','Exceptions'],a:1},
+ {q:'A period-end package must be assembled and checked for missing pieces. Which tool handles that?',options:['Analytics dashboard','Report Binder Builder','Exam Mode','Alert Status report'],a:1},
+ {q:'You want the fastest read on how many reconciliations are open vs. completed right now. Which report?',options:['Open Reconciliations (KPI cards)','Data-Load Results','Match-Rule Statistics','Adjustment Detail'],a:0}
+];
+
+/* ============================================================
+   RENDER HELPERS
+   ============================================================ */
+const app=document.getElementById('app');
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg){S.toast=msg;renderToast();setTimeout(()=>{S.toast=null;renderToast();},2600);}
+function renderToast(){let el=document.getElementById('toastHost');if(!el)return;el.innerHTML=S.toast?`<div class="toast">${esc(S.toast)}</div>`:'';}
+
+function chrome(inner,activeNav){
+  return `
+  <div class="shell">
+    <header class="topbar">
+      <div class="brandblock">
+        <img src="${LOGO_SRC}" alt="BISP logo" class="bisplogo"/>
+        <div class="brandtext">
+          <div class="appname">ORACLE ARCS <span class="dim">· Reports &amp; Report Binders</span></div>
+          <div class="tag">Original BISP Oracle ARCS-inspired training simulator</div>
+        </div>
+      </div>
+      <div class="userblock">
+        <div class="userinfo"><div class="uname">${esc(S.user.name||'Guest Learner')}</div><div class="urole">${esc(S.user.role)}</div></div>
+        <button class="btn ghost sm" data-nav="main">Menu</button>
+      </div>
+    </header>
+    <nav class="subnav">
+      ${navItem('main','Home')}${navItem('library','Report Library')}${navItem('binder','Report Binders')}
+      ${navItem('scenarios','Training Scenarios')}${navItem('practice','Practice Mode')}${navItem('exam','Exam Mode')}
+      ${navItem('analytics','Analytics')}${navItem('help','Help')}
+    </nav>
+    <main class="content">${inner}</main>
+    <footer class="footer">
+      <div>© BISP Trainings | <a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a> | Call Us: +91 769-409-5404</div>
+      <div class="dim">Illustrative training data — not real Oracle ARCS output.</div>
+    </footer>
+    <div id="toastHost"></div>
+  </div>`;
+  function navItem(id,label){return `<button class="navlink ${activeNav===id?'active':''}" data-nav="${id}">${label}</button>`;}
+}
+
+/* ---------- generic SVG bar chart ---------- */
+function barChart(labels,values,opts={}){
+  const w=opts.w||620,h=opts.h||220,pad=40,barW=(w-pad*2)/values.length*0.62,gap=(w-pad*2)/values.length;
+  const max=Math.max(1,...values.map(v=>Math.abs(v)));
+  const color=opts.color||'var(--teal)';
+  let bars='',labs='';
+  values.forEach((v,i)=>{
+    const bh=Math.max(2,(Math.abs(v)/max)*(h-pad*2));
+    const x=pad+i*gap+(gap-barW)/2;
+    const y=h-pad-bh;
+    bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${v<0?'var(--coral)':color}"><title>${esc(labels[i])}: ${v}</title></rect>`;
+    labs+=`<text x="${(x+barW/2).toFixed(1)}" y="${h-pad+16}" font-size="10" text-anchor="middle" fill="var(--ink-3)">${esc(labels[i])}</text>`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" class="chart"><line x1="${pad}" y1="${h-pad}" x2="${w-10}" y2="${h-pad}" stroke="var(--line)"/>${bars}${labs}</svg>`;
+}
+function lineChart(labels,values,opts={}){
+  const w=opts.w||620,h=opts.h||220,pad=40;
+  const max=Math.max(...values,1),min=Math.min(...values,0);
+  const span=(max-min)||1;
+  const stepX=(w-pad*2)/(values.length-1||1);
+  let pts=values.map((v,i)=>`${(pad+i*stepX).toFixed(1)},${(h-pad-((v-min)/span)*(h-pad*2)).toFixed(1)}`).join(' ');
+  let dots=values.map((v,i)=>{const x=pad+i*stepX,y=h-pad-((v-min)/span)*(h-pad*2);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="var(--amber)"><title>${esc(labels[i])}: ${v}</title></circle>`;}).join('');
+  let labs=labels.map((l,i)=>`<text x="${(pad+i*stepX).toFixed(1)}" y="${h-pad+16}" font-size="10" text-anchor="middle" fill="var(--ink-3)">${esc(l)}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" class="chart"><line x1="${pad}" y1="${h-pad}" x2="${w-10}" y2="${h-pad}" stroke="var(--line)"/><polyline points="${pts}" fill="none" stroke="var(--navy)" stroke-width="2"/>${dots}${labs}</svg>`;
+}
+
+/* ---------- generic sortable/filterable table ---------- */
+function dataTable(rows,opts={}){
+  if(!rows.length)return '<div class="empty">No rows match the current filter.</div>';
+  const cols=Object.keys(rows[0]);
+  let filtered=rows;
+  if(S.tableFilter){const q=S.tableFilter.toLowerCase();filtered=rows.filter(r=>cols.some(c=>String(r[c]).toLowerCase().includes(q)));}
+  if(S.tableSort.col){const c=S.tableSort.col,d=S.tableSort.dir;filtered=[...filtered].sort((a,b)=>{const av=a[c],bv=b[c];if(typeof av==='number')return (av-bv)*d;return String(av).localeCompare(String(bv))*d;});}
+  const money_cols=cols.filter(c=>['Balance','Difference','Value','Amount','Expected','Actual'].includes(c));
+  let head=cols.map(c=>`<th data-sort="${esc(c)}">${esc(c)} ${S.tableSort.col===c?(S.tableSort.dir>0?'▲':'▼'):''}</th>`).join('');
+  let body=filtered.map(r=>`<tr>${cols.map(c=>{let v=r[c];if(money_cols.includes(c))v=money(v);return `<td class="${money_cols.includes(c)?'num':''} ${c==='Risk'?'risk-'+String(r[c]).toLowerCase():''} ${c==='Status'?'st-'+String(r[c]).toLowerCase().replace(/\s+/g,'-'):''}">${esc(v)}</td>`;}).join('')}</tr>`).join('');
+  return `
+   <div class="tabletools">
+     <input type="text" id="tblSearch" placeholder="Search rows…" value="${esc(S.tableFilter)}"/>
+     <div class="dim sm">${filtered.length} of ${rows.length} rows</div>
+   </div>
+   <div class="tablewrap"><table class="datatable"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+function bindTable(container,rows){
+  const search=container.querySelector('#tblSearch');
+  if(search)search.addEventListener('input',e=>{S.tableFilter=e.target.value;renderCurrent();});
+  container.querySelectorAll('th[data-sort]').forEach(th=>th.addEventListener('click',()=>{
+    const c=th.getAttribute('data-sort');
+    if(S.tableSort.col===c)S.tableSort.dir*=-1;else{S.tableSort.col=c;S.tableSort.dir=1;}
+    renderCurrent();
+  }));
+}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+function view_login(){
+  return `
+  <div class="loginwrap">
+    <div class="loginmark">${heroDashboardSVG()}</div>
+    <div class="logincard">
+      <img src="${LOGO_SRC}" class="bisplogo lg" alt="BISP logo"/>
+      <h1>ORACLE ARCS</h1>
+      <p class="loginsub">Reports and Report Binders<br/>Training Simulator</p>
+      <label class="flabel">Username</label>
+      <input id="loginName" type="text" placeholder="e.g. J. Alvarez" />
+      <label class="flabel">Role</label>
+      <select id="loginRole">
+        <option>Finance Analyst</option><option>Controller</option><option>Reviewer</option><option>Auditor</option><option>Administrator</option>
+      </select>
+      <button class="btn primary block" id="loginBtn">LOGIN</button>
+      <div class="dim sm center" style="margin-top:14px">Original BISP Oracle ARCS-inspired training simulator</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- original "Oracle ARCS inspired" dashboard illustration ----------
+   Wholly original artwork: an abstract enterprise reconciliation dashboard
+   mockup (top bar + sidebar + KPI tiles + chart + ledger rows). Not a copy
+   of any real Oracle screen or proprietary graphic. */
+function heroDashboardSVG(){
+  return `<svg viewBox="0 0 640 400" class="hero-illustration" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="640" height="400" rx="16" fill="#0F2E52"/>
+    <rect x="0" y="0" width="640" height="42" rx="16" fill="#0B2340"/>
+    <circle cx="24" cy="21" r="5" fill="#D3572F"/><circle cx="42" cy="21" r="5" fill="#E0A82E"/><circle cx="60" cy="21" r="5" fill="#0F6E6E"/>
+    <rect x="0" y="42" width="150" height="358" fill="#0B2340" opacity=".55"/>
+    <rect x="20" y="66" width="110" height="10" rx="3" fill="#3E6690"/>
+    <rect x="20" y="92" width="90" height="8" rx="3" fill="#2C4E75"/>
+    <rect x="20" y="112" width="90" height="8" rx="3" fill="#2C4E75"/>
+    <rect x="20" y="132" width="90" height="8" rx="3" fill="#2C4E75"/>
+    <rect x="20" y="152" width="90" height="8" rx="3" fill="#2C4E75"/>
+    <rect x="172" y="64" width="108" height="60" rx="8" fill="#123A66"/>
+    <rect x="292" y="64" width="108" height="60" rx="8" fill="#123A66"/>
+    <rect x="412" y="64" width="108" height="60" rx="8" fill="#123A66"/>
+    <rect x="190" y="80" width="50" height="8" rx="3" fill="#8FB6DC"/>
+    <rect x="190" y="96" width="30" height="14" rx="3" fill="#0F6E6E"/>
+    <rect x="310" y="80" width="50" height="8" rx="3" fill="#8FB6DC"/>
+    <rect x="310" y="96" width="30" height="14" rx="3" fill="#E0A82E"/>
+    <rect x="430" y="80" width="50" height="8" rx="3" fill="#8FB6DC"/>
+    <rect x="430" y="96" width="30" height="14" rx="3" fill="#D3572F"/>
+    <rect x="172" y="140" width="348" height="120" rx="8" fill="#123A66"/>
+    <g transform="translate(190,155)">
+      <rect x="0" y="70" width="18" height="30" fill="#0F6E6E"/>
+      <rect x="26" y="50" width="18" height="50" fill="#0F6E6E"/>
+      <rect x="52" y="60" width="18" height="40" fill="#E0A82E"/>
+      <rect x="78" y="30" width="18" height="70" fill="#0F6E6E"/>
+      <rect x="104" y="45" width="18" height="55" fill="#0F6E6E"/>
+      <rect x="130" y="20" width="18" height="80" fill="#E0A82E"/>
+      <rect x="156" y="55" width="18" height="45" fill="#0F6E6E"/>
+      <rect x="182" y="40" width="18" height="60" fill="#0F6E6E"/>
+      <rect x="208" y="10" width="18" height="90" fill="#8FB6DC" opacity=".5"/>
+      <rect x="234" y="65" width="18" height="35" fill="#0F6E6E"/>
+      <rect x="260" y="48" width="18" height="52" fill="#0F6E6E"/>
+    </g>
+    <rect x="172" y="276" width="348" height="106" rx="8" fill="#123A66"/>
+    <rect x="190" y="292" width="200" height="7" rx="3" fill="#3E6690"/>
+    <rect x="190" y="310" width="312" height="1" fill="#2C4E75"/>
+    <rect x="190" y="322" width="90" height="7" rx="3" fill="#8FB6DC"/>
+    <rect x="300" y="322" width="60" height="7" rx="3" fill="#8FB6DC"/>
+    <rect x="470" y="322" width="32" height="7" rx="3" fill="#0F6E6E"/>
+    <rect x="190" y="340" width="90" height="7" rx="3" fill="#8FB6DC"/>
+    <rect x="300" y="340" width="60" height="7" rx="3" fill="#8FB6DC"/>
+    <rect x="470" y="340" width="32" height="7" rx="3" fill="#E0A82E"/>
+    <rect x="190" y="358" width="90" height="7" rx="3" fill="#8FB6DC"/>
+    <rect x="300" y="358" width="60" height="7" rx="3" fill="#8FB6DC"/>
+    <rect x="470" y="358" width="32" height="7" rx="3" fill="#0F6E6E"/>
+  </svg>`;
+}
+
+function view_main(){
+  const cards=[
+    ['library','recon','Report Library','Browse all 19 standard Oracle ARCS reports by category.'],
+    ['binder','binder','Report Binders','Assemble and validate a period-end binder package.'],
+    ['scenarios','scenario','Training Scenarios','Guided, step-by-step walkthroughs of real ARCS workflows.'],
+    ['practice','practice','Practice Mode','Free-form tasks with immediate feedback.'],
+    ['exam','exam','Exam Mode','Original scenario-based assessment questions.'],
+    ['analytics','dashboard','Analytics','Illustrative dashboards across every report family.']
+  ];
+  return `
+  <div class="hero">
+    <div class="hero-text">
+      <h1>ORACLE ARCS — Reports &amp; Report Binders</h1>
+      <p>Welcome${S.user.name?', '+esc(S.user.name):''}. Practice generating reports, building report binders, and completing period-end packages in a safe, original training environment.</p>
+    </div>
+    <div class="hero-image">${heroDashboardSVG()}</div>
+  </div>
+  <div class="cardgrid">
+    ${cards.map(([id,ic,t,d])=>`
+      <button class="menucard" data-nav="${id}">
+        ${icon(ic,'menuicon')}
+        <div class="menucard-title">${t}</div>
+        <div class="menucard-desc">${d}</div>
+        <div class="menucard-go">Open →</div>
+      </button>`).join('')}
+  </div>
+  <div class="panel">
+    <h2>Report generation flow</h2>
+    ${smartArtFlow(['Select Report','Set Parameters','Run','Validate','Preview','Select Format','Export','Review'])}
+  </div>`;
+}
+
+function smartArtFlow(steps){
+  return `<div class="flow">${steps.map((s,i)=>`<div class="flowstep"><div class="flowbox">${esc(s)}</div>${i<steps.length-1?`<div class="flowarrow">${icon('arrow')}</div>`:''}</div>`).join('')}</div>`;
+}
+function smartArtTree(root,items){
+  return `<div class="tree"><div class="treeroot">${esc(root)}</div><div class="treekids">${items.map(i=>`<div class="treekid">${esc(i)}</div>`).join('')}</div></div>`;
+}
+
+function view_library(){
+  let cats=Object.entries(REPORT_CATALOG).map(([cat,reps])=>`
+    <div class="panel">
+      <h2 class="cathead">${icon(CATEGORY_ICON[cat],'cathead-icon')}${esc(cat)}</h2>
+      <div class="reportgrid">
+        ${reps.map(r=>`
+          <button class="reportcard" data-open-report="${r.id}">
+            ${icon(CATEGORY_ICON[cat],'reportcard-icon')}
+            <div class="reportcard-name">${esc(r.name)}</div>
+            <div class="reportcard-desc">${esc(r.desc)}</div>
+          </button>`).join('')}
+      </div>
+    </div>`).join('');
+  return `<h1 class="pagetitle">Report Library <span class="dim sm">19 standard reports</span></h1>${cats}`;
+}
+
+function view_params(){
+  const r=findReport(S.activeReport);
+  if(!r)return view_library();
+  const fields=['Period','Entity','Account','Status','Risk','Preparer','Reviewer'];
+  const opts={Period:['Jun-2026','May-2026','Apr-2026'],Entity:['All',...ENTITIES],Account:['All',...ACCOUNTS],Status:['All',...STATUS],Risk:['All',...RISK],Preparer:['All',...PREPARERS],Reviewer:['All',...REVIEWERS]};
+  return `
+   <button class="linkback" data-nav="library">← Back to Report Library</button>
+   <h1 class="pagetitle">${icon(CATEGORY_ICON[categoryOf(r.id)],'title-icon')}${esc(r.name)}</h1>
+   <p class="dim">${esc(r.desc)}</p>
+   <div class="panel">
+     <h2>Report Parameters</h2>
+     <div class="paramgrid">
+       ${fields.map(f=>`
+         <div class="fgroup">
+           <label class="flabel">${f}</label>
+           <select data-param="${f}">
+             ${opts[f].map(o=>`<option ${S.activeParams[f]===o?'selected':''}>${esc(o)}</option>`).join('')}
+           </select>
+         </div>`).join('')}
+     </div>
+     <div class="btnrow">
+       <button class="btn primary" id="runReportBtn">RUN REPORT</button>
+       <button class="btn ghost" id="resetParamsBtn">RESET</button>
+     </div>
+   </div>`;
+}
+
+function exportRow(){
+  return `<div class="btnrow" style="margin-top:10px">
+    ${['PDF','XLSX','CSV','HTML'].map(f=>`<button class="btn outline sm" data-export="${f}">${f}</button>`).join('')}
+    <span class="dim sm" style="align-self:center;margin-left:8px">Illustrative Training Output</span>
+  </div>`;
+}
+
+function reportHeader(r){
+  return `
+  <div class="reportmeta">
+    <div><span class="dim sm">Report</span><div class="rmv">${esc(r.name)}</div></div>
+    <div><span class="dim sm">Period</span><div class="rmv">${esc(S.activeParams.Period)}</div></div>
+    <div><span class="dim sm">Entity</span><div class="rmv">${esc(S.activeParams.Entity)}</div></div>
+    <div><span class="dim sm">Generated</span><div class="rmv">Aug 14, 2026</div></div>
+  </div>`;
+}
+
+function view_preview(){
+  const r=findReport(S.activeReport);
+  if(!r)return view_library();
+  let body='';
+  switch(r.id){
+    case 'open-recon': body=preview_openRecon(); break;
+    case 'aging-analysis': body=preview_aging(); break;
+    case 'balance-analysis': body=preview_balance(); break;
+    case 'late-recon': body=preview_lateRecon(); break;
+    case 'unexplained-diff': body=preview_unexplained(); break;
+    case 'rejected-recon': body=preview_rejected(); break;
+    case 'audit-report': body=preview_generic(r,'Audit trail');break;
+    default: body=preview_generic(r,r.name);
+  }
+  return `
+   <button class="linkback" data-nav="params" data-open-report="${r.id}">← Back to Parameters</button>
+   <h1 class="pagetitle">${esc(r.name)} — Preview</h1>
+   ${reportHeader(r)}
+   <div class="panel">${body}${exportRow()}</div>`;
+}
+
+function preview_generic(r,chartTitle){
+  const rows=rowsForReport(r.id);
+  const numCol=Object.keys(rows[0]).find(c=>typeof rows[0][c]==='number');
+  const chart=numCol?barChart(rows.slice(0,8).map(x=>String(x[Object.keys(x)[0]]).slice(0,10)),rows.slice(0,8).map(x=>x[numCol])):'';
+  return `
+   <h2>Summary</h2>
+   <div class="kpirow">
+     <div class="kpi"><div class="kpiv">${rows.length}</div><div class="kpil">Rows Returned</div></div>
+     <div class="kpi"><div class="kpiv">${new Set(rows.map(x=>x.Status||x.Risk||'')).size||'—'}</div><div class="kpil">Distinct Status/Risk</div></div>
+     <div class="kpi"><div class="kpiv">${S.activeParams.Period}</div><div class="kpil">Period</div></div>
+   </div>
+   ${chart?`<h2>${esc(chartTitle)}</h2>${chart}`:''}
+   <h2>Detail</h2>
+   <div id="tableHost">${dataTable(rows)}</div>`;
+}
+
+function preview_lateRecon(){
+  const rows=rowsForReport('late-recon');
+  const chart=barChart(rows.map(r=>r.Account.split('-')[0]),rows.map(r=>r['Days Late']),{color:'var(--amber)'});
+  return `<h2>Aging of Late Items (days late)</h2>${chart}<h2>Detail</h2><div id="tableHost">${dataTable(rows)}</div>`;
+}
+
+function preview_rejected(){
+  const rows=rowsForReport('rejected-recon');
+  const counts={};rows.forEach(r=>counts[r.Reason]=(counts[r.Reason]||0)+1);
+  const chart=barChart(Object.keys(counts).map(k=>k.slice(0,12)),Object.values(counts),{color:'var(--coral)'});
+  return `<h2>Rejections by Reason</h2>${chart}<h2>Detail</h2><div id="tableHost">${dataTable(rows)}</div>`;
+}
+
+function preview_unexplained(){
+  const rows=rowsForReport('unexplained-diff');
+  const chart=lineChart(rows.map((r,i)=>'W'+(i+1)),rows.map(r=>r.Difference));
+  return `<h2>Difference Trend</h2>${chart}<h2>Detail</h2><div id="tableHost">${dataTable(rows)}</div>`;
+}
+
+function preview_openRecon(){
+  const rows=genReconStatusRows('open-recon',18);
+  const counts={Open:rows.filter(r=>['Not Started','In Progress'].includes(r.Status)).length,
+    Completed:rows.filter(r=>['Approved'].includes(r.Status)).length,
+    Late:rows.filter((r,i)=>i%4===0).length,
+    'High Risk':rows.filter(r=>r.Risk==='High').length};
+  let filtered=rows;
+  if(S.openKpiFilter==='Open')filtered=rows.filter(r=>['Not Started','In Progress'].includes(r.Status));
+  else if(S.openKpiFilter==='Completed')filtered=rows.filter(r=>r.Status==='Approved');
+  else if(S.openKpiFilter==='High Risk')filtered=rows.filter(r=>r.Risk==='High');
+  return `
+   <h2>Open Reconciliations — KPIs</h2>
+   <div class="kpirow clickable">
+     ${Object.entries(counts).map(([k,v])=>`<button class="kpi kpibtn ${S.openKpiFilter===k?'active':''}" data-kpi="${k}"><div class="kpiv">${v}</div><div class="kpil">${k}</div></button>`).join('')}
+     <button class="kpi kpibtn ${S.openKpiFilter==='All'?'active':''}" data-kpi="All"><div class="kpiv">${rows.length}</div><div class="kpil">All</div></button>
+   </div>
+   <h2>Detail ${S.openKpiFilter!=='All'?'— filtered: '+esc(S.openKpiFilter):''}</h2>
+   <div id="tableHost">${dataTable(filtered)}</div>`;
+}
+
+function preview_aging(){
+  const rnd=seededRand('aging');
+  const buckets=['0–7','8–30','31–60','61–90','90+'];
+  const counts=buckets.map(()=>2+Math.floor(rnd()*9));
+  const active=S.activeParams._agingBucket;
+  const rows=genUnexplainedRows('aging-detail',20).map((r,i)=>({...r,Bucket:buckets[i%buckets.length]}));
+  const filtered=active?rows.filter(r=>r.Bucket===active):rows;
+  return `
+   <h2>Aging Buckets (days open)</h2>
+   <div class="kpirow clickable">
+     ${buckets.map((b,i)=>`<button class="kpi kpibtn ${active===b?'active':''}" data-bucket="${b}"><div class="kpiv">${counts[i]}</div><div class="kpil">${b} days</div></button>`).join('')}
+     <button class="kpi kpibtn ${!active?'active':''}" data-bucket="">​<div class="kpiv">${counts.reduce((a,b)=>a+b,0)}</div><div class="kpil">All</div></button>
+   </div>
+   <h2>Open Items ${active?'— filtered: '+esc(active)+' days':''}</h2>
+   <div id="tableHost">${dataTable(filtered)}</div>`;
+}
+
+function preview_balance(){
+  const rnd=seededRand('balance-'+S.activeParams.Account);
+  const begin=Math.round(rnd()*400000*100)/100;
+  const activity=Math.round((rnd()*120000-40000)*100)/100;
+  const adj=Math.round((rnd()*8000-4000)*100)/100;
+  const end=Math.round((begin+activity+adj)*100)/100;
+  return `
+   <h2>Balance Bridge — ${esc(S.activeParams.Account)}</h2>
+   <div class="bridge">
+     <div class="bstep"><div class="blabel">Beginning Balance</div><div class="bval">${money(begin)}</div></div>
+     <div class="bop">+</div>
+     <div class="bstep"><div class="blabel">Activity</div><div class="bval">${money(activity)}</div></div>
+     <div class="bop">+</div>
+     <div class="bstep"><div class="blabel">Adjustments</div><div class="bval">${money(adj)}</div></div>
+     <div class="bop">=</div>
+     <div class="bstep total"><div class="blabel">Ending Balance</div><div class="bval">${money(end)}</div></div>
+   </div>
+   <h2>Movement</h2>
+   ${barChart(['Beginning','Activity','Adjustments','Ending'],[begin,activity,adj,end])}`;
+}
+
+/* ============================================================
+   REPORT BINDER BUILDER
+   ============================================================ */
+function view_binder(){
+  const b=S.binder;
+  return `
+  <h1 class="pagetitle">${icon('binder','title-icon')}Oracle ARCS Report Binder Builder</h1>
+  <div class="panel">
+    <h2>Create Binder</h2>
+    <div class="paramgrid">
+      <div class="fgroup"><label class="flabel">Binder Name</label><input id="binderName" type="text" value="${esc(b.name)}" placeholder="e.g. June 2026 Period-End Package"/></div>
+      <div class="fgroup"><label class="flabel">Period</label><input id="binderPeriod" type="text" value="${esc(b.period)}"/></div>
+      <div class="fgroup"><label class="flabel">Entity</label><input id="binderEntity" type="text" value="${esc(b.entity)}"/></div>
+      <div class="fgroup" style="grid-column:1/-1"><label class="flabel">Description</label><input id="binderDesc" type="text" value="${esc(b.desc)}" placeholder="Optional"/></div>
+    </div>
+    <div class="btnrow"><button class="btn primary" id="createBinderBtn">CREATE BINDER</button></div>
+  </div>
+
+  <div class="panel">
+    <h2>Binder Components</h2>
+    <p class="dim sm">Add each component to build the package. Click a component in the tree to preview it.</p>
+    <div class="compgrid">
+      ${S.binderAllComponents.map(c=>`
+        <button class="comptoggle ${b.components.includes(c)?'on':''}" data-comp="${c}">
+          ${icon(COMPONENT_ICON[c],'comp-icon')}${b.components.includes(c)?'✓ ':'+ '}${esc(c)}
+        </button>`).join('')}
+    </div>
+    <h2>Binder Structure</h2>
+    ${smartArtTree('REPORT BINDER',S.binderAllComponents.map(c=>(b.components.includes(c)?'✓ ':'○ ')+c))}
+  </div>
+
+  <div class="panel">
+    <h2>Binder Preview</h2>
+    ${binderPreviewHtml()}
+  </div>
+
+  <div class="panel">
+    <h2>Binder Validation</h2>
+    <div class="btnrow"><button class="btn primary" id="validateBinderBtn">VALIDATE BINDER</button></div>
+    <div id="binderValidationResult">${S.binder._validated?binderValidationHtml():''}</div>
+  </div>`;
+}
+function binderPreviewHtml(){
+  const b=S.binder;
+  if(!b.name)return `<div class="empty">Create a binder above to see its preview.</div>`;
+  return `
+   <div class="binderdoc">
+     <div class="binderdoc-head">ORACLE ARCS</div>
+     <div class="binderdoc-title">${esc(b.period.toUpperCase())}<br/>PERIOD-END REPORT BINDER</div>
+     <div class="dim sm center">${esc(b.name)} · ${esc(b.entity)}</div>
+     <h3>Table of Contents</h3>
+     <ol>
+       ${(b.components.length?b.components:S.binderAllComponents.filter(c=>c!=='Cover')).filter(c=>c!=='Cover').map(c=>`<li>${esc(c)}</li>`).join('')}
+     </ol>
+     <div class="dim sm center" style="margin-top:10px">"Illustrative Training Binder"</div>
+   </div>`;
+}
+function binderValidationHtml(){
+  const missing=S.binderAllComponents.filter(c=>!S.binder.components.includes(c));
+  if(missing.length===0){
+    return `<div class="validbox ok">✓ COMPLETE — all 9 binder components are present.</div>`;
+  }
+  return `<div class="validbox warn">⚠ MISSING COMPONENTS: ${missing.map(esc).join(', ')}</div>`;
+}
+
+/* ============================================================
+   SCENARIOS
+   ============================================================ */
+function view_scenarios(){
+  return `
+  <h1 class="pagetitle">${icon('scenario','title-icon')}Business Scenarios <span class="dim sm">Training Mode — guided walkthroughs</span></h1>
+  <div class="panel">
+    <h2>Oracle ARCS period-end scenario</h2>
+    <p><em>"You are the Controller preparing the June 2026 Oracle ARCS period-end reporting package."</em></p>
+    ${smartArtFlow(['Recon Status','Late Recons','Aging Analysis','Audit Report','Add Details','Add Attachments','Add Workflow History','Add Certifications','Add Exceptions','Validate Binder'])}
+  </div>
+  <div class="scenariolist">
+    ${SCENARIOS.map(sc=>`
+      <div class="scenariocard ${S.scenarioProgress[sc.id]?'done':''}">
+        <div class="scenariocard-head">
+          ${icon('scenario','scenario-icon')}
+          <span class="scnum">${sc.id}</span>
+          <span class="scname">${esc(sc.title)}</span>
+          ${S.scenarioProgress[sc.id]?'<span class="badge">Completed</span>':''}
+        </div>
+        <div class="scenariobody">
+          <div><b>Situation</b><p>${esc(sc.situation)}</p></div>
+          <div><b>Objective</b><p>${esc(sc.objective)}</p></div>
+          <div><b>Required Action</b><p>${esc(sc.action)}</p></div>
+          <div><b>Expected Result</b><p>${esc(sc.expected)}</p></div>
+          ${S.scenarioProgress[sc.id]?`<div class="feedback"><b>Feedback</b><p>${esc(sc.feedback)}</p></div>`:''}
+        </div>
+        <div class="btnrow">
+          ${sc.reportId?`<button class="btn outline sm" data-nav="params" data-open-report="${sc.reportId}">Open Report</button>`:`<button class="btn outline sm" data-nav="binder">Open Binder Builder</button>`}
+          ${!S.scenarioProgress[sc.id]?`<button class="btn primary sm" data-complete-scenario="${sc.id}">Mark Complete</button>`:''}
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ============================================================
+   PRACTICE MODE
+   ============================================================ */
+function view_practice(){
+  return `
+  <h1 class="pagetitle">${icon('practice','title-icon')}Practice Mode</h1>
+  <div class="panel">
+    <h2>Task</h2>
+    <p>"Generate a Late Reconciliation report and identify the oldest high-risk item."</p>
+    <div class="btnrow">
+      <button class="btn primary" data-nav="params" data-open-report="late-recon">Open Late Reconciliations</button>
+      <button class="btn ghost" id="practiceCheckBtn">I found it — check my answer</button>
+    </div>
+    <div id="practiceResult"></div>
+  </div>
+  <div class="panel">
+    <h2>More practice tasks</h2>
+    <ul class="tasklist">
+      <li>Run Aging Analysis and click the 90+ bucket to isolate the oldest exposure.</li>
+      <li>Run Open Reconciliations and filter to High Risk using the KPI cards.</li>
+      <li>Build a Report Binder with all 9 components and validate it.</li>
+      <li>Run Audit Report and find the most recent Rejected action.</li>
+    </ul>
+  </div>`;
+}
+
+/* ============================================================
+   EXAM MODE
+   ============================================================ */
+function view_exam(){
+  if(S.exam.submitted){
+    const correct=EXAM_QUESTIONS.filter((q,i)=>S.exam.answers[i]===q.a).length;
+    const pct=Math.round(correct/EXAM_QUESTIONS.length*100);
+    return `
+    <h1 class="pagetitle">Exam Results</h1>
+    <div class="panel center">
+      <div class="scorebig">${pct}%</div>
+      <div class="dim">${correct} of ${EXAM_QUESTIONS.length} correct</div>
+      <div class="badge ${pct>=80?'pass':'retry'}" style="margin-top:10px">${pct>=80?'PASSED':'RETRY RECOMMENDED'}</div>
+      <div class="btnrow center" style="margin-top:16px">
+        <button class="btn primary" id="retakeExamBtn">Retake Exam</button>
+        <button class="btn ghost" data-nav="main">Return to Menu</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Review</h2>
+      ${EXAM_QUESTIONS.map((q,i)=>`
+        <div class="reviewq">
+          <div><b>${i+1}. ${esc(q.q)}</b></div>
+          <div class="${S.exam.answers[i]===q.a?'ok':'bad'}">Your answer: ${esc(q.options[S.exam.answers[i]]??'—')} ${S.exam.answers[i]===q.a?'✓':'✗ (correct: '+esc(q.options[q.a])+')'}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+  const i=S.exam.qIndex,q=EXAM_QUESTIONS[i];
+  return `
+  <h1 class="pagetitle">${icon('exam','title-icon')}Exam Mode <span class="dim sm">Question ${i+1} of ${EXAM_QUESTIONS.length}</span></h1>
+  <div class="panel">
+    <div class="examprogress"><div class="examprogress-fill" style="width:${(i/EXAM_QUESTIONS.length)*100}%"></div></div>
+    <h2 style="margin-top:16px">${esc(q.q)}</h2>
+    <div class="examoptions">
+      ${q.options.map((o,oi)=>`<button class="examopt ${S.exam.answers[i]===oi?'selected':''}" data-exam-answer="${oi}">${esc(o)}</button>`).join('')}
+    </div>
+    <div class="btnrow" style="margin-top:20px">
+      <button class="btn ghost" id="examPrevBtn" ${i===0?'disabled':''}>Previous</button>
+      ${i<EXAM_QUESTIONS.length-1?`<button class="btn primary" id="examNextBtn" ${S.exam.answers[i]===undefined?'disabled':''}>Next</button>`:`<button class="btn primary" id="examSubmitBtn" ${S.exam.answers[i]===undefined?'disabled':''}>Submit Exam</button>`}
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   ANALYTICS
+   ============================================================ */
+function view_analytics(){
+  const rnd=seededRand('analytics');
+  const series=[
+    ['Reconciliation Status',['Not Started','In Progress','Submitted','Approved'],[4,7,5,12]],
+    ['Late Reconciliations',['0-7','8-14','15-21','22+'],[6,4,3,2]],
+    ['Aging',['0–7','8–30','31–60','61–90','90+'],[9,7,5,4,3]],
+    ['Unexplained Differences',['W1','W2','W3','W4'],[2,5,3,6]],
+    ['Rejections',['No Attach','Balance','Comment','Risk'],[3,5,2,4]],
+    ['Unmatched Transactions',['Bank A','Bank B','ERP','Card'],[11,6,9,4]],
+    ['Match-Rule Statistics',['R1','R2','R3','R4','R5'],[88,72,95,64,80]],
+    ['Data-Load Results',['Loaded','Warnings','Errors'],[22,4,1]]
+  ];
+  return `
+  <h1 class="pagetitle">${icon('dashboard','title-icon')}Analytics <span class="dim sm">Illustrative Training Data</span></h1>
+  <div class="anagrid">
+    ${series.map(([title,labels,vals])=>`
+      <div class="panel">
+        <h2>${esc(title)}</h2>
+        ${barChart(labels,vals,{w:300,h:170})}
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ============================================================
+   HELP
+   ============================================================ */
+function view_help(){
+  return `
+  <h1 class="pagetitle">Help</h1>
+  <div class="panel">
+    <h2>About this simulator</h2>
+    <p>This is an original BISP Trainings simulator inspired by Oracle Account Reconciliation Cloud Service (ARCS) — specifically the Reports and Report Binders module. It does not reproduce Oracle's actual UI, screenshots, or proprietary graphics, and all data shown is fictional.</p>
+    <h2>How to move around</h2>
+    <ul class="tasklist">
+      <li><b>Report Library</b> — browse the 19 standard reports by category, set parameters, and run them.</li>
+      <li><b>Report Binders</b> — assemble a period-end binder from 9 components and validate it.</li>
+      <li><b>Training Scenarios</b> — 8 guided real-world walkthroughs.</li>
+      <li><b>Practice Mode</b> — a free-form task with a self-check.</li>
+      <li><b>Exam Mode</b> — 8 original scenario-based questions with scoring.</li>
+      <li><b>Analytics</b> — dashboards summarizing every report family.</li>
+    </ul>
+    <div class="btnrow"><button class="btn primary" data-nav="main">Back to Home</button></div>
+  </div>`;
+}
+
+/* ============================================================
+   COMPLETION
+   ============================================================ */
+function view_completion(){
+  const sc=S.scoring;
+  const elapsed=sc.startTime?Math.round((Date.now()-sc.startTime)/1000):0;
+  const mm=String(Math.floor(elapsed/60)).padStart(2,'0'),ss=String(elapsed%60).padStart(2,'0');
+  const total=sc.correctActions+sc.incorrectActions;
+  const pct=total?Math.round(sc.correctActions/total*100):100;
+  return `
+  <div class="completewrap">
+    <img src="${LOGO_SRC}" class="bisplogo lg"/>
+    <h1>ORACLE ARCS</h1>
+    <h2>CONGRATULATIONS!</h2>
+    <p class="loginsub">Reports and Report Binders<br/>Training Completed</p>
+    <div class="kpirow">
+      <div class="kpi"><div class="kpiv">${sc.reportsCompleted}</div><div class="kpil">Reports Generated</div></div>
+      <div class="kpi"><div class="kpiv">${sc.scenariosCompleted}</div><div class="kpil">Scenarios Completed</div></div>
+      <div class="kpi"><div class="kpiv">${S.binder._validated?'Yes':'No'}</div><div class="kpil">Binder Validated</div></div>
+      <div class="kpi"><div class="kpiv">${pct}%</div><div class="kpil">Score</div></div>
+      <div class="kpi"><div class="kpiv">${mm}:${ss}</div><div class="kpil">Time Taken</div></div>
+    </div>
+    <div class="btnrow center"><button class="btn primary" data-nav="main">Return to Home</button></div>
+    <div class="dim sm" style="margin-top:22px">BISP Trainings · www.bisptrainings.com · Call Us: +91 769-409-5404</div>
+    <div class="dim sm">© BISP Trainings | www.bisptrainings.com</div>
+  </div>`;
+}
+
+/* ============================================================
+   ROUTER + EVENT BINDING
+   ============================================================ */
+function renderCurrent(){
+  let html='';
+  const fab=document.querySelector('.fab');
+  if(S.view==='login'){ app.innerHTML=view_login(); bindLogin(); if(fab)fab.style.display='none'; return; }
+  if(fab)fab.style.display='block';
+  switch(S.view){
+    case 'main': html=chrome(view_main(),'main'); break;
+    case 'library': html=chrome(view_library(),'library'); break;
+    case 'params': html=chrome(view_params(),'library'); break;
+    case 'preview': html=chrome(view_preview(),'library'); break;
+    case 'binder': html=chrome(view_binder(),'binder'); break;
+    case 'scenarios': html=chrome(view_scenarios(),'scenarios'); break;
+    case 'practice': html=chrome(view_practice(),'practice'); break;
+    case 'exam': html=chrome(view_exam(),'exam'); break;
+    case 'analytics': html=chrome(view_analytics(),'analytics'); break;
+    case 'help': html=chrome(view_help(),'help'); break;
+    case 'completion': html=chrome(view_completion(),'main'); break;
+    default: html=chrome(view_main(),'main');
+  }
+  app.innerHTML=html;
+  bindGlobal();
+  bindViewSpecific();
+}
+
+function goTo(view){S.view=view;window.scrollTo(0,0);renderCurrent();}
+
+function bindLogin(){
+  document.getElementById('loginBtn').addEventListener('click',()=>{
+    const name=document.getElementById('loginName').value.trim();
+    const role=document.getElementById('loginRole').value;
+    S.user.name=name||'Guest Learner';
+    S.user.role=role;
+    S.scoring.startTime=Date.now();
+    goTo('main');
+  });
+}
+
+function bindGlobal(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const rid=el.getAttribute('data-open-report');
+      if(rid){S.activeReport=rid;S.tableFilter='';S.tableSort={col:null,dir:1};S.openKpiFilter='All';}
+      goTo(el.getAttribute('data-nav'));
+    });
+  });
+}
+
+function bindViewSpecific(){
+  switch(S.view){
+    case 'library':
+      document.querySelectorAll('[data-open-report]').forEach(el=>{
+        if(el.hasAttribute('data-nav'))return; // already bound
+        el.addEventListener('click',()=>{S.activeReport=el.getAttribute('data-open-report');S.tableFilter='';S.tableSort={col:null,dir:1};goTo('params');});
+      });
+      break;
+    case 'params':
+      document.querySelectorAll('[data-param]').forEach(sel=>sel.addEventListener('change',e=>{S.activeParams[sel.getAttribute('data-param')]=e.target.value;}));
+      const runBtn=document.getElementById('runReportBtn');
+      if(runBtn)runBtn.addEventListener('click',()=>{S.scoring.reportsCompleted++;toast('Report generated successfully.');goTo('preview');});
+      const resetBtn=document.getElementById('resetParamsBtn');
+      if(resetBtn)resetBtn.addEventListener('click',()=>{S.activeParams={Period:'Jun-2026',Entity:'All',Account:'All',Status:'All',Risk:'All',Preparer:'All',Reviewer:'All'};renderCurrent();});
+      break;
+    case 'preview': {
+      const host=document.getElementById('tableHost');
+      if(host)bindTable(host,rowsForReport(S.activeReport));
+      document.querySelectorAll('[data-export]').forEach(b=>b.addEventListener('click',()=>toast('Illustrative '+b.getAttribute('data-export')+' export generated.')));
+      document.querySelectorAll('[data-kpi]').forEach(b=>b.addEventListener('click',()=>{S.openKpiFilter=b.getAttribute('data-kpi');renderCurrent();}));
+      document.querySelectorAll('[data-bucket]').forEach(b=>b.addEventListener('click',()=>{S.activeParams._agingBucket=b.getAttribute('data-bucket')||null;renderCurrent();}));
+      break;
+    }
+    case 'binder': {
+      const nameEl=document.getElementById('binderName'),periodEl=document.getElementById('binderPeriod'),entEl=document.getElementById('binderEntity'),descEl=document.getElementById('binderDesc');
+      [nameEl,periodEl,entEl,descEl].forEach(el=>{if(!el)return;el.addEventListener('input',()=>{S.binder.name=nameEl.value;S.binder.period=periodEl.value;S.binder.entity=entEl.value;S.binder.desc=descEl.value;});});
+      const createBtn=document.getElementById('createBinderBtn');
+      if(createBtn)createBtn.addEventListener('click',()=>{
+        if(!S.binder.name){toast('Enter a binder name first.');return;}
+        S.binder._validated=false;toast('Binder "'+S.binder.name+'" created.');renderCurrent();
+      });
+      document.querySelectorAll('[data-comp]').forEach(b=>b.addEventListener('click',()=>{
+        const c=b.getAttribute('data-comp');
+        const idx=S.binder.components.indexOf(c);
+        if(idx>-1)S.binder.components.splice(idx,1); else {S.binder.components.push(c);S.scoring.binderTasksCompleted++;}
+        S.binder._validated=false;
+        renderCurrent();
+      }));
+      const valBtn=document.getElementById('validateBinderBtn');
+      if(valBtn)valBtn.addEventListener('click',()=>{
+        S.binder._validated=true;
+        const complete=S.binder.components.length===S.binderAllComponents.length;
+        if(complete){S.scoring.correctActions++;toast('Binder validated — COMPLETE.');}
+        else{S.scoring.incorrectActions++;toast('Binder validated — missing components.');}
+        renderCurrent();
+      });
+      break;
+    }
+    case 'scenarios':
+      document.querySelectorAll('[data-complete-scenario]').forEach(b=>b.addEventListener('click',()=>{
+        const id=b.getAttribute('data-complete-scenario');
+        if(!S.scenarioProgress[id]){S.scenarioProgress[id]=true;S.scoring.scenariosCompleted++;S.scoring.correctActions++;}
+        toast('Scenario marked complete.');
+        renderCurrent();
+      }));
+      break;
+    case 'practice': {
+      const btn=document.getElementById('practiceCheckBtn');
+      if(btn)btn.addEventListener('click',()=>{
+        const rows=genLateRows('late-recon');
+        const oldest=rows[0];
+        document.getElementById('practiceResult').innerHTML=`<div class="validbox ok" style="margin-top:14px">Oldest high-risk item: <b>${esc(oldest.Account)}</b> at <b>${esc(oldest.Entity)}</b> — ${oldest['Days Late']} days late, owner ${esc(oldest.Owner)}.</div>`;
+        S.scoring.correctActions++;
+      });
+      break;
+    }
+    case 'exam': {
+      document.querySelectorAll('[data-exam-answer]').forEach(b=>b.addEventListener('click',()=>{
+        S.exam.answers[S.exam.qIndex]=parseInt(b.getAttribute('data-exam-answer'),10);
+        renderCurrent();
+      }));
+      const prev=document.getElementById('examPrevBtn'); if(prev)prev.addEventListener('click',()=>{S.exam.qIndex--;renderCurrent();});
+      const next=document.getElementById('examNextBtn'); if(next)next.addEventListener('click',()=>{S.exam.qIndex++;renderCurrent();});
+      const submit=document.getElementById('examSubmitBtn'); if(submit)submit.addEventListener('click',()=>{
+        S.exam.submitted=true;
+        const correct=EXAM_QUESTIONS.filter((q,i)=>S.exam.answers[i]===q.a).length;
+        S.scoring.correctActions+=correct;S.scoring.incorrectActions+=(EXAM_QUESTIONS.length-correct);
+        renderCurrent();
+      });
+      const retake=document.getElementById('retakeExamBtn'); if(retake)retake.addEventListener('click',()=>{S.exam={qIndex:0,answers:[],submitted:false};renderCurrent();});
+      break;
+    }
+  }
+  // universal: allow finishing to completion screen from Help footer shortcut
+}
+
+/* Finish button injected into subnav via keyboard shortcut area: add a floating action */
+function addFinishFab(){
+  const fab=document.createElement('button');
+  fab.className='fab';
+  fab.textContent='Finish Training →';
+  fab.addEventListener('click',()=>goTo('completion'));
+  fab.style.display='none';
+  document.body.appendChild(fab);
+}
+
+/* ---------- init ---------- */
+renderCurrent();
+addFinishFab();
+
+</script>
+</body>
+</html>
