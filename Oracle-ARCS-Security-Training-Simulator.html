@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle ARCS — Security Model Training Simulator | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#081726;
+  --bg-grad:#0B2036;
+  --panel:#0F2740;
+  --panel-2:#13304F;
+  --panel-3:#173A5E;
+  --border:#1F3D5C;
+  --border-soft:#16314E;
+  --text:#E8EFF7;
+  --text-dim:#93A9C2;
+  --text-faint:#5E7691;
+  --accent:#2BD1E0;
+  --accent-dim:#1C8C97;
+  --violet:#7C89F2;
+  --amber:#F3B94E;
+  --green:#33D6A0;
+  --red:#F1596E;
+  --display:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --radius:14px;
+  --radius-sm:8px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 10% 0%, #0E2D48 0%, transparent 45%),
+    radial-gradient(circle at 90% 10%, #0C2A44 0%, transparent 40%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent);color:#04141C;}
+a{color:var(--accent);}
+button{font-family:var(--body);cursor:pointer;}
+.hidden{display:none !important;}
+.mono{font-family:var(--mono);}
+
+/* ===== scrollbar ===== */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+/* ===== LOGIN ===== */
+#view-login{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  position:relative;
+  overflow:hidden;
+}
+#view-login::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at 50% 40%, black, transparent 70%);
+  opacity:.5;
+  pointer-events:none;
+}
+.login-card{
+  position:relative;
+  width:100%;
+  max-width:440px;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:38px 36px 32px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(43,209,224,.04);
+  animation:riseIn .6s ease both;
+}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.login-logo-row{display:flex;align-items:center;gap:12px;margin-bottom:26px;}
+.login-logo-row img{height:34px;width:auto;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
+.login-brand-tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--text-faint);text-transform:uppercase;}
+
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--accent);
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:10px;
+}
+.eyebrow::before{content:"";width:16px;height:1px;background:var(--accent);}
+.login-title{
+  font-family:var(--display);
+  font-size:32px;
+  font-weight:600;
+  letter-spacing:-.01em;
+  line-height:1.1;
+  margin:0 0 4px;
+}
+.login-sub{
+  font-family:var(--display);
+  font-size:15px;
+  color:var(--text-dim);
+  margin:0 0 26px;
+  letter-spacing:.04em;
+}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px;font-family:var(--mono);}
+.field input, .field select{
+  width:100%;
+  background:#081A2B;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:11px 13px;
+  color:var(--text);
+  font-family:var(--body);
+  font-size:14px;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43,209,224,.15);}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px;}
+.role-chip{
+  border:1px solid var(--border);
+  background:#081A2B;
+  color:var(--text-dim);
+  border-radius:var(--radius-sm);
+  padding:9px 6px;
+  font-size:12px;
+  text-align:center;
+  transition:.15s;
+}
+.role-chip:hover{border-color:var(--accent-dim);color:var(--text);}
+.role-chip.selected{border-color:var(--accent);color:var(--accent);background:rgba(43,209,224,.08);box-shadow:0 0 0 1px var(--accent) inset;}
+.btn-primary{
+  width:100%;
+  background:linear-gradient(180deg,var(--accent),var(--accent-dim));
+  color:#05161F;
+  border:none;
+  border-radius:var(--radius-sm);
+  padding:13px;
+  font-weight:700;
+  font-size:14px;
+  letter-spacing:.03em;
+  box-shadow:0 8px 24px -8px rgba(43,209,224,.5);
+  transition:transform .12s, box-shadow .12s;
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 28px -6px rgba(43,209,224,.6);}
+.btn-primary:active{transform:translateY(0);}
+.login-hint{font-size:11px;color:var(--text-faint);text-align:center;margin-top:14px;font-family:var(--mono);}
+
+/* ===== APP SHELL ===== */
+#app-shell{display:none;min-height:100vh;grid-template-columns:236px 1fr;}
+#app-shell.active{display:grid;}
+.sidebar{
+  background:#081A2C;
+  border-right:1px solid var(--border-soft);
+  padding:18px 12px 18px;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sidebar-brand{display:flex;align-items:center;gap:9px;padding:6px 8px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:12px;}
+.sidebar-brand img{height:22px;}
+.sidebar-brand-text{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);text-transform:uppercase;line-height:1.4;}
+.nav-group-label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin:14px 10px 6px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;
+  border-radius:8px;
+  color:var(--text-dim);
+  font-size:13px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:.12s;
+  margin-bottom:2px;
+}
+.nav-item svg{flex:none;opacity:.8;}
+.nav-item:hover{background:var(--panel);color:var(--text);}
+.nav-item.active{background:rgba(43,209,224,.09);border-color:rgba(43,209,224,.35);color:var(--accent);}
+.nav-item.active svg{opacity:1;}
+.sidebar-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--border-soft);}
+.session-badge{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);padding:0 8px;line-height:1.6;}
+.session-badge b{color:var(--accent);}
+.logout-link{display:block;margin-top:8px;padding:7px 8px;font-size:12px;color:var(--red);border-radius:8px;}
+.logout-link:hover{background:rgba(241,89,110,.08);}
+
+.main{padding:26px 34px 60px;max-width:1220px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:12px;}
+.page-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.page-title{font-family:var(--display);font-size:26px;font-weight:600;margin:0;letter-spacing:-.01em;}
+.page-desc{color:var(--text-dim);font-size:13.5px;margin-top:6px;max-width:640px;line-height:1.5;}
+.progress-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:999px;padding:7px 14px;
+  font-family:var(--mono);font-size:11.5px;color:var(--text-dim);
+}
+.progress-pill b{color:var(--accent);}
+
+.view{display:none;animation:fadeUp .35s ease both;}
+.view.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== CARDS / GRIDS ===== */
+.grid{display:grid;gap:14px;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:1000px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+.card{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius);
+  padding:18px;
+  transition:.15s;
+}
+.card.hoverable:hover{border-color:var(--accent-dim);transform:translateY(-2px);box-shadow:0 12px 28px -14px rgba(0,0,0,.6);}
+.card.clickable{cursor:pointer;}
+
+.dash-card{display:flex;flex-direction:column;gap:10px;min-height:118px;}
+.dash-card-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(43,209,224,.1);color:var(--accent);
+  border:1px solid rgba(43,209,224,.25);
+}
+.dash-card h3{margin:0;font-family:var(--display);font-size:15px;font-weight:600;}
+.dash-card p{margin:0;color:var(--text-dim);font-size:12.5px;line-height:1.5;}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;text-transform:uppercase;font-weight:600;}
+.badge-green{background:rgba(51,214,160,.12);color:var(--green);border:1px solid rgba(51,214,160,.3);}
+.badge-red{background:rgba(241,89,110,.12);color:var(--red);border:1px solid rgba(241,89,110,.3);}
+.badge-amber{background:rgba(243,185,78,.12);color:var(--amber);border:1px solid rgba(243,185,78,.3);}
+.badge-neutral{background:rgba(147,169,194,.1);color:var(--text-dim);border:1px solid var(--border);}
+
+/* ===== FLOW / SMARTART ===== */
+.flow-vertical{display:flex;flex-direction:column;align-items:center;gap:0;margin:20px 0;}
+.flow-node{
+  width:100%;max-width:420px;
+  background:var(--panel-2);border:1px solid var(--border);
+  border-radius:10px;padding:13px 18px;
+  text-align:center;font-family:var(--display);font-weight:600;font-size:14px;
+  cursor:pointer;transition:.15s;position:relative;
+}
+.flow-node:hover{border-color:var(--accent);background:rgba(43,209,224,.06);}
+.flow-node .fn-idx{font-family:var(--mono);font-size:10px;color:var(--accent);display:block;margin-bottom:3px;letter-spacing:.1em;}
+.flow-arrow{color:var(--text-faint);font-size:18px;line-height:1;margin:2px 0;}
+.flow-pulse{position:absolute;left:50%;top:0;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px 3px var(--accent);transform:translateX(-50%);opacity:0;}
+
+.flow-horizontal{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:18px 0;}
+.fh-node{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:9px;
+  padding:9px 13px;font-size:12.5px;font-family:var(--mono);color:var(--text-dim);
+  white-space:nowrap;
+}
+.fh-node.on{border-color:var(--accent);color:var(--accent);background:rgba(43,209,224,.08);}
+.fh-node.blocked{border-color:var(--red);color:var(--red);background:rgba(241,89,110,.08);}
+.fh-node.ok{border-color:var(--green);color:var(--green);background:rgba(51,214,160,.08);}
+.fh-arrow{color:var(--text-faint);}
+
+/* ===== ROLE / DIMENSION CARDS ===== */
+.role-card{cursor:pointer;}
+.role-card .rc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.rc-avatar{width:34px;height:34px;border-radius:8px;background:var(--panel-3);display:flex;align-items:center;justify-content:center;color:var(--accent);font-family:var(--display);font-weight:700;font-size:14px;border:1px solid var(--border);}
+.role-card h4{margin:0;font-size:14px;font-family:var(--display);}
+.role-card p{margin:2px 0 0;font-size:12px;color:var(--text-dim);}
+
+.dim-wheel{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0;}
+@media(max-width:760px){.dim-wheel{grid-template-columns:repeat(2,1fr);}}
+.dim-item{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:12px;
+  padding:16px 10px;text-align:center;cursor:pointer;transition:.15s;
+}
+.dim-item:hover{border-color:var(--violet);background:rgba(124,137,242,.07);}
+.dim-item span{display:block;font-size:12.5px;font-family:var(--display);font-weight:600;margin-top:8px;}
+
+/* ===== SIMULATION PANELS ===== */
+.sim-panel{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:22px;margin-bottom:18px;}
+.sim-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.sim-controls .field{margin-bottom:0;min-width:170px;flex:1;}
+.result-box{
+  border-radius:10px;padding:16px 18px;margin-top:10px;
+  border:1px solid var(--border);background:var(--panel-2);
+  font-size:13.5px;line-height:1.6;
+}
+.result-box.allow{border-color:rgba(51,214,160,.4);background:rgba(51,214,160,.06);}
+.result-box.deny{border-color:rgba(241,89,110,.4);background:rgba(241,89,110,.06);}
+.result-title{font-family:var(--display);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.result-title.allow{color:var(--green);}
+.result-title.deny{color:var(--red);}
+
+.btn{
+  background:var(--panel-3);border:1px solid var(--border);color:var(--text);
+  padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;transition:.12s;
+}
+.btn:hover{border-color:var(--accent-dim);color:var(--accent);}
+.btn-accent{background:linear-gradient(180deg,var(--accent),var(--accent-dim));color:#05161F;border:none;box-shadow:0 6px 18px -6px rgba(43,209,224,.5);}
+.btn-accent:hover{color:#05161F;transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--border);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+
+table{width:100%;border-collapse:collapse;font-size:12.8px;}
+thead th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-faint);padding:9px 10px;border-bottom:1px solid var(--border);
+}
+tbody td{padding:10px 10px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+tbody td:first-child, thead th:first-child{padding-left:2px;}
+
+.entity-table{margin-top:10px;}
+.toggle-row{display:flex;gap:8px;margin-bottom:14px;}
+.toggle-btn{
+  padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);
+  font-size:13px;color:var(--text-dim);
+}
+.toggle-btn.active{border-color:var(--violet);color:var(--violet);background:rgba(124,137,242,.08);}
+
+/* ===== SCENARIO / MODAL ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(4,12,20,.72);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+}
+.overlay.active{display:flex;}
+.modal{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);border-radius:16px;
+  max-width:560px;width:100%;max-height:86vh;overflow-y:auto;
+  padding:26px 28px 24px;
+  animation:riseIn .25s ease both;
+}
+.modal-close{float:right;background:none;border:none;color:var(--text-faint);font-size:20px;line-height:1;padding:2px 6px;}
+.modal-close:hover{color:var(--text);}
+.modal h3{font-family:var(--display);font-size:19px;margin:0 0 4px;}
+.modal .modal-tag{font-family:var(--mono);font-size:10.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;display:block;}
+.modal-section{margin-top:14px;}
+.modal-section h5{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:0 0 5px;}
+.modal-section p, .modal-section li{font-size:13.5px;color:var(--text-dim);line-height:1.6;margin:0;}
+.modal-section ul{margin:0;padding-left:18px;}
+
+.scenario-card{cursor:pointer;}
+.scenario-card .sc-num{font-family:var(--mono);color:var(--accent);font-size:11px;}
+.scenario-card h4{margin:6px 0 4px;font-size:14.5px;font-family:var(--display);}
+.scenario-card p{margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.5;}
+
+.choice-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.choice-btn{
+  text-align:left;padding:11px 14px;border-radius:9px;border:1px solid var(--border);
+  background:var(--panel-2);color:var(--text);font-size:13px;
+}
+.choice-btn:hover{border-color:var(--accent-dim);}
+.choice-btn.correct{border-color:var(--green);background:rgba(51,214,160,.1);}
+.choice-btn.incorrect{border-color:var(--red);background:rgba(241,89,110,.1);}
+.choice-btn:disabled{cursor:default;}
+
+/* ===== KPI DASHBOARD ===== */
+.kpi-card{padding:16px 18px;}
+.kpi-value{font-family:var(--display);font-size:28px;font-weight:700;margin:2px 0;}
+.kpi-label{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
+.kpi-note{font-size:11px;color:var(--text-faint);margin-top:6px;}
+
+/* ===== EXAM ===== */
+.exam-progress{height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border-soft);}
+.exam-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--violet));transition:width .3s;}
+.exam-q-label{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.exam-q-text{font-family:var(--display);font-size:17px;font-weight:600;margin:0 0 16px;line-height:1.4;}
+
+/* ===== COMPLETION ===== */
+.completion-wrap{display:flex;align-items:center;justify-content:center;min-height:74vh;text-align:center;}
+.completion-card{max-width:480px;width:100%;padding:40px 36px;}
+.score-ring{width:150px;height:150px;margin:14px auto 6px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.score-ring-num b{font-family:var(--display);font-size:32px;}
+.score-ring-num span{font-family:var(--mono);font-size:10px;color:var(--text-faint);text-transform:uppercase;}
+.status-pill{display:inline-block;padding:7px 20px;border-radius:999px;font-family:var(--display);font-weight:700;font-size:14px;margin:14px 0 20px;}
+.completion-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+.completion-stats div{background:var(--panel-2);border:1px solid var(--border-soft);border-radius:10px;padding:12px 6px;}
+.completion-stats b{display:block;font-family:var(--display);font-size:19px;}
+.completion-stats span{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);text-transform:uppercase;}
+
+/* ===== FOOTER ===== */
+.app-footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--text-faint);font-size:11.5px;font-family:var(--mono);}
+.app-footer a{color:var(--text-faint);text-decoration:none;}
+.app-footer a:hover{color:var(--accent);}
+.footer-logo-row{display:flex;align-items:center;gap:8px;}
+.footer-logo-row img{height:16px;opacity:.85;}
+
+/* ===== timeline session-timeout widget ===== */
+.timeout-ring{width:120px;height:120px;margin:10px auto;position:relative;}
+.timeout-ring svg{transform:rotate(-90deg);}
+.timeout-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:22px;}
+
+@media(max-width:900px){
+  #app-shell.active{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;flex-direction:row;flex-wrap:wrap;overflow-x:auto;}
+  .sidebar-brand{border-bottom:none;margin-bottom:0;}
+  .nav-group-label{display:none;}
+  .sidebar-foot{display:none;}
+  .main{padding:20px 16px 50px;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="view-login">
+  <div class="login-card">
+    <div class="login-logo-row">
+      <img src="data:image/jpeg;base64,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" alt="BISP Trainings logo">
+      <div class="login-brand-tag">BISP Trainings<br>Enterprise Learning</div>
+    </div>
+    <div class="eyebrow">Oracle ARCS · Module 09</div>
+    <h1 class="login-title">Security Model</h1>
+    <p class="login-sub">Interactive Training Simulator</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-username">Username</label>
+        <input id="login-username" type="text" placeholder="e.g. priya.nair" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" placeholder="••••••••" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <div class="role-grid" id="login-role-grid"></div>
+      </div>
+      <button type="submit" class="btn-primary">Login to Simulator</button>
+    </form>
+    <p class="login-hint">All users, data and scenarios are fictional and for training purposes only.</p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <div class="sidebar-brand-text">BISP Trainings<br>Oracle ARCS Security</div>
+    </div>
+
+    <div class="nav-group-label">Overview</div>
+    <div class="nav-item" data-target="dashboard"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></div>
+
+    <div class="nav-group-label">Identity &amp; Access</div>
+    <div class="nav-item" data-target="architecture"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3z"/></svg><span>Security Architecture</span></div>
+    <div class="nav-item" data-target="roles"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7"/></svg><span>Role Management</span></div>
+    <div class="nav-item" data-target="dimensions"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Access Dimensions</span></div>
+    <div class="nav-item" data-target="rbac"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="14" r="4"/><path d="M11 11l9-9M16 6l3 3M13 9l2.5 2.5"/></svg><span>RBAC Simulator</span></div>
+
+    <div class="nav-group-label">Data &amp; Workflow</div>
+    <div class="nav-item" data-target="row-level"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg><span>Row-Level Security</span></div>
+    <div class="nav-item" data-target="object-sec"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6a1 1 0 011-1h5l2 2h9a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V6z"/></svg><span>Object Security</span></div>
+    <div class="nav-item" data-target="sod"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="8" r="2.5"/><path d="M16 14.2c2.9.5 5 2.7 5 5.8"/></svg><span>Separation of Duties</span></div>
+    <div class="nav-item" data-target="team-claim"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="2.6"/><circle cx="17" cy="7" r="2.6"/><path d="M2.5 19c.6-3 2.4-5 4.5-5s3.9 2 4.5 5M12.5 19c.6-3 2.4-5 4.5-5s3.9 2 4.5 5"/></svg><span>Team Claim</span></div>
+    <div class="nav-item" data-target="attachments"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11l-8.5 8.5a4.5 4.5 0 01-6.4-6.4L14 4a3 3 0 014.2 4.2L9.8 16.6a1.5 1.5 0 01-2.1-2.1l7.4-7.4"/></svg><span>Sensitive Attachments</span></div>
+
+    <div class="nav-group-label">Reporting &amp; APIs</div>
+    <div class="nav-item" data-target="report-sec"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M2 20h20"/></svg><span>Report Security</span></div>
+    <div class="nav-item" data-target="api-sec"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v6M15 3v6M6 9h12v3a6 6 0 01-12 0V9zM12 18v3"/></svg><span>API Security</span></div>
+
+    <div class="nav-group-label">Authentication</div>
+    <div class="nav-item" data-target="auth"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span>SSO, MFA &amp; Sessions</span></div>
+
+    <div class="nav-group-label">Governance</div>
+    <div class="nav-item" data-target="audit"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg><span>Audit Explorer</span></div>
+    <div class="nav-item" data-target="kpi"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M2 20h20"/></svg><span>Security Risk Dashboard</span></div>
+
+    <div class="nav-group-label">Learn &amp; Assess</div>
+    <div class="nav-item" data-target="scenarios"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5c2-1 5-1 7 0v14c-2-1-5-1-7 0V5zM20 5c-2-1-5-1-7 0v14c2-1 5-1 7 0V5z"/></svg><span>Scenario Lab</span></div>
+    <div class="nav-item" data-target="practice"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5z"/><path d="M13 7.5L16.5 11"/></svg><span>Practice Mode</span></div>
+    <div class="nav-item" data-target="exam"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21 12 18.5 16.5 21 15 13.5"/></svg><span>Exam Mode</span></div>
+
+    <div class="sidebar-foot">
+      <div class="session-badge">Signed in as<br><b id="session-user">—</b><br>Role: <b id="session-role">—</b></div>
+      <a href="#" class="logout-link" id="logout-link">Log out</a>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="view" id="view-dashboard">
+      <div class="topbar">
+        <div>
+          <div class="page-eyebrow">Oracle ARCS &middot; Security Model</div>
+          <h1 class="page-title">Security Dashboard</h1>
+          <p class="page-desc">Explore how identity, roles, data access and workflow controls fit together in Account Reconciliation Cloud Service.</p>
+        </div>
+        <div class="progress-pill" id="progress-pill"></div>
+      </div>
+      <div class="grid grid-4" id="dashboard-grid"></div>
+      <div id="footer-slot-1"></div>
+    </div>
+
+    <!-- SECURITY ARCHITECTURE -->
+    <div class="view" id="view-architecture">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Identity &amp; Access</div>
+        <h1 class="page-title">Security Architecture</h1>
+        <p class="page-desc">Every access decision in ARCS flows through eight layers. Click a layer to see what it controls.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="flow-vertical" id="flow-vertical"></div>
+      </div>
+    </div>
+
+    <!-- ROLES -->
+    <div class="view" id="view-roles">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Identity &amp; Access</div>
+        <h1 class="page-title">Role Management</h1>
+        <p class="page-desc">Twelve functional roles cover the ARCS security model. Click any role for its full profile.</p>
+      </div></div>
+      <div class="grid grid-3" id="roles-grid"></div>
+    </div>
+
+    <!-- ACCESS DIMENSIONS -->
+    <div class="view" id="view-dimensions">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Identity &amp; Access</div>
+        <h1 class="page-title">Access Dimension Explorer</h1>
+        <p class="page-desc">Security in ARCS can be scoped along ten dimensions at once. Click a dimension for a worked example.</p>
+      </div></div>
+      <div class="dim-wheel" id="dimension-wheel"></div>
+    </div>
+
+    <!-- RBAC SIMULATOR -->
+    <div class="view" id="view-rbac">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Identity &amp; Access</div>
+        <h1 class="page-title">RBAC Simulation</h1>
+        <p class="page-desc">Pick a user and an action to see whether their role permits it.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="field"><label>Select User</label><select id="rbac-user"></select></div>
+          <div class="field"><label>Select Action</label><select id="rbac-action"></select></div>
+        </div>
+        <button class="btn btn-accent" id="rbac-run">Run Check</button>
+        <div class="result-box" id="rbac-result"><p>Choose a user and action, then run the check.</p></div>
+      </div>
+    </div>
+
+    <!-- ROW-LEVEL SECURITY -->
+    <div class="view" id="view-row-level">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Data &amp; Workflow</div>
+        <h1 class="page-title">Row-Level Security Simulation</h1>
+        <p class="page-desc">Switch between two users scoped to different entities and watch visible records change.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="toggle-row" id="rowlevel-toggle"></div>
+        <table class="entity-table">
+          <thead><tr><th>Reconciliation</th><th>Entity</th><th>Account</th><th>Status</th></tr></thead>
+          <tbody id="rowlevel-tbody"></tbody>
+        </table>
+        <p class="kpi-note" id="rowlevel-note" style="margin-top:12px;"></p>
+      </div>
+    </div>
+
+    <!-- OBJECT SECURITY -->
+    <div class="view" id="view-object-sec">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Data &amp; Workflow</div>
+        <h1 class="page-title">Object Security Simulation</h1>
+        <p class="page-desc">Select an object and a role to check whether that role can access it at all.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="field"><label>Select Object</label><select id="objsec-object"></select></div>
+          <div class="field"><label>Select Role</label><select id="objsec-role"></select></div>
+        </div>
+        <button class="btn btn-accent" id="objsec-run">Check Access</button>
+        <div class="result-box" id="objsec-result"><p>Choose an object and role, then check access.</p></div>
+      </div>
+    </div>
+
+    <!-- SEPARATION OF DUTIES -->
+    <div class="view" id="view-sod">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Data &amp; Workflow</div>
+        <h1 class="page-title">Separation of Duties &amp; No Self-Approval</h1>
+        <p class="page-desc">Walk a reconciliation through prepare → self-approval attempt → independent approval.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="flow-horizontal" id="sod-flow"></div>
+        <div class="btn-row">
+          <button class="btn btn-accent" id="sod-prepare">1. Prepare as Priya</button>
+          <button class="btn" id="sod-self-approve" disabled>2. Attempt Self-Approval</button>
+          <button class="btn" id="sod-assign-approver" disabled>3. Assign Independent Approver</button>
+          <button class="btn btn-ghost" id="sod-reset">Reset</button>
+        </div>
+        <div class="result-box" id="sod-result"></div>
+      </div>
+    </div>
+
+    <!-- TEAM CLAIM -->
+    <div class="view" id="view-team-claim">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Data &amp; Workflow</div>
+        <h1 class="page-title">Team Claim Simulator</h1>
+        <p class="page-desc">Claim an unowned reconciliation or release one you own back to the team pool.</p>
+      </div></div>
+      <div class="grid grid-2" id="claim-board"></div>
+    </div>
+
+    <!-- ATTACHMENTS -->
+    <div class="view" id="view-attachments">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Data &amp; Workflow</div>
+        <h1 class="page-title">Sensitive Attachment Simulator</h1>
+        <p class="page-desc">Some attachments carry extra restrictions on top of normal object access.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="field"><label>Attachment Type</label><select id="att-type"></select></div>
+          <div class="field"><label>Select User Role</label><select id="att-role"></select></div>
+        </div>
+        <button class="btn btn-accent" id="att-run">Check Access</button>
+        <div class="result-box" id="att-result"><p>Choose an attachment type and role, then check access.</p></div>
+      </div>
+    </div>
+
+    <!-- REPORT SECURITY -->
+    <div class="view" id="view-report-sec">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Reporting &amp; APIs</div>
+        <h1 class="page-title">Report Security Simulator</h1>
+        <p class="page-desc">The same report, run by different roles, returns different authorized rows.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="field"><label>Run Report As</label><select id="report-role"></select></div>
+        </div>
+        <button class="btn btn-accent" id="report-run">Run Report</button>
+        <table class="entity-table">
+          <thead><tr><th>Entity</th><th>Account</th><th>Balance</th></tr></thead>
+          <tbody id="report-tbody"></tbody>
+        </table>
+        <p class="kpi-note" id="report-note" style="margin-top:12px;"></p>
+      </div>
+    </div>
+
+    <!-- API SECURITY -->
+    <div class="view" id="view-api-sec">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Reporting &amp; APIs</div>
+        <h1 class="page-title">API Security Simulator</h1>
+        <p class="page-desc">API clients are governed by scope, enforced just like UI-level permissions.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="btn-row">
+          <button class="btn api-scope-btn" data-scope="Read">Scope: Read</button>
+          <button class="btn api-scope-btn" data-scope="Write">Scope: Write</button>
+          <button class="btn api-scope-btn" data-scope="Restricted">Scope: Restricted</button>
+        </div>
+        <div class="flow-horizontal" id="api-flow" style="margin-top:16px;"></div>
+        <div class="result-box" id="api-result"><p>Select a scope to simulate an API request.</p></div>
+      </div>
+    </div>
+
+    <!-- AUTH: SSO / MFA / SESSION / IMPERSONATION -->
+    <div class="view" id="view-auth">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Authentication</div>
+        <h1 class="page-title">SSO, MFA &amp; Session Controls</h1>
+        <p class="page-desc">Authentication, session management and administrative impersonation controls.</p>
+      </div></div>
+
+      <div class="sim-panel">
+        <h3 style="font-family:var(--display);margin:0 0 4px;font-size:16px;">SSO + MFA Login Flow</h3>
+        <p class="page-desc" style="margin-bottom:14px;">Simulate a successful login, or a login that fails MFA.</p>
+        <div class="flow-horizontal" id="auth-flow"></div>
+        <div class="btn-row">
+          <button class="btn btn-accent" id="auth-success">Simulate Successful Login</button>
+          <button class="btn" id="auth-fail">Simulate Failed MFA</button>
+        </div>
+        <div class="result-box" id="auth-result"><p>Run a simulation to see the authentication outcome.</p></div>
+      </div>
+
+      <div class="sim-panel">
+        <h3 style="font-family:var(--display);margin:0 0 4px;font-size:16px;">Session Timeout</h3>
+        <p class="page-desc" style="margin-bottom:14px;">Sessions end after a period of inactivity and require re-authentication.</p>
+        <div class="timeout-ring" id="timeout-ring-wrap"></div>
+        <p class="kpi-note" id="timeout-status" style="text-align:center;">Click start to simulate an inactive session.</p>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-accent" id="timeout-start">Start Inactivity Timer</button>
+          <button class="btn btn-ghost hidden" id="timeout-reauth">Re-authenticate</button>
+        </div>
+      </div>
+
+      <div class="sim-panel">
+        <h3 style="font-family:var(--display);margin:0 0 4px;font-size:16px;">Administrative Impersonation</h3>
+        <div id="admin-imp-panel"></div>
+      </div>
+    </div>
+
+    <!-- AUDIT EXPLORER -->
+    <div class="view" id="view-audit">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Governance</div>
+        <h1 class="page-title">Security Audit Explorer</h1>
+        <p class="page-desc">Filter the illustrative audit trail by user or result.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="sim-controls">
+          <div class="field"><label>User</label><select id="audit-filter-user"></select></div>
+          <div class="field"><label>Result</label><select id="audit-filter-result"></select></div>
+        </div>
+        <table>
+          <thead><tr><th>User</th><th>Role</th><th>Object</th><th>Action</th><th>Date</th><th>Result</th></tr></thead>
+          <tbody id="audit-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- KPI / RISK DASHBOARD -->
+    <div class="view" id="view-kpi">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Governance</div>
+        <h1 class="page-title">Security Risk Dashboard</h1>
+        <p class="page-desc">Illustrative KPIs summarizing this training environment's simulated security events.</p>
+      </div></div>
+      <div class="grid grid-4" id="kpi-grid"></div>
+    </div>
+
+    <!-- SCENARIO LAB -->
+    <div class="view" id="view-scenarios">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Learn &amp; Assess</div>
+        <h1 class="page-title">Security Scenario Lab</h1>
+        <p class="page-desc">Ten decision-based scenarios covering the most common ARCS security situations.</p>
+      </div></div>
+      <div class="grid grid-3" id="scenario-grid"></div>
+    </div>
+
+    <!-- PRACTICE MODE -->
+    <div class="view" id="view-practice">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Learn &amp; Assess</div>
+        <h1 class="page-title">Practice Mode</h1>
+        <p class="page-desc">Low-stakes practice questions with immediate explanations.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="exam-q-label" id="practice-q-num"></div>
+        <div class="exam-q-text" id="practice-q-text"></div>
+        <div class="choice-list" id="practice-choices"></div>
+        <div id="practice-feedback"></div>
+        <div class="btn-row"><button class="btn btn-ghost" id="practice-next">Next Question</button></div>
+      </div>
+    </div>
+
+    <!-- EXAM MODE -->
+    <div class="view" id="view-exam">
+      <div class="topbar"><div>
+        <div class="page-eyebrow">Learn &amp; Assess</div>
+        <h1 class="page-title">Exam Mode</h1>
+        <p class="page-desc">20 original questions. Score 80% or higher to pass.</p>
+      </div></div>
+      <div class="sim-panel">
+        <div class="exam-progress"><div class="exam-progress-bar" id="exam-progress-bar" style="width:0%"></div></div>
+        <div id="exam-body"></div>
+      </div>
+    </div>
+
+    <!-- COMPLETION -->
+    <div class="view" id="view-completion">
+      <div class="completion-wrap">
+        <div class="card completion-card">
+          <div class="eyebrow" style="justify-content:center;">Oracle ARCS &middot; Security Model</div>
+          <h1 class="login-title" style="font-size:24px;">Training Completed</h1>
+          <div id="completion-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-footer">
+      <div class="footer-logo-row">
+        <img src="data:image/jpeg;base64,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" alt="BISP logo">
+        <span>&copy; BISP Trainings &middot; www.bisptrainings.com</span>
+      </div>
+      <div>
+        <a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a>
+        &nbsp;&middot;&nbsp; Call Us: +91 769-409-5404
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="modal-close-btn">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ORACLE ARCS SECURITY MODEL — TRAINING SIMULATOR
+   BISP Trainings — illustrative training content only.
+   All data below is fictional / for instructional purposes.
+   ========================================================= */
+
+/* ---------- ICONS (minimal inline SVG set) ---------- */
+const ICON = {
+  shield:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3z"/></svg>',
+  users:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="8" r="2.5"/><path d="M16 14.2c2.9.5 5 2.7 5 5.8"/></svg>',
+  role:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7"/></svg>',
+  folder:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6a1 1 0 011-1h5l2 2h9a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V6z"/></svg>',
+  building:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>',
+  coin:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.2c0 3-6 1.3-6 4.3 0 1.4 1.3 2.5 3 2.5s3-1 3-2.5"/></svg>',
+  calendar:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  team:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="2.6"/><circle cx="17" cy="7" r="2.6"/><path d="M2.5 19c.6-3 2.4-5 4.5-5s3.9 2 4.5 5M12.5 19c.6-3 2.4-5 4.5-5s3.9 2 4.5 5"/></svg>',
+  chart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M2 20h20"/></svg>',
+  plug:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v6M15 3v6M6 9h12v3a6 6 0 01-12 0V9zM12 18v3"/></svg>',
+  search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>',
+  key:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="14" r="4"/><path d="M11 11l9-9M16 6l3 3M13 9l2.5 2.5"/></svg>',
+  clock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+  check:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>',
+  x:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 5l14 14M19 5L5 19"/></svg>',
+  alert:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>',
+  paperclip:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11l-8.5 8.5a4.5 4.5 0 01-6.4-6.4L14 4a3 3 0 014.2 4.2L9.8 16.6a1.5 1.5 0 01-2.1-2.1l7.4-7.4"/></svg>',
+  grid:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+  book:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5c2-1 5-1 7 0v14c-2-1-5-1-7 0V5zM20 5c-2-1-5-1-7 0v14c2-1 5-1 7 0V5z"/></svg>',
+  pencil:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5z"/><path d="M13 7.5L16.5 11"/></svg>',
+  award:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21 12 18.5 16.5 21 15 13.5"/></svg>',
+};
+function ic(name){return ICON[name]||'';}
+
+/* ---------- STATE ---------- */
+const STATE = {
+  loggedIn:false,
+  userRole:'Preparer',
+  username:'Trainee',
+  currentEntityUser:'A',
+  soDStage:0, // 0 none, 1 prepared, 2 violation shown, 3 satisfied
+  claimBoard:[
+    {id:'REC-1042', entity:'Entity 100', owner:null},
+    {id:'REC-1043', entity:'Entity 100', owner:null},
+    {id:'REC-2091', entity:'Entity 200', owner:'Anita Rao'},
+    {id:'REC-2092', entity:'Entity 200', owner:null},
+  ],
+  scenariosCompleted:0,
+  scenarioCorrect:0,
+  practiceAnswered:0,
+  practiceCorrect:0,
+  examAnswers:[],
+  examIndex:0,
+  examScorePct:null,
+  sessionSeconds:15,
+  sessionTimer:null,
+};
+
+/* ---------- DATA: ROLES ---------- */
+const ROLES = [
+  {name:'Service Administrator', purpose:'Owns the overall ARCS environment configuration and top-level security setup.', responsibilities:['Configure system settings and profiles','Manage roles and provisioning','Maintain integrations and data sources'], access:'Full access across all entities, profiles and administrative functions.', restrictions:'Should not be the routine preparer or approver of day-to-day reconciliations.', example:'Karan sets up a new reconciliation profile for the EMEA close cycle.', risk:'Excess admin accounts increase the blast radius of a compromised credential.'},
+  {name:'Power User', purpose:'Configures reconciliation content (profiles, formats, rules) without full administrative rights.', responsibilities:['Design reconciliation formats','Maintain matching rules','Support report design'], access:'Broad configuration access, scoped away from user/role administration.', restrictions:'Cannot manage security roles or system-wide settings.', example:'Meera adjusts a matching rule for the bank-statement reconciliation format.', risk:'Unreviewed rule changes can silently alter what preparers are required to reconcile.'},
+  {name:'Reconciliation Manager', purpose:'Oversees a team’s reconciliation workload, assignments and quality.', responsibilities:['Assign reconciliations to preparers','Monitor status and completion','Escalate exceptions'], access:'Visibility across the team’s entities; may prepare or review, subject to SoD.', restrictions:'Must not approve a reconciliation they personally prepared.', example:'Priya’s manager reassigns an overdue reconciliation to another preparer.', risk:'A manager with unchecked approve rights can bypass segregation controls.'},
+  {name:'Preparer', purpose:'Performs the first-line reconciliation of an assigned account or entity.', responsibilities:['Enter reconciling items','Attach supporting evidence','Submit for review'], access:'Read/write on assigned reconciliations only.', restrictions:'Cannot review or approve their own submissions.', example:'Priya reconciles the Entity 100 bank account for July.', risk:'Overly broad preparer access can expose unrelated entities’ financial data.'},
+  {name:'Reviewer', purpose:'Performs a second-line check of a prepared reconciliation before approval.', responsibilities:['Validate reconciling items','Request corrections','Add review comments'], access:'Read access to assigned reconciliations, write access to review fields.', restrictions:'Cannot be the same person as the preparer for that item.', example:'Rahul reviews Priya’s reconciliation and requests one correction.', risk:'A reviewer who is also the preparer removes the second line of defense.'},
+  {name:'Approver', purpose:'Gives final sign-off that a reconciliation is complete and materially accurate.', responsibilities:['Approve or reject reviewed reconciliations','Confirm supporting evidence is sufficient'], access:'Approve/reject action on reconciliations routed to them.', restrictions:'Cannot approve a reconciliation they prepared or reviewed (no self-approval).', example:'Anita approves the Entity 200 reconciliation after review.', risk:'Self-approval is one of the most common close-process control failures.'},
+  {name:'Viewer', purpose:'Read-only stakeholder who needs visibility without transaction rights.', responsibilities:['Monitor close status','Review completed reconciliations'], access:'Read-only, scoped to assigned entities/profiles.', restrictions:'No prepare, review, approve or edit rights anywhere.', example:'A controller checks close progress without editing anything.', risk:'Low risk profile, but scope should still be limited to need-to-know entities.'},
+  {name:'Report Designer', purpose:'Builds and maintains management and audit reports.', responsibilities:['Design report layouts','Define report-level filters','Publish reports to stakeholders'], access:'Report design tools; underlying data still filtered by the viewer’s own security.', restrictions:'Designing a report does not grant the designer extra data access.', example:'A report designer builds an aging report for unresolved reconciling items.', risk:'A poorly filtered report can leak data beyond the viewer’s normal access.'},
+  {name:'Data Integration Operator', purpose:'Manages inbound data loads (GL balances, sub-ledger extracts, bank feeds).', responsibilities:['Run and monitor data loads','Investigate load errors','Coordinate with source-system owners'], access:'Access to integration and data-load functions, not reconciliation content.', restrictions:'Should not also approve the reconciliations built from data they load.', example:'An operator resolves a mapping error in the daily bank feed.', risk:'Combining load and approval duties weakens data-integrity assurance.'},
+  {name:'Transaction Matching User', purpose:'Works the transaction-matching module to auto/manual-match line items.', responsibilities:['Run matching rules','Manually match exceptions','Escalate unmatched items'], access:'Matching workspace access scoped to assigned data sources.', restrictions:'Matching activity is subject to the same SoD rules as reconciliation prep.', example:'A user manually matches three unmatched card-clearing transactions.', risk:'Unrestricted matching scope can expose transactions from other business units.'},
+  {name:'Auditor', purpose:'Independent internal reviewer of process and control evidence.', responsibilities:['Review audit trails','Sample completed reconciliations','Verify control evidence'], access:'Read-only, typically broader in scope than a business user, no transaction rights.', restrictions:'No prepare, review or approve rights under any circumstance.', example:'An internal auditor samples 20 approved reconciliations for SoD compliance.', risk:'Granting an auditor write access compromises independence.'},
+  {name:'External Auditor', purpose:'Independent third-party reviewer performing statutory or compliance audits.', responsibilities:['Request and review evidence','Test control design and operation'], access:'Tightly scoped, time-boxed, read-only access to in-scope entities only.', restrictions:'No access outside the audit period or engagement scope; no transaction rights.', example:'An external auditor is granted 30-day read access to Q2 reconciliations only.', risk:'Standing external-auditor accounts left active after engagement end are a common finding.'},
+];
+
+/* ---------- DATA: ACCESS DIMENSIONS ---------- */
+const DIMENSIONS = [
+  {name:'Profile', icon:'folder', example:'Security can be scoped to the "Bank Reconciliations" profile so a user only sees that profile’s items.'},
+  {name:'Organizational Unit', icon:'building', example:'A regional controller is scoped to the "EMEA" organizational unit and cannot see APAC data.'},
+  {name:'Entity', icon:'building', example:'Priya is scoped to Entity 100 only; Entity 200 reconciliations never appear in her list.'},
+  {name:'Account', icon:'coin', example:'Access can be narrowed to specific GL accounts, e.g. only cash and bank clearing accounts.'},
+  {name:'Account Type', icon:'coin', example:'A reviewer might be scoped to "Balance Sheet" account types only, excluding P&L.'},
+  {name:'Match Type', icon:'grid', example:'A transaction-matching user is scoped to "Card Clearing" match types only.'},
+  {name:'Data Source', icon:'plug', example:'Access can be limited to a single bank-feed data source rather than all integrations.'},
+  {name:'Period', icon:'calendar', example:'An external auditor’s access is limited to the "Q2-2026" period and expires after it.'},
+  {name:'Team', icon:'team', example:'Reconciliations assigned to the "APAC Close Team" are only visible to that team’s members.'},
+  {name:'User Group', icon:'users', example:'A user group "Bank Preparers" is granted prepare rights across a bundle of bank accounts at once.'},
+];
+
+/* ---------- DATA: SECURITY LAYERS (flow) ---------- */
+const LAYERS = [
+  {name:'Identity', desc:'The trusted starting point — a verified corporate identity from the organization’s identity provider.'},
+  {name:'User / Group', desc:'The identity is mapped to an ARCS user account, and optionally to one or more user groups for bulk provisioning.'},
+  {name:'Role', desc:'One or more roles (Preparer, Reviewer, Approver, etc.) are assigned, defining what functions the user can perform.'},
+  {name:'Object', desc:'Roles are combined with object-level permissions — which profiles, reports or reconciliation objects the user can touch.'},
+  {name:'Data', desc:'Row-level security (entity, account, period, team) filters exactly which records within an object the user can see.'},
+  {name:'Workflow', desc:'Separation-of-duties and no-self-approval rules govern how the user can move a record through prepare → review → approve.'},
+  {name:'Report', desc:'Reports re-apply the same row-level security, so a user never sees more in a report than in the transaction screens.'},
+  {name:'Audit', desc:'Every security-relevant action is logged — who did what, to which object, when, and with what result.'},
+];
+
+/* ---------- DATA: RBAC RULES ---------- */
+const RBAC_RULES = {
+  'Preparer': {allowed:['Prepare','Attach Evidence','Submit for Review'], restricted:['Review','Approve','Reject']},
+  'Reviewer': {allowed:['Review','Comment','Return for Correction'], restricted:['Prepare','Approve']},
+  'Approver': {allowed:['Approve','Reject'], restricted:['Prepare','Review']},
+  'Reconciliation Manager': {allowed:['Assign','Prepare','Review','Approve'], restricted:[]},
+  'Viewer': {allowed:['View'], restricted:['Prepare','Review','Approve','Edit']},
+  'Auditor': {allowed:['View','Export Audit Log'], restricted:['Prepare','Review','Approve','Edit']},
+};
+const RBAC_USERS = [
+  {name:'Priya Nair', role:'Preparer', entity:'Entity 100'},
+  {name:'Rahul Verma', role:'Reviewer', entity:'Entity 100'},
+  {name:'Anita Rao', role:'Approver', entity:'Entity 200'},
+  {name:'Karan Shah', role:'Reconciliation Manager', entity:'Entity 100 & 200'},
+  {name:'Meera Iyer', role:'Auditor', entity:'All Entities (read-only)'},
+];
+const RBAC_ACTIONS = ['Prepare','Review','Approve','Reject','Assign','Attach Evidence','Submit for Review','Comment','Return for Correction','View','Export Audit Log','Edit'];
+
+/* ---------- DATA: OBJECT SECURITY ---------- */
+const OBJECTS = ['Profile: Bank Reconciliations','Reconciliation: Entity 100 Cash','Report: Aging Summary','Match Type: Card Clearing','Data Source: SAP GL Feed'];
+const OBJECT_ACCESS = {
+  'Preparer':      {'Profile: Bank Reconciliations':1,'Reconciliation: Entity 100 Cash':1,'Report: Aging Summary':0,'Match Type: Card Clearing':0,'Data Source: SAP GL Feed':0},
+  'Reviewer':       {'Profile: Bank Reconciliations':1,'Reconciliation: Entity 100 Cash':1,'Report: Aging Summary':1,'Match Type: Card Clearing':0,'Data Source: SAP GL Feed':0},
+  'Approver':       {'Profile: Bank Reconciliations':1,'Reconciliation: Entity 100 Cash':0,'Report: Aging Summary':1,'Match Type: Card Clearing':0,'Data Source: SAP GL Feed':0},
+  'Reconciliation Manager':{'Profile: Bank Reconciliations':1,'Reconciliation: Entity 100 Cash':1,'Report: Aging Summary':1,'Match Type: Card Clearing':1,'Data Source: SAP GL Feed':0},
+  'Auditor':        {'Profile: Bank Reconciliations':1,'Reconciliation: Entity 100 Cash':1,'Report: Aging Summary':1,'Match Type: Card Clearing':1,'Data Source: SAP GL Feed':1},
+  'Data Integration Operator':{'Profile: Bank Reconciliations':0,'Reconciliation: Entity 100 Cash':0,'Report: Aging Summary':0,'Match Type: Card Clearing':1,'Data Source: SAP GL Feed':1},
+};
+
+/* ---------- DATA: ATTACHMENTS ---------- */
+const ATTACHMENTS = ['Payroll Summary','Bank Statement','Tax Document','Management Document'];
+const ATTACHMENT_ACCESS = {
+  'Payroll Summary': ['Reconciliation Manager','Auditor','Service Administrator'],
+  'Bank Statement': ['Preparer','Reviewer','Approver','Reconciliation Manager','Auditor'],
+  'Tax Document': ['Reconciliation Manager','Auditor','Service Administrator'],
+  'Management Document': ['Reconciliation Manager','Service Administrator'],
+};
+
+/* ---------- DATA: AUDIT LOG ---------- */
+const AUDIT_LOG = [
+  {user:'Priya Nair', role:'Preparer', object:'REC-1042', action:'Prepare', date:'2026-07-31 09:14', result:'Successful'},
+  {user:'Rahul Verma', role:'Reviewer', object:'REC-1042', action:'Review', date:'2026-07-31 14:02', result:'Successful'},
+  {user:'Priya Nair', role:'Preparer', object:'REC-1042', action:'Approve (attempt)', date:'2026-07-31 14:10', result:'Blocked — Self-Approval'},
+  {user:'Anita Rao', role:'Approver', object:'REC-2091', action:'Approve', date:'2026-07-31 15:41', result:'Successful'},
+  {user:'Karan Shah', role:'Reconciliation Manager', object:'REC-1043', action:'Assign', date:'2026-07-30 08:55', result:'Successful'},
+  {user:'Meera Iyer', role:'Auditor', object:'Aging Summary', action:'View', date:'2026-07-29 11:20', result:'Successful'},
+  {user:'Priya Nair', role:'Preparer', object:'Entity 200 Cash', action:'View (attempt)', date:'2026-07-29 10:02', result:'Blocked — Entity Restricted'},
+  {user:'Rahul Verma', role:'Reviewer', object:'REC-1043', action:'Return for Correction', date:'2026-07-28 16:30', result:'Successful'},
+  {user:'Admin User', role:'Service Administrator', object:'Security Role: Preparer', action:'Role Update', date:'2026-07-27 09:00', result:'Successful'},
+  {user:'External Auditor (Q2)', role:'External Auditor', object:'Q2 Reconciliations', action:'View', date:'2026-07-25 13:12', result:'Successful'},
+  {user:'External Auditor (Q2)', role:'External Auditor', object:'Q1 Reconciliations', action:'View (attempt)', date:'2026-07-25 13:14', result:'Blocked — Period Restricted'},
+  {user:'Karan Shah', role:'Reconciliation Manager', object:'REC-1042', action:'Approve (attempt)', date:'2026-07-31 14:20', result:'Blocked — Prepared by Same Manager Chain'},
+];
+
+/* ---------- DATA: SCENARIO LAB (10) ---------- */
+const SCENARIOS = [
+  {title:'Preparer Access', situation:'Priya, a Preparer, tries to open a reconciliation for Entity 200, which is not assigned to her.', options:['System allows access because she is a Preparer','System blocks access — entity is outside her assigned scope','System allows access but hides the numbers'], correct:1, explanation:'Row-level entity security governs visibility independent of role — Preparer rights on Entity 100 do not extend to Entity 200.', risk:'Entity-level data exposure across business units.'},
+  {title:'Reviewer Access', situation:'Rahul, a Reviewer, tries to directly edit a reconciling item instead of just reviewing it.', options:['Allowed — reviewers can edit anything','Blocked — reviewers can comment/return, not edit prepared entries','Allowed only on weekends'], correct:1, explanation:'Reviewers validate and can request correction, but editing the underlying entry stays with the Preparer to preserve the audit trail.', risk:'Blurred prepare/review boundary weakens the second line of defense.'},
+  {title:'Approver Segregation', situation:'Anita reviewed a reconciliation earlier in the day. Can she also approve it?', options:['Yes, one person can review and approve the same item','No — review and approval should be independent steps where duties allow','Only if she asks a manager first'], correct:1, explanation:'Wherever practical, ARCS security should keep review and approval independent to strengthen segregation of duties.', risk:'Combined review+approval collapses two controls into one.'},
+  {title:'Self-Approval Attempt', situation:'Priya prepares a reconciliation, then tries to approve it herself.', options:['Allowed if she is confident in the numbers','Blocked — no self-approval, regardless of confidence','Allowed if under a materiality threshold'], correct:1, explanation:'No-self-approval is a hard control in ARCS: the preparer of a record can never be its approver.', risk:'Self-approval is the single most common close-control violation.'},
+  {title:'Entity Restriction', situation:'A new preparer joins the EMEA team. What entity access should they receive by default?', options:['Access to all entities globally, for flexibility','Only the EMEA entities relevant to their assignment','No entity access until requested by anyone'], correct:1, explanation:'Least-privilege provisioning means scoping entity access to what the role actually needs, not the whole organization.', risk:'Over-provisioned entity access is hard to detect and easy to abuse.'},
+  {title:'Account Restriction', situation:'An accounts-payable preparer requests access to cash and bank accounts "just in case."', options:['Grant it — more access reduces support tickets','Deny — scope access to the accounts the role actually reconciles','Grant it but note it for next year’s audit'], correct:1, explanation:'Account-level security should mirror actual job responsibilities, not convenience.', risk:'Unused excess access is a standing audit finding waiting to happen.'},
+  {title:'Period Restriction', situation:'An external auditor’s engagement covers Q2 only. It is now Q3.', options:['Their access should still show Q2 and Q3 data','Their access should have expired with the Q2 period','Their access should be upgraded to all periods'], correct:1, explanation:'Period-scoped and time-boxed access should be revoked or expire once the engagement period ends.', risk:'Stale external access after engagement end is a classic access-review finding.'},
+  {title:'Sensitive Attachment', situation:'A Preparer tries to open a Payroll Summary attached to a reconciliation.', options:['Allowed — it is attached to their reconciliation','Blocked — payroll is restricted to specific sensitive-data roles','Allowed only if HR approves in the moment'], correct:1, explanation:'Sensitive-attachment restrictions apply on top of normal object security, regardless of who owns the parent reconciliation.', risk:'Sensitive HR/financial data leakage through attachments.'},
+  {title:'Report Security', situation:'Two users run the same "Aging Summary" report. Do they see the same rows?', options:['Yes, reports ignore row-level security','No — each user sees only the rows their own security allows','Only the Administrator sees filtered results'], correct:1, explanation:'Standard ARCS reports re-apply each user’s row-level security, so results are automatically filtered per viewer.', risk:'A report that bypassed security would leak data far more broadly than a single transaction screen.'},
+  {title:'External Auditor', situation:'An external auditor asks for standing write access "to save time" during fieldwork.', options:['Grant write access — it speeds up testing','Keep access read-only, scoped, and time-boxed','Grant admin access so they can see everything'], correct:1, explanation:'External auditors should receive the minimum necessary read-only access, strictly scoped to the audit period and entities in question.', risk:'Granting write access to an external party compromises independence and control integrity.'},
+];
+
+/* ---------- DATA: EXAM (20 original MCQs) ---------- */
+const EXAM_QUESTIONS = [
+  {q:'What is the primary purpose of row-level security in ARCS?', options:['To control which menu items a user sees','To filter which records (e.g. entities) a user can view within an object they can access','To encrypt data at rest','To set password complexity rules'], correct:1, explanation:'Row-level security filters visible records — like entities or accounts — independent of broader object access.'},
+  {q:'Which control specifically prevents a preparer from approving their own reconciliation?', options:['Object security','Row-level security','No-self-approval control','Session timeout'], correct:2, explanation:'No-self-approval is a dedicated workflow control layered on top of role-based permissions.'},
+  {q:'A user is assigned the Viewer role. What should they be able to do?', options:['Prepare and submit reconciliations','Approve reconciliations under $10,000','Read data only, within their assigned scope','Edit report layouts'], correct:2, explanation:'Viewer is a read-only role; it grants no transaction or edit rights.'},
+  {q:'Why should External Auditor access typically be time-boxed?', options:['To reduce license costs only','To ensure access does not outlive the audit engagement scope','Because external auditors cannot use SSO','Because ARCS requires it for all roles'], correct:1, explanation:'Time-boxing prevents stale, unreviewed access from persisting after the engagement ends.'},
+  {q:'Which pairing represents a segregation-of-duties violation?', options:['Same user prepares and later reviews a different reconciliation','Same user prepares and approves the same reconciliation','Different users prepare and review the same reconciliation','A manager assigns work to a preparer'], correct:1, explanation:'The core SoD violation is one individual controlling both preparation and approval of the same item.'},
+  {q:'What does object-level security primarily govern?', options:['Which specific data rows a user sees','Which functional objects (profiles, reports, reconciliations) a user can access at all','Network firewall rules','Password expiration'], correct:1, explanation:'Object security is the access gate to a functional area; row-level security then filters within it.'},
+  {q:'A Reconciliation Manager assigned a reconciliation to a preparer. Later, can the manager approve that same item?', options:['Never, under any circumstance','Only if independent of the preparation chain and permitted by policy','Yes, managers are exempt from SoD','Only on the last day of the period'], correct:1, explanation:'Managers can approve items they did not personally prepare, provided SoD rules are respected.'},
+  {q:'What is the role of Multi-Factor Authentication (MFA) in the ARCS security model?', options:['It replaces the need for a password entirely','It adds a second proof of identity beyond the password, typically via the identity provider','It only applies to Administrators','It encrypts data within reconciliations'], correct:1, explanation:'MFA is an additional authentication factor layered on top of SSO/password authentication.'},
+  {q:'Which of these is an example of an access dimension, not a role?', options:['Approver','Entity','Reviewer','Service Administrator'], correct:1, explanation:'Entity is a data-scoping dimension; the others are functional roles.'},
+  {q:'What happens to visible data when a report is run in ARCS?', options:['All data is shown regardless of the viewer','Row-level security is re-applied so the viewer sees only authorized rows','Only Administrators can run reports','Reports bypass security for performance reasons'], correct:1, explanation:'Reports enforce the same security filtering as the underlying transactional screens.'},
+  {q:'Why should sensitive attachments (e.g. payroll data) have additional restrictions beyond normal object access?', options:['They contain data more sensitive than the reconciliation itself and warrant tighter access','Attachments are never sensitive','Attachments are auto-deleted after upload','Attachments cannot be restricted in ARCS'], correct:0, explanation:'Sensitive-attachment controls add a targeted layer of protection for especially sensitive content.'},
+  {q:'What is the main audit-related purpose of a security audit trail?', options:['To speed up report rendering','To record who did what, to which object, when, and with what result','To automatically fix SoD violations','To manage user passwords'], correct:1, explanation:'The audit trail provides evidence of security-relevant actions for review and investigation.'},
+  {q:'A user’s session has been inactive for the configured timeout period. What should occur?', options:['Nothing — sessions never expire','The session should time out and require re-authentication','The user is automatically promoted to Administrator','The system deletes their account'], correct:1, explanation:'Session timeout on inactivity reduces the risk of an unattended, authenticated session being misused.'},
+  {q:'What is a key risk of administrative impersonation features?', options:['They are always disabled and pose no risk','Actions taken while impersonating another user could go unattributed without strong audit evidence','They automatically violate SoD','They cannot be logged'], correct:1, explanation:'Impersonation is powerful for support scenarios, so it requires strict controls and clear audit evidence of who performed which action.'},
+  {q:'Which best describes the "Team" access dimension?', options:['A password policy applied to a group','A way to scope visibility of reconciliations to members of a defined team','A report formatting option','A type of API scope'], correct:1, explanation:'Team-based security limits visibility of assigned work to members of that team.'},
+  {q:'In the Team Claim workflow, what does "claiming" a reconciliation typically do?', options:['Permanently deletes the item','Assigns the item to the claiming user as its current owner','Approves the item automatically','Removes it from the audit trail'], correct:1, explanation:'Claiming sets the claiming user as the current owner responsible for that item of work.'},
+  {q:'What should an API client with "Read" scope be able to do?', options:['Read and write reconciliation data','Read data only; write actions should be rejected','Delete user accounts','Bypass row-level security'], correct:1, explanation:'API scopes should be enforced just like UI permissions — a Read scope should not permit write actions.'},
+  {q:'Why is it best practice to avoid standing Administrator accounts for routine reconciliation work?', options:['Administrator accounts are slower to use','It concentrates excessive privilege where it is not functionally needed, increasing risk','ARCS does not allow Administrators to prepare reconciliations','It has no security implication'], correct:1, explanation:'Least-privilege principles discourage using high-privilege accounts for routine, lower-risk tasks.'},
+  {q:'A Preparer attempts to view a reconciliation report filtered to Entity 200, which is outside their assigned entities. What is the expected result?', options:['Full access, since reports are unrestricted','Restricted — the same entity security applied elsewhere in ARCS also applies to reports','Partial access to summary totals only, always','Access granted after a warning message'], correct:1, explanation:'Row-level security is consistently enforced across transactional screens and reporting.'},
+  {q:'What combination of controls most directly prevents a single individual from fraudulently pushing a reconciliation through the entire close process alone?', options:['Session timeout and MFA','Separation of duties and no-self-approval','Report design and API scopes','Team claim and release'], correct:1, explanation:'SoD and no-self-approval together ensure no single individual can complete the full prepare-review-approve cycle unchecked.'},
+];
+
+/* ---------- INIT ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  buildLoginRoles();
+  buildSidebarActiveState();
+  renderDashboard();
+  renderFlowVertical();
+  renderRoles();
+  renderDimensions();
+  renderRbacSim();
+  renderRowLevelSim();
+  renderObjectSim();
+  renderSoDSim();
+  renderTeamClaim();
+  renderAttachmentSim();
+  renderReportSim();
+  renderApiSim();
+  renderAuthFlow();
+  renderSessionTimeoutWidget();
+  renderAdminImpersonation();
+  renderAuditExplorer();
+  renderScenarioLab();
+  renderPractice();
+  renderKpiDashboard();
+  wireNav();
+  wireLogin();
+  wireModalClose();
+  updateProgressPill();
+});
+
+/* ---------- LOGIN ---------- */
+function buildLoginRoles(){
+  const wrap = document.getElementById('login-role-grid');
+  const roleNames = ['Preparer','Reviewer','Approver','Manager','Auditor','Administrator'];
+  wrap.innerHTML = roleNames.map((r,i)=>`<button type="button" class="role-chip ${i===0?'selected':''}" data-role="${r}">${r}</button>`).join('');
+  wrap.querySelectorAll('.role-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      wrap.querySelectorAll('.role-chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
+}
+function wireLogin(){
+  document.getElementById('login-form').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const selected = document.querySelector('#login-role-grid .role-chip.selected');
+    STATE.userRole = selected ? selected.dataset.role : 'Preparer';
+    const uname = document.getElementById('login-username').value.trim();
+    STATE.username = uname || 'Trainee';
+    STATE.loggedIn = true;
+    document.getElementById('view-login').style.display='none';
+    const shell = document.getElementById('app-shell');
+    shell.classList.add('active');
+    document.getElementById('session-user').textContent = STATE.username;
+    document.getElementById('session-role').textContent = STATE.userRole;
+    navigateTo('dashboard');
+  });
+}
+
+/* ---------- NAV ---------- */
+function wireNav(){
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click', ()=> navigateTo(item.dataset.target));
+  });
+  document.getElementById('logout-link').addEventListener('click', (e)=>{
+    e.preventDefault();
+    location.reload();
+  });
+}
+function navigateTo(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target = document.getElementById('view-'+id);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.target===id));
+  document.querySelector('.main').scrollTo?.(0,0);
+  window.scrollTo(0,0);
+  if(id==='exam') startExamIfNeeded();
+}
+function buildSidebarActiveState(){ /* handled by navigateTo via CSS classes */ }
+function updateProgressPill(){
+  const pill = document.getElementById('progress-pill');
+  if(!pill) return;
+  pill.innerHTML = `<span>Scenarios <b>${STATE.scenariosCompleted}/10</b></span><span>&middot;</span><span>Exam <b>${STATE.examScorePct===null?'—':STATE.examScorePct+'%'}</b></span>`;
+}
+
+/* ---------- MODAL ---------- */
+function openModal(html){
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('overlay').classList.add('active');
+}
+function wireModalClose(){
+  document.getElementById('overlay').addEventListener('click', (e)=>{
+    if(e.target.id==='overlay') closeModal();
+  });
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('active'); }
+
+/* ---------- DASHBOARD ---------- */
+const DASH_CARDS = [
+  {icon:'shield', title:'Identity', desc:'How identities enter the ARCS trust chain.', target:'architecture'},
+  {icon:'users', title:'Users & Groups', desc:'Provisioning individuals and bulk groups.', target:'architecture'},
+  {icon:'role', title:'Roles', desc:'12 functional roles and what each can do.', target:'roles'},
+  {icon:'folder', title:'Objects', desc:'Profiles, reports and reconciliation objects.', target:'object-sec'},
+  {icon:'building', title:'Entities', desc:'Row-level security by entity.', target:'row-level'},
+  {icon:'coin', title:'Accounts', desc:'Access dimensions across accounts.', target:'dimensions'},
+  {icon:'calendar', title:'Periods', desc:'Time-boxing access by close period.', target:'dimensions'},
+  {icon:'team', title:'Teams', desc:'Team claim / release workflow.', target:'team-claim'},
+  {icon:'chart', title:'Reports', desc:'Security-filtered reporting.', target:'report-sec'},
+  {icon:'plug', title:'APIs', desc:'Scope-based API access control.', target:'api-sec'},
+  {icon:'search', title:'Audit', desc:'Full security audit trail explorer.', target:'audit'},
+];
+function renderDashboard(){
+  const grid = document.getElementById('dashboard-grid');
+  grid.innerHTML = DASH_CARDS.map(c=>`
+    <div class="card dash-card hoverable clickable" data-target="${c.target}">
+      <div class="dash-card-icon">${ic(c.icon)}</div>
+      <h3>${c.title}</h3>
+      <p>${c.desc}</p>
+    </div>`).join('');
+  grid.querySelectorAll('.dash-card').forEach(card=>{
+    card.addEventListener('click', ()=> navigateTo(card.dataset.target));
+  });
+}
+
+/* ---------- SECURITY ARCHITECTURE FLOW ---------- */
+function renderFlowVertical(){
+  const wrap = document.getElementById('flow-vertical');
+  wrap.innerHTML = LAYERS.map((l,i)=>`
+    ${i>0?'<div class="flow-arrow">&#8595;</div>':''}
+    <div class="flow-node" data-idx="${i}"><span class="fn-idx">LAYER ${String(i+1).padStart(2,'0')}</span>${l.name}</div>
+  `).join('');
+  wrap.querySelectorAll('.flow-node').forEach(node=>{
+    node.addEventListener('click', ()=>{
+      const l = LAYERS[node.dataset.idx];
+      openModal(`<span class="modal-tag">Security Architecture</span><h3>${l.name}</h3>
+      <div class="modal-section"><p>${l.desc}</p></div>`);
+    });
+  });
+}
+
+/* ---------- ROLES ---------- */
+function renderRoles(){
+  const grid = document.getElementById('roles-grid');
+  grid.innerHTML = ROLES.map((r,i)=>`
+    <div class="card role-card hoverable" data-idx="${i}">
+      <div class="rc-top">
+        <div class="rc-avatar">${r.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+        <div><h4>${r.name}</h4><p>Click for detail</p></div>
+      </div>
+      <p>${r.purpose}</p>
+    </div>`).join('');
+  grid.querySelectorAll('.role-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const r = ROLES[card.dataset.idx];
+      openModal(`<span class="modal-tag">Role Profile</span><h3>${r.name}</h3>
+        <div class="modal-section"><h5>Purpose</h5><p>${r.purpose}</p></div>
+        <div class="modal-section"><h5>Responsibilities</h5><ul>${r.responsibilities.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="modal-section"><h5>Access</h5><p>${r.access}</p></div>
+        <div class="modal-section"><h5>Restrictions</h5><p>${r.restrictions}</p></div>
+        <div class="modal-section"><h5>Example</h5><p>${r.example}</p></div>
+        <div class="modal-section"><h5>Security Risk</h5><p>${r.risk}</p></div>`);
+    });
+  });
+}
+
+/* ---------- ACCESS DIMENSION EXPLORER ---------- */
+function renderDimensions(){
+  const wrap = document.getElementById('dimension-wheel');
+  wrap.innerHTML = DIMENSIONS.map((d,i)=>`
+    <div class="dim-item" data-idx="${i}">${ic(d.icon)}<span>${d.name}</span></div>`).join('');
+  wrap.querySelectorAll('.dim-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const d = DIMENSIONS[item.dataset.idx];
+      openModal(`<span class="modal-tag">Access Dimension</span><h3>${d.name}</h3>
+        <div class="modal-section"><h5>Example</h5><p>${d.example}</p></div>`);
+    });
+  });
+}
+
+/* ---------- RBAC SIMULATION ---------- */
+function renderRbacSim(){
+  const userSel = document.getElementById('rbac-user');
+  const actionSel = document.getElementById('rbac-action');
+  userSel.innerHTML = RBAC_USERS.map(u=>`<option value="${u.name}">${u.name} — ${u.role}</option>`).join('');
+  actionSel.innerHTML = RBAC_ACTIONS.map(a=>`<option value="${a}">${a}</option>`).join('');
+  document.getElementById('rbac-run').addEventListener('click', ()=>{
+    const user = RBAC_USERS.find(u=>u.name===userSel.value);
+    const action = actionSel.value;
+    const rules = RBAC_RULES[user.role];
+    const allowed = rules.allowed.includes(action);
+    const box = document.getElementById('rbac-result');
+    box.className = 'result-box ' + (allowed?'allow':'deny');
+    box.innerHTML = `
+      <div class="result-title ${allowed?'allow':'deny'}">${ic(allowed?'check':'x')} ${allowed?'ALLOWED':'RESTRICTED IN THIS TRAINING SCENARIO'}</div>
+      <p><b>${user.name}</b> (${user.role}) attempting <b>${action}</b>.</p>
+      <p>${allowed
+        ? `The ${user.role} role includes "${action}" among its permitted actions.`
+        : `The ${user.role} role’s permitted actions are: ${rules.allowed.join(', ')}. "${action}" falls outside that scope, so the request is blocked.`}</p>`;
+  });
+}
+
+/* ---------- ROW-LEVEL SECURITY ---------- */
+const ENTITY_DATA = {
+  A: [ {id:'REC-1042', entity:'Entity 100', account:'Cash - Operating', status:'In Review'}, {id:'REC-1043', entity:'Entity 100', account:'Bank Clearing', status:'Not Started'} ],
+  B: [ {id:'REC-2091', entity:'Entity 200', account:'Cash - Operating', status:'Approved'}, {id:'REC-2092', entity:'Entity 200', account:'Intercompany', status:'In Review'} ],
+};
+function renderRowLevelSim(){
+  const toggleWrap = document.getElementById('rowlevel-toggle');
+  toggleWrap.innerHTML = `
+    <button class="toggle-btn active" data-u="A">User A — Priya (Entity 100)</button>
+    <button class="toggle-btn" data-u="B">User B — Anita (Entity 200)</button>`;
+  toggleWrap.querySelectorAll('.toggle-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      toggleWrap.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      STATE.currentEntityUser = btn.dataset.u;
+      paintRowLevelTable();
+    });
+  });
+  paintRowLevelTable();
+}
+function paintRowLevelTable(){
+  const rows = ENTITY_DATA[STATE.currentEntityUser];
+  const tbody = document.getElementById('rowlevel-tbody');
+  tbody.innerHTML = rows.map(r=>`<tr><td class="mono">${r.id}</td><td>${r.entity}</td><td>${r.account}</td><td><span class="badge badge-neutral">${r.status}</span></td></tr>`).join('');
+  document.getElementById('rowlevel-note').textContent = `Showing records visible to the selected user only — entity-level row security filters out the other user's entity automatically.`;
+}
+
+/* ---------- OBJECT SECURITY ---------- */
+function renderObjectSim(){
+  const objSel = document.getElementById('objsec-object');
+  const roleSel = document.getElementById('objsec-role');
+  objSel.innerHTML = OBJECTS.map(o=>`<option value="${o}">${o}</option>`).join('');
+  roleSel.innerHTML = Object.keys(OBJECT_ACCESS).map(r=>`<option value="${r}">${r}</option>`).join('');
+  document.getElementById('objsec-run').addEventListener('click', ()=>{
+    const obj = objSel.value, role = roleSel.value;
+    const ok = OBJECT_ACCESS[role][obj];
+    const box = document.getElementById('objsec-result');
+    box.className = 'result-box ' + (ok?'allow':'deny');
+    box.innerHTML = `<div class="result-title ${ok?'allow':'deny'}">${ic(ok?'check':'x')} ${ok?'ACCESSIBLE':'RESTRICTED'}</div>
+      <p>The <b>${role}</b> role is ${ok?'granted':'not granted'} access to <b>${obj}</b>.</p>`;
+  });
+}
+
+/* ---------- SoD SIMULATOR ---------- */
+function renderSoDSim(){
+  paintSoD();
+  document.getElementById('sod-prepare').addEventListener('click', ()=>{ STATE.soDStage=1; paintSoD(); });
+  document.getElementById('sod-self-approve').addEventListener('click', ()=>{ STATE.soDStage=2; paintSoD(); });
+  document.getElementById('sod-assign-approver').addEventListener('click', ()=>{ STATE.soDStage=3; paintSoD(); });
+  document.getElementById('sod-reset').addEventListener('click', ()=>{ STATE.soDStage=0; paintSoD(); });
+}
+function paintSoD(){
+  const flow = document.getElementById('sod-flow');
+  const s = STATE.soDStage;
+  const prepClass = s>=1?'ok':'';
+  const revClass = s===2?'blocked':(s===3?'ok':'');
+  flow.innerHTML = `
+    <div class="fh-node ${prepClass}">PREPARER — Priya</div><div class="fh-arrow">&rarr;</div>
+    <div class="fh-node ${revClass}">${s===2?'SAME USER APPROVAL ATTEMPT':'APPROVER'} ${s===3?'— Anita':''}</div>`;
+  const box = document.getElementById('sod-result');
+  document.getElementById('sod-self-approve').disabled = s<1;
+  document.getElementById('sod-assign-approver').disabled = s<2;
+  if(s===0){ box.className='result-box'; box.innerHTML='<p>Start by having Priya prepare the reconciliation.</p>'; }
+  else if(s===1){ box.className='result-box'; box.innerHTML='<p>Reconciliation prepared by Priya. Now try to have Priya approve it herself.</p>'; }
+  else if(s===2){ box.className='result-box deny'; box.innerHTML=`<div class="result-title deny">${ic('x')} CONTROL VIOLATION</div><p>Priya cannot approve a reconciliation she prepared. Assign an independent approver to resolve this.</p>`; }
+  else if(s===3){ box.className='result-box allow'; box.innerHTML=`<div class="result-title allow">${ic('check')} CONTROL SATISFIED</div><p>Anita, an independent Approver, reviewed and approved the reconciliation. Segregation of duties is preserved.</p>`; }
+}
+
+/* ---------- TEAM CLAIM ---------- */
+function renderTeamClaim(){
+  paintClaimBoard();
+}
+function paintClaimBoard(){
+  const wrap = document.getElementById('claim-board');
+  wrap.innerHTML = STATE.claimBoard.map((item,i)=>`
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div>
+        <div class="mono" style="font-size:13px;color:var(--text)">${item.id}</div>
+        <div style="font-size:12px;color:var(--text-dim)">${item.entity} ${item.owner?`&middot; Owner: <b style="color:var(--accent)">${item.owner}</b>`:'&middot; Unclaimed'}</div>
+      </div>
+      <div class="btn-row" style="margin-top:0;">
+        ${item.owner
+          ? `<button class="btn btn-sm btn-ghost" data-act="release" data-i="${i}">Release</button>`
+          : `<button class="btn btn-sm btn-accent" data-act="claim" data-i="${i}">Claim</button>`}
+      </div>
+    </div>`).join('');
+  wrap.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = +btn.dataset.i;
+      if(btn.dataset.act==='claim') STATE.claimBoard[i].owner = STATE.username || 'Trainee';
+      else STATE.claimBoard[i].owner = null;
+      paintClaimBoard();
+    });
+  });
+}
+
+/* ---------- ATTACHMENT SIMULATOR ---------- */
+function renderAttachmentSim(){
+  const attSel = document.getElementById('att-type');
+  const roleSel = document.getElementById('att-role');
+  attSel.innerHTML = ATTACHMENTS.map(a=>`<option value="${a}">${a}</option>`).join('');
+  roleSel.innerHTML = ROLES.map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+  document.getElementById('att-run').addEventListener('click', ()=>{
+    const type = attSel.value, role = roleSel.value;
+    const ok = ATTACHMENT_ACCESS[type].includes(role);
+    const box = document.getElementById('att-result');
+    box.className = 'result-box ' + (ok?'allow':'deny');
+    box.innerHTML = `<div class="result-title ${ok?'allow':'deny'}">${ic(ok?'check':'x')} ${ok?'AUTHORIZED':'RESTRICTED'}</div>
+      <p><b>${role}</b> ${ok?'is authorized to open':'is not authorized to open'} a <b>${type}</b> attachment.</p>
+      <p style="font-size:12px;color:var(--text-faint);">Authorized roles for this attachment type: ${ATTACHMENT_ACCESS[type].join(', ')}.</p>`;
+  });
+}
+
+/* ---------- REPORT SECURITY ---------- */
+const REPORT_ROWS = [
+  {entity:'Entity 100', account:'Cash - Operating', balance:'$412,300'},
+  {entity:'Entity 100', account:'Bank Clearing', balance:'$18,220'},
+  {entity:'Entity 200', account:'Cash - Operating', balance:'$276,900'},
+  {entity:'Entity 200', account:'Intercompany', balance:'-$54,100'},
+];
+const REPORT_ROLE_ENTITY = {
+  'Preparer':['Entity 100'], 'Reviewer':['Entity 100'], 'Approver':['Entity 200'],
+  'Reconciliation Manager':['Entity 100','Entity 200'], 'Auditor':['Entity 100','Entity 200'], 'Viewer':['Entity 100'],
+};
+function renderReportSim(){
+  const roleSel = document.getElementById('report-role');
+  roleSel.innerHTML = Object.keys(REPORT_ROLE_ENTITY).map(r=>`<option value="${r}">${r}</option>`).join('');
+  document.getElementById('report-run').addEventListener('click', paintReport);
+  paintReport();
+}
+function paintReport(){
+  const role = document.getElementById('report-role').value;
+  const allowedEntities = REPORT_ROLE_ENTITY[role];
+  const rows = REPORT_ROWS.filter(r=>allowedEntities.includes(r.entity));
+  const tbody = document.getElementById('report-tbody');
+  tbody.innerHTML = rows.map(r=>`<tr><td>${r.entity}</td><td>${r.account}</td><td class="mono">${r.balance}</td></tr>`).join('');
+  document.getElementById('report-note').textContent = `${role} sees ${rows.length} of ${REPORT_ROWS.length} rows — filtered by the same entity security enforced elsewhere in ARCS.`;
+}
+
+/* ---------- API SECURITY ---------- */
+function renderApiSim(){
+  document.querySelectorAll('.api-scope-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const scope = btn.dataset.scope;
+      const flow = document.getElementById('api-flow');
+      const ok = scope==='Read' || scope==='Write';
+      const cls = scope==='Restricted'?'blocked':'ok';
+      flow.innerHTML = `
+        <div class="fh-node ok">API CLIENT</div><div class="fh-arrow">&rarr;</div>
+        <div class="fh-node ok">AUTHENTICATION</div><div class="fh-arrow">&rarr;</div>
+        <div class="fh-node ${cls}">SCOPE: ${scope.toUpperCase()}</div><div class="fh-arrow">&rarr;</div>
+        <div class="fh-node ${cls}">RESOURCE</div><div class="fh-arrow">&rarr;</div>
+        <div class="fh-node ${cls}">ACTION</div>`;
+      const box = document.getElementById('api-result');
+      box.className = 'result-box ' + (ok?'allow':'deny');
+      box.innerHTML = ok
+        ? `<div class="result-title allow">${ic('check')} REQUEST PERMITTED</div><p>A client authenticated with <b>${scope}</b> scope may perform ${scope==='Read'?'read':'read and write'} operations on authorized resources.</p>`
+        : `<div class="result-title deny">${ic('x')} REQUEST BLOCKED</div><p>A client with a <b>Restricted</b> scope cannot perform the requested action. Scopes are enforced identically to UI-level permissions.</p>`;
+    });
+  });
+}
+
+/* ---------- SSO + MFA ---------- */
+function renderAuthFlow(){
+  const steps = ['USER','IDENTITY PROVIDER','SSO','MFA','ORACLE ARCS','ACCESS'];
+  paintAuthFlow(steps, -1);
+  document.getElementById('auth-success').addEventListener('click', ()=> animateAuth(steps, steps.length-1));
+  document.getElementById('auth-fail').addEventListener('click', ()=> animateAuth(steps, 3, true));
+}
+function paintAuthFlow(steps, activeUpTo, failedAt){
+  const wrap = document.getElementById('auth-flow');
+  wrap.innerHTML = steps.map((s,i)=>{
+    let cls = '';
+    if(failedAt!==undefined && i===failedAt) cls='blocked';
+    else if(i<=activeUpTo) cls='ok';
+    return `${i>0?'<div class="fh-arrow">&rarr;</div>':''}<div class="fh-node ${cls}">${s}</div>`;
+  }).join('');
+}
+function animateAuth(steps, stopAt, fail){
+  let i=0;
+  const interval = setInterval(()=>{
+    if(fail && i===stopAt){ paintAuthFlow(steps, i-1, i); clearInterval(interval);
+      document.getElementById('auth-result').innerHTML = `<div class="result-title deny">${ic('x')} AUTHENTICATION FAILED</div><p>MFA challenge was not completed successfully. Access to Oracle ARCS is denied and the attempt is logged.</p>`;
+      document.getElementById('auth-result').className='result-box deny';
+      return;
+    }
+    paintAuthFlow(steps, i);
+    i++;
+    if(i>stopAt || (fail && i>stopAt)){
+      clearInterval(interval);
+      if(!fail){
+        document.getElementById('auth-result').innerHTML = `<div class="result-title allow">${ic('check')} AUTHENTICATION SUCCESSFUL</div><p>Identity verified via the identity provider, SSO session established, MFA challenge passed. Access to Oracle ARCS granted.</p>`;
+        document.getElementById('auth-result').className='result-box allow';
+      }
+    }
+  }, 450);
+}
+
+/* ---------- SESSION TIMEOUT ---------- */
+function renderSessionTimeoutWidget(){
+  paintTimeoutRing(STATE.sessionSeconds, 15);
+  document.getElementById('timeout-start').addEventListener('click', startSessionTimer);
+  document.getElementById('timeout-reauth').addEventListener('click', ()=>{
+    clearInterval(STATE.sessionTimer);
+    STATE.sessionSeconds=15;
+    paintTimeoutRing(15,15);
+    document.getElementById('timeout-status').textContent = 'Session active. Inactivity timer reset after re-authentication.';
+    document.getElementById('timeout-reauth').classList.add('hidden');
+  });
+}
+function startSessionTimer(){
+  clearInterval(STATE.sessionTimer);
+  STATE.sessionSeconds = 15;
+  document.getElementById('timeout-reauth').classList.add('hidden');
+  document.getElementById('timeout-status').textContent = 'Active session — simulated inactivity countdown running.';
+  STATE.sessionTimer = setInterval(()=>{
+    STATE.sessionSeconds--;
+    paintTimeoutRing(STATE.sessionSeconds, 15);
+    if(STATE.sessionSeconds<=0){
+      clearInterval(STATE.sessionTimer);
+      document.getElementById('timeout-status').textContent = 'Session timed out due to inactivity. Re-authentication is required to continue.';
+      document.getElementById('timeout-reauth').classList.remove('hidden');
+    }
+  }, 400);
+}
+function paintTimeoutRing(sec, total){
+  const pct = Math.max(0, sec/total);
+  const circumference = 2*Math.PI*50;
+  const offset = circumference*(1-pct);
+  const color = sec<=4 ? 'var(--red)' : (sec<=8 ? 'var(--amber)' : 'var(--accent)');
+  document.getElementById('timeout-ring-wrap').innerHTML = `
+    <svg width="120" height="120" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="8"/>
+      <circle cx="60" cy="60" r="50" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"
+        stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+    </svg>
+    <div class="timeout-num" style="color:${color}">${sec}s</div>`;
+}
+
+/* ---------- ADMIN IMPERSONATION ---------- */
+function renderAdminImpersonation(){
+  document.getElementById('admin-imp-panel').innerHTML = `
+    <div class="modal-section"><h5>Purpose</h5><p>Allows an Administrator to temporarily act as another user to troubleshoot a reported access issue.</p></div>
+    <div class="modal-section"><h5>Risk</h5><p>Actions performed during impersonation could be misattributed to the impersonated user without strong controls.</p></div>
+    <div class="modal-section"><h5>Control</h5><p>Impersonation sessions should require justification, be time-boxed, and be clearly flagged in the audit trail as "performed via impersonation."</p></div>
+    <div class="modal-section"><h5>Audit Evidence</h5><p>Every impersonated action logs both the Administrator's identity and the impersonated user's identity.</p></div>`;
+}
+
+/* ---------- AUDIT EXPLORER ---------- */
+function renderAuditExplorer(){
+  const userSel = document.getElementById('audit-filter-user');
+  const resultSel = document.getElementById('audit-filter-result');
+  const users = ['All', ...new Set(AUDIT_LOG.map(a=>a.user))];
+  const results = ['All', ...new Set(AUDIT_LOG.map(a=>a.result))];
+  userSel.innerHTML = users.map(u=>`<option value="${u}">${u}</option>`).join('');
+  resultSel.innerHTML = results.map(r=>`<option value="${r}">${r}</option>`).join('');
+  [userSel, resultSel].forEach(sel=> sel.addEventListener('change', paintAuditTable));
+  paintAuditTable();
+}
+function paintAuditTable(){
+  const u = document.getElementById('audit-filter-user').value;
+  const r = document.getElementById('audit-filter-result').value;
+  const rows = AUDIT_LOG.filter(a=> (u==='All'||a.user===u) && (r==='All'||a.result===r) );
+  document.getElementById('audit-tbody').innerHTML = rows.map(a=>`
+    <tr><td>${a.user}</td><td>${a.role}</td><td class="mono">${a.object}</td><td>${a.action}</td><td class="mono">${a.date}</td>
+    <td><span class="badge ${a.result.startsWith('Successful')?'badge-green':'badge-red'}">${a.result.startsWith('Successful')?'Successful':'Blocked'}</span></td></tr>`).join('');
+}
+
+/* ---------- SCENARIO LAB ---------- */
+function renderScenarioLab(){
+  const grid = document.getElementById('scenario-grid');
+  grid.innerHTML = SCENARIOS.map((s,i)=>`
+    <div class="card scenario-card hoverable" data-idx="${i}">
+      <span class="sc-num">SCENARIO ${String(i+1).padStart(2,'0')}</span>
+      <h4>${s.title}</h4>
+      <p>${s.situation}</p>
+    </div>`).join('');
+  grid.querySelectorAll('.scenario-card').forEach(card=>{
+    card.addEventListener('click', ()=> openScenario(+card.dataset.idx));
+  });
+}
+function openScenario(idx){
+  const s = SCENARIOS[idx];
+  openModal(`
+    <span class="modal-tag">Security Scenario ${idx+1}</span><h3>${s.title}</h3>
+    <div class="modal-section"><h5>Situation</h5><p>${s.situation}</p></div>
+    <div class="modal-section"><h5>Decision</h5>
+      <div class="choice-list" id="scenario-choices"></div>
+    </div>
+    <div id="scenario-feedback"></div>`);
+  const list = document.getElementById('scenario-choices');
+  list.innerHTML = s.options.map((opt,i)=>`<button class="choice-btn" data-i="${i}">${opt}</button>`).join('');
+  list.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = +btn.dataset.i;
+      list.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+      const correct = i===s.correct;
+      btn.classList.add(correct?'correct':'incorrect');
+      if(!correct) list.children[s.correct].classList.add('correct');
+      STATE.scenariosCompleted++;
+      if(correct) STATE.scenarioCorrect++;
+      updateProgressPill();
+      document.getElementById('scenario-feedback').innerHTML = `
+        <div class="modal-section"><h5>Action &amp; Result</h5><p>${correct?'Correct — this reflects standard ARCS security practice.':'Not quite — here is the expected outcome.'}</p></div>
+        <div class="modal-section"><h5>Explanation</h5><p>${s.explanation}</p></div>
+        <div class="modal-section"><h5>Security Risk</h5><p>${s.risk}</p></div>`;
+    }, {once:true});
+  });
+}
+
+/* ---------- PRACTICE MODE ---------- */
+const PRACTICE_QUESTIONS = [
+  {q:'You are a Reconciliation Manager. A preparer reports they can access an entity they should not see. What should you investigate first?', options:['Their password strength','Their assigned entity-level security scope','The color theme of their dashboard','Whether they used SSO or typed a password'], correct:1, explanation:'An unexpected entity showing up almost always traces back to overly broad row-level (entity) security assignment.'},
+  {q:'A Preparer and Reviewer are the same person for one reconciliation. What control gap does this represent?', options:['Session timeout misconfiguration','A segregation-of-duties gap','An API scope issue','A report design issue'], correct:1, explanation:'One person performing both prepare and review functions removes an intended independent check.'},
+  {q:'An external auditor still has access two months after their engagement ended. What is the most likely root cause?', options:['MFA was not enforced','Access was not time-boxed to the engagement period','The auditor role has no restrictions by design','Row-level security failed'], correct:1, explanation:'Standing access after engagement end usually means the access review or expiry process was not applied.'},
+  {q:'A user with Viewer access is able to edit a reconciliation. What is the most likely explanation?', options:['Viewer is designed to allow edits','The user was also granted a second role with edit rights','Viewers can always edit their own entity','This is expected default behavior'], correct:1, explanation:'Viewer alone should be read-only; edit capability suggests an additional role or misconfiguration.'},
+  {q:'A report shows a user data from an entity outside their normal access. What should be checked first?', options:['The report’s own security filtering configuration','The user’s screen resolution','The report’s color scheme','The user’s job title'], correct:1, explanation:'Reports should inherit row-level security; unexpected exposure usually points to a report-level filtering gap.'},
+];
+let practiceIdx = 0;
+function renderPractice(){
+  paintPractice();
+  document.getElementById('practice-next').addEventListener('click', ()=>{
+    practiceIdx = (practiceIdx+1) % PRACTICE_QUESTIONS.length;
+    paintPractice();
+  });
+}
+function paintPractice(){
+  const p = PRACTICE_QUESTIONS[practiceIdx];
+  document.getElementById('practice-q-num').textContent = `Practice Question ${practiceIdx+1} of ${PRACTICE_QUESTIONS.length}`;
+  document.getElementById('practice-q-text').textContent = p.q;
+  const list = document.getElementById('practice-choices');
+  list.innerHTML = p.options.map((opt,i)=>`<button class="choice-btn" data-i="${i}">${opt}</button>`).join('');
+  document.getElementById('practice-feedback').innerHTML = '';
+  list.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = +btn.dataset.i;
+      list.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+      const correct = i===p.correct;
+      btn.classList.add(correct?'correct':'incorrect');
+      if(!correct) list.children[p.correct].classList.add('correct');
+      STATE.practiceAnswered++;
+      if(correct) STATE.practiceCorrect++;
+      document.getElementById('practice-feedback').innerHTML = `<div class="result-box ${correct?'allow':'deny'}" style="margin-top:14px;"><p>${p.explanation}</p></div>`;
+    }, {once:true});
+  });
+}
+
+/* ---------- EXAM MODE ---------- */
+function startExamIfNeeded(){
+  if(STATE.examScorePct!==null) return; // already completed, show summary state
+  STATE.examIndex = 0;
+  STATE.examAnswers = new Array(EXAM_QUESTIONS.length).fill(null);
+  paintExam();
+}
+function paintExam(){
+  const wrap = document.getElementById('exam-body');
+  if(STATE.examIndex >= EXAM_QUESTIONS.length){
+    finishExam();
+    return;
+  }
+  const q = EXAM_QUESTIONS[STATE.examIndex];
+  document.getElementById('exam-progress-bar').style.width = `${(STATE.examIndex/EXAM_QUESTIONS.length)*100}%`;
+  wrap.innerHTML = `
+    <div class="exam-q-label">Question ${STATE.examIndex+1} of ${EXAM_QUESTIONS.length}</div>
+    <div class="exam-q-text">${q.q}</div>
+    <div class="choice-list" id="exam-choices"></div>
+    <div id="exam-feedback"></div>`;
+  const list = document.getElementById('exam-choices');
+  list.innerHTML = q.options.map((opt,i)=>`<button class="choice-btn" data-i="${i}">${opt}</button>`).join('');
+  list.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = +btn.dataset.i;
+      list.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+      const correct = i===q.correct;
+      btn.classList.add(correct?'correct':'incorrect');
+      if(!correct) list.children[q.correct].classList.add('correct');
+      STATE.examAnswers[STATE.examIndex] = correct;
+      document.getElementById('exam-feedback').innerHTML = `<div class="result-box ${correct?'allow':'deny'}" style="margin-top:14px;"><p>${q.explanation}</p></div>
+        <div class="btn-row"><button class="btn btn-accent" id="exam-next-btn">${STATE.examIndex===EXAM_QUESTIONS.length-1?'Finish Exam':'Next Question'}</button></div>`;
+      document.getElementById('exam-next-btn').addEventListener('click', ()=>{
+        STATE.examIndex++;
+        paintExam();
+      });
+    }, {once:true});
+  });
+}
+function finishExam(){
+  const correctCount = STATE.examAnswers.filter(Boolean).length;
+  const pct = Math.round((correctCount/EXAM_QUESTIONS.length)*100);
+  STATE.examScorePct = pct;
+  updateProgressPill();
+  navigateTo('completion');
+  paintCompletion(correctCount, pct);
+}
+
+/* ---------- KPI DASHBOARD ---------- */
+const KPI_DATA = [
+  {label:'Role Violations', value:3, tone:'amber'},
+  {label:'Data Access Violations', value:2, tone:'red'},
+  {label:'SoD Violations', value:1, tone:'red'},
+  {label:'Self-Approval Attempts', value:2, tone:'red'},
+  {label:'Report Security Issues', value:0, tone:'green'},
+  {label:'API Security Issues', value:1, tone:'amber'},
+  {label:'Authentication Failures', value:4, tone:'amber'},
+];
+function renderKpiDashboard(){
+  const grid = document.getElementById('kpi-grid');
+  const toneVar = {amber:'var(--amber)', red:'var(--red)', green:'var(--green)'};
+  grid.innerHTML = KPI_DATA.map(k=>`
+    <div class="card kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="color:${toneVar[k.tone]}">${k.value}</div>
+      <div class="kpi-note">Illustrative training data</div>
+    </div>`).join('');
+}
+
+/* ---------- COMPLETION ---------- */
+function paintCompletion(correctCount, pct){
+  const passed = pct>=80;
+  const circumference = 2*Math.PI*66;
+  const offset = circumference*(1-pct/100);
+  document.getElementById('completion-body').innerHTML = `
+    <div class="score-ring">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="66" fill="none" stroke="var(--border)" stroke-width="10"/>
+        <circle cx="75" cy="75" r="66" fill="none" stroke="${passed?'var(--green)':'var(--amber)'}" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" style="transform:rotate(-90deg);transform-origin:50% 50%;"/>
+      </svg>
+      <div class="score-ring-num"><b>${pct}%</b><span>Exam Score</span></div>
+    </div>
+    <div class="status-pill" style="background:${passed?'rgba(51,214,160,.14)':'rgba(243,185,78,.14)'};color:${passed?'var(--green)':'var(--amber)'};border:1px solid ${passed?'rgba(51,214,160,.4)':'rgba(243,185,78,.4)'}">${passed?'PASSED':'RETRY RECOMMENDED'}</div>
+    <div class="completion-stats">
+      <div><b>${STATE.scenariosCompleted}</b><span>Scenarios Done</span></div>
+      <div><b>${correctCount}/${EXAM_QUESTIONS.length}</b><span>Correct Answers</span></div>
+      <div><b>${STATE.scenarioCorrect}</b><span>Scenario Wins</span></div>
+    </div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-ghost" id="completion-retry">Retake Exam</button>
+      <button class="btn btn-accent" id="completion-dashboard">Back to Dashboard</button>
+    </div>`;
+  document.getElementById('completion-retry').addEventListener('click', ()=>{
+    STATE.examScorePct = null;
+    navigateTo('exam');
+  });
+  document.getElementById('completion-dashboard').addEventListener('click', ()=> navigateTo('dashboard'));
+}
+
+</script>
+</body>
+</html>
