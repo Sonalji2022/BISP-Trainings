@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle ARCS · Data Integration Lab | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#080B14;
+  --bg-grid: rgba(45,212,191,0.045);
+  --panel:#0E1424;
+  --panel-2:#121A2E;
+  --card:#161F36;
+  --card-hi:#1B2542;
+  --border:#26314E;
+  --border-soft:#1C2438;
+  --text:#E9EDF6;
+  --text-dim:#93A0BD;
+  --text-faint:#5C6A8C;
+  --teal:#2FE0C6;
+  --teal-dim:#1B7D6E;
+  --coral:#FF6B52;
+  --amber:#FFB93D;
+  --green:#3FDB90;
+  --red:#FF5C7A;
+  --violet:#8B7CF6;
+  --bisp-blue:#1B4F9C;
+  --bisp-orange:#F7941D;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{background:var(--bg); color:var(--text); font-family:var(--font-body); min-height:100vh; -webkit-font-smoothing:antialiased;}
+body{
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 34px 34px;
+  background-attachment: fixed;
+}
+::selection{background:var(--teal); color:#04120F;}
+a{color:inherit; text-decoration:none;}
+button{font-family:var(--font-body); cursor:pointer;}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--border); border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:var(--teal-dim);}
+:focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
+
+.mono{font-family:var(--font-mono);}
+.illustrative{
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--amber); background:rgba(255,185,61,0.09); border:1px solid rgba(255,185,61,0.35);
+  padding:3px 8px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.illustrative::before{content:'●'; font-size:7px;}
+
+/* ---------- Pipeline signature motif ---------- */
+.pipeline{position:relative; display:flex; align-items:center; gap:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, var(--border) 8%, var(--border) 92%, transparent); margin:6px 0;}
+.pipeline .packet{position:absolute; top:50%; width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 10px 2px rgba(47,224,198,.7); transform:translateY(-50%); animation:travel 3.2s linear infinite;}
+.pipeline .packet:nth-child(2){animation-delay:1.1s; background:var(--coral); box-shadow:0 0 10px 2px rgba(255,107,82,.6);}
+.pipeline .packet:nth-child(3){animation-delay:2.2s; background:var(--violet); box-shadow:0 0 10px 2px rgba(139,124,246,.6);}
+@keyframes travel{from{left:-2%;} to{left:101%;}}
+@media (prefers-reduced-motion: reduce){.pipeline .packet{animation:none; display:none;}}
+
+/* ================= LOGIN SCREEN ================= */
+#loginScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; padding:24px;}
+.login-glow{position:absolute; width:900px; height:900px; border-radius:50%; background:radial-gradient(circle, rgba(47,224,198,0.10) 0%, transparent 65%); top:-320px; right:-260px; pointer-events:none;}
+.login-glow.two{background:radial-gradient(circle, rgba(255,107,82,0.08) 0%, transparent 65%); top:auto; bottom:-380px; left:-300px; right:auto;}
+.login-card{position:relative; z-index:2; width:100%; max-width:460px; background:linear-gradient(180deg, var(--panel-2), var(--panel)); border:1px solid var(--border); border-radius:18px; padding:40px 38px 34px; box-shadow:0 40px 90px -30px rgba(0,0,0,.7);}
+.login-eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.22em; color:var(--teal); text-transform:uppercase; display:flex; align-items:center; gap:8px;}
+.login-eyebrow::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px 2px rgba(47,224,198,.8); display:inline-block;}
+.login-title{font-family:var(--font-display); font-size:34px; font-weight:700; letter-spacing:-0.01em; margin-top:14px; line-height:1.05;}
+.login-title span{color:var(--teal);}
+.login-sub{font-family:var(--font-display); font-size:14px; color:var(--text-dim); margin-top:6px; letter-spacing:.02em;}
+.login-tagline{font-style:normal; margin-top:18px; font-family:var(--font-mono); font-size:12.5px; color:var(--coral); letter-spacing:.03em;}
+.login-form{margin-top:26px; display:flex; flex-direction:column; gap:14px;}
+.field label{display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; font-family:var(--font-mono);}
+.field input, .field select{width:100%; background:var(--card); border:1px solid var(--border); color:var(--text); padding:11px 13px; border-radius:9px; font-size:14px; font-family:var(--font-body); transition:border-color .15s;}
+.field input:focus, .field select:focus{border-color:var(--teal);}
+.btn{border:none; border-radius:9px; padding:12px 18px; font-weight:600; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s, box-shadow .12s, opacity .12s;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:linear-gradient(135deg, var(--teal), #1FA98E); color:#03120E; box-shadow:0 10px 26px -10px rgba(47,224,198,.55);}
+.btn-primary:hover{box-shadow:0 14px 32px -8px rgba(47,224,198,.7);}
+.btn-ghost{background:var(--card); color:var(--text); border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--teal-dim);}
+.btn-coral{background:linear-gradient(135deg, var(--coral), #C8452F); color:#1A0400;}
+.btn-block{width:100%; margin-top:6px;}
+.btn-sm{padding:8px 12px; font-size:12.5px; border-radius:7px;}
+.login-footer{margin-top:28px; padding-top:20px; border-top:1px solid var(--border-soft); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.bisp-brand{display:flex; align-items:center; gap:10px;}
+.bisp-brand img{height:30px; width:auto; border-radius:4px; background:#fff; padding:3px;}
+.bisp-brand-text{font-size:11px; color:var(--text-dim); line-height:1.4;}
+.bisp-brand-text b{color:var(--text); font-family:var(--font-display);}
+
+/* ================= APP SHELL ================= */
+#mainShell{display:none; min-height:100vh; grid-template-columns:248px 1fr; }
+#mainShell.active{display:grid;}
+.topbar{grid-column:1/3; display:flex; align-items:center; justify-content:space-between; padding:14px 26px; border-bottom:1px solid var(--border-soft); background:rgba(14,20,36,0.85); backdrop-filter:blur(10px); position:sticky; top:0; z-index:40;}
+.topbar-left{display:flex; align-items:center; gap:14px;}
+.brandmark{font-family:var(--font-display); font-weight:700; font-size:18px; letter-spacing:-0.01em; display:flex; align-items:center; gap:8px;}
+.brandmark .dot{width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px 2px rgba(47,224,198,.8);}
+.brandmark small{font-family:var(--font-mono); font-size:10px; color:var(--text-faint); font-weight:500; letter-spacing:.1em; margin-left:4px;}
+.topbar-right{display:flex; align-items:center; gap:14px;}
+.role-chip{font-family:var(--font-mono); font-size:11px; color:var(--text-dim); background:var(--card); border:1px solid var(--border); padding:6px 12px; border-radius:20px;}
+.sidebar{border-right:1px solid var(--border-soft); background:var(--panel); padding:18px 12px; position:sticky; top:57px; align-self:start; height:calc(100vh - 57px); overflow-y:auto;}
+.sidebar-group-label{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-faint); padding:14px 12px 6px;}
+.nav-item{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:9px; color:var(--text-dim); font-size:13.5px; font-weight:500; cursor:pointer; transition:background .12s, color .12s; margin-bottom:2px;}
+.nav-item:hover{background:var(--card); color:var(--text);}
+.nav-item.active{background:linear-gradient(90deg, rgba(47,224,198,.15), transparent); color:var(--teal); border-left:2px solid var(--teal); padding-left:10px;}
+.nav-item .glyph{width:20px; text-align:center; font-size:13px; opacity:.85;}
+.main-content{padding:28px 32px 60px; overflow-x:hidden;}
+
+.page-head{margin-bottom:24px;}
+.page-eyebrow{font-family:var(--font-mono); font-size:11px; color:var(--teal); letter-spacing:.14em; text-transform:uppercase; display:flex; align-items:center; gap:8px;}
+.page-title{font-family:var(--font-display); font-size:26px; font-weight:700; margin-top:6px; letter-spacing:-0.01em;}
+.page-desc{color:var(--text-dim); font-size:13.5px; margin-top:6px; max-width:720px; line-height:1.55;}
+
+/* Grid helpers */
+.grid{display:grid; gap:16px;}
+.grid-6{grid-template-columns:repeat(6,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media (max-width:1100px){.grid-6{grid-template-columns:repeat(3,1fr);} .grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);} .grid-2{grid-template-columns:1fr;}}
+
+.card{background:var(--card); border:1px solid var(--border-soft); border-radius:14px; padding:18px;}
+.card-title{font-family:var(--font-display); font-size:14.5px; font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+.card-title .tag{font-size:9px;}
+
+.kpi{position:relative; overflow:hidden;}
+.kpi-label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+.kpi-value{font-family:var(--font-display); font-size:26px; font-weight:700; margin-top:8px;}
+.kpi-delta{font-size:11px; margin-top:6px; font-family:var(--font-mono);}
+.kpi-delta.up{color:var(--green);}
+.kpi-delta.down{color:var(--red);}
+.kpi::after{content:''; position:absolute; right:-10px; bottom:-10px; width:60px; height:60px; border-radius:50%; background:var(--teal); opacity:.06;}
+
+.chart-wrap{height:220px; position:relative;}
+.chart-wrap.short{height:170px;}
+
+/* Buttons row */
+.btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;}
+
+/* Tables */
+table.datatable{width:100%; border-collapse:collapse; font-size:13px;}
+table.datatable th{text-align:left; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); padding:9px 10px; border-bottom:1px solid var(--border);}
+table.datatable td{padding:10px 10px; border-bottom:1px solid var(--border-soft); color:var(--text-dim);}
+table.datatable tr:hover td{background:rgba(255,255,255,0.015); color:var(--text);}
+.badge{font-family:var(--font-mono); font-size:10px; padding:3px 9px; border-radius:20px; letter-spacing:.04em; display:inline-block;}
+.badge.success{background:rgba(63,219,144,.12); color:var(--green); border:1px solid rgba(63,219,144,.35);}
+.badge.warning{background:rgba(255,185,61,.12); color:var(--amber); border:1px solid rgba(255,185,61,.35);}
+.badge.failed{background:rgba(255,92,122,.12); color:var(--red); border:1px solid rgba(255,92,122,.35);}
+.badge.running{background:rgba(139,124,246,.12); color:var(--violet); border:1px solid rgba(139,124,246,.35);}
+.badge.valid{background:rgba(63,219,144,.12); color:var(--green); border:1px solid rgba(63,219,144,.35);}
+.badge.invalid{background:rgba(255,92,122,.12); color:var(--red); border:1px solid rgba(255,92,122,.35);}
+
+/* Source ecosystem */
+.source-tile{background:var(--card); border:1px solid var(--border-soft); border-radius:13px; padding:16px; cursor:pointer; transition:border-color .15s, transform .15s;}
+.source-tile:hover{border-color:var(--teal-dim); transform:translateY(-2px);}
+.source-tile.selected{border-color:var(--teal); box-shadow:0 0 0 1px var(--teal) inset;}
+.source-glyph{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; font-size:12px; margin-bottom:12px;}
+.source-name{font-family:var(--font-display); font-size:14px; font-weight:600;}
+.source-cat{font-size:11px; color:var(--text-faint); margin-top:3px;}
+
+.detail-panel{margin-top:18px;}
+.kv-row{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-soft); font-size:13px;}
+.kv-row .k{width:140px; flex-shrink:0; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); padding-top:2px;}
+.kv-row .v{color:var(--text-dim); line-height:1.5;}
+
+/* Flow diagram (SmartArt style) */
+.flow{display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:18px 0;}
+.flow-node{background:var(--card-hi); border:1px solid var(--border); border-radius:10px; padding:12px 18px; font-family:var(--font-display); font-size:13px; font-weight:600; text-align:center; min-width:120px;}
+.flow-node.active{border-color:var(--teal); color:var(--teal); box-shadow:0 0 0 1px var(--teal) inset;}
+.flow-arrow{color:var(--text-faint); font-size:18px; margin:0 10px; flex-shrink:0;}
+.flow.vertical{flex-direction:column; align-items:flex-start;}
+.flow.vertical .flow-arrow{margin:6px 0 6px 26px; transform:rotate(90deg);}
+
+/* Wizard */
+.wizard-steps{display:flex; align-items:center; gap:6px; margin-bottom:22px; overflow-x:auto; padding-bottom:6px;}
+.wstep{flex-shrink:0; display:flex; align-items:center; gap:7px; padding:7px 12px 7px 8px; border-radius:20px; background:var(--card); border:1px solid var(--border-soft); font-size:11.5px; color:var(--text-faint); font-family:var(--font-mono); cursor:pointer;}
+.wstep .num{width:18px; height:18px; border-radius:50%; background:var(--border); color:var(--text-dim); display:flex; align-items:center; justify-content:center; font-size:10px;}
+.wstep.done{color:var(--green);}
+.wstep.done .num{background:var(--green); color:#052E17;}
+.wstep.current{color:var(--teal); border-color:var(--teal);}
+.wstep.current .num{background:var(--teal); color:#04120F;}
+
+.progress-track{background:var(--panel-2); border-radius:20px; height:9px; overflow:hidden; border:1px solid var(--border-soft);}
+.progress-fill{height:100%; background:linear-gradient(90deg, var(--teal-dim), var(--teal)); border-radius:20px; transition:width .5s ease;}
+.progress-fill.amber{background:linear-gradient(90deg,#9c6c1a, var(--amber));}
+.progress-fill.coral{background:linear-gradient(90deg,#8c2a1c, var(--coral));}
+.progress-label{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-bottom:6px;}
+
+.pill-select{display:flex; gap:8px; flex-wrap:wrap;}
+.pill{padding:9px 15px; border-radius:20px; background:var(--card); border:1px solid var(--border-soft); font-size:12.5px; color:var(--text-dim); cursor:pointer; font-family:var(--font-mono);}
+.pill.active{background:rgba(47,224,198,.13); border-color:var(--teal); color:var(--teal);}
+
+.status-dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:7px;}
+.status-dot.on{background:var(--green); box-shadow:0 0 8px 2px rgba(63,219,144,.6);}
+.status-dot.off{background:var(--red); box-shadow:0 0 8px 2px rgba(255,92,122,.5);}
+.status-dot.idle{background:var(--text-faint);}
+
+/* Load simulator bars */
+.load-stage{margin-bottom:16px;}
+.load-stage-label{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:12px; margin-bottom:6px; color:var(--text-dim);}
+.load-stage-label .pct{color:var(--teal);}
+
+/* Error / scenario cards */
+.err-card{background:var(--card); border:1px solid var(--border-soft); border-radius:12px; padding:15px; cursor:pointer;}
+.err-card:hover{border-color:var(--coral);}
+.err-card.open{border-color:var(--coral); background:var(--card-hi);}
+.err-title{font-family:var(--font-display); font-weight:600; font-size:13.5px; display:flex; align-items:center; gap:8px;}
+.err-title::before{content:'⚠'; color:var(--coral);}
+.err-body{margin-top:12px; font-size:12.5px; color:var(--text-dim); line-height:1.6; display:none;}
+.err-card.open .err-body{display:block;}
+.err-body b{color:var(--text); font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; display:block; margin-top:10px;}
+
+/* Health rings */
+.ring-wrap{display:flex; align-items:center; gap:22px;}
+.ring{position:relative; width:120px; height:120px;}
+.ring svg{transform:rotate(-90deg);}
+.ring-num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:22px; font-weight:700;}
+
+/* Scenario stepper */
+.scenario-item{display:flex; gap:14px; padding:16px; border-radius:12px; background:var(--card); border:1px solid var(--border-soft); margin-bottom:10px;}
+.scenario-item.done{border-color:var(--green);}
+.scenario-num{width:30px; height:30px; border-radius:50%; background:var(--panel-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:12px; flex-shrink:0;}
+.scenario-item.done .scenario-num{background:var(--green); color:#052E17; border-color:var(--green);}
+.scenario-body{flex:1;}
+.scenario-title{font-weight:600; font-size:13.5px; font-family:var(--font-display);}
+.scenario-desc{font-size:12px; color:var(--text-faint); margin-top:3px;}
+.scenario-feedback{margin-top:8px; font-size:12px; color:var(--teal); font-family:var(--font-mono); display:none;}
+.scenario-item.done .scenario-feedback{display:block;}
+
+/* Quiz */
+.quiz-card{background:var(--card); border:1px solid var(--border-soft); border-radius:14px; padding:22px; max-width:680px;}
+.quiz-progress{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-bottom:10px;}
+.quiz-q{font-family:var(--font-display); font-size:16px; font-weight:600; margin-bottom:16px; line-height:1.4;}
+.quiz-opt{display:block; width:100%; text-align:left; background:var(--panel-2); border:1px solid var(--border); color:var(--text-dim); padding:12px 14px; border-radius:9px; margin-bottom:9px; font-size:13.5px; transition:border-color .12s, background .12s;}
+.quiz-opt:hover{border-color:var(--teal-dim);}
+.quiz-opt.correct{border-color:var(--green); background:rgba(63,219,144,.1); color:var(--green);}
+.quiz-opt.wrong{border-color:var(--red); background:rgba(255,92,122,.1); color:var(--red);}
+.quiz-explain{margin-top:14px; font-size:12.5px; color:var(--text-dim); background:var(--panel-2); border-left:3px solid var(--teal); padding:11px 13px; border-radius:6px; display:none; line-height:1.5;}
+.flashcard{background:var(--card); border:1px solid var(--border-soft); border-radius:14px; padding:22px; min-height:150px; display:flex; flex-direction:column; justify-content:center; cursor:pointer;}
+.flashcard .fq{font-family:var(--font-display); font-weight:600; font-size:15px;}
+.flashcard .fa{font-size:13px; color:var(--teal); margin-top:12px; font-family:var(--font-mono); display:none;}
+.flashcard.flipped .fa{display:block;}
+.flashcard .hint{font-size:10.5px; color:var(--text-faint); margin-top:14px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.06em;}
+
+/* Scorecard */
+.score-row{display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--border-soft);}
+.score-row .name{font-size:13px; color:var(--text-dim); font-family:var(--font-display); font-weight:500;}
+.score-row .bar-mini{width:220px;}
+.badge-final{margin-top:26px; text-align:center; padding:26px; border-radius:16px; background:linear-gradient(135deg, rgba(47,224,198,.12), rgba(139,124,246,.08)); border:1px solid var(--teal-dim);}
+.badge-final .trophy{font-size:36px;}
+.badge-final .btitle{font-family:var(--font-display); font-weight:700; font-size:18px; margin-top:8px;}
+.badge-final .bsub{font-size:12px; color:var(--text-dim); margin-top:4px; font-family:var(--font-mono);}
+
+/* Footer */
+.app-footer{margin-top:50px; padding-top:22px; border-top:1px solid var(--border-soft); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+.app-footer .l{display:flex; align-items:center; gap:12px;}
+.app-footer img{height:26px; background:#fff; padding:3px; border-radius:4px;}
+.app-footer .txt{font-size:11px; color:var(--text-faint); line-height:1.6;}
+.app-footer .txt b{color:var(--text-dim);}
+
+.section-note{font-size:12px; color:var(--text-faint); background:var(--panel-2); border:1px dashed var(--border); padding:10px 13px; border-radius:9px; margin-bottom:16px; line-height:1.5;}
+
+/* Utility */
+.mt-8{margin-top:8px;} .mt-14{margin-top:14px;} .mt-18{margin-top:18px;} .mt-24{margin-top:24px;}
+.flex{display:flex;} .flex-between{display:flex; align-items:center; justify-content:space-between;} .gap-8{gap:8px;} .gap-12{gap:12px;} .wrap{flex-wrap:wrap;}
+.muted{color:var(--text-faint);}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-glow"></div>
+  <div class="login-glow two"></div>
+  <div class="login-card">
+    <div class="login-eyebrow">Data Integration Lab</div>
+    <div class="login-title">ORACLE <span>ARCS</span></div>
+    <div class="login-sub">Account Reconciliation Cloud Service · Integration Training</div>
+    <div class="pipeline" style="margin-top:20px;"><span class="packet"></span><span class="packet"></span><span class="packet"></span></div>
+    <div class="login-tagline">"Connect. Map. Validate. Load."</div>
+
+    <div class="login-form">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="trainee.analyst" value="trainee.analyst">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" value="••••••••">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select id="loginRole">
+          <option>Integration Analyst</option>
+          <option>Reconciliation Administrator</option>
+          <option>Finance Systems Trainee</option>
+          <option>Implementation Consultant</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="enterLab()">Enter Integration Lab →</button>
+    </div>
+
+    <div class="login-footer">
+      <div class="bisp-brand">
+        <img src="data:image/jpeg;base64,LOGO_BASE64_PLACEHOLDER" alt="BISP Trainings logo">
+        <div class="bisp-brand-text"><b>BISP Trainings</b><br>www.bisptrainings.com · +91 769-409-5404</div>
+      </div>
+      <span class="illustrative">Training Simulation</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN SHELL ============ -->
+<div id="mainShell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brandmark"><span class="dot"></span>ORACLE ARCS <small>DATA INTEGRATION LAB</small></div>
+    </div>
+    <div class="topbar-right">
+      <span class="illustrative">Illustrative Training Data</span>
+      <span class="role-chip" id="roleChipDisplay">Integration Analyst</span>
+    </div>
+  </div>
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main-content" id="content"></div>
+</div>
+
+<script>
+/* ===================== LOGO ===================== */
+document.querySelectorAll('img[src*="LOGO_BASE64_PLACEHOLDER"]').forEach(()=>{});
+const LOGO_B64 = "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";
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('img').forEach(img=>{ if(img.src.includes('LOGO_BASE64_PLACEHOLDER')) img.src = "data:image/jpeg;base64," + LOGO_B64; });
+});
+
+/* ===================== DATA ===================== */
+const SOURCES = [
+  {id:'fgl', name:'Oracle Fusion GL', cat:'ERP · General Ledger', glyph:'GL', color:'#2FE0C6',
+    typical:'Journal lines: Account, Entity, Cost Center, Period, Currency, Amount, Journal Source.',
+    conn:'Fusion REST API endpoint, OAuth2 client-credentials, business unit scoped extract.',
+    map:'Chart of Accounts natural-account segment mapped to ARCS Account dimension; BU segment to Entity.',
+    val:'Checks journals are posted and period status is Open before extract.',
+    load:'Scheduled Data Management batch, typically nightly after GL close cutoff.'},
+  {id:'fsl', name:'Oracle Fusion Subledgers', cat:'ERP · Subledger', glyph:'SL', color:'#2FE0C6',
+    typical:'AP/AR/FA subledger balances by account, supplier/customer, and period.',
+    conn:'Fusion BI Publisher extract or REST API, service-account authentication.',
+    map:'Subledger natural account mapped to reconciliation Account; transaction type to Category.',
+    val:'Confirms subledger-to-GL tie-out totals before load.',
+    load:'Loaded as supporting detail for transaction matching rules.'},
+  {id:'fccs', name:'Oracle FCCS', cat:'EPM · Consolidation', glyph:'CC', color:'#8B7CF6',
+    typical:'Consolidated entity balances, elimination entries, ownership percentages.',
+    conn:'EPM Cloud Data Management connection, pre-built application adapter.',
+    map:'FCCS Entity & Account dimensions map directly using shared dimension library.',
+    val:'Validates consolidation status is finalized for the period.',
+    load:'Loaded post-close for corporate-level reconciliations.'},
+  {id:'plan', name:'Oracle Planning', cat:'EPM · Planning', glyph:'PL', color:'#8B7CF6',
+    typical:'Budget and forecast balances by account, entity, and scenario.',
+    conn:'EPM Cloud native connection via shared services identity domain.',
+    map:'Scenario dimension mapped to ARCS Category (Budget/Forecast/Actual).',
+    val:'Checks the plan cycle is submitted and locked.',
+    load:'Loaded for budget-to-actual variance reconciliations.'},
+  {id:'sap', name:'SAP', cat:'ERP · Third-Party', glyph:'SAP', color:'#FFB93D',
+    typical:'FI/CO ledger extracts: GL account, company code, cost center, amount.',
+    conn:'File-based extract (IDoc/flat file) or middleware connector; SFTP drop typical.',
+    map:'SAP company code mapped to Entity; SAP GL account mapped to Account dimension.',
+    val:'Verifies extract row counts match SAP batch control totals.',
+    load:'Loaded via flat-file import format after landing on integration server.'},
+  {id:'msd', name:'Microsoft Dynamics', cat:'ERP · Third-Party', glyph:'D365', color:'#FFB93D',
+    typical:'General ledger transactions and dimension combinations by legal entity.',
+    conn:'REST/OData API connection or scheduled CSV export.',
+    map:'Dynamics main account mapped to Account; legal entity mapped to Entity.',
+    val:'Confirms period close status in the source legal entity.',
+    load:'Loaded via Data Management with a Dynamics-specific import format.'},
+  {id:'wd', name:'Workday', cat:'HCM/Financials', glyph:'WD', color:'#FF6B52',
+    typical:'Payroll accrual and financial accounting balances by cost center.',
+    conn:'Workday RaaS (Report-as-a-Service) web service connection.',
+    map:'Cost center mapped to Entity or Department dimension per client design.',
+    val:'Checks the accounting period is closed in Workday.',
+    load:'Loaded for payroll and HR-cost related reconciliations.'},
+  {id:'ns', name:'NetSuite', cat:'ERP · Cloud', glyph:'NS', color:'#FFB93D',
+    typical:'Subsidiary-level GL balances, saved search extracts.',
+    conn:'SuiteTalk web services or scheduled saved-search CSV export.',
+    map:'NetSuite subsidiary mapped to Entity; account number mapped to Account.',
+    val:'Validates subsidiary period is not locked for further posting.',
+    load:'Loaded via REST API import format directly into staging tables.'},
+  {id:'bank', name:'Banks', cat:'External · Treasury', glyph:'BNK', color:'#3FDB90',
+    typical:'Bank statement lines: date, description, amount, reference number.',
+    conn:'SFTP file drop (BAI2/MT940) or open-banking API feed.',
+    map:'Bank account number mapped to member; transaction codes mapped to Category.',
+    val:'Confirms statement date range is complete with no gaps.',
+    load:'Loaded for Transaction Matching against GL cash activity.'},
+  {id:'dw', name:'Data Warehouse', cat:'Internal · DW', glyph:'DW', color:'#2FE0C6',
+    typical:'Pre-aggregated fact tables spanning multiple source ERPs.',
+    conn:'JDBC connection string to the enterprise warehouse schema.',
+    map:'Warehouse conformed dimensions map one-to-one to ARCS dimensions.',
+    val:'Checks warehouse ETL job completion flag before extract.',
+    load:'Loaded as a consolidated multi-source feed to reduce integration count.'},
+  {id:'flat', name:'Flat File', cat:'File · CSV/TXT', glyph:'TXT', color:'#93A0BD',
+    typical:'Delimited or fixed-width files with account, entity, period, amount columns.',
+    conn:'File-based location pointing to an inbox folder or shared drive.',
+    map:'Column positions mapped explicitly via the Import Format Builder.',
+    val:'Checks file naming convention, header row, and delimiter consistency.',
+    load:'Loaded manually or via a scheduled file-watcher trigger.'},
+  {id:'rest', name:'REST API', cat:'API · Web Service', glyph:'API', color:'#8B7CF6',
+    typical:'JSON payloads returned from a source system endpoint.',
+    conn:'HTTPS endpoint with token-based or OAuth2 authentication.',
+    map:'JSON fields mapped to import-format columns via a payload template.',
+    val:'Validates HTTP response codes and payload schema before parsing.',
+    load:'Loaded through a scripted REST integration executed on schedule.'},
+  {id:'sftp', name:'SFTP', cat:'File Transfer', glyph:'FTP', color:'#93A0BD',
+    typical:'Secure file drops containing GL extracts or bank statements.',
+    conn:'SFTP host, port, credentials or SSH key, target directory path.',
+    map:'Inherits the mapping of whichever file format is transferred.',
+    val:'Confirms file arrival and checksum before triggering the load.',
+    load:'Loaded automatically once the file-watcher detects a new file.'},
+  {id:'jdbc', name:'JDBC', cat:'Database', glyph:'DB', color:'#2FE0C6',
+    typical:'Direct table or view extracts from a relational database.',
+    conn:'JDBC connection string, driver class, credentials, and query/view name.',
+    map:'Database columns mapped directly to import-format target attributes.',
+    val:'Checks row counts returned against an expected control count.',
+    load:'Loaded through a direct SQL extract at a scheduled interval.'},
+];
+
+const ERRORS = [
+  {cat:'Connection Error', cause:'Invalid credentials, expired token, or unreachable host/port.', example:'SFTP handshake fails with "authentication rejected" during Test Connection.', check:'Connection Configuration screen → Connection Status indicator.', fix:'Re-enter credentials, confirm firewall/IP allow-list, then re-run Test Connection.'},
+  {cat:'Format Error', cause:'Source file does not match the defined Import Format (delimiter, column count, header).', example:'A new column was added upstream, shifting every subsequent column left.', check:'Import Format Builder → Validate Format result.', fix:'Update the Import Format to match the new file layout and re-validate.'},
+  {cat:'Mapping Error', cause:'A source dimension member has no corresponding target mapping row.', example:'Cost center "9999-NEW" exists in SAP but not in the Dimension Mapping table.', check:'Dimension Mapping Lab → unmapped members list.', fix:'Add the missing mapping row, or use a wildcard/default mapping, then re-validate.'},
+  {cat:'Member Error', cause:'Target member referenced by a mapping does not exist in the ARCS application.', example:'Mapping points to entity "US_BANK" which was never created in ARCS.', check:'Member Mapping screen → target member validation flag.', fix:'Create the missing member in ARCS or correct the mapping to an existing member.'},
+  {cat:'Period Error', cause:'Source period label cannot be resolved to an open ARCS calendar period.', example:'Source sends "JAN-26" but ARCS calendar expects "Jan-2026".', check:'Period Mapping screen → Status column.', fix:'Add or correct the period mapping row so the label resolves correctly.'},
+  {cat:'Validation Error', cause:'Loaded data fails a business validation rule after mapping succeeds.', example:'A journal amount arrives unbalanced (debits ≠ credits) for the entity.', check:'Validation Center → failed check detail.', fix:'Correct the source data or adjust the validation rule scope, then re-run.'},
+  {cat:'Load Error', cause:'Data passes validation but fails during the physical write to the ARCS application.', example:'A concurrent load process locks the target cube, causing a timeout.', check:'Integration Monitor → job Status and Errors column.', fix:'Re-run the load rule once the lock clears, or stagger the load schedule.'},
+];
+
+const PRACTICE_QA = [
+  {q:'Which component controls source-to-target transformation?', a:'The Import Format together with Dimension/Member Mapping controls how source columns and values transform into ARCS target attributes.'},
+  {q:'Where should period mapping be validated?', a:'In the Period Mapping screen, by confirming every incoming source period resolves to an open target calendar period before the load runs.'},
+  {q:'What should be checked after a failed load?', a:'Start with the Integration Monitor job entry, then drill into the Error Center category shown for that job to find the root cause.'},
+  {q:'Why are integration logs important?', a:'Logs give an auditable, chronological record of every extract, mapping, validation, and load event, which is essential for troubleshooting and compliance.'},
+  {q:'What is the purpose of the Validation Center before a load runs?', a:'It runs a pre-flight set of checks (format, mapping, member, period, category, amount, required fields) so bad data is caught before it reaches the target application.'},
+  {q:'What does a "Warning" status in the Load Simulator usually mean?', a:'Records loaded successfully but triggered a non-blocking rule, such as an unusually large variance, worth reviewing but not rejected outright.'},
+];
+
+const EXAM_QUESTIONS = [
+  {q:'What is the primary purpose of the Data Integration Framework in Oracle ARCS?', opts:['To design report layouts','To bring source financial data into ARCS for reconciliation','To manage user security roles','To schedule email notifications'], correct:1, exp:'The framework extracts, maps, validates, and loads data from source systems into ARCS so it can be reconciled.'},
+  {q:'Which object defines how source file columns align to ARCS target attributes?', opts:['Location','Import Format','Category','Schedule'], correct:1, exp:'The Import Format defines the column-by-column layout and data types expected from the source.'},
+  {q:'A "Location" in an ARCS integration primarily represents what?', opts:['A physical office address','A logical grouping tying a source, period, and target together for a load','A bank branch code','A user\'s time zone setting'], correct:1, exp:'Location is a logical construct that connects source data to a specific point of load within the target application.'},
+  {q:'What does Dimension Mapping translate?', opts:['User passwords','Source dimension member values to target ARCS dimension members','File encryption keys','Network ports'], correct:1, exp:'Dimension mapping converts values like source account codes into the equivalent ARCS dimension members.'},
+  {q:'If a source sends "JAN-26" but ARCS expects "Jan-2026", which mapping type resolves this?', opts:['Category Mapping','Member Mapping','Period Mapping','Format Mapping'], correct:2, exp:'Period Mapping translates source period labels into valid target calendar periods.'},
+  {q:'What is the role of Category Mapping?', opts:['Mapping report colors','Mapping source scenario labels like Actual/Budget to ARCS categories','Mapping bank routing numbers','Mapping user roles to menus'], correct:1, exp:'Category Mapping aligns source scenario/category labels (e.g., ACTUAL) with the ARCS category dimension.'},
+  {q:'Which screen would you check first for a job that failed overnight?', opts:['Login screen','Integration Monitor','Scheduling Center','Practice Mode'], correct:1, exp:'The Integration Monitor lists jobs with status and error indicators, the natural starting point for troubleshooting.'},
+  {q:'What does the Validation Center check before a load executes?', opts:['Only file size','Format, mapping, member, period, category, amount, and required fields','Only network latency','Only user login history'], correct:1, exp:'Validation Center runs a multi-point pre-flight check spanning several data-quality dimensions.'},
+  {q:'A "Member Error" typically indicates what?', opts:['The source file is missing entirely','A mapped target member does not exist in the ARCS application','The password expired','The report failed to print'], correct:1, exp:'A member error means a mapping points to a target member that has not been created in ARCS.'},
+  {q:'What is the benefit of Drill-Through in ARCS?', opts:['It deletes old data','It lets a user trace a summarized balance back to its originating source transaction','It changes user permissions','It compresses log files'], correct:1, exp:'Drill-through provides traceability from an ARCS balance down to the underlying source record.'},
+  {q:'Which connection type is most typical for a bank statement feed?', opts:['SFTP file drop','Bluetooth pairing','USB transfer','Local print queue'], correct:0, exp:'Bank statements are commonly delivered via secure file transfer protocols such as SFTP.'},
+  {q:'What does a "Success Rate" KPI represent on the Command Center?', opts:['Percentage of users logged in','Percentage of records that loaded successfully out of total processed','Number of open tickets','Average salary of the integration team'], correct:1, exp:'Success Rate is calculated as records loaded divided by total records processed.'},
+  {q:'Why would you schedule an integration as "Period-End" rather than Daily?', opts:['To reduce login attempts','Because the source data is only final and meaningful at period close','To disable validation','To skip mapping entirely'], correct:1, exp:'Some sources only produce reliable, final data at period-end, so a period-end schedule avoids loading incomplete data.'},
+  {q:'What is the purpose of a Load Rule?', opts:['To style the dashboard','To bundle source, target, location, import format, mappings and schedule into one repeatable job','To reset passwords','To translate currencies only'], correct:1, exp:'A Load Rule packages all integration configuration elements into a single reusable, schedulable job.'},
+  {q:'Which of these is NOT typically part of Connection Configuration?', opts:['Source Type','Authentication Concept','Connection Status','Exam Score'], correct:3, exp:'Exam Score belongs to the training/assessment side of the simulator, not to connection setup.'},
+  {q:'What should you do if Test Connection returns "Connection Failed"?', opts:['Ignore it and load anyway','Re-check credentials, host, and network access, then retest','Delete the entire integration','Restart the whole ARCS application'], correct:1, exp:'Connection failures are resolved by verifying credentials and network reachability before retrying.'},
+  {q:'What does REST API integration rely on for authentication most commonly?', opts:['Token-based or OAuth2 authentication','A physical smart card only','No authentication needed','A fax confirmation'], correct:0, exp:'REST integrations typically use token-based or OAuth2 authentication over HTTPS.'},
+  {q:'In the Error Center, what is shown for each error category?', opts:['Only the error name','Cause, Example, Where to Check, and Resolution','A video tutorial only','A list of unrelated ARCS reports'], correct:1, exp:'Each error category is documented with its cause, a concrete example, where to investigate, and how to resolve it.'},
+  {q:'What is the main advantage of routing multiple sources through a Data Warehouse before ARCS?', opts:['It hides data from auditors','It consolidates multiple ERPs into one conformed feed, reducing the number of integrations to maintain','It slows down processing intentionally','It removes the need for validation entirely'], correct:1, exp:'A warehouse can pre-conform data from multiple ERPs, simplifying the integration landscape.'},
+  {q:'What does the Integration Health Score aggregate?', opts:['Only exam results','Connection, Mapping, Validation, Load, and Schedule health into one overall indicator','Employee attendance','Marketing metrics'], correct:1, exp:'The health score rolls up multiple operational sub-scores into a single overall integration health indicator.'},
+];
+
+const SCENARIO_STEPS = [
+  {title:'Select the Source', desc:'Choose "Banks" as the source system supplying statement transactions.'},
+  {title:'Configure the Connection', desc:'Set up an SFTP connection to the bank\'s secure file drop and test it.'},
+  {title:'Choose the Target', desc:'Select Oracle ARCS Transaction Matching as the target application.'},
+  {title:'Define the Location', desc:'Create a Location linking the Bank source to the ARCS cash reconciliation.'},
+  {title:'Build the Import Format', desc:'Map statement columns (date, description, amount, reference) to target attributes.'},
+  {title:'Map Dimensions', desc:'Map the bank account number to its ARCS entity/member equivalent.'},
+  {title:'Map the Period', desc:'Align the statement date range to the correct ARCS calendar period.'},
+  {title:'Map the Category', desc:'Set the category to "Actual" for real transaction activity.'},
+  {title:'Build the Load Rule', desc:'Bundle source, location, format, and mappings into a single Load Rule.'},
+  {title:'Run Validation', desc:'Execute the Validation Center checks before attempting the load.'},
+  {title:'Run the Load', desc:'Execute the Data Load Simulator to bring bank transactions into ARCS.'},
+  {title:'Monitor the Result', desc:'Confirm the job succeeded in the Integration Monitor and review any warnings.'},
+];
+
+/* ===================== STATE ===================== */
+const state = {
+  role:'Integration Analyst',
+  currentSection:'command',
+  wizard:{step:0, source:null, connTested:false, connOk:false, target:null, location:'', mappingsDone:{dimension:false, member:false, period:false, category:false}, ruleSaved:false, memberRows:[{s:'BANK_US', t:'US_BANK'}], periodRows:[{s:'JAN-26', t:'Jan-2026', status:'Valid'}], categoryRows:[{s:'ACTUAL', t:'Actual', status:'Valid'}]},
+  jobs:[
+    {id:'JOB-10231', source:'Oracle Fusion GL', rule:'GL_Monthly_Load', start:'2026-08-16 23:10', duration:'4m 12s', records:52140, status:'SUCCESS', errors:0},
+    {id:'JOB-10232', source:'SAP', rule:'SAP_FI_Daily', start:'2026-08-17 01:00', duration:'2m 47s', records:18902, status:'WARNING', errors:6},
+    {id:'JOB-10233', source:'Banks', rule:'Bank_Stmt_Daily', start:'2026-08-17 02:15', duration:'1m 05s', records:6410, status:'FAILED', errors:41},
+    {id:'JOB-10234', source:'NetSuite', rule:'NS_Subsidiary_Load', start:'2026-08-17 03:00', duration:'—', records:0, status:'RUNNING', errors:0},
+    {id:'JOB-10235', source:'Workday', rule:'WD_Payroll_Accrual', start:'2026-08-16 22:40', duration:'3m 30s', records:9820, status:'SUCCESS', errors:0},
+  ],
+  errorOpen:null,
+  scenarioDone:new Array(SCENARIO_STEPS.length).fill(false),
+  errorLabAnswered:false,
+  errorLabCorrect:false,
+  practiceFlipped:new Array(PRACTICE_QA.length).fill(false),
+  exam:{current:0, answers:new Array(EXAM_QUESTIONS.length).fill(null), finished:false},
+  loadRun:{done:false, processed:0, loaded:0, rejected:0, warnings:0, duration:'0m 00s'},
+  validation:{ran:false},
+};
+
+/* ===================== LOGIN ===================== */
+function enterLab(){
+  const role = document.getElementById('loginRole').value;
+  state.role = role;
+  document.getElementById('roleChipDisplay').textContent = role;
+  document.getElementById('loginScreen').style.display='none';
+  const shell = document.getElementById('mainShell');
+  shell.classList.add('active');
+  buildSidebar();
+  navigate('command');
+}
+
+/* ===================== SIDEBAR / NAV ===================== */
+const NAV = [
+  {group:'Overview', items:[
+    {id:'command', label:'Command Center', glyph:'◈'},
+    {id:'sources', label:'Source Ecosystem', glyph:'⬡'},
+  ]},
+  {group:'Build', items:[
+    {id:'wizard', label:'Configuration Wizard', glyph:'⚙'},
+    {id:'validate', label:'Validation Center', glyph:'✓'},
+    {id:'load', label:'Data Load Simulator', glyph:'▶'},
+  ]},
+  {group:'Operate', items:[
+    {id:'errors', label:'Error Center', glyph:'⚠'},
+    {id:'monitor', label:'Integration Monitor', glyph:'▤'},
+    {id:'analytics', label:'Integration Analytics', glyph:'▥'},
+    {id:'drillthrough', label:'Drill-Through Explorer', glyph:'⤵'},
+    {id:'scheduling', label:'Scheduling Center', glyph:'◷'},
+    {id:'health', label:'Health Score', glyph:'♥'},
+  ]},
+  {group:'Train', items:[
+    {id:'scenario', label:'Business Scenario', glyph:'✦'},
+    {id:'errorlab', label:'Error Scenario Lab', glyph:'✎'},
+    {id:'practice', label:'Practice Mode', glyph:'▦'},
+    {id:'exam', label:'Exam Mode', glyph:'▧'},
+    {id:'scorecard', label:'Final Scorecard', glyph:'★'},
+  ]},
+];
+
+function buildSidebar(){
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = NAV.map(g=>`
+    <div class="sidebar-group-label">${g.group}</div>
+    ${g.items.map(it=>`<div class="nav-item" id="nav-${it.id}" onclick="navigate('${it.id}')"><span class="glyph">${it.glyph}</span>${it.label}</div>`).join('')}
+  `).join('');
+}
+function setActiveNav(id){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el = document.getElementById('nav-'+id);
+  if(el) el.classList.add('active');
+}
+
+function navigate(id){
+  state.currentSection = id;
+  setActiveNav(id);
+  const renderers = {
+    command: renderCommand, sources: renderSources, wizard: renderWizard,
+    validate: renderValidate, load: renderLoad, errors: renderErrors,
+    monitor: renderMonitor, analytics: renderAnalytics, drillthrough: renderDrillthrough,
+    scheduling: renderScheduling, health: renderHealth, scenario: renderScenario,
+    errorlab: renderErrorLab, practice: renderPractice, exam: renderExam, scorecard: renderScorecard,
+  };
+  document.getElementById('content').innerHTML = '<div id="pageRoot"></div>';
+  (renderers[id] || renderCommand)();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function pageHead(eyebrow, title, desc){
+  return `<div class="page-head">
+    <div class="page-eyebrow"><span>◆</span>${eyebrow}</div>
+    <div class="page-title">${title}</div>
+    <div class="page-desc">${desc}</div>
+  </div>`;
+}
+function footerHTML(){
+  return `<div class="app-footer">
+    <div class="l">
+      <img src="data:image/jpeg;base64,${LOGO_B64}" alt="BISP Trainings">
+      <div class="txt"><b>BISP Trainings</b> · www.bisptrainings.com · Call Us: +91 769-409-5404</div>
+    </div>
+    <div class="txt">© BISP Trainings | www.bisptrainings.com</div>
+  </div>`;
+}
+function mount(html){ document.getElementById('pageRoot').innerHTML = html + footerHTML(); }
+
+/* ===================== CHART HELPERS ===================== */
+const CHART_COLORS = ['#2FE0C6','#FF6B52','#8B7CF6','#FFB93D','#3FDB90','#FF5C7A'];
+function baseChartOptions(extra){
+  return Object.assign({
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{labels:{color:'#93A0BD', font:{family:'Inter', size:11}}} },
+    scales:{
+      x:{ticks:{color:'#5C6A8C', font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}},
+      y:{ticks:{color:'#5C6A8C', font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}}
+    }
+  }, extra||{});
+}
+function makeChart(canvasId, type, labels, datasets, opts){
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return;
+  new Chart(ctx, { type, data:{labels, datasets}, options: opts || baseChartOptions() });
+}
+
+/* ===================== COMMAND CENTER ===================== */
+function renderCommand(){
+  mount(`
+    ${pageHead('Screen 02 · Integration Command Center', 'Command Center', 'A live overview of connections, throughput, and load health across every configured source feeding Oracle ARCS.')}
+    <div class="section-note">All figures below are <b>Illustrative Training Data</b> generated for practice purposes and do not reflect a live Oracle environment.</div>
+
+    <div class="grid grid-6">
+      ${kpiCard('Total Sources','14','+0','',true)}
+      ${kpiCard('Active Connections','9','▲ 2 today','up')}
+      ${kpiCard('Records Processed','482,300','▲ 6.1%','up')}
+      ${kpiCard('Records Loaded','468,150','▲ 5.8%','up')}
+      ${kpiCard('Failed Records','14,150','▼ 1.2%','down')}
+      ${kpiCard('Success Rate','97.1%','▲ 0.4 pts','up')}
+    </div>
+
+    <div class="grid grid-2 mt-24">
+      <div class="card"><div class="card-title">Records by Source <span class="illustrative tag">Bar</span></div><div class="chart-wrap"><canvas id="chSrc"></canvas></div></div>
+      <div class="card"><div class="card-title">Load Trend (7 Days) <span class="illustrative tag">Line</span></div><div class="chart-wrap"><canvas id="chTrend"></canvas></div></div>
+    </div>
+    <div class="grid grid-3 mt-24">
+      <div class="card"><div class="card-title">Success vs Failure <span class="illustrative tag">Donut</span></div><div class="chart-wrap short"><canvas id="chSF"></canvas></div></div>
+      <div class="card"><div class="card-title">Errors by Type <span class="illustrative tag">Donut</span></div><div class="chart-wrap short"><canvas id="chErrType"></canvas></div></div>
+      <div class="card"><div class="card-title">Source Volume <span class="illustrative tag">Bar</span></div><div class="chart-wrap short"><canvas id="chVol"></canvas></div></div>
+    </div>
+  `);
+  makeChart('chSrc','bar',['Fusion GL','SAP','Banks','NetSuite','Workday','Flat File'],
+    [{label:'Records', data:[52140,18902,6410,14320,9820,7200], backgroundColor:'#2FE0C6', borderRadius:6}]);
+  makeChart('chTrend','line',['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    [{label:'Loaded', data:[61000,58200,63500,60100,67200,40200,29900], borderColor:'#FF6B52', backgroundColor:'rgba(255,107,82,0.15)', tension:.35, fill:true}]);
+  makeChart('chSF','doughnut',['Success','Failure'], [{data:[97.1,2.9], backgroundColor:['#3FDB90','#FF5C7A'], borderWidth:0}],
+    baseChartOptions({scales:{}, cutout:'70%'}));
+  makeChart('chErrType','doughnut',['Mapping','Member','Period','Format','Connection'],
+    [{data:[38,22,17,14,9], backgroundColor:CHART_COLORS, borderWidth:0}], baseChartOptions({scales:{}, cutout:'65%'}));
+  makeChart('chVol','bar',['GL','SAP','DW','SFTP','JDBC'],
+    [{label:'Volume (k)', data:[220,95,140,60,80], backgroundColor:'#8B7CF6', borderRadius:6}]);
+}
+function kpiCard(label,val,delta,dir,noDelta){
+  return `<div class="card kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${val}</div>${noDelta? '' : `<div class="kpi-delta ${dir}">${delta}</div>`}</div>`;
+}
+
+/* ===================== SOURCE ECOSYSTEM ===================== */
+let selectedSourceDetail = null;
+function renderSources(){
+  mount(`
+    ${pageHead('Screen 03 · Source System Map', 'Source Ecosystem', 'Click any source system to review its typical data, connection method, mapping approach, validation, and load pattern.')}
+    <div class="grid grid-4" id="sourceGrid">
+      ${SOURCES.map(s=>`
+        <div class="source-tile" id="tile-${s.id}" onclick="openSourceDetail('${s.id}')">
+          <div class="source-glyph" style="background:${s.color}22; color:${s.color}; border:1px solid ${s.color}55;">${s.glyph}</div>
+          <div class="source-name">${s.name}</div>
+          <div class="source-cat">${s.cat}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div id="sourceDetailWrap"></div>
+  `);
+  if(selectedSourceDetail) openSourceDetail(selectedSourceDetail, true);
+}
+function openSourceDetail(id, silent){
+  selectedSourceDetail = id;
+  if(!silent){
+    document.querySelectorAll('.source-tile').forEach(t=>t.classList.remove('selected'));
+    document.getElementById('tile-'+id).classList.add('selected');
+  }
+  const s = SOURCES.find(x=>x.id===id);
+  document.getElementById('sourceDetailWrap').innerHTML = `
+    <div class="card detail-panel">
+      <div class="card-title">${s.name} <span class="illustrative tag">${s.cat}</span></div>
+      <div class="kv-row"><div class="k">Typical Data</div><div class="v">${s.typical}</div></div>
+      <div class="kv-row"><div class="k">Connection</div><div class="v">${s.conn}</div></div>
+      <div class="kv-row"><div class="k">Mapping</div><div class="v">${s.map}</div></div>
+      <div class="kv-row"><div class="k">Validation</div><div class="v">${s.val}</div></div>
+      <div class="kv-row"><div class="k">Load</div><div class="v">${s.load}</div></div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="startWizardWith('${s.id}')">Use in Configuration Wizard →</button>
+      </div>
+    </div>`;
+}
+function startWizardWith(id){
+  state.wizard.source = id;
+  navigate('wizard');
+}
+
+/* ===================== CONFIGURATION WIZARD ===================== */
+const WIZ_STEPS = ['Source','Connection','Target App','Location','Import Format','Dimension Map','Member Map','Period Map','Category Map','Load Rule'];
+function renderWizard(){
+  const w = state.wizard;
+  mount(`
+    ${pageHead('Screens 04–13 · Configuration Wizard', 'Configuration Wizard', 'Walk a source system through the full ARCS integration build: connection, target, location, format, mapping, and load rule.')}
+    <div class="wizard-steps">
+      ${WIZ_STEPS.map((s,i)=>`<div class="wstep ${i<w.step?'done':i===w.step?'current':''}" onclick="jumpWizard(${i})"><span class="num">${i<w.step?'✓':i+1}</span>${s}</div>`).join('')}
+    </div>
+    <div class="card" id="wizardBody"></div>
+  `);
+  renderWizardStep();
+}
+function jumpWizard(i){ if(i<=state.wizard.step || i===state.wizard.step+1) { state.wizard.step=i; renderWizard(); } }
+function wizNav(nextEnabled){
+  return `<div class="btn-row">
+    ${state.wizard.step>0 ? `<button class="btn btn-ghost" onclick="wizBack()">← Back</button>`:''}
+    <button class="btn btn-primary" ${nextEnabled?'':'disabled style="opacity:.4;cursor:not-allowed;"'} onclick="wizNext()">Continue →</button>
+  </div>`;
+}
+function wizBack(){ state.wizard.step = Math.max(0,state.wizard.step-1); renderWizard(); }
+function wizNext(){ state.wizard.step = Math.min(WIZ_STEPS.length-1, state.wizard.step+1); renderWizard(); }
+
+function renderWizardStep(){
+  const w = state.wizard;
+  const body = document.getElementById('wizardBody');
+  const quickSources = SOURCES.filter(s=>['fgl','sap','bank','wd','ns','flat','rest','sftp','jdbc'].includes(s.id));
+  if(w.step===0){
+    body.innerHTML = `
+      <div class="card-title">Screen 04 · Source Selection</div>
+      <div class="pill-select">
+        ${quickSources.map(s=>`<div class="pill ${w.source===s.id?'active':''}" onclick="selectWizSource('${s.id}')">${s.name}</div>`).join('')}
+      </div>
+      ${wizNav(!!w.source)}
+    `;
+  } else if(w.step===1){
+    const src = SOURCES.find(s=>s.id===w.source);
+    body.innerHTML = `
+      <div class="card-title">Screen 05 · Connection Configuration</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Source Connection</label><input type="text" value="${src?src.name+'_CONN':''}" readonly></div>
+        <div class="field"><label>Source Type</label><input type="text" value="${src?src.cat:''}" readonly></div>
+        <div class="field"><label>Authentication Concept</label>
+          <select id="authConcept"><option>OAuth2 Client Credentials</option><option>Username / Password</option><option>SSH Key</option><option>API Token</option></select>
+        </div>
+        <div class="field"><label>Connection Status</label>
+          <div style="padding-top:8px;"><span class="status-dot ${w.connTested ? (w.connOk?'on':'off') : 'idle'}"></span>${w.connTested ? (w.connOk?'Connected':'Connection Failed') : 'Not Tested'}</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="testConnection()">Test Connection</button>
+        <button class="btn btn-ghost btn-sm" onclick="saveConnection()">Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetConnection()">Reset</button>
+      </div>
+      ${wizNav(w.connTested && w.connOk)}
+    `;
+  } else if(w.step===2){
+    body.innerHTML = `
+      <div class="card-title">Screen 06 · Target Application</div>
+      <div class="flow">
+        <div class="flow-node">Source</div><div class="flow-arrow">→</div>
+        <div class="flow-node active">Target Application</div><div class="flow-arrow">→</div>
+        <div class="flow-node">Oracle ARCS</div>
+      </div>
+      <div class="field" style="max-width:340px;"><label>Select Target Application</label>
+        <select id="targetApp" onchange="state.wizard.target=this.value; renderWizardStep();">
+          <option value="">— Select —</option>
+          <option ${w.target==='Account Reconciliation'?'selected':''}>Account Reconciliation</option>
+          <option ${w.target==='Transaction Matching'?'selected':''}>Transaction Matching</option>
+          <option ${w.target==='Consolidation'?'selected':''}>Consolidation</option>
+          <option ${w.target==='Close Management'?'selected':''}>Close Management</option>
+        </select>
+      </div>
+      ${wizNav(!!w.target)}
+    `;
+  } else if(w.step===3){
+    body.innerHTML = `
+      <div class="card-title">Screen 07 · Location</div>
+      <div class="flow vertical">
+        <div class="flow-node">Source</div><div class="flow-arrow">↓</div>
+        <div class="flow-node active">Location</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">Mapping</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">Load</div>
+      </div>
+      <div class="field" style="max-width:340px;"><label>Location Name</label>
+        <input type="text" id="locName" value="${w.location}" oninput="state.wizard.location=this.value" placeholder="e.g. GL_US_MONTHLY">
+      </div>
+      ${wizNav(true)}
+    `;
+  } else if(w.step===4){
+    body.innerHTML = `
+      <div class="card-title">Screen 08 · Import Format Builder</div>
+      <table class="datatable">
+        <thead><tr><th>Source Column</th><th>Data Type</th><th>Target Attribute</th><th>Required?</th><th>Mapping</th></tr></thead>
+        <tbody>
+          ${[['Account','Text','Account','Yes','Direct'],['Entity','Text','Entity','Yes','Direct'],['Period','Date','Period','Yes','Lookup'],['Currency','Text','Currency','No','Direct'],['Amount','Number','Amount','Yes','Direct'],['Reference','Text','Reference','No','Direct']]
+            .map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="alert('Import format structure is valid: 6/6 columns mapped.')">Validate Format</button></div>
+      ${wizNav(true)}
+    `;
+  } else if(w.step===5){
+    body.innerHTML = `
+      <div class="card-title">Screen 09 · Dimension Mapping Lab</div>
+      <div class="flow"><div class="flow-node">Source: 100100</div><div class="flow-arrow">→</div><div class="flow-node active">Target: 110000</div></div>
+      <table class="datatable">
+        <thead><tr><th>Dimension</th><th>Source Value</th><th>Target Value</th></tr></thead>
+        <tbody>
+          <tr><td>Account</td><td>100100</td><td>110000</td></tr>
+          <tr><td>Entity</td><td>US01</td><td>US_ENTITY</td></tr>
+          <tr><td>Department</td><td>DEPT-4</td><td>Finance_Ops</td></tr>
+          <tr><td>Currency</td><td>USD</td><td>USD</td></tr>
+        </tbody>
+      </table>
+      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="markMapDone('dimension')">Validate Mapping</button></div>
+      ${w.mappingsDone.dimension ? '<div class="illustrative" style="margin-top:10px;">Mapping Validated</div>':''}
+      ${wizNav(w.mappingsDone.dimension)}
+    `;
+  } else if(w.step===6){
+    body.innerHTML = `
+      <div class="card-title">Screen 10 · Member Mapping</div>
+      <div class="flow"><div class="flow-node">BANK_US</div><div class="flow-arrow">→</div><div class="flow-node active">US_BANK</div></div>
+      <table class="datatable">
+        <thead><tr><th>Source Member</th><th>Target Member</th><th></th></tr></thead>
+        <tbody id="memberRows">
+          ${w.memberRows.map((r,i)=>`<tr><td>${r.s}</td><td>${r.t}</td><td><button class="btn btn-ghost btn-sm" onclick="deleteMemberRow(${i})">Delete</button></td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="addMemberRow()">Add Row</button>
+        <button class="btn btn-ghost btn-sm" onclick="markMapDone('member')">Validate</button>
+      </div>
+      ${w.mappingsDone.member ? '<div class="illustrative" style="margin-top:10px;">Mapping Validated</div>':''}
+      ${wizNav(w.mappingsDone.member)}
+    `;
+  } else if(w.step===7){
+    body.innerHTML = `
+      <div class="card-title">Screen 11 · Period Mapping</div>
+      <div class="flow"><div class="flow-node">JAN-26</div><div class="flow-arrow">→</div><div class="flow-node active">JAN-2026</div></div>
+      <table class="datatable">
+        <thead><tr><th>Source Period</th><th>Target Period</th><th>Status</th></tr></thead>
+        <tbody>${w.periodRows.map(r=>`<tr><td>${r.s}</td><td>${r.t}</td><td><span class="badge valid">${r.status}</span></td></tr>`).join('')}</tbody>
+      </table>
+      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="markMapDone('period')">Validate</button></div>
+      ${w.mappingsDone.period ? '<div class="illustrative" style="margin-top:10px;">Mapping Validated</div>':''}
+      ${wizNav(w.mappingsDone.period)}
+    `;
+  } else if(w.step===8){
+    body.innerHTML = `
+      <div class="card-title">Screen 12 · Category Mapping</div>
+      <div class="flow"><div class="flow-node">ACTUAL</div><div class="flow-arrow">→</div><div class="flow-node active">Actual</div></div>
+      <table class="datatable">
+        <thead><tr><th>Source Category</th><th>Target Category</th><th>Status</th></tr></thead>
+        <tbody>${w.categoryRows.map(r=>`<tr><td>${r.s}</td><td>${r.t}</td><td><span class="badge valid">${r.status}</span></td></tr>`).join('')}</tbody>
+      </table>
+      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="markMapDone('category')">Validate</button></div>
+      ${w.mappingsDone.category ? '<div class="illustrative" style="margin-top:10px;">Mapping Validated</div>':''}
+      ${wizNav(w.mappingsDone.category)}
+    `;
+  } else if(w.step===9){
+    body.innerHTML = `
+      <div class="card-title">Screen 13 · Data-Load Rule Builder</div>
+      <div class="flow"><div class="flow-node">Source</div><div class="flow-arrow">→</div><div class="flow-node">Import</div><div class="flow-arrow">→</div><div class="flow-node">Map</div><div class="flow-arrow">→</div><div class="flow-node">Validate</div><div class="flow-arrow">→</div><div class="flow-node active">Load</div></div>
+      <div class="grid grid-2">
+        <div class="field"><label>Rule Name</label><input type="text" id="ruleName" value="${w.source ? w.source.toUpperCase()+'_LOAD_RULE':''}"></div>
+        <div class="field"><label>Source</label><input type="text" value="${w.source ? SOURCES.find(s=>s.id===w.source).name:''}" readonly></div>
+        <div class="field"><label>Target</label><input type="text" value="${w.target||''}" readonly></div>
+        <div class="field"><label>Location</label><input type="text" value="${w.location||'—'}" readonly></div>
+        <div class="field"><label>Import Format</label><input type="text" value="Standard 6-Column Format" readonly></div>
+        <div class="field"><label>Schedule</label>
+          <select id="ruleSchedule"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>Period-End</option></select>
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary btn-sm" onclick="saveLoadRule()">Save Load Rule</button></div>
+      ${w.ruleSaved ? '<div class="illustrative" style="margin-top:12px;">Load Rule Saved — proceed to Validation Center</div>':''}
+    `;
+  }
+}
+function selectWizSource(id){ state.wizard.source=id; state.wizard.connTested=false; state.wizard.connOk=false; renderWizardStep(); document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); }
+function testConnection(){ state.wizard.connTested=true; state.wizard.connOk = true; renderWizardStep(); }
+function saveConnection(){ if(!state.wizard.connTested) return; renderWizardStep(); }
+function resetConnection(){ state.wizard.connTested=false; state.wizard.connOk=false; renderWizardStep(); }
+function markMapDone(type){ state.wizard.mappingsDone[type]=true; renderWizardStep(); }
+function addMemberRow(){ state.wizard.memberRows.push({s:'NEW_SRC', t:'NEW_TARGET'}); renderWizardStep(); }
+function deleteMemberRow(i){ state.wizard.memberRows.splice(i,1); renderWizardStep(); }
+function saveLoadRule(){ state.wizard.ruleSaved=true; renderWizardStep(); }
+
+/* ===================== VALIDATION CENTER ===================== */
+function renderValidate(){
+  const checks = [
+    ['Format', state.wizard.step>3 || state.validation.ran],
+    ['Mapping', state.wizard.mappingsDone.dimension || state.validation.ran],
+    ['Member', state.wizard.mappingsDone.member || state.validation.ran],
+    ['Period', state.wizard.mappingsDone.period || state.validation.ran],
+    ['Category', state.wizard.mappingsDone.category || state.validation.ran],
+    ['Amount', true],
+    ['Required Fields', true],
+  ];
+  const passCount = checks.filter(c=>c[1]).length;
+  const pct = Math.round((passCount/checks.length)*100);
+  mount(`
+    ${pageHead('Screen 14 · Validation Center', 'Validation Center', 'A pre-flight check across format, mapping, member, period, category, amount, and required fields before any load is executed.')}
+    <div class="card">
+      <div class="card-title">Validation Checklist</div>
+      <div class="grid grid-4">
+        ${checks.map(c=>`<div class="card" style="padding:14px;"><div class="flex-between"><span style="font-size:13px;">${c[0]}</span><span class="badge ${c[1]?'valid':'invalid'}">${c[1]?'VALID':'PENDING'}</span></div></div>`).join('')}
+      </div>
+      <div class="mt-24">
+        <div class="progress-label"><span>Validation Progress</span><span>${pct}%</span></div>
+        <div class="progress-track"><div class="progress-fill ${pct<70?'coral':pct<100?'amber':''}" style="width:${pct}%"></div></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary btn-sm" onclick="runValidation()">Run Full Validation</button></div>
+    </div>
+  `);
+}
+function runValidation(){ state.validation.ran=true; renderValidate(); }
+
+/* ===================== DATA LOAD SIMULATOR ===================== */
+function renderLoad(){
+  mount(`
+    ${pageHead('Screen 15 · Data Load Simulator', 'Data Load Simulator', 'Run a simulated load to see each pipeline stage progress from source read through to final write.')}
+    <div class="card">
+      <div class="btn-row" style="margin-top:0;"><button class="btn btn-primary" onclick="runDataLoad()">▶ Run Data Load</button></div>
+      <div class="mt-24" id="loadStages">
+        ${['Reading Source','Importing','Mapping','Validating','Loading'].map(s=>`
+          <div class="load-stage">
+            <div class="load-stage-label"><span>${s}</span><span class="pct" id="pct-${s.replace(/\s/g,'')}">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="bar-${s.replace(/\s/g,'')}" style="width:0%"></div></div>
+          </div>
+        `).join('')}
+      </div>
+      <div id="loadResults" class="mt-24"></div>
+    </div>
+  `);
+  if(state.loadRun.done) showLoadResults();
+}
+function runDataLoad(){
+  const stages = ['ReadingSource','Importing','Mapping','Validating','Loading'];
+  let i=0;
+  function step(){
+    if(i>=stages.length){
+      state.loadRun = {done:true, processed:14820, loaded:14370, rejected:312, warnings:138, duration: (Math.round(Math.random()*2)+3)+'m '+(10+Math.round(Math.random()*40))+'s'};
+      const job = {id:'JOB-'+(10236+state.jobs.length), source: state.wizard.source ? SOURCES.find(s=>s.id===state.wizard.source).name : 'Flat File', rule: 'SIMULATED_LOAD', start:'2026-08-17 (Simulated)', duration: state.loadRun.duration, records: state.loadRun.processed, status: state.loadRun.rejected>0?'WARNING':'SUCCESS', errors: state.loadRun.rejected};
+      state.jobs.unshift(job);
+      showLoadResults();
+      return;
+    }
+    const key = stages[i];
+    let p=0;
+    const iv = setInterval(()=>{
+      p += 20;
+      const bar = document.getElementById('bar-'+key), pc = document.getElementById('pct-'+key);
+      if(bar){ bar.style.width = Math.min(p,100)+'%'; pc.textContent = Math.min(p,100)+'%'; }
+      if(p>=100){ clearInterval(iv); i++; step(); }
+    }, 90);
+  }
+  step();
+}
+function showLoadResults(){
+  const r = state.loadRun;
+  document.getElementById('loadResults').innerHTML = `
+    <div class="grid grid-4">
+      ${kpiCard('Records Processed', r.processed.toLocaleString(), '', '', true)}
+      ${kpiCard('Records Loaded', r.loaded.toLocaleString(), '', '', true)}
+      ${kpiCard('Rejected', r.rejected.toLocaleString(), '', '', true)}
+      ${kpiCard('Warnings / Duration', r.warnings + ' / ' + r.duration, '', '', true)}
+    </div>
+  `;
+}
+
+/* ===================== ERROR CENTER ===================== */
+function renderErrors(){
+  mount(`
+    ${pageHead('Screen 16 · Error Center', 'Error Center', 'Click a category to see its cause, a concrete example, where to check, and how to resolve it.')}
+    <div class="grid grid-2" id="errGrid">
+      ${ERRORS.map((e,i)=>`
+        <div class="err-card ${state.errorOpen===i?'open':''}" onclick="toggleError(${i})">
+          <div class="err-title">${e.cat}</div>
+          <div class="err-body">
+            <b>Cause</b>${e.cause}
+            <b>Example</b>${e.example}
+            <b>Where to Check</b>${e.check}
+            <b>Resolution</b>${e.fix}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `);
+}
+function toggleError(i){ state.errorOpen = state.errorOpen===i ? null : i; renderErrors(); }
+
+/* ===================== INTEGRATION MONITOR ===================== */
+function renderMonitor(){
+  mount(`
+    ${pageHead('Screen 17 · Integration Monitor', 'Integration Monitor', 'Live job table across every scheduled and simulated integration run.')}
+    <div class="card">
+      <table class="datatable">
+        <thead><tr><th>Job ID</th><th>Source</th><th>Rule</th><th>Start Time</th><th>Duration</th><th>Records</th><th>Status</th><th>Errors</th></tr></thead>
+        <tbody>
+          ${state.jobs.map(j=>`<tr><td class="mono">${j.id}</td><td>${j.source}</td><td>${j.rule}</td><td class="mono">${j.start}</td><td class="mono">${j.duration}</td><td>${j.records.toLocaleString()}</td><td><span class="badge ${j.status.toLowerCase()}">${j.status}</span></td><td>${j.errors}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `);
+}
+
+/* ===================== ANALYTICS ===================== */
+function renderAnalytics(){
+  mount(`
+    ${pageHead('Screen 18 · Integration Analytics', 'Integration Analytics', 'Deeper trend and distribution views for reviewing integration performance over time.')}
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">Records by Source</div><div class="chart-wrap"><canvas id="aChart1"></canvas></div></div>
+      <div class="card"><div class="card-title">Load Trend</div><div class="chart-wrap"><canvas id="aChart2"></canvas></div></div>
+    </div>
+    <div class="grid grid-4 mt-24">
+      <div class="card"><div class="card-title">Success Rate</div><div class="chart-wrap short"><canvas id="aChart3"></canvas></div></div>
+      <div class="card"><div class="card-title">Failure Rate</div><div class="chart-wrap short"><canvas id="aChart4"></canvas></div></div>
+      <div class="card"><div class="card-title">Processing Duration</div><div class="chart-wrap short"><canvas id="aChart5"></canvas></div></div>
+      <div class="card"><div class="card-title">Top Failing Sources</div><div class="chart-wrap short"><canvas id="aChart6"></canvas></div></div>
+    </div>
+  `);
+  makeChart('aChart1','bar',['GL','SAP','Banks','NetSuite','Workday','DW'],[{data:[52140,18902,6410,14320,9820,31200], backgroundColor:'#2FE0C6', borderRadius:6}], baseChartOptions({plugins:{legend:{display:false}}}));
+  makeChart('aChart2','line',['W1','W2','W3','W4','W5','W6'],[{data:[410000,438000,455000,447000,468150,472300], borderColor:'#8B7CF6', backgroundColor:'rgba(139,124,246,.15)', fill:true, tension:.35}], baseChartOptions({plugins:{legend:{display:false}}}));
+  makeChart('aChart3','doughnut',['Success','Other'],[{data:[97.1,2.9], backgroundColor:['#3FDB90','#1C2438'], borderWidth:0}], baseChartOptions({scales:{}, cutout:'70%'}));
+  makeChart('aChart4','doughnut',['Failure','Other'],[{data:[2.9,97.1], backgroundColor:['#FF5C7A','#1C2438'], borderWidth:0}], baseChartOptions({scales:{}, cutout:'70%'}));
+  makeChart('aChart5','bar',['GL','SAP','Banks','NS'],[{data:[4.2,2.8,1.1,3.4], backgroundColor:'#FFB93D', borderRadius:6}], baseChartOptions({plugins:{legend:{display:false}}}));
+  makeChart('aChart6','bar',['Banks','SAP','SFTP','Flat File'],[{data:[41,6,4,2], backgroundColor:'#FF5C7A', borderRadius:6}], baseChartOptions({plugins:{legend:{display:false}}}));
+}
+
+/* ===================== DRILL-THROUGH ===================== */
+const DRILL_LEVELS = [
+  {label:'ARCS Balance', detail:'Reconciliation balance: Cash — US Entity, Aug 2026, Amount $482,300.00'},
+  {label:'Source Data', detail:'Source feed: Banks → Bank_Stmt_Daily load, 6,410 records contributing to this balance.'},
+  {label:'Source Record', detail:'Individual statement line: Ref# BNK-88213, Date 2026-08-14, Amount $12,450.00'},
+  {label:'Transaction Detail', detail:'Full transaction: Description "Wire Transfer — Vendor Payment", Matched GL Journal JE-55210.'},
+];
+let drillIndex = 0;
+function renderDrillthrough(){
+  mount(`
+    ${pageHead('Screen 19 · Drill-Through Explorer', 'Drill-Through Explorer', 'Trace a summarized ARCS balance down to its originating transaction detail, one level at a time.')}
+    <div class="card">
+      <div class="flow vertical" id="drillFlow">
+        ${DRILL_LEVELS.map((l,i)=>`<div class="flow-node ${i===drillIndex?'active':''}" style="cursor:pointer;" onclick="setDrill(${i})">${l.label}</div>${i<DRILL_LEVELS.length-1?'<div class="flow-arrow">↓</div>':''}`).join('')}
+      </div>
+      <div class="card" style="background:var(--panel-2); margin-top:10px;">
+        <div class="card-title">${DRILL_LEVELS[drillIndex].label}</div>
+        <div style="font-size:13px; color:var(--text-dim); font-family:var(--font-mono); line-height:1.7;">${DRILL_LEVELS[drillIndex].detail}</div>
+      </div>
+    </div>
+  `);
+}
+function setDrill(i){ drillIndex=i; renderDrillthrough(); }
+
+/* ===================== SCHEDULING ===================== */
+const SCHEDULES = [
+  {name:'GL_Monthly_Load', freq:'Monthly', next:'2026-09-01 02:00', last:'2026-08-01 02:00', status:'Active', owner:'M. Rao'},
+  {name:'SAP_FI_Daily', freq:'Daily', next:'2026-08-18 01:00', last:'2026-08-17 01:00', status:'Active', owner:'S. Iyer'},
+  {name:'Bank_Stmt_Daily', freq:'Daily', next:'2026-08-18 02:15', last:'2026-08-17 02:15', status:'Attention', owner:'A. Verma'},
+  {name:'FCCS_PeriodEnd', freq:'Period-End', next:'2026-08-31 20:00', last:'2026-07-31 20:00', status:'Active', owner:'P. Nair'},
+  {name:'WD_Payroll_Accrual', freq:'Weekly', next:'2026-08-22 22:00', last:'2026-08-15 22:00', status:'Active', owner:'R. Singh'},
+];
+function renderScheduling(){
+  mount(`
+    ${pageHead('Screen 20 · Scheduling Center', 'Scheduling Center', 'Recurring load rule schedules across Daily, Weekly, Monthly, and Period-End frequencies.')}
+    <div class="flow">
+      <div class="flow-node">Schedule</div><div class="flow-arrow">→</div><div class="flow-node">Import</div><div class="flow-arrow">→</div>
+      <div class="flow-node">Map</div><div class="flow-arrow">→</div><div class="flow-node">Validate</div><div class="flow-arrow">→</div>
+      <div class="flow-node">Load</div><div class="flow-arrow">→</div><div class="flow-node active">Log</div>
+    </div>
+    <div class="grid grid-3 mt-18">
+      ${SCHEDULES.map(s=>`
+        <div class="card">
+          <div class="card-title">${s.name} <span class="badge ${s.status==='Active'?'success':'warning'}">${s.status}</span></div>
+          <div class="kv-row"><div class="k">Frequency</div><div class="v">${s.freq}</div></div>
+          <div class="kv-row"><div class="k">Next Run</div><div class="v mono">${s.next}</div></div>
+          <div class="kv-row"><div class="k">Last Run</div><div class="v mono">${s.last}</div></div>
+          <div class="kv-row" style="border-bottom:none;"><div class="k">Owner</div><div class="v">${s.owner}</div></div>
+        </div>
+      `).join('')}
+    </div>
+  `);
+}
+
+/* ===================== HEALTH SCORE ===================== */
+function ringSVG(pct, color){
+  const r=50, c=2*Math.PI*r, off = c - (pct/100)*c;
+  return `<div class="ring"><svg width="120" height="120"><circle cx="60" cy="60" r="${r}" stroke="#1C2438" stroke-width="10" fill="none"/><circle cx="60" cy="60" r="${r}" stroke="${color}" stroke-width="10" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${off}" stroke-linecap="round"/></svg><div class="ring-num">${pct}%</div></div>`;
+}
+function renderHealth(){
+  const subs = [['Connection Health',94,'#2FE0C6'],['Mapping Health',88,'#8B7CF6'],['Validation Health',91,'#3FDB90'],['Load Health',86,'#FFB93D'],['Schedule Health',95,'#FF6B52']];
+  mount(`
+    ${pageHead('Screen 24 · Integration Health Score', 'Integration Health Score', 'A composite view of connection, mapping, validation, load, and schedule reliability.')}
+    <div class="card">
+      <div class="ring-wrap">
+        ${ringSVG(90,'#2FE0C6')}
+        <div>
+          <div class="page-title" style="font-size:20px;">Overall Integration Health</div>
+          <div class="progress-track mt-14" style="max-width:320px;"><div class="progress-fill" style="width:90%"></div></div>
+          <div class="muted" style="font-size:12px; margin-top:6px;">90% · Illustrative Training Data</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-3 mt-18">
+      ${subs.map(s=>`<div class="card"><div class="card-title">${s[0]}</div><div class="progress-track"><div class="progress-fill" style="width:${s[1]}%; background:${s[2]};"></div></div><div class="muted mt-8" style="font-size:12px;">${s[1]}%</div></div>`).join('')}
+    </div>
+  `);
+}
+
+/* ===================== BUSINESS SCENARIO ===================== */
+function renderScenario(){
+  const doneCount = state.scenarioDone.filter(Boolean).length;
+  mount(`
+    ${pageHead('Screen 22 · Real Business Scenario', 'Business Scenario', '"A company wants to reconcile Bank transactions against General Ledger balances." Work through each configuration step below.')}
+    <div class="progress-label"><span>Scenario Progress</span><span>${doneCount}/${SCENARIO_STEPS.length}</span></div>
+    <div class="progress-track mt-8" style="margin-bottom:18px;"><div class="progress-fill" style="width:${(doneCount/SCENARIO_STEPS.length)*100}%"></div></div>
+    ${SCENARIO_STEPS.map((s,i)=>`
+      <div class="scenario-item ${state.scenarioDone[i]?'done':''}">
+        <div class="scenario-num">${i+1}</div>
+        <div class="scenario-body">
+          <div class="scenario-title">${s.title}</div>
+          <div class="scenario-desc">${s.desc}</div>
+          <div class="scenario-feedback">✓ Step confirmed — configuration recorded correctly.</div>
+        </div>
+        ${!state.scenarioDone[i] ? `<button class="btn btn-ghost btn-sm" onclick="completeScenarioStep(${i})">Confirm</button>`:''}
+      </div>
+    `).join('')}
+  `);
+}
+function completeScenarioStep(i){ state.scenarioDone[i]=true; renderScenario(); }
+
+/* ===================== ERROR SCENARIO LAB ===================== */
+function renderErrorLab(){
+  const opts = [['A','Mapping'],['B','Report'],['C','Dashboard'],['D','User interface only']];
+  mount(`
+    ${pageHead('Screen 23 · Error Scenario Lab', 'Error Scenario Lab', 'Apply what you know about troubleshooting to a realistic failure scenario.')}
+    <div class="quiz-card">
+      <div class="quiz-progress">SCENARIO 1 OF 1</div>
+      <div class="quiz-q">100 records failed because of an invalid member mapping. What should you check?</div>
+      ${opts.map(o=>`<button class="quiz-opt ${state.errorLabAnswered ? (o[0]==='A' ? 'correct' : (state.errorLabSelected===o[0]?'wrong':'')) : ''}" ${state.errorLabAnswered?'disabled':''} onclick="answerErrorLab('${o[0]}')">${o[0]}. ${o[1]}</button>`).join('')}
+      <div class="quiz-explain" style="${state.errorLabAnswered?'display:block;':''}">Correct answer: <b>A. Mapping</b>. Invalid member mapping errors are resolved by reviewing the Member Mapping table — the failing source member either needs a corrected mapping or the target member needs to be created in ARCS.</div>
+    </div>
+  `);
+}
+function answerErrorLab(choice){
+  state.errorLabAnswered = true;
+  state.errorLabSelected = choice;
+  state.errorLabCorrect = choice==='A';
+  renderErrorLab();
+}
+
+/* ===================== PRACTICE MODE ===================== */
+function renderPractice(){
+  mount(`
+    ${pageHead('Screen 25 · Practice Mode', 'Practice Mode', 'Flip each card to check your understanding before moving on to Exam Mode.')}
+    <div class="grid grid-2">
+      ${PRACTICE_QA.map((qa,i)=>`
+        <div class="flashcard ${state.practiceFlipped[i]?'flipped':''}" onclick="flipCard(${i})">
+          <div class="fq">${qa.q}</div>
+          <div class="fa">${qa.a}</div>
+          <div class="hint">${state.practiceFlipped[i]?'Click to hide':'Click to reveal answer'}</div>
+        </div>
+      `).join('')}
+    </div>
+  `);
+}
+function flipCard(i){ state.practiceFlipped[i] = !state.practiceFlipped[i]; renderPractice(); }
+
+/* ===================== EXAM MODE ===================== */
+function renderExam(){
+  const e = state.exam;
+  if(e.finished){
+    const score = e.answers.filter((a,i)=>a===EXAM_QUESTIONS[i].correct).length;
+    mount(`
+      ${pageHead('Screen 26 · Exam Mode', 'Exam Complete', '20 original Oracle ARCS Data Integration questions.')}
+      <div class="quiz-card">
+        <div class="quiz-q">Your Score: ${score} / ${EXAM_QUESTIONS.length}</div>
+        <div class="progress-track"><div class="progress-fill" style="width:${(score/EXAM_QUESTIONS.length)*100}%"></div></div>
+        <div class="btn-row"><button class="btn btn-primary btn-sm" onclick="restartExam()">Retake Exam</button><button class="btn btn-ghost btn-sm" onclick="navigate('scorecard')">View Final Scorecard →</button></div>
+      </div>
+    `);
+    return;
+  }
+  const q = EXAM_QUESTIONS[e.current];
+  const answered = e.answers[e.current] !== null;
+  mount(`
+    ${pageHead('Screen 26 · Exam Mode', 'Exam Mode', '20 original questions — no real Oracle certification content is reproduced.')}
+    <div class="quiz-card">
+      <div class="quiz-progress">QUESTION ${e.current+1} OF ${EXAM_QUESTIONS.length}</div>
+      <div class="quiz-q">${q.q}</div>
+      ${q.opts.map((o,i)=>`<button class="quiz-opt ${answered ? (i===q.correct?'correct':(e.answers[e.current]===i?'wrong':'')) : ''}" ${answered?'disabled':''} onclick="answerExam(${i})">${o}</button>`).join('')}
+      <div class="quiz-explain" style="${answered?'display:block;':''}">${q.exp}</div>
+      <div class="btn-row">
+        ${answered ? `<button class="btn btn-primary btn-sm" onclick="nextExamQ()">${e.current<EXAM_QUESTIONS.length-1?'Next Question →':'Finish Exam →'}</button>` : ''}
+      </div>
+    </div>
+  `);
+}
+function answerExam(i){ state.exam.answers[state.exam.current]=i; renderExam(); }
+function nextExamQ(){ if(state.exam.current<EXAM_QUESTIONS.length-1){ state.exam.current++; } else { state.exam.finished=true; } renderExam(); }
+function restartExam(){ state.exam = {current:0, answers:new Array(EXAM_QUESTIONS.length).fill(null), finished:false}; renderExam(); }
+
+/* ===================== FINAL SCORECARD ===================== */
+function renderScorecard(){
+  const w = state.wizard;
+  const configScore = w.ruleSaved ? 100 : Math.round((w.step/10)*100);
+  const mapVals = Object.values(w.mappingsDone);
+  const mappingScore = Math.round((mapVals.filter(Boolean).length / mapVals.length) * 100);
+  const validationScore = state.validation.ran ? 100 : 40;
+  const loadScore = state.loadRun.done ? Math.round((state.loadRun.loaded/state.loadRun.processed)*100) : 0;
+  const troubleshootingScore = (state.errorOpen!==null ? 50:0) + (state.errorLabCorrect ? 50:0);
+  const scenarioScore = Math.round((state.scenarioDone.filter(Boolean).length/SCENARIO_STEPS.length)*100);
+  const examAnswered = state.exam.answers.filter(a=>a!==null).length;
+  const examScore = examAnswered>0 ? Math.round((state.exam.answers.filter((a,i)=>a===EXAM_QUESTIONS[i].correct).length/EXAM_QUESTIONS.length)*100) : 0;
+  const rows = [['Configuration Score', configScore],['Mapping Score', mappingScore],['Validation Score', validationScore],['Load Score', loadScore],['Troubleshooting Score', troubleshootingScore],['Scenario Score', scenarioScore],['Exam Score', examScore]];
+  const overall = Math.round(rows.reduce((a,r)=>a+r[1],0)/rows.length);
+  mount(`
+    ${pageHead('Screen 27 · Final Scorecard', 'Final Scorecard', 'A roll-up of your progress across configuration, mapping, validation, load, troubleshooting, scenario, and exam work.')}
+    <div class="card">
+      ${rows.map(r=>`<div class="score-row"><div class="name">${r[0]}</div><div class="bar-mini"><div class="progress-track"><div class="progress-fill" style="width:${r[1]}%"></div></div></div><div class="mono" style="width:44px; text-align:right;">${r[1]}%</div></div>`).join('')}
+    </div>
+    <div class="badge-final">
+      <div class="trophy">🏆</div>
+      <div class="btitle">ORACLE ARCS DATA INTEGRATION LAB</div>
+      <div class="bsub">TRAINING COMPLETE · OVERALL SCORE ${overall}%</div>
+    </div>
+  `);
+}
+</script>
+</body>
+</html>
