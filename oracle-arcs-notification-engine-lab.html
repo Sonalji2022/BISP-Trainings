@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle ARCS — Notification Engine Lab | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f1c;
+  --surface:#111a2e;
+  --surface-2:#16223d;
+  --surface-3:#1c2c4d;
+  --border:#28395c;
+  --border-soft:#1f2d4d;
+  --text:#e9edf7;
+  --text-dim:#8fa0c4;
+  --text-faint:#5f6f95;
+  --accent:#e0543f;
+  --accent-dim:#e0543f33;
+  --amber:#f0a83c;
+  --amber-dim:#f0a83c26;
+  --success:#33c48f;
+  --success-dim:#33c48f22;
+  --info:#4e88ff;
+  --info-dim:#4e88ff22;
+  --danger:#ef5a67;
+  --danger-dim:#ef5a6722;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, #1a2747 0%, transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, #26193f22 0%, transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  line-height:1.5;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+::selection{background:var(--accent-dim);color:var(--text);}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+a{color:inherit;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+}
+.h-display{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em;}
+
+/* ============ LOGIN SCREEN ============ */
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  padding:24px;
+}
+.login-bg-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(ellipse 900px 600px at 50% 40%, black 10%, transparent 75%);
+  opacity:.55;
+}
+.login-pulse-line{
+  position:absolute;
+  left:0;right:0;top:38%;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity:.5;
+}
+.login-card{
+  position:relative;
+  width:100%;max-width:420px;
+  background:linear-gradient(180deg, var(--surface) 0%, var(--surface) 100%);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:38px 36px 30px;
+  box-shadow:0 30px 80px -20px #00000090, 0 0 0 1px #ffffff05 inset;
+  animation:cardIn .7s cubic-bezier(.16,1,.3,1);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.98);}to{opacity:1;transform:none;}}
+.login-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
+  color:var(--accent);background:var(--accent-dim);
+  border:1px solid #e0543f4d;
+  padding:5px 10px;border-radius:100px;
+  text-transform:uppercase;
+}
+.login-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 1.6s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.login-title{font-size:28px;margin-top:16px;line-height:1.15;}
+.login-sub{font-family:var(--font-mono);font-size:12.5px;color:var(--text-dim);margin-top:8px;letter-spacing:.03em;}
+.field{margin-top:18px;}
+.field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;font-weight:500;}
+.field input, .field select{
+  width:100%;background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;padding:11px 13px;font-size:14px;
+  transition:border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+.env-row{display:flex;gap:8px;margin-top:6px;}
+.env-chip{
+  flex:1;text-align:center;padding:9px 6px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface-2);font-size:12.5px;color:var(--text-dim);transition:all .15s;
+}
+.env-chip.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.btn-primary{
+  width:100%;margin-top:24px;background:var(--accent);color:#fff;border:none;
+  padding:13px;border-radius:9px;font-weight:600;font-size:14.5px;letter-spacing:.02em;
+  box-shadow:0 8px 24px -8px #e0543f80;
+  transition:transform .12s, box-shadow .12s, filter .12s;
+}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 10px 28px -6px #e0543f99;}
+.btn-primary:active{transform:translateY(0);}
+.login-footer{margin-top:22px;padding-top:18px;border-top:1px solid var(--border-soft);
+  display:flex;align-items:center;gap:10px;}
+.login-footer img{height:34px;border-radius:4px;background:#fff;padding:4px 7px;}
+.login-footer .lf-text{font-size:11px;color:var(--text-faint);line-height:1.4;}
+.login-footer .lf-text b{color:var(--text-dim);}
+
+/* ============ APP SHELL ============ */
+#app{display:none;min-height:100vh;}
+#app.active{display:flex;}
+.sidebar{
+  width:252px;flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border-soft);
+  display:flex;flex-direction:column;
+  height:100vh;position:sticky;top:0;
+}
+.sb-brand{padding:20px 18px 16px;border-bottom:1px solid var(--border-soft);}
+.sb-brand-top{display:flex;align-items:center;gap:9px;}
+.sb-logo-mark{width:9px;height:9px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+.sb-brand-title{font-family:var(--font-display);font-weight:600;font-size:14.5px;letter-spacing:.01em;}
+.sb-brand-sub{font-family:var(--font-mono);font-size:9.5px;color:var(--text-faint);letter-spacing:.1em;margin-top:3px;padding-left:18px;text-transform:uppercase;}
+.sb-env{font-family:var(--font-mono);font-size:10px;color:var(--success);margin-top:10px;padding-left:18px;display:flex;align-items:center;gap:6px;}
+.sb-env .d{width:5px;height:5px;border-radius:50%;background:var(--success);}
+.sb-nav{flex:1;overflow-y:auto;padding:12px 10px;}
+.sb-group-label{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);text-transform:uppercase;padding:14px 10px 6px;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 10px;border-radius:8px;border:none;background:transparent;color:var(--text-dim);
+  font-size:13px;font-weight:500;margin-bottom:1px;transition:background .12s,color .12s;
+}
+.sb-item:hover{background:var(--surface-2);color:var(--text);}
+.sb-item.active{background:var(--accent-dim);color:var(--accent);}
+.sb-item .ic{width:15px;text-align:center;font-size:13px;opacity:.9;}
+.sb-foot{padding:14px 18px;border-top:1px solid var(--border-soft);}
+.sb-foot img{height:28px;border-radius:3px;background:#fff;padding:3px 5px;}
+.sb-foot-text{font-size:10px;color:var(--text-faint);margin-top:8px;line-height:1.5;}
+
+.main{flex:1;min-width:0;height:100vh;overflow-y:auto;}
+.topbar{
+  position:sticky;top:0;z-index:5;
+  background:#0a0f1cee;backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-soft);
+  padding:16px 32px;display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{font-family:var(--font-display);font-size:18px;font-weight:600;}
+.topbar-desc{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.topbar-tag{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--amber);background:var(--amber-dim);border:1px solid #f0a83c40;
+  padding:4px 9px;border-radius:100px;
+}
+.content{padding:26px 32px 60px;max-width:1280px;}
+.screen{display:none;animation:fadeUp .35s ease;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ============ COMMON COMPONENTS ============ */
+.grid{display:grid;gap:14px;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media (max-width:1080px){.grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:20px;
+}
+.panel-title{font-family:var(--font-display);font-weight:600;font-size:15px;margin-bottom:4px;}
+.panel-sub{font-size:12px;color:var(--text-dim);margin-bottom:16px;}
+
+.kpi-card{
+  background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:16px 18px;position:relative;overflow:hidden;
+}
+.kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--kc,var(--accent));}
+.kpi-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;}
+.kpi-value{font-family:var(--font-display);font-size:28px;font-weight:700;margin-top:8px;}
+.kpi-delta{font-size:11px;margin-top:5px;color:var(--text-dim);}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-family:var(--font-mono);padding:3px 8px;border-radius:100px;letter-spacing:.03em;text-transform:uppercase;}
+.badge-illustrative{color:var(--amber);background:var(--amber-dim);border:1px solid #f0a83c40;}
+.badge-success{color:var(--success);background:var(--success-dim);border:1px solid #33c48f40;}
+.badge-danger{color:var(--danger);background:var(--danger-dim);border:1px solid #ef5a6740;}
+.badge-info{color:var(--info);background:var(--info-dim);border:1px solid #4e88ff40;}
+.badge-pending{color:var(--text-dim);background:var(--surface-3);border:1px solid var(--border);}
+
+.trigger-card{
+  background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:16px;cursor:pointer;transition:border-color .15s,transform .15s,background .15s;
+  position:relative;
+}
+.trigger-card:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--surface-2);}
+.trigger-card.selected{border-color:var(--accent);background:var(--accent-dim);}
+.trigger-ic{font-size:18px;margin-bottom:10px;}
+.trigger-name{font-weight:600;font-size:13.5px;}
+.trigger-meta{font-size:11px;color:var(--text-faint);margin-top:6px;font-family:var(--font-mono);}
+
+.btn{
+  padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);
+  color:var(--text);font-size:12.5px;font-weight:600;transition:all .12s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{background:var(--surface-3);border-color:var(--text-faint);}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-accent:hover{filter:brightness(1.08);}
+.btn-success{background:var(--success);border-color:var(--success);color:#08281c;}
+.btn-danger{background:transparent;border-color:var(--danger);color:var(--danger);}
+.btn-danger:hover{background:var(--danger-dim);}
+.btn-ghost{background:transparent;border-color:var(--border);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;font-weight:500;}
+.form-row input,.form-row select,.form-row textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:10px 12px;font-size:13px;transition:border-color .15s;
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--accent);}
+.form-row textarea{resize:vertical;min-height:90px;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+@media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+
+.channel-card{
+  background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:18px;cursor:pointer;transition:all .15s;text-align:center;
+}
+.channel-card:hover{border-color:var(--text-faint);}
+.channel-card.selected{border-color:var(--accent);background:var(--accent-dim);}
+.channel-ic{font-size:22px;margin-bottom:8px;}
+.channel-name{font-weight:600;font-size:13px;}
+
+.tab-row{display:flex;gap:6px;border-bottom:1px solid var(--border-soft);margin-bottom:18px;flex-wrap:wrap;}
+.tab-btn{padding:9px 4px;background:none;border:none;color:var(--text-dim);font-size:13px;font-weight:500;
+  border-bottom:2px solid transparent;margin-bottom:-1px;margin-right:14px;transition:all .12s;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--accent);border-color:var(--accent);}
+.subview{display:none;}
+.subview.active{display:block;}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-faint);padding:9px 10px;border-bottom:1px solid var(--border);}
+td{padding:10px 10px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);}
+tr:hover td{background:var(--surface-2);}
+td.strong{color:var(--text);font-weight:500;}
+.mono{font-family:var(--font-mono);}
+
+.flow-row{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:8px 0 16px;}
+.flow-node{
+  flex-shrink:0;min-width:118px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:9px;padding:13px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative;
+}
+.flow-node:hover{border-color:var(--text-faint);}
+.flow-node.lit{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 20px -4px #e0543f80;}
+.flow-node .fn-ic{font-size:16px;}
+.flow-node .fn-label{font-size:11px;font-weight:600;margin-top:6px;}
+.flow-arrow{flex-shrink:0;width:34px;display:flex;align-items:center;justify-content:center;color:var(--text-faint);font-size:15px;}
+.flow-arrow.lit{color:var(--accent);}
+
+.ladder{display:flex;flex-direction:column;gap:0;max-width:340px;}
+.ladder-step{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:13px 15px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.ladder-connector{width:2px;height:20px;background:var(--border);margin-left:22px;}
+.ladder-step .ls-name{font-weight:600;font-size:13px;}
+.ladder-step .ls-meta{font-size:10.5px;color:var(--text-faint);margin-top:3px;font-family:var(--font-mono);}
+
+.timeline-row{display:flex;align-items:center;overflow-x:auto;padding:12px 0;}
+.tl-dot{flex-shrink:0;width:120px;text-align:center;}
+.tl-dot .circ{width:14px;height:14px;border-radius:50%;background:var(--surface-3);border:2px solid var(--border);margin:0 auto;}
+.tl-dot.active .circ{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent);}
+.tl-dot .tl-label{font-size:11px;margin-top:8px;color:var(--text-dim);font-weight:500;}
+.tl-line{flex-shrink:0;width:40px;height:2px;background:var(--border);}
+.tl-line.active{background:var(--accent);}
+
+.notif-card{
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--border);
+  border-radius:12px;padding:18px;max-width:380px;box-shadow:0 20px 40px -20px #00000080;
+}
+.notif-card .nc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.notif-card .nc-bell{font-size:15px;}
+.notif-card .nc-title{font-weight:700;font-size:14.5px;margin-top:4px;}
+.notif-card .nc-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);padding:5px 0;border-top:1px solid var(--border-soft);}
+.notif-card .nc-row b{color:var(--text);font-weight:500;}
+
+.bar-chart{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:10px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.bar-fill{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),#e0543f99);min-height:3px;transition:height .6s ease;}
+.bar-val{font-size:10.5px;font-family:var(--font-mono);color:var(--text-dim);margin-bottom:5px;}
+.bar-name{font-size:10px;color:var(--text-faint);margin-top:8px;text-align:center;}
+
+.donut-wrap{display:flex;align-items:center;gap:22px;}
+.legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);margin-bottom:8px;}
+.legend-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+
+.card-flip{perspective:1000px;height:140px;}
+.card-flip-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer;}
+.card-flip.flipped .card-flip-inner{transform:rotateY(180deg);}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;padding:16px;
+  display:flex;flex-direction:column;justify-content:center;border:1px solid var(--border);}
+.card-front{background:var(--surface-2);}
+.card-back{background:var(--surface-3);transform:rotateY(180deg);}
+
+.problem-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);padding:15px 16px;cursor:pointer;transition:all .15s;}
+.problem-card:hover{border-color:var(--accent);}
+.problem-card.open{border-color:var(--accent);background:var(--accent-dim);}
+.problem-detail{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);}
+.problem-card.open .problem-detail{display:block;}
+.pd-stage{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
+.pd-stage .pd-num{width:22px;height:22px;border-radius:50%;background:var(--surface-3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--font-mono);flex-shrink:0;color:var(--text-dim);}
+.pd-stage b{font-size:12.5px;}
+.pd-stage p{font-size:12px;color:var(--text-dim);margin-top:2px;}
+
+.quiz-q{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.quiz-q .q-num{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);}
+.quiz-q .q-text{font-weight:600;font-size:14px;margin-top:6px;margin-bottom:12px;}
+.q-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:7px;transition:all .12s;}
+.q-opt:hover{border-color:var(--text-faint);}
+.q-opt.correct{border-color:var(--success);background:var(--success-dim);}
+.q-opt.incorrect{border-color:var(--danger);background:var(--danger-dim);}
+.q-opt input{accent-color:var(--accent);}
+
+.toast{
+  position:fixed;bottom:22px;right:22px;background:var(--surface-3);border:1px solid var(--border);
+  border-left:3px solid var(--success);border-radius:9px;padding:13px 18px;font-size:13px;font-weight:500;
+  box-shadow:0 20px 40px -12px #000000a0;z-index:100;display:flex;align-items:center;gap:10px;
+  animation:toastIn .3s ease;max-width:320px;
+}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+.checklist-item{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border-soft);}
+.checklist-item:last-child{border-bottom:none;}
+
+.footer-band{margin-top:44px;padding:26px 32px;border-top:1px solid var(--border-soft);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.footer-band .fb-text{font-size:11px;color:var(--text-faint);}
+.footer-band img{height:22px;border-radius:4px;background:#fff;padding:3px 5px;}
+
+.pill-select{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{padding:7px 13px;border-radius:100px;border:1px solid var(--border);background:var(--surface-2);font-size:12px;color:var(--text-dim);transition:all .12s;}
+.pill.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+
+.placeholder-chip{
+  display:inline-flex;font-family:var(--font-mono);font-size:11px;background:var(--info-dim);color:var(--info);
+  border:1px solid #4e88ff40;padding:4px 9px;border-radius:6px;margin:3px 4px 3px 0;
+}
+.score-ring{position:relative;width:150px;height:150px;margin:0 auto;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-ring-text .sv{font-family:var(--font-display);font-size:32px;font-weight:700;}
+.score-ring-text .sl{font-size:10px;color:var(--text-faint);font-family:var(--font-mono);letter-spacing:.06em;}
+
+.locked-note{font-size:11.5px;color:var(--text-faint);margin-top:10px;font-style:italic;}
+.divider{height:1px;background:var(--border-soft);margin:20px 0;}
+.slider-row{display:flex;align-items:center;gap:14px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);}
+.slider-val{font-family:var(--font-mono);font-size:12.5px;color:var(--accent);min-width:64px;text-align:right;}
+
+@media (max-width:900px){
+  .sidebar{position:fixed;left:-260px;z-index:50;transition:left .2s;box-shadow:0 0 40px #000000a0;}
+  .sidebar.open{left:0;}
+  .main{width:100%;}
+  .content{padding:20px 16px 48px;}
+  .topbar{padding:14px 16px;}
+  #menuToggle{display:flex !important;}
+}
+#menuToggle{display:none;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-bg-grid"></div>
+  <div class="login-pulse-line"></div>
+  <div class="login-card">
+    <span class="login-badge"><span class="dot"></span> Illustrative Training Simulation</span>
+    <h1 class="login-title h-display">Oracle ARCS<br>Notification Engine Lab</h1>
+    <p class="login-sub">TRIGGER · CONFIGURE · NOTIFY · ESCALATE · MONITOR</p>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="trainee@bisptrainings.com" value="trainee@bisptrainings.com">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••••" value="••••••••••">
+    </div>
+    <div class="field">
+      <label>Environment</label>
+      <div class="env-row" id="envRow">
+        <div class="env-chip" data-env="Development">Development</div>
+        <div class="env-chip active" data-env="Test">Test</div>
+        <div class="env-chip" data-env="Production">Production</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="enterLab()">ENTER LAB →</button>
+
+    <div class="login-footer">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <div class="lf-text"><b>BISP Trainings</b> · www.bisptrainings.com<br>Call us: +91 769-409-5404</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-top">
+        <span class="sb-logo-mark"></span>
+        <span class="sb-brand-title">ARCS Notification Lab</span>
+      </div>
+      <div class="sb-brand-sub">Command Console</div>
+      <div class="sb-env"><span class="d"></span><span id="envLabel">Test Environment</span></div>
+    </div>
+    <nav class="sb-nav" id="sbNav"></nav>
+    <div class="sb-foot">
+      <img src="data:image/jpeg;base64,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" alt="BISP">
+      <div class="sb-foot-text"><b style="color:var(--text-dim)">BISP Trainings</b><br>www.bisptrainings.com<br>+91 769-409-5404</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div>
+          <div class="topbar-title h-display" id="topbarTitle">Command Center</div>
+          <div class="topbar-desc" id="topbarDesc">Live overview of notification volume and health</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <img src="data:image/jpeg;base64,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" alt="BISP Trainings" style="height:26px;border-radius:4px;background:#fff;padding:3px 6px;">
+        <span class="topbar-tag">Illustrative Training Data</span>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+
+    <div class="footer-band">
+      <div class="fb-text">© BISP Trainings · www.bisptrainings.com · Original UI inspired by Oracle ARCS. Not an official Oracle product.</div>
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAQEBAQFBAUGBgUHCAcIBwoKCQkKChALDAsMCxAYDxEPDxEPGBUZFRMVGRUmHhoaHiYsJSMlLDUvLzVDP0NXV3UBBAQEBAUEBQYGBQcIBwgHCgoJCQoKEAsMCwwLEBgPEQ8PEQ8YFRkVExUZFSYeGhoeJiwlIyUsNS8vNUM/Q1dXdf/CABEIAEAAwAMBIgACEQEDEQH/xAAdAAACAgMBAQEAAAAAAAAAAAAABwYIAwQFAgEJ/9oACAEBAAAAAL/ALvn5AOU5QAAAK74AisqPk3bKzgPL92DQ7G2YzIc639sRYPcFmz/AlrArKmb3WM/Rdk1HdRO+EbZWrLze4c2C+xYNvr0kma7uRTyyMSVL479fGhryx7gAJawJ+cz3jsJili5Xv1If6jvTt1edAAYF3YQo52+E8UM89La4EzUlxCC8DBnNfJha26eebv8AnPzNvY1Nsx5Ko9rLj9S6B7XJ7JMYbscGSd/h5+LhncVl3//EABsBAAIDAQEBAAAAAAAAAAAAAAAEAwUGBwIB/9oACAECEAAAALYQmQkt00q/yamqU9WF/pYeU5lCTrdWfXbW2Z5rhY981KCIAB//xAAbAQACAwEBAQAAAAAAAAAAAAAABQMEBgcBCP/aAAgBAxAAAABYamjc8yttg2kMczfx0EGNl7brXcHz0yPKS1VX6p1OfilWMLnoAH//xAA0EAABBAIBAAYIBQUBAAAAAAAEAgMFBgEHAAgSExYXNxARFBU1VVZXICMwNlMiJCYxMlH/2gAIAQEAAQwA/BsuWkI6t/2T2WnmtQ1HqJ7b255zwipn8JfPCKmfwl88IqZ/CXzwipn8JfBIlNSu8KHHlk5A/VsdkuFsuh9Zrh+I4Xwrv33MkOeFd++5khzwrv33MkOW+h2yKjhHzLsWe3nVV++5khzwrv33MkOZ1lshj8wbZJantXXWSnxZICWZw1L8tX7+o3Lbvxmv2OSiVV9x7IfSHMNSrIlJOfwD0k4fJWGj4AwZMJNxc3GMHxxSHxrL0gmYOwycXmvLezrfYaLtHGlpjlC4t+xICs9Vp9S3y87Itqme3RQJHsKdseGsr7omG3RTr3eG6mIE+sFZPEb8ZdWlDdcIUpzfTLK+o9Wyms1LYtdsyltDLW0VqzzB2b+Da2erX43Of9L/AO1enWfmts30WjPq2DRv/dt+ZFl50ZPhtk50ghRWNiOLaxjGejI+Z/kbOcq9l2b5g2jnRlz6q3P8Ysamr0mZMRl7kNPRMyEkmPLbfbt1YsD+youWio5WUb9+DwvKB+9a9zcwQr9JJfW0nLtWLeEskO+1nOF6s8wdm/gl4kGXjyQDGuuO3QJphCW2LzMoa7i2D69mOdxbB9ezHKXXJQ2+3UJixmjPeH9k+vpjleozEXJqky5IyRP235kWXmnZHYwYUx3Zigi27qRYiraW/Z2XmC9NGUddYyNXlu+vZvmBZ+dGf9uTXNo0A6Iky5MRnK44M0wR9L4xDrDlE3GegkcCcyl5rfvwiE5WJMeKsEYc/hWWtg7THskZ7rjgX0Na11xNHTQUkaKsYLVnmDs39DWnmts307b8yLLzoyfDbJzpMtoxM15WMY6+hSyGdjgNtqz1dm+YFn50b8u4qliy2nGVawu05aT5hqSUP2dp0/W5ZDrwSPYSzxHgiiRn09V3bmXc0in5e9fbURCV3OBQvGFIbCDa/qbHaTnkFKh0za9uFmXcCs97ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOFXemisOPvWCOw3ppL0rO3Kz4ZW2H6Nk63vcpep8wOBKeH12xtekinsj0lwnlrp237tYPbTYBbOdS6lzUcvHnvNvSV/1te5C6WEsSAKcH0LW56AgpZmUj3BXJah26t2Z+cq/UdZd2JsjqdhijvpIqOppo6XxK2L1ITuSvzUxFxLUcCshVNoVyCtUKSRCkNs+iRaoFvW7GEuxki74Hat+n+M6X1O/h3sYZtfPA7Vv0/zwO1b9P8APBjU+Scj+5m+38EtW9fqe40dfwm1EER+ZGBpcDaDaFYQKhpLHoWtKG1KVnGExU3CTA7r0dJCloQQMt51lL7eXnDRUrShZDSV8lJmHiWEvyUgMG0GaEYK2QMQ0+zxB4KhfaMFM5Y9AxA76MOsvNup5G1S7tvuoEAlEFzuNiSLJ5bMfYG2y4DYZOZZ3KZZhx2L2Os2x4U9MIWILsPBtXeyDLeq4VywGXhJAiDEByVYvjBuSRRZVa2qvdXeqS4GY6+4XcclKAANkvf8dXryaw2089OthPBbJXGH5wzO4sMBETxFCswciCYY3HRlrR7S5mLmlRUDH3+KkGpUuPlnUgVrZbKH3mhZFEyNA2uQNbabRYxYOXr9tmYfWuHMqaPJodiiFntxpcu80iJvS22Mge+GI9MDc3XmmpICYexCwOziu1Ykn5lPKMHaQrlNpMak1ggVS5sNnLwiTY5TvfwMiYqUBn3Sv//EADoQAAIBBAADBgMEBwkAAAAAAAECAwAEERITFCEFEDFBdLJRcdIVIHLRBiIwMmFikiMkM0JDgZGjs//aAAgBAQANPwD7l1dw2ol84xMcFhWP1pGupMufMnBr1Uleqkr1UleqkrtOO5WS1lkMgR4U3DoT+27OH9+vsZcuemq1+F/rr8D/AF1+B/rp76CJYnVgEdzgSdWPVa/C/wBdfgf66UZQSK+hPwOWNdlT8C7xgB/IOB3b3/8A5VaShDILgLtkA+GtKQGMUpkA/pSs4cq4kKfNSFqUHR1+I8QR5EVaXDw8QXIUNr541qCcQ4Mgk26A5plyttD1br4FvICsZyW64+WtICWtpsZIHjqfOp5WQBXCYwM+YNMcBROCfbXmDKAf+CtBdjbyjDkfFSMgiufT3v8AcHbFkT/VWT38eLuzfH/qrml9grmrf2mpbCB5fx9VpeAw+AlOa+0Zq54ewUnaLSSJ4kqGIwM/AeFEDOp6r/Bh4g1AIGnmyqKxDEN8zrXNyeyuejqCWJo3x1BLhTS3sOMdMgsAa59Pe/3JRhhnBBHUEHyIoDCIdW1XyGa+S18lq0mQS3cYXe5/i9fJK4ZjWe5bPDQ+SAeFc0vsFGaIz8dwpDanGASKcpxUVQpWMDCiME4xUTbXSTgC43b/ADOBX2jLX2gPYKnkMhKjPBdj1DfBaXqHjYqenyqRwiXfg6E9Bv5EVzknsq2uEkcIASQPhTyI0jyY2YKcgBVzVtKso4q6tMynICqfKufT3v8AsONF380vsFc1b+001pOCf4BxU9tcJKB5qEL19oy0L3I+YjqCCLWFI9RlyQ2c5NHJBj/wmP8AMlQSPHIo8mQ4NYj3+fBFNfRggjNfFUA7u1nS4tLmTpGRsTgtXqo/zr1Uf516qP8AOvVR/nXqo/zr1Uf50gy2LhHP+yqSSa7RvQtruMF1QnJ75bkNHKCuGAQVdyI7GSRVKlARWgSJDIixQoPIEtU0egEfVIE8wCfEmp76R4nGmGU096HQPjJXQCpWYvak4/fOWTBwCtMMA6SMoJozmZ7cnZ5nJz+vjooqK5d2CY6ApUN2jSOdcKo74CxaATI8sRU6t+4dlwa9RL9VJIyPrcyNq6nBU4bxFeol+qvUS/VQQOY+Zk2CHoDjasA45iXOP6qjAYpLcv4HOCVZ/wCU0EXhCMAJoR01x0x3qpJJOAAOuTUb6s8EqyqGHkSpODUaqXQMCyb+Gw8s4ouEWPYAsxBbAHxwCe5nCK88qxKWIzgFiOtOMxyRsHRh8QR0PdtoJQ41L76a5+O3T59+7LlGDLsh1YdPMEYPdAf0h0M0VtbwQc4JuDJbTxkSPIWZcbU1xb8taszIX1tArbcGVHi/tfBuoB6kVHa9oz2cUF5oObNwjQ50ID4XIGehFML4l4AWWRHnUwCHecLkJ5IEOMgnNRyBDbm5lEQjFycyu7SlkPD/ANOYPlcKDmpYex4J57eYwsYo7id5k3UhgMMM01nb28s3GeVns7W/nLRnWVGMhiZCMEMRmuRiEckmFlXQX3DU7SSHKCVPEk0yX8KnnVa1AjssxRmLfCujfFRhqEl8yoZ5baVCLUCPLGeWQgy5Iy3jUlqDBcC5VbNYjbIGTTcLxt8+Wd+uauGnW0s7l3tpWgeMKYxJJJO67NnBc0s1kty7QQ2fa00MYkBhzalOJHGShz0JGaa6tOMiuslzLbCG6SNJeo3eMvHvVza2DvPLMHQvFYTwkMSxG6y4ozyERXF66XSsLRgxdw5fQy41Gf3qtpUk7QuJYUuOC5spEcujHBJdsVFYRzJy9wLYT3N1dPJeaRoVQScI4TyFXt7JZiK5uSbizs5eHJzJ3YnKlHC5O2GFc/ayWPCnxbQpF2g0svMqHAOUwRkHpTz2aX7JI8IduZzK8MvGYheHkHhhRisT6XF3M2AeNmNAu7o408HQL06MM1Bx57OKK4McTTydqTzFiithyYSM7dMUzyJdyNOJLSR5LjEb28ZY4VUOSVxha//EADsRAAIBBAADAgoFDQAAAAAAAAECAwAEBRESEzEGIRUiQVFUcZGSk9EHEBRTYSMkMDI0QlVyc4GhsbL/2gAIAQIBAT8AGNiRENxexQuyhghVmIB6b4RX2HH/AMVi+HJ8qGOx0t5Osl/EVRI+EmNyPG3vQ1XgTDeS+tvhP8qucXDbzvFJBHxL5gCCD3gisXj7m6luIbaLi4G3rYGhoeej2ezA3+a7I6gOpPsBq1x17dSyRQwkug8ZSQpHtq/1YNIt0RGUOm2flUeTspJEjEhDN+qGVl36tgVcZfH28xilnCuNbHCT19QqDL46eQRx3Clz0BBU/wCazX7e39KH/gfURLHO7LGXDKvQgEa9dc6f0ZveX51lbi5N0vFZup5EPcXU/uDzGuwyv4QvGYaLx717oq1tHHaS8n5seuWBwBtv0HUVipud2iyT8po/yYHCw0e7Q2a+kaK5OSeaIEiKbib2DRpM5aZBYobpWhYSKwdemx/qs2yrnwxOgGiJ/tqsiwv8zCbQF9BAWA7gQetZeGV7tZFjZkeGIqwBIICAVyJ/un901yJ/un900Le4JAEMhP8AKazPdflfKsUKt+BVACK7JTww305klRAYSNsQPKKjjiXtHLetdW4h13Hmrs+KF6Va5SwmztzIsyKgtlQOxChiG33brtfLOM59ogLSQLIeYsZ3xAqAD3ddVk7O3vp4hY2zq5J5jcBRAPx3WTtLg5uMrDIyAw+MFJHdqgAOgFQ3t5CvDFcyovmVyBXhTJem3HxGrwpkvTbj4jV4UyXps/xGrv2Sf0H/xAA7EQACAQMCBAEIBA8AAAAAAAABAgMABAUREgYTITFRBxUiMkFUkpMQU1XRFBYjJDA0QmFyc5GUobLS/9oACAEDAQE/ADkJHZ+RaSSqrFS4KqCR301Nfhl99myfGn30MzmMfgMc9pbzwvNcXPNMciqx2bAupB7da/HHi0d3yH9wPvq34szk8KyJlbzQ+MjAiuJclFHb4m7u5vyk1qd8hGpdlldQTp3OgoZ3FdPzgAHsSrAf5FXOQtLaJJJZQEf1SASD/SsZDNk2jWyjaYuCVCj2Crjh7LwW8kzQBo4/XMciSbP4ghOlWPDGdvrVbi2sy8Ta6NvQduh7kVe8MZ6ytzPPYuIgNS4KuAPE7SaxH6iv8yX/AHP0Qvj7vF2tvNerbyQSzNq0bMrrJt7bAdCNtebsV9twfJm/4rGYvEC2IGet2HNl68iYftnxWvKFPavYYuCCUypbryzJtKhiWdzoD109Kri5U8P2kPKk1367yui9z2NZOIRYHHpzA/pk6g6jrqa8kFxYC1ktbghWurbYhJ016nVQfE1Nwfk8HJc3eOdLpDBIjQyAhtjd+3rVwjG8nBBRFJZo7kAeJJNYFGwfCd0uUIiLNKVjdhqQygBQPE1ipoktTG0iq6SyBlJ0I1YmufB9anxCufB9anxCjcW4BJmT4hWJ62Yb2NJIw/eGYkGuKIZZbOERxs5EvZRr7DUjyNgIrRbacy6jUctunpa1c469iwsCNE5czl9oGpUEVwNFYSYG5s7nlQ3UkKm3lmG0IysSV1Pqk1w9lb7C2dycxfxPEqjkIJllkY+C7SelcPZOwHCE6vdQRyMl0RGZAGG4sQAKLMx1JJqWztJW3SW8bt4soJrzbj/dIPlrXm3H+6QfLWvN2P8AdIfgFAADQfoP/9k=" alt="BISP">
+    </div>
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   DATA MODEL
+========================================================= */
+const TRIGGERS = [
+  {id:'recon_opened', name:'Reconciliation Opened', ic:'📂', cat:'Lifecycle', desc:'Fires the moment a preparer opens a new reconciliation for the period.'},
+  {id:'due_soon', name:'Due Soon', ic:'⏳', cat:'Deadline', desc:'Fires a configurable number of days before a reconciliation is due.'},
+  {id:'overdue', name:'Overdue', ic:'⚠️', cat:'Deadline', desc:'Fires once the due date passes without submission.'},
+  {id:'submitted', name:'Submitted', ic:'📤', cat:'Workflow', desc:'Fires when a preparer submits a reconciliation for review.'},
+  {id:'rejected', name:'Rejected', ic:'✖️', cat:'Workflow', desc:'Fires when a reviewer sends a reconciliation back to the preparer.'},
+  {id:'approved', name:'Approved', ic:'✅', cat:'Workflow', desc:'Fires when a reconciliation clears final approval.'},
+  {id:'reassigned', name:'Reassigned', ic:'🔁', cat:'Workflow', desc:'Fires when ownership of a reconciliation moves to a new user.'},
+  {id:'alert_assigned', name:'Alert Assigned', ic:'🚩', cat:'Alerts', desc:'Fires when a reconciliation alert is assigned to an owner.'},
+  {id:'data_load_failed', name:'Data Load Failed', ic:'📉', cat:'System', desc:'Fires when a scheduled data load into ARCS does not complete.'},
+  {id:'matching_completed', name:'Matching Completed', ic:'🔗', cat:'System', desc:'Fires when an automated transaction matching run finishes.'},
+  {id:'journal_export_failed', name:'Journal Export Failed', ic:'🧾', cat:'System', desc:'Fires when a journal fails to export to the source ledger.'},
+  {id:'period_closed', name:'Period Closed', ic:'🔒', cat:'Lifecycle', desc:'Fires when the close manager locks the accounting period.'},
+];
+
+const CHANNELS = [
+  {id:'in_app', name:'In-App', ic:'🔔', note:null},
+  {id:'email', name:'Email', ic:'✉️', note:null},
+  {id:'teams', name:'Microsoft Teams', ic:'👥', note:'Simulator / framework option'},
+  {id:'slack', name:'Slack', ic:'#', note:'Simulator / framework option'},
+  {id:'mobile', name:'Mobile Push', ic:'📱', note:'Simulator / framework option'},
+  {id:'webhook', name:'Webhook', ic:'🔗', note:'Simulator / framework option'},
+];
+
+const PLACEHOLDERS = ['{{User}}','{{Reconciliation}}','{{Account}}','{{Period}}','{{DueDate}}','{{Status}}','{{Difference}}','{{AlertID}}'];
+
+const NAV = [
+  {group:'Overview', items:[
+    {id:'dashboard', label:'Command Center', ic:'▣'},
+  ]},
+  {group:'Configure', items:[
+    {id:'triggers', label:'Trigger Center', ic:'⚡'},
+    {id:'config', label:'Notification Configuration', ic:'⚙'},
+    {id:'channels', label:'Channel Selector', ic:'📡'},
+    {id:'templates', label:'Template & Placeholder Builder', ic:'✎'},
+    {id:'preview', label:'Live Notification Preview', ic:'🔔'},
+  ]},
+  {group:'Lifecycle Labs', items:[
+    {id:'duesoon', label:'Due-Soon Simulator', ic:'⏳'},
+    {id:'escalation', label:'Overdue Escalation Lab', ic:'▲'},
+    {id:'digest', label:'Daily Digest Builder', ic:'▤'},
+    {id:'critical', label:'Critical Alert Mode', ic:'✱'},
+  ]},
+  {group:'Simulate', items:[
+    {id:'eventsim', label:'Event Simulator', ic:'▶'},
+    {id:'scenario', label:'Scenario Lab', ic:'◈'},
+    {id:'failure', label:'Failure Simulator', ic:'⨯'},
+    {id:'flowviz', label:'Flow Visualizer', ic:'⇄'},
+  ]},
+  {group:'Monitor', items:[
+    {id:'monitor', label:'Delivery Monitor', ic:'▦'},
+    {id:'analytics', label:'Delivery Analytics', ic:'📊'},
+  ]},
+  {group:'Govern', items:[
+    {id:'preferences', label:'User Preferences', ic:'☰'},
+    {id:'quality', label:'Quality Check', ic:'✓'},
+    {id:'bestpractice', label:'Best Practices', ic:'★'},
+    {id:'troubleshoot', label:'Troubleshooting Lab', ic:'🔧'},
+  ]},
+  {group:'Certify', items:[
+    {id:'exam', label:'Exam Mode', ic:'▤'},
+    {id:'scorecard', label:'Final Scorecard', ic:'🏆'},
+  ]},
+];
+
+const TOPBAR_META = {
+  dashboard:['Command Center','Live overview of notification volume and health'],
+  triggers:['Trigger Center','12 reconciliation events that can fire a notification'],
+  config:['Notification Configuration','Define how a trigger becomes a notification'],
+  channels:['Channel Selector','Choose one or more delivery channels'],
+  templates:['Template & Placeholder Builder','Compose the message and insert dynamic fields'],
+  preview:['Live Notification Preview','See the notification as the recipient would'],
+  duesoon:['Due-Soon Simulator','Model the countdown from today to escalation'],
+  escalation:['Overdue Escalation Lab','Configure the four-tier escalation ladder'],
+  digest:['Daily Digest Builder','Bundle routine notifications into one summary'],
+  critical:['Critical Alert Mode','Immediate, high-priority notification path'],
+  eventsim:['Event Simulator','Fire a reconciliation event and watch it travel the pipeline'],
+  scenario:['Scenario Lab','Guided, scored configuration scenarios'],
+  failure:['Failure Simulator','Diagnose and resolve delivery failures'],
+  flowviz:['Notification Flow Visualizer','Click each stage of the pipeline to learn what it does'],
+  monitor:['Delivery Monitor','Live-style log of recent notification deliveries'],
+  analytics:['Delivery Analytics','Volume, success rate and channel mix'],
+  preferences:['User Preferences','How an individual user wants to be notified'],
+  quality:['Notification Quality Check','Validate a configuration before enabling it'],
+  bestpractice:['Best Practices','Do this, not that'],
+  troubleshoot:['Troubleshooting Lab','Work a support ticket end to end'],
+  exam:['Exam Mode','20 original practice questions'],
+  scorecard:['Final Scorecard','Your Notification Engine Specialist readiness'],
+};
+
+/* =========================================================
+   STATE
+========================================================= */
+let state = {
+  env:'Test',
+  selectedTrigger: TRIGGERS[1],
+  config: {name:'Reconciliation Due Soon Reminder', priority:'Medium', recipient:'Preparer', channel:'Email', template:'Due Soon - Standard', schedule:'3 days before due date', escalation:'Enabled', status:'Draft'},
+  selectedChannels: ['email','in_app'],
+  template: {subject:'Reconciliation {{Reconciliation}} — {{Status}}', message:'Hello {{User}},\n\nReconciliation {{Reconciliation}} for {{Period}} requires your attention.\n\nAccount: {{Account}}\nDue date: {{DueDate}}\nDifference: {{Difference}}', recipient:'Preparer', priority:'Medium', action:'OPEN RECONCILIATION'},
+  digestMode: 'immediate',
+  reminderDays: 3,
+  escalationCfg: {level:'Reviewer', recipient:'Team Lead', delayHours:24, channel:'Email'},
+  deliveryLog: [],
+  examAnswers: {},
+  examSubmitted: false,
+  scenarioStep: 0,
+  scenarioScore: null,
+  qualityChecked: false,
+};
+
+function uid(){ return 'NTF-' + Math.floor(1000+Math.random()*8999); }
+function nowStr(){ const d=new Date(); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+
+// seed a delivery log
+const seedTriggersCycle = ['due_soon','overdue','submitted','journal_export_failed','approved','data_load_failed','rejected','matching_completed'];
+const seedChannelsCycle = ['Email','In-App','Email','Email','In-App','Email','Teams','In-App'];
+const seedStatusCycle = ['Delivered','Delivered','Failed','Delivered','Delivered','Retrying','Delivered','Pending'];
+for(let i=0;i<8;i++){
+  const trg = TRIGGERS.find(t=>t.id===seedTriggersCycle[i]);
+  state.deliveryLog.push({
+    id: uid(), trigger: trg.name, recipient: ['J. Rao','A. Verma','S. Iyer','Close Manager','P. Nair'][i%5],
+    channel: seedChannelsCycle[i], created:'09:0'+i, sent: seedStatusCycle[i]==='Pending' ? '—' : '09:0'+(i+1),
+    status: seedStatusCycle[i]
+  });
+}
+
+function toast(msg, kind){
+  const t = document.createElement('div');
+  t.className='toast';
+  t.style.borderLeftColor = kind==='danger' ? 'var(--danger)' : kind==='amber' ? 'var(--amber)' : 'var(--success)';
+  t.innerHTML = `<span>${kind==='danger'?'⨯':kind==='amber'?'⚠':'✓'}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300);}, 2600);
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+document.getElementById('envRow').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.env-chip');
+  if(!chip) return;
+  document.querySelectorAll('.env-chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  state.env = chip.dataset.env;
+});
+
+function enterLab(){
+  document.getElementById('loginScreen').style.opacity='0';
+  document.getElementById('loginScreen').style.transition='opacity .35s';
+  setTimeout(()=>{
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('envLabel').textContent = state.env + ' Environment';
+    buildNav();
+    goTo('dashboard');
+  }, 350);
+}
+
+/* =========================================================
+   NAV
+========================================================= */
+function buildNav(){
+  const nav = document.getElementById('sbNav');
+  nav.innerHTML = NAV.map(g => `
+    <div class="sb-group-label">${g.group}</div>
+    ${g.items.map(it => `<button class="sb-item" data-screen="${it.id}" onclick="goTo('${it.id}')"><span class="ic">${it.ic}</span><span>${it.label}</span></button>`).join('')}
+  `).join('');
+}
+
+function goTo(screenId){
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.toggle('active', b.dataset.screen===screenId));
+  const meta = TOPBAR_META[screenId] || ['',''];
+  document.getElementById('topbarTitle').textContent = meta[0];
+  document.getElementById('topbarDesc').textContent = meta[1];
+  document.getElementById('content').innerHTML = RENDER[screenId] ? RENDER[screenId]() : '';
+  document.getElementById('content').scrollTop=0;
+  window.scrollTo(0,0);
+  if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
+  if(POST_RENDER[screenId]) POST_RENDER[screenId]();
+}
+
+/* =========================================================
+   RENDER FUNCTIONS
+========================================================= */
+const RENDER = {};
+const POST_RENDER = {};
+
+/* ---- DASHBOARD ---- */
+RENDER.dashboard = () => `
+  <div class="grid grid-4" style="margin-bottom:16px;">
+    ${kpiCard('Total Notifications','1,248','+6.2% vs last period','var(--accent)')}
+    ${kpiCard('Delivered','1,131','90.6% success rate','var(--success)')}
+    ${kpiCard('Failed','43','3.4% of volume','var(--danger)')}
+    ${kpiCard('Critical','9','Journal export + data load','var(--amber)')}
+    ${kpiCard('Escalated','17','Overdue reconciliations','var(--info)')}
+    ${kpiCard('Pending','74','Queued for delivery','var(--text-faint)')}
+  </div>
+  <div class="grid grid-2">
+    <div class="panel">
+      <div class="panel-title">Notifications by Trigger</div>
+      <div class="panel-sub">Illustrative training data</div>
+      ${barChart([['Due Soon',312],['Overdue',188],['Submitted',241],['Approved',196],['Journal Export Failed',41],['Data Load Failed',28]])}
+    </div>
+    <div class="panel">
+      <div class="panel-title">Notifications by Channel</div>
+      <div class="panel-sub">Illustrative training data</div>
+      ${barChart([['Email',612],['In-App',487],['Teams',88],['Slack',34],['Mobile Push',19],['Webhook',8]])}
+    </div>
+  </div>
+  <div class="grid grid-2" style="margin-top:14px;">
+    <div class="panel">
+      <div class="panel-title">Delivery Success Rate</div>
+      <div class="panel-sub">Trailing 7 days</div>
+      ${barChart([['Mon',88],['Tue',91],['Wed',86],['Thu',93],['Fri',90],['Sat',95],['Sun',92]], '%')}
+    </div>
+    <div class="panel">
+      <div class="panel-title">Daily Volume</div>
+      <div class="panel-sub">Notifications sent per day</div>
+      ${barChart([['Mon',142],['Tue',168],['Wed',131],['Thu',201],['Fri',187],['Sat',64],['Sun',58]])}
+    </div>
+  </div>
+`;
+
+function kpiCard(label,value,delta,color){
+  return `<div class="kpi-card" style="--kc:${color}">
+    <div class="kpi-label">${label}</div>
+    <div class="kpi-value">${value}</div>
+    <div class="kpi-delta">${delta}</div>
+  </div>`;
+}
+function barChart(pairs, suffix=''){
+  const max = Math.max(...pairs.map(p=>p[1]));
+  return `<div class="bar-chart">
+    ${pairs.map(([name,val])=>`
+      <div class="bar-col">
+        <div class="bar-val">${val}${suffix}</div>
+        <div class="bar-fill" style="height:${Math.max(6,(val/max*100))}%"></div>
+        <div class="bar-name">${name}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ---- TRIGGER CENTER ---- */
+RENDER.triggers = () => `
+  <div class="panel-sub" style="margin-bottom:16px;">Click a trigger to open it in Notification Configuration.</div>
+  <div class="grid grid-4">
+    ${TRIGGERS.map(t=>`
+      <div class="trigger-card ${state.selectedTrigger.id===t.id?'selected':''}" onclick="selectTrigger('${t.id}')">
+        <div class="trigger-ic">${t.ic}</div>
+        <div class="trigger-name">${t.name}</div>
+        <div class="trigger-meta">${t.cat}</div>
+      </div>
+    `).join('')}
+  </div>
+`;
+function selectTrigger(id){
+  state.selectedTrigger = TRIGGERS.find(t=>t.id===id);
+  state.config.name = state.selectedTrigger.name + ' Notification';
+  toast('Opening "'+state.selectedTrigger.name+'" in Notification Configuration');
+  goTo('config');
+}
+
+/* ---- NOTIFICATION CONFIGURATION ---- */
+RENDER.config = () => {
+  const t = state.selectedTrigger, c = state.config;
+  return `
+  <div class="grid" style="grid-template-columns:1.4fr 1fr;gap:16px;">
+    <div class="panel">
+      <div class="panel-title">${t.ic} ${t.name}</div>
+      <div class="panel-sub">${t.desc}</div>
+      <div class="form-grid">
+        <div class="form-row"><label>Notification Name</label><input id="cf_name" value="${c.name}"></div>
+        <div class="form-row"><label>Priority</label>
+          <select id="cf_priority"><option ${c.priority==='Low'?'selected':''}>Low</option><option ${c.priority==='Medium'?'selected':''}>Medium</option><option ${c.priority==='High'?'selected':''}>High</option><option ${c.priority==='Critical'?'selected':''}>Critical</option></select>
+        </div>
+        <div class="form-row"><label>Recipient</label>
+          <select id="cf_recipient"><option ${c.recipient==='Preparer'?'selected':''}>Preparer</option><option ${c.recipient==='Reviewer'?'selected':''}>Reviewer</option><option ${c.recipient==='Responsible Owner'?'selected':''}>Responsible Owner</option><option ${c.recipient==='Close Manager'?'selected':''}>Close Manager</option></select>
+        </div>
+        <div class="form-row"><label>Channel</label>
+          <select id="cf_channel">${CHANNELS.map(ch=>`<option ${c.channel===ch.name?'selected':''}>${ch.name}</option>`).join('')}</select>
+        </div>
+        <div class="form-row"><label>Template</label>
+          <select id="cf_template"><option>Due Soon - Standard</option><option>Overdue - Standard</option><option>Critical - Journal Export</option><option>Approval - Standard</option><option>Custom</option></select>
+        </div>
+        <div class="form-row"><label>Schedule</label><input id="cf_schedule" value="${c.schedule}"></div>
+        <div class="form-row"><label>Escalation</label>
+          <select id="cf_escalation"><option ${c.escalation==='Enabled'?'selected':''}>Enabled</option><option ${c.escalation==='Disabled'?'selected':''}>Disabled</option></select>
+        </div>
+        <div class="form-row"><label>Status</label>
+          <select id="cf_status"><option ${c.status==='Draft'?'selected':''}>Draft</option><option ${c.status==='Enabled'?'selected':''}>Enabled</option><option ${c.status==='Disabled'?'selected':''}>Disabled</option></select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-accent" onclick="saveConfig()">SAVE</button>
+        <button class="btn" onclick="testConfig()">TEST</button>
+        <button class="btn btn-ghost" onclick="goTo('preview')">PREVIEW</button>
+        <button class="btn btn-success" onclick="setStatus('Enabled')">ENABLE</button>
+        <button class="btn btn-danger" onclick="setStatus('Disabled')">DISABLE</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Current State</div>
+      <div class="checklist-item"><span>Status</span>${statusBadge(c.status)}</div>
+      <div class="checklist-item"><span>Trigger</span><span class="mono" style="font-size:12px">${t.name}</span></div>
+      <div class="checklist-item"><span>Channel</span><span class="mono" style="font-size:12px">${c.channel}</span></div>
+      <div class="checklist-item"><span>Priority</span><span class="mono" style="font-size:12px">${c.priority}</span></div>
+      <div class="divider"></div>
+      <div class="panel-sub" style="margin-bottom:8px;">This maps to the reconciliation lifecycle:</div>
+      ${miniFlow(['Event','Trigger','Notification','Channel','Delivery'], -1)}
+    </div>
+  </div>`;
+};
+function statusBadge(s){
+  if(s==='Enabled') return '<span class="badge badge-success">Enabled</span>';
+  if(s==='Disabled') return '<span class="badge badge-danger">Disabled</span>';
+  return '<span class="badge badge-pending">Draft</span>';
+}
+function miniFlow(stages, litIdx){
+  return `<div class="flow-row">${stages.map((s,i)=>`
+    ${i>0?`<div class="flow-arrow ${i<=litIdx?'lit':''}">→</div>`:''}
+    <div class="flow-node ${i===litIdx?'lit':''}"><div class="fn-label">${s}</div></div>
+  `).join('')}</div>`;
+}
+function readConfigForm(){
+  state.config.name = document.getElementById('cf_name').value;
+  state.config.priority = document.getElementById('cf_priority').value;
+  state.config.recipient = document.getElementById('cf_recipient').value;
+  state.config.channel = document.getElementById('cf_channel').value;
+  state.config.template = document.getElementById('cf_template').value;
+  state.config.schedule = document.getElementById('cf_schedule').value;
+  state.config.escalation = document.getElementById('cf_escalation').value;
+  state.config.status = document.getElementById('cf_status').value;
+}
+function saveConfig(){ readConfigForm(); toast('Configuration saved'); goTo('config'); }
+function testConfig(){ readConfigForm(); toast('Test notification sent to your account (simulated)'); }
+function setStatus(s){ readConfigForm(); state.config.status=s; toast('Notification '+s.toLowerCase()); goTo('config'); }
+
+/* ---- CHANNEL SELECTOR ---- */
+RENDER.channels = () => `
+  <div class="panel-sub" style="margin-bottom:16px;">Select one or more channels for the active configuration: <b style="color:var(--text)">${state.config.name}</b></div>
+  <div class="grid grid-3">
+    ${CHANNELS.map(c=>`
+      <div class="channel-card ${state.selectedChannels.includes(c.id)?'selected':''}" onclick="toggleChannel('${c.id}')">
+        <div class="channel-ic">${c.ic}</div>
+        <div class="channel-name">${c.name}</div>
+        ${c.note ? `<div style="margin-top:8px;"><span class="badge badge-illustrative">${c.note}</span></div>` : ''}
+      </div>
+    `).join('')}
+  </div>
+  <div class="btn-row"><button class="btn btn-accent" onclick="toast('Channel selection saved')">SAVE SELECTION</button></div>
+`;
+function toggleChannel(id){
+  const i = state.selectedChannels.indexOf(id);
+  if(i>-1) state.selectedChannels.splice(i,1); else state.selectedChannels.push(id);
+  goTo('channels');
+}
+
+/* ---- TEMPLATE & PLACEHOLDER BUILDER ---- */
+RENDER.templates = () => {
+  const tp = state.template;
+  return `
+  <div class="tab-row">
+    <button class="tab-btn active" data-tab="build" onclick="switchTab(this,'build')">Template Builder</button>
+    <button class="tab-btn" data-tab="ph" onclick="switchTab(this,'ph')">Placeholder Builder</button>
+  </div>
+  <div class="subview active" id="tab-build">
+    <div class="grid" style="grid-template-columns:1.3fr 1fr;gap:16px;">
+      <div class="panel">
+        <div class="form-row"><label>Subject</label><input id="tp_subject" value="${escapeHtml(tp.subject)}"></div>
+        <div class="form-row"><label>Message</label><textarea id="tp_message" rows="7">${escapeHtml(tp.message)}</textarea></div>
+        <div class="form-grid">
+          <div class="form-row"><label>Recipient</label><select id="tp_recipient"><option ${tp.recipient==='Preparer'?'selected':''}>Preparer</option><option ${tp.recipient==='Reviewer'?'selected':''}>Reviewer</option><option ${tp.recipient==='Responsible Owner'?'selected':''}>Responsible Owner</option></select></div>
+          <div class="form-row"><label>Priority</label><select id="tp_priority"><option ${tp.priority==='Low'?'selected':''}>Low</option><option ${tp.priority==='Medium'?'selected':''}>Medium</option><option ${tp.priority==='High'?'selected':''}>High</option><option ${tp.priority==='Critical'?'selected':''}>Critical</option></select></div>
+        </div>
+        <div class="form-row"><label>Action Button</label><input id="tp_action" value="${tp.action}"></div>
+        <div class="btn-row">
+          <button class="btn btn-accent" onclick="saveTemplate()">SAVE TEMPLATE</button>
+          <button class="btn" onclick="goTo('preview')">PREVIEW</button>
+          <button class="btn btn-ghost" onclick="toast('Test template rendered with sample data')">TEST</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Insert Placeholders</div>
+        <div class="panel-sub">Click to copy into the message field</div>
+        <div>${PLACEHOLDERS.map(p=>`<span class="placeholder-chip" style="cursor:pointer" onclick="insertPlaceholder('${p}')">${p}</span>`).join('')}</div>
+        <div class="divider"></div>
+        <div class="panel-title" style="font-size:13px;">Rendered Preview</div>
+        <div class="notif-card" style="max-width:none;margin-top:10px;" id="templateRenderPreview">${renderTemplatePreview()}</div>
+      </div>
+    </div>
+  </div>
+  <div class="subview" id="tab-ph">
+    <div class="panel">
+      <div class="panel-title">Available Placeholders</div>
+      <div class="panel-sub">Illustrative fields available to any template</div>
+      <div style="margin-bottom:18px;">${PLACEHOLDERS.map(p=>`<span class="placeholder-chip">${p}</span>`).join('')}</div>
+      <div class="panel-title" style="font-size:13px;">Sample Rendered Message</div>
+      <div class="panel" style="background:var(--surface-2);margin-top:10px;">
+        <p class="mono" style="font-size:12.5px;line-height:1.9;color:var(--text-dim);white-space:pre-wrap;">Hello <span style="color:var(--text)">Anita Rao</span>,
+
+Reconciliation <span style="color:var(--text)">ABC-100</span> for <span style="color:var(--text)">Aug-2026</span>
+requires your attention.
+
+Account: <span style="color:var(--text)">1000-Cash Operating</span>
+Due date: <span style="color:var(--text)">31-Aug-2026</span>
+Difference: <span style="color:var(--text)">$1,240.00</span></p>
+      </div>
+    </div>
+  </div>
+  `;
+};
+function switchTab(btn, id){
+  const row = btn.closest('.tab-row');
+  row.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  row.parentElement.querySelectorAll('.subview').forEach(v=>v.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+}
+function insertPlaceholder(p){
+  const el = document.getElementById('tp_message');
+  if(!el) return;
+  const pos = el.selectionStart || el.value.length;
+  el.value = el.value.slice(0,pos) + p + el.value.slice(pos);
+  refreshTemplatePreview();
+}
+function refreshTemplatePreview(){
+  const el = document.getElementById('templateRenderPreview');
+  if(el) el.innerHTML = renderTemplatePreview();
+}
+function renderTemplatePreview(){
+  const msgEl = document.getElementById('tp_message');
+  const subjEl = document.getElementById('tp_subject');
+  const actionEl = document.getElementById('tp_action');
+  let msg = msgEl ? msgEl.value : state.template.message;
+  let subj = subjEl ? subjEl.value : state.template.subject;
+  let action = actionEl ? actionEl.value : state.template.action;
+  const sample = {'{{User}}':'Anita Rao','{{Reconciliation}}':'ABC-100','{{Account}}':'1000-Cash Operating','{{Period}}':'Aug-2026','{{DueDate}}':'31-Aug-2026','{{Status}}':'Due Soon','{{Difference}}':'$1,240.00','{{AlertID}}':'ALT-2291'};
+  Object.keys(sample).forEach(k=>{ msg = msg.split(k).join(sample[k]); subj = subj.split(k).join(sample[k]); });
+  return `<div class="nc-top"><span class="nc-bell">🔔</span><span class="badge badge-info">Preview</span></div>
+    <div class="nc-title">${escapeHtml(subj)}</div>
+    <p class="mono" style="font-size:11.5px;color:var(--text-dim);white-space:pre-wrap;margin-top:8px;line-height:1.8;">${escapeHtml(msg)}</p>
+    <button class="btn btn-accent" style="width:100%;margin-top:12px;justify-content:center;">${escapeHtml(action)}</button>`;
+}
+function saveTemplate(){
+  state.template.subject = document.getElementById('tp_subject').value;
+  state.template.message = document.getElementById('tp_message').value;
+  state.template.recipient = document.getElementById('tp_recipient').value;
+  state.template.priority = document.getElementById('tp_priority').value;
+  state.template.action = document.getElementById('tp_action').value;
+  toast('Template saved');
+}
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+document.addEventListener('input', (e)=>{
+  if(e.target && (e.target.id==='tp_message'||e.target.id==='tp_subject'||e.target.id==='tp_action')) refreshTemplatePreview();
+});
+
+/* ---- LIVE PREVIEW ---- */
+RENDER.preview = () => `
+  <div style="display:flex;justify-content:center;padding:20px 0;">
+    <div class="notif-card">
+      <div class="nc-top"><span class="nc-bell">🔔 Notification</span><span class="badge badge-info">${state.config.channel}</span></div>
+      <div class="nc-title">Reconciliation ABC-100</div>
+      <div class="nc-row"><span>Period</span><b>Aug-2026</b></div>
+      <div class="nc-row"><span>Status</span><b>${state.selectedTrigger.name}</b></div>
+      <div class="nc-row"><span>Due Date</span><b>31-Aug-2026</b></div>
+      <div class="nc-row"><span>Priority</span><b>${state.config.priority}</b></div>
+      <button class="btn btn-accent" style="width:100%;margin-top:14px;justify-content:center;" onclick="toast('Opening reconciliation ABC-100 (simulated)')">OPEN RECONCILIATION</button>
+    </div>
+  </div>
+`;
+
+/* ---- DUE SOON SIMULATOR ---- */
+RENDER.duesoon = () => `
+  <div class="panel">
+    <div class="panel-title">Countdown Timeline</div>
+    <div class="panel-sub">Illustrative reminder timing — drag to configure</div>
+    ${dueSoonTimeline()}
+    <div class="divider"></div>
+    <div class="form-row" style="max-width:420px;">
+      <label>Remind this many days before due date</label>
+      <div class="slider-row">
+        <input type="range" min="1" max="10" value="${state.reminderDays}" oninput="updateReminder(this.value)">
+        <span class="slider-val" id="reminderVal">${state.reminderDays} days</span>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-accent" onclick="toast('Reminder timing saved: '+state.reminderDays+' days before due date')">SAVE TIMING</button></div>
+  </div>
+`;
+function dueSoonTimeline(){
+  const stages = ['Today','Due Soon','Reminder','Due Date','Overdue','Escalation'];
+  return `<div class="timeline-row">${stages.map((s,i)=>`
+    ${i>0?`<div class="tl-line ${i<=1?'active':''}"></div>`:''}
+    <div class="tl-dot ${i<=1?'active':''}"><div class="circ"></div><div class="tl-label">${s}</div></div>
+  `).join('')}</div>`;
+}
+function updateReminder(v){ state.reminderDays = v; document.getElementById('reminderVal').textContent = v+' days'; }
+
+/* ---- ESCALATION LAB ---- */
+RENDER.escalation = () => {
+  const cfg = state.escalationCfg;
+  return `
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="panel">
+      <div class="panel-title">Escalation Ladder</div>
+      <div class="panel-sub">Overdue reconciliations climb this ladder</div>
+      <div class="ladder">
+        ${ladderStep('Preparer','Initial owner', cfg.level==='Preparer')}
+        <div class="ladder-connector"></div>
+        ${ladderStep('Reviewer','+ '+cfg.delayHours+'h if unresolved', cfg.level==='Reviewer')}
+        <div class="ladder-connector"></div>
+        ${ladderStep('Manager','+ '+(cfg.delayHours*2)+'h if unresolved', cfg.level==='Manager')}
+        <div class="ladder-connector"></div>
+        ${ladderStep('Management','Final escalation tier', cfg.level==='Management')}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Configure Escalation</div>
+      <div class="form-row"><label>Escalation Level</label>
+        <select id="es_level"><option ${cfg.level==='Preparer'?'selected':''}>Preparer</option><option ${cfg.level==='Reviewer'?'selected':''}>Reviewer</option><option ${cfg.level==='Manager'?'selected':''}>Manager</option><option ${cfg.level==='Management'?'selected':''}>Management</option></select>
+      </div>
+      <div class="form-row"><label>Recipient</label><input id="es_recipient" value="${cfg.recipient}"></div>
+      <div class="form-row"><label>Delay Before Escalation (hours)</label><input id="es_delay" type="number" value="${cfg.delayHours}"></div>
+      <div class="form-row"><label>Channel</label><select id="es_channel">${CHANNELS.map(c=>`<option ${cfg.channel===c.name?'selected':''}>${c.name}</option>`).join('')}</select></div>
+      <div class="btn-row"><button class="btn btn-accent" onclick="saveEscalation()">SAVE ESCALATION RULE</button></div>
+    </div>
+  </div>`;
+};
+function ladderStep(name, meta, active){
+  return `<div class="ladder-step" style="${active?'border-color:var(--accent);background:var(--accent-dim)':''}">
+    <div><div class="ls-name">${name}</div><div class="ls-meta">${meta}</div></div>
+    ${active?'<span class="badge badge-info">Active tier</span>':''}
+  </div>`;
+}
+function saveEscalation(){
+  state.escalationCfg = {
+    level: document.getElementById('es_level').value,
+    recipient: document.getElementById('es_recipient').value,
+    delayHours: Number(document.getElementById('es_delay').value)||24,
+    channel: document.getElementById('es_channel').value,
+  };
+  toast('Escalation rule saved');
+  goTo('escalation');
+}
+
+/* ---- DIGEST BUILDER ---- */
+RENDER.digest = () => `
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="panel">
+      <div class="panel-title">Delivery Mode</div>
+      <div class="pill-select">
+        <div class="pill ${state.digestMode==='immediate'?'selected':''}" style="cursor:pointer" onclick="setDigestMode('immediate')">Immediate</div>
+        <div class="pill ${state.digestMode==='digest'?'selected':''}" style="cursor:pointer" onclick="setDigestMode('digest')">Daily Digest</div>
+      </div>
+      <p class="panel-sub" style="margin-top:14px;">${state.digestMode==='immediate' ? 'Each notification is sent the moment its trigger fires.' : 'Routine notifications are bundled into one summary, sent once per day.'}</p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Today's Digest Preview</div>
+      <div class="notif-card" style="max-width:none;">
+        <div class="nc-title">Today's Notifications</div>
+        <div class="nc-row"><span>Due Soon</span><b>5</b></div>
+        <div class="nc-row"><span>Overdue</span><b>3</b></div>
+        <div class="nc-row"><span>Rejected</span><b>2</b></div>
+        <div class="nc-row"><span>Data Load Failure</span><b>1</b></div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:12px;justify-content:center;" onclick="toast('Opening digest detail (simulated)')">VIEW DETAILS</button>
+      </div>
+    </div>
+  </div>
+`;
+function setDigestMode(m){ state.digestMode=m; goTo('digest'); }
+
+/* ---- CRITICAL ALERT MODE ---- */
+RENDER.critical = () => `
+  <div class="panel" style="border-color:#ef5a6760;background:linear-gradient(180deg,#ef5a6712,var(--surface));">
+    <span class="badge badge-danger">Critical Event</span>
+    <div class="h-display" style="font-size:20px;margin-top:12px;">Journal Export Failed</div>
+    <div class="panel-sub" style="margin-top:4px;">Bypasses digest rules — delivered immediately on any enabled channel.</div>
+    <div style="margin-top:20px;">${miniFlow(['Immediate Notification','Owner','Escalation','Action'], 3)}</div>
+    <div class="btn-row"><button class="btn btn-accent" onclick="fireCritical()">SIMULATE CRITICAL ALERT</button></div>
+    <div id="criticalResult"></div>
+  </div>
+`;
+function fireCritical(){
+  const id = uid();
+  document.getElementById('criticalResult').innerHTML = `
+    <div class="panel" style="margin-top:14px;background:var(--surface-2);">
+      <div class="mono" style="font-size:12px;color:var(--text-dim);">${id} · ${nowStr()}</div>
+      <div style="margin-top:6px;">Sent to <b>Responsible Owner</b> via <b>Email + In-App</b> · <span class="badge badge-success">Delivered</span></div>
+    </div>`;
+  state.deliveryLog.unshift({id, trigger:'Journal Export Failed', recipient:'Responsible Owner', channel:'Email + In-App', created:nowStr(), sent:nowStr(), status:'Delivered'});
+  toast('Critical alert delivered immediately');
+}
+
+/* ---- EVENT SIMULATOR ---- */
+const EVENT_BUTTONS = [
+  ['OPEN RECONCILIATION','recon_opened'],['SUBMIT','submitted'],['REJECT','rejected'],['APPROVE','approved'],
+  ['REASSIGN','reassigned'],['ASSIGN ALERT','alert_assigned'],['FAIL DATA LOAD','data_load_failed'],
+  ['COMPLETE MATCHING','matching_completed'],['FAIL JOURNAL EXPORT','journal_export_failed'],['CLOSE PERIOD','period_closed'],
+];
+RENDER.eventsim = () => `
+  <div class="panel">
+    <div class="panel-title">Fire an Event</div>
+    <div class="panel-sub">Each button simulates a user or system action inside ARCS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      ${EVENT_BUTTONS.map(([label,trigId])=>`<button class="btn" onclick="fireEvent('${trigId}','${label}')">${label}</button>`).join('')}
+    </div>
+  </div>
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-title">Pipeline</div>
+    <div id="eventFlow">${miniFlow(['Event','Trigger','Notification','Channel','Delivery'], -1)}</div>
+    <div id="eventLogLine" class="panel-sub" style="margin-top:10px;"></div>
+  </div>
+`;
+function fireEvent(trigId, label){
+  const trg = TRIGGERS.find(t=>t.id===trigId);
+  const stages = ['Event','Trigger','Notification','Channel','Delivery'];
+  let step = 0;
+  const el = document.getElementById('eventFlow');
+  const logEl = document.getElementById('eventLogLine');
+  logEl.textContent = `${label} → ${trg.name} trigger evaluating…`;
+  const interval = setInterval(()=>{
+    el.innerHTML = miniFlow(stages, step);
+    step++;
+    if(step>=stages.length){
+      clearInterval(interval);
+      const id = uid();
+      const ch = CHANNELS[Math.floor(Math.random()*2)].name;
+      logEl.innerHTML = `<span class="badge badge-success">Delivered</span> ${id} · ${trg.name} → ${ch} · ${nowStr()}`;
+      state.deliveryLog.unshift({id, trigger:trg.name, recipient:'Preparer', channel:ch, created:nowStr(), sent:nowStr(), status:'Delivered'});
+    }
+  }, 420);
+}
+
+/* ---- FLOW VISUALIZER ---- */
+const FLOW_STAGES = [
+  ['Event','The action inside ARCS that starts everything — e.g. a reconciliation is submitted or a data load fails.'],
+  ['Trigger','The rule engine matches the event to one of the 12 configured trigger types.'],
+  ['Template','The matching notification template is loaded and its placeholders are queued for substitution.'],
+  ['Recipient','The engine resolves who should receive it — a specific user, a role, or a group.'],
+  ['Channel','One or more delivery channels are selected: in-app, email, or a connected simulator channel.'],
+  ['Delivery','The message is rendered with live data and handed to the channel for delivery.'],
+  ['Action','The recipient can act directly from the notification, e.g. opening the reconciliation.'],
+  ['Log','Every attempt — delivered, pending, failed, or retried — is written to the delivery log.'],
+];
+RENDER.flowviz = () => `
+  <div class="panel">
+    <div class="panel-title">Click a Stage</div>
+    <div class="panel-sub">Original SmartArt-style flow — not an Oracle screenshot</div>
+    <div class="flow-row">
+      ${FLOW_STAGES.map((s,i)=>`
+        ${i>0?`<div class="flow-arrow">→</div>`:''}
+        <div class="flow-node" onclick="showStage(${i})" id="fvnode${i}"><div class="fn-ic">${['🟢','⚡','✎','👤','📡','📬','☑','🗒'][i]}</div><div class="fn-label">${s[0]}</div></div>
+      `).join('')}
+    </div>
+    <div class="panel" style="background:var(--surface-2);margin-top:8px;" id="fvDetail">
+      <div class="panel-sub">Click any stage above to see what it does.</div>
+    </div>
+  </div>
+`;
+function showStage(i){
+  document.querySelectorAll('[id^=fvnode]').forEach(n=>n.classList.remove('lit'));
+  document.getElementById('fvnode'+i).classList.add('lit');
+  document.getElementById('fvDetail').innerHTML = `<b style="font-size:13.5px;">${FLOW_STAGES[i][0]}</b><p class="panel-sub" style="margin-top:6px;">${FLOW_STAGES[i][1]}</p>`;
+}
+
+/* ---- SCENARIO LAB ---- */
+const SCENARIOS = [
+  {
+    title:'Reconciliation Approaching Due Date',
+    prompt:'A reconciliation is approaching its due date. Configure a notification to warn the preparer in time.',
+    steps:[
+      {label:'Select trigger', options:['Due Soon','Overdue','Approved'], correct:'Due Soon'},
+      {label:'Select recipient', options:['Preparer','Close Manager','All Users'], correct:'Preparer'},
+      {label:'Select channel', options:['Email','Webhook only','No channel'], correct:'Email'},
+      {label:'Select template', options:['Due Soon - Standard','Critical - Journal Export','Blank'], correct:'Due Soon - Standard'},
+    ]
+  },
+  {
+    title:'Journal Export Failure',
+    prompt:'A journal export fails during period close. Configure the response.',
+    steps:[
+      {label:'Select trigger', options:['Journal Export Failed','Matching Completed','Submitted'], correct:'Journal Export Failed'},
+      {label:'Select priority', options:['Critical','Low','Medium'], correct:'Critical'},
+      {label:'Select channel', options:['Email + In-App','Webhook only','None'], correct:'Email + In-App'},
+      {label:'Select recipient', options:['Responsible Owner','Random User','No one'], correct:'Responsible Owner'},
+    ]
+  }
+];
+let scenarioActive = 0;
+let scenarioChoices = {};
+RENDER.scenario = () => {
+  const sc = SCENARIOS[scenarioActive];
+  return `
+  <div class="tab-row">
+    ${SCENARIOS.map((s,i)=>`<button class="tab-btn ${i===scenarioActive?'active':''}" onclick="switchScenario(${i})">${s.title}</button>`).join('')}
+  </div>
+  <div class="panel">
+    <div class="panel-title">Scenario</div>
+    <div class="panel-sub">${sc.prompt}</div>
+    ${sc.steps.map((st,i)=>`
+      <div class="form-row">
+        <label>${i+1}. ${st.label}</label>
+        <div class="pill-select">
+          ${st.options.map(o=>`<div class="pill ${scenarioChoices[i]===o?'selected':''}" style="cursor:pointer" onclick="pickScenario(${i},'${o}')">${o}</div>`).join('')}
+        </div>
+      </div>
+    `).join('')}
+    <div class="btn-row">
+      <button class="btn" onclick="toast('Test run complete (simulated)')">TEST</button>
+      <button class="btn btn-accent" onclick="submitScenario()">SEND</button>
+    </div>
+    <div id="scenarioResult"></div>
+  </div>`;
+};
+function switchScenario(i){ scenarioActive=i; scenarioChoices={}; goTo('scenario'); }
+function pickScenario(i,val){ scenarioChoices[i]=val; goTo('scenario'); }
+function submitScenario(){
+  const sc = SCENARIOS[scenarioActive];
+  let correct=0;
+  sc.steps.forEach((st,i)=>{ if(scenarioChoices[i]===st.correct) correct++; });
+  const pct = Math.round(correct/sc.steps.length*100);
+  document.getElementById('scenarioResult').innerHTML = `
+    <div class="panel" style="margin-top:14px;background:var(--surface-2);">
+      <div class="panel-title" style="font-size:13.5px;">Result: ${correct}/${sc.steps.length} correct (${pct}%)</div>
+      ${sc.steps.map((st,i)=>`<div class="checklist-item"><span>${st.label}</span>${scenarioChoices[i]===st.correct?'<span class="badge badge-success">Correct</span>':`<span class="badge badge-danger">Expected: ${st.correct}</span>`}</div>`).join('')}
+    </div>`;
+  state.scenarioScore = pct;
+}
+
+/* ---- FAILURE SIMULATOR ---- */
+const FAILURE_TYPES = [
+  {name:'Invalid Recipient', cause:'The resolved user account is inactive or missing an email/channel address.', diagnose:'Check the recipient role mapping and confirm the user record is active.', resolve:'Update the user record or reassign the notification to a valid recipient.'},
+  {name:'Channel Failure', cause:'The delivery channel (e.g. email relay or webhook endpoint) was unreachable.', diagnose:'Review the channel status and recent delivery attempts for that channel.', resolve:'Retry delivery once the channel is confirmed healthy, or fail over to a backup channel.'},
+  {name:'Template Error', cause:'A placeholder in the template did not resolve to a value.', diagnose:'Open the template and check every {{placeholder}} against the trigger\'s available fields.', resolve:'Correct the placeholder or supply a fallback value, then re-test the template.'},
+  {name:'Trigger Error', cause:'The trigger condition was misconfigured and never fired.', diagnose:'Review the trigger criteria against the event that was expected to fire it.', resolve:'Correct the trigger condition and re-enable the notification.'},
+  {name:'Delivery Failure', cause:'The message was generated but the channel rejected it.', diagnose:'Inspect the delivery log entry for the returned error code.', resolve:'Resolve the underlying channel issue and requeue the notification for retry.'},
+];
+RENDER.failure = () => `
+  <div class="panel-sub" style="margin-bottom:14px;">Select a failure type to simulate its diagnostic path.</div>
+  <div class="grid grid-3">
+    ${FAILURE_TYPES.map((f,i)=>`<div class="trigger-card" onclick="simulateFailure(${i})"><div class="trigger-ic">⨯</div><div class="trigger-name">${f.name}</div></div>`).join('')}
+  </div>
+  <div id="failureResult"></div>
+`;
+function simulateFailure(i){
+  const f = FAILURE_TYPES[i];
+  document.getElementById('failureResult').innerHTML = `
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-title">${f.name}</div>
+      ${['ERROR','DIAGNOSE','RESOLVE','RETRY'].map((stage,idx)=>`
+        <div class="pd-stage"><div class="pd-num">${idx+1}</div><div><b>${stage}</b><p>${[f.cause,f.diagnose,f.resolve,'Notification requeued and delivery re-attempted.'][idx]}</p></div></div>
+      `).join('')}
+      <span class="badge badge-success">Resolved (simulated)</span>
+    </div>`;
+}
+
+/* ---- DELIVERY MONITOR ---- */
+RENDER.monitor = () => `
+  <div class="panel">
+    <div class="panel-title">Live-Style Delivery Log</div>
+    <div class="panel-sub">Most recent notifications generated in this session appear first</div>
+    <table>
+      <thead><tr><th>ID</th><th>Trigger</th><th>Recipient</th><th>Channel</th><th>Created</th><th>Sent</th><th>Status</th></tr></thead>
+      <tbody>
+        ${state.deliveryLog.slice(0,25).map(r=>`
+          <tr><td class="strong mono">${r.id}</td><td>${r.trigger}</td><td>${r.recipient}</td><td>${r.channel}</td><td class="mono">${r.created}</td><td class="mono">${r.sent}</td><td>${statusChip(r.status)}</td></tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+`;
+function statusChip(s){
+  if(s==='Delivered') return '<span class="badge badge-success">Delivered</span>';
+  if(s==='Failed') return '<span class="badge badge-danger">Failed</span>';
+  if(s==='Retrying') return '<span class="badge badge-illustrative">Retrying</span>';
+  return '<span class="badge badge-pending">Pending</span>';
+}
+
+/* ---- ANALYTICS ---- */
+RENDER.analytics = () => `
+  <div class="grid grid-2">
+    <div class="panel"><div class="panel-title">Delivery Success %</div>${barChart([['Mon',88],['Tue',91],['Wed',86],['Thu',93],['Fri',90]],'%')}</div>
+    <div class="panel"><div class="panel-title">Failed Notifications</div>${barChart([['Invalid Recipient',12],['Channel Failure',9],['Template Error',6],['Trigger Error',5],['Delivery Failure',11]])}</div>
+    <div class="panel"><div class="panel-title">Notifications by Channel</div>${barChart([['Email',612],['In-App',487],['Teams',88],['Slack',34],['Mobile',19],['Webhook',8]])}</div>
+    <div class="panel"><div class="panel-title">Escalations</div>${barChart([['Reviewer',24],['Manager',11],['Management',4]])}</div>
+  </div>
+`;
+
+/* ---- PREFERENCES ---- */
+RENDER.preferences = () => `
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="panel">
+      <div class="panel-title">Alert Style</div>
+      <div class="pill-select">
+        <div class="pill selected" style="cursor:pointer">Immediate Alerts</div>
+        <div class="pill" style="cursor:pointer">Daily Digest</div>
+        <div class="pill selected" style="cursor:pointer">Critical Alerts</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Channel Preferences</div>
+      <div class="grid grid-2">
+        ${['In-App','Email','Teams','Slack','Mobile Push'].map((c,i)=>`
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);">
+            <input type="checkbox" ${i<2?'checked':''} style="accent-color:var(--accent)"> ${c}
+          </label>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-accent" onclick="toast('Preferences saved')">SAVE PREFERENCES</button></div>
+`;
+
+/* ---- QUALITY CHECK ---- */
+RENDER.quality = () => {
+  const c = state.config;
+  const items = [
+    ['Trigger', !!state.selectedTrigger],
+    ['Recipient', !!c.recipient],
+    ['Template', !!c.template],
+    ['Channel', !!c.channel],
+    ['Priority', !!c.priority],
+    ['Schedule', !!c.schedule],
+    ['Escalation', c.escalation==='Enabled'],
+  ];
+  const allGood = items.every(i=>i[1]);
+  return `
+  <div class="panel">
+    <div class="panel-title">Validate "${c.name}"</div>
+    ${items.map(([label,ok])=>`<div class="checklist-item"><span>${label}</span>${ok?'<span class="badge badge-success">✓ Set</span>':'<span class="badge badge-danger">Missing</span>'}</div>`).join('')}
+    <div class="divider"></div>
+    ${allGood ? '<span class="badge badge-success" style="font-size:12px;padding:8px 14px;">✓ READY</span>' : '<span class="badge badge-danger" style="font-size:12px;padding:8px 14px;">⚠ CONFIGURATION ISSUE</span>'}
+  </div>`;
+};
+
+/* ---- BEST PRACTICES ---- */
+const BEST_PRACTICES = [
+  {front:'DO — Match priority to urgency', back:'Reserve "Critical" for events that need action within the hour, like a failed journal export.'},
+  {front:'DON\'T — Send everything immediately', back:'Bundle routine updates into a daily digest so critical alerts stand out.'},
+  {front:'DO — Test before enabling', back:'Use TEST to confirm placeholders resolve correctly with real data shapes.'},
+  {front:'DON\'T — Reuse one template for every trigger', back:'A generic template loses the context a recipient needs to act quickly.'},
+  {front:'DO — Review the escalation ladder quarterly', back:'Owners change teams; a stale ladder escalates to the wrong person.'},
+  {front:'DON\'T — Ignore failed deliveries', back:'A quiet failure queue hides real problems — check the Delivery Monitor regularly.'},
+];
+RENDER.bestpractice = () => `
+  <div class="panel-sub" style="margin-bottom:14px;">Click a card to flip it.</div>
+  <div class="grid grid-3">
+    ${BEST_PRACTICES.map((b,i)=>`
+      <div class="card-flip" onclick="this.classList.toggle('flipped')">
+        <div class="card-flip-inner">
+          <div class="card-face card-front"><b style="font-size:13px;">${b.front}</b></div>
+          <div class="card-face card-back"><p style="font-size:12.5px;color:var(--text-dim);">${b.back}</p></div>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+`;
+
+/* ---- TROUBLESHOOTING LAB ---- */
+const TS_PROBLEMS = [
+  {name:'Notification not received', cause:'Recipient\'s channel address is missing or the notification is disabled.', investigate:'Check the Delivery Monitor for the expected notification ID and its status.', resolve:'Confirm the recipient has a valid channel address and the notification status is Enabled.'},
+  {name:'Wrong recipient', cause:'The recipient role was mapped to the wrong resolved user.', investigate:'Compare the configured Recipient field against the reconciliation\'s assignment.', resolve:'Correct the recipient mapping in Notification Configuration and re-test.'},
+  {name:'Duplicate notification', cause:'Two overlapping trigger rules both matched the same event.', investigate:'Review the Trigger Center for rules with overlapping conditions.', resolve:'Disable or merge the duplicate rule so only one fires per event.'},
+  {name:'Failed delivery', cause:'The channel rejected the message — see Failure Simulator for common causes.', investigate:'Open the delivery log entry and review its status and channel.', resolve:'Resolve the channel issue, then requeue for retry.'},
+  {name:'Missing template', cause:'The notification references a template that was deleted or renamed.', investigate:'Check the Template field in Notification Configuration for a valid selection.', resolve:'Re-select a valid template and save the configuration.'},
+  {name:'Incorrect trigger', cause:'The notification is mapped to the wrong lifecycle event.', investigate:'Compare the intended business event to the trigger currently selected.', resolve:'Update the trigger in Notification Configuration to match the intended event.'},
+  {name:'No escalation', cause:'Escalation is disabled on the notification or the ladder has no next tier configured.', investigate:'Open the Overdue Escalation Lab and confirm a tier and delay are set.', resolve:'Enable escalation and configure at least one tier with a recipient and delay.'},
+];
+RENDER.troubleshoot = () => `
+  <div class="panel-sub" style="margin-bottom:14px;">Click a problem to work through cause, investigation and resolution.</div>
+  <div class="grid grid-2">
+    ${TS_PROBLEMS.map((p,i)=>`
+      <div class="problem-card" id="tsp${i}" onclick="toggleProblem(${i})">
+        <b style="font-size:13.5px;">${p.name}</b>
+        <div class="problem-detail">
+          <div class="pd-stage"><div class="pd-num">1</div><div><b>Cause</b><p>${p.cause}</p></div></div>
+          <div class="pd-stage"><div class="pd-num">2</div><div><b>Investigation</b><p>${p.investigate}</p></div></div>
+          <div class="pd-stage"><div class="pd-num">3</div><div><b>Resolution</b><p>${p.resolve}</p></div></div>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+`;
+function toggleProblem(i){ document.getElementById('tsp'+i).classList.toggle('open'); }
+
+/* ---- EXAM MODE ---- */
+const EXAM = [
+  {q:'Which trigger fires when a reconciliation passes its due date without submission?', opts:['Due Soon','Overdue','Rejected','Period Closed'], a:1},
+  {q:'A reviewer sends a reconciliation back to the preparer. Which trigger fires?', opts:['Rejected','Reassigned','Submitted','Approved'], a:0},
+  {q:'Which trigger is most appropriate for a scheduled load into ARCS that does not complete?', opts:['Matching Completed','Data Load Failed','Alert Assigned','Journal Export Failed'], a:1},
+  {q:'What is the purpose of a placeholder like {{DueDate}} in a template?', opts:['It locks the template from editing','It substitutes live data at send time','It selects the delivery channel','It sets the notification priority'], a:1},
+  {q:'Which channels are explicitly labeled as simulator/framework options in this lab?', opts:['Email and In-App','Teams, Slack, Mobile Push and Webhook','Only Webhook','None — all are native'], a:1},
+  {q:'What does the escalation ladder in this lab climb through, in order?', opts:['Preparer → Reviewer → Manager → Management','Reviewer → Preparer → Management → Manager','Manager → Reviewer → Preparer','Preparer → Management → Manager'], a:0},
+  {q:'Daily Digest mode is best suited to which kind of notification?', opts:['A single critical journal export failure','Routine, non-urgent updates bundled together','Password reset emails','System outage alerts'], a:1},
+  {q:'In Critical Alert Mode, how is the notification delivered relative to digest rules?', opts:['It waits for the next scheduled digest','It is delivered immediately, bypassing digest rules','It is discarded if a digest is pending','It is delivered only after manager approval'], a:1},
+  {q:'A notification never fires even though the event clearly occurred. What is the first thing to check?', opts:['The recipient\'s preferred font','The trigger condition configuration','The company logo','The exam score'], a:1},
+  {q:'Which field in Notification Configuration determines who receives the message?', opts:['Schedule','Recipient','Status','Template'], a:1},
+  {q:'"Invalid Recipient" as a failure type most likely means:', opts:['The template has a syntax error','The user account is inactive or missing a channel address','The trigger never fired','The channel is globally down'], a:1},
+  {q:'What should you do before enabling a new notification for production use?', opts:['Skip testing to save time','Run TEST to confirm placeholders resolve correctly','Delete the escalation rule','Disable all other notifications'], a:1},
+  {q:'Which trigger fires when a reconciliation is first created by a preparer?', opts:['Reconciliation Opened','Submitted','Approved','Period Closed'], a:0},
+  {q:'What does the Quality Check screen validate?', opts:['The company\'s financial statements','That required fields on a configuration are complete','The user\'s password strength','The number of licensed seats'], a:1},
+  {q:'Which trigger is tied to locking an accounting period?', opts:['Period Closed','Matching Completed','Due Soon','Alert Assigned'], a:0},
+  {q:'A duplicate notification problem is usually caused by:', opts:['Two overlapping trigger rules matching the same event','A missing placeholder','A slow network','An expired password'], a:0},
+  {q:'What is the role of the Delivery Monitor?', opts:['To edit templates','To show a live-style log of recent notification deliveries and their status','To configure escalation tiers','To log in to the environment'], a:1},
+  {q:'Best practice for template reuse across triggers is to:', opts:['Use one generic template for every trigger','Tailor templates so recipients get context specific to the event','Never use placeholders','Disable all templates by default'], a:1},
+  {q:'Which status indicates a notification is configured but not yet active?', opts:['Enabled','Disabled','Draft','Delivered'], a:2},
+  {q:'What best describes the purpose of this simulator, per its own labeling?', opts:['An official Oracle ARCS product','An illustrative training simulation inspired by Oracle ARCS concepts','A production notification engine','A certified Oracle exam'], a:1},
+];
+RENDER.exam = () => {
+  if(state.examSubmitted) return examResultView();
+  return `
+  <div class="panel-sub" style="margin-bottom:14px;">20 original practice questions. Not official Oracle certification content.</div>
+  ${EXAM.map((q,i)=>`
+    <div class="quiz-q">
+      <div class="q-num">Question ${i+1} of ${EXAM.length}</div>
+      <div class="q-text">${q.q}</div>
+      ${q.opts.map((o,oi)=>`
+        <label class="q-opt"><input type="radio" name="ex${i}" value="${oi}" onchange="state.examAnswers[${i}]=${oi}"> <span>${o}</span></label>
+      `).join('')}
+    </div>
+  `).join('')}
+  <div class="btn-row"><button class="btn btn-accent" onclick="submitExam()">SUBMIT EXAM</button></div>
+  `;
+};
+let examStartTime = Date.now();
+POST_RENDER.exam = () => { examStartTime = Date.now(); };
+function submitExam(){
+  state.examSubmitted = true;
+  state.examTimeSec = Math.round((Date.now()-examStartTime)/1000);
+  goTo('exam');
+}
+function examResultView(){
+  let correct=0;
+  EXAM.forEach((q,i)=>{ if(state.examAnswers[i]===q.a) correct++; });
+  const pct = Math.round(correct/EXAM.length*100);
+  state.examScore = pct;
+  return `
+  <div class="panel">
+    <div class="grid" style="grid-template-columns:200px 1fr;gap:24px;align-items:center;">
+      ${scoreRing(pct)}
+      <div>
+        <div class="panel-title">Exam Complete</div>
+        <div class="checklist-item"><span>Correct</span><b>${correct} / ${EXAM.length}</b></div>
+        <div class="checklist-item"><span>Incorrect</span><b>${EXAM.length-correct}</b></div>
+        <div class="checklist-item"><span>Score</span><b>${pct}%</b></div>
+        <div class="checklist-item"><span>Time</span><b>${state.examTimeSec}s</b></div>
+        <div class="btn-row">
+          <button class="btn" onclick="retakeExam()">RETAKE</button>
+          <button class="btn btn-accent" onclick="goTo('scorecard')">VIEW FINAL SCORECARD</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-title">Review</div>
+    ${EXAM.map((q,i)=>`
+      <div class="quiz-q">
+        <div class="q-text">${i+1}. ${q.q}</div>
+        ${q.opts.map((o,oi)=>`<div class="q-opt ${oi===q.a?'correct':(state.examAnswers[i]===oi?'incorrect':'')}">${o}${oi===q.a?' ✓':''}</div>`).join('')}
+      </div>
+    `).join('')}
+  </div>`;
+}
+function retakeExam(){ state.examSubmitted=false; state.examAnswers={}; goTo('exam'); }
+function scoreRing(pct){
+  const r=62, c=2*Math.PI*r, off=c*(1-pct/100);
+  return `<div class="score-ring">
+    <svg width="150" height="150"><circle cx="75" cy="75" r="${r}" stroke="var(--border)" stroke-width="10" fill="none"/>
+    <circle cx="75" cy="75" r="${r}" stroke="var(--accent)" stroke-width="10" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${off}" stroke-linecap="round" style="transition:stroke-dashoffset 1s ease"/></svg>
+    <div class="score-ring-text"><div class="sv">${pct}%</div><div class="sl">SCORE</div></div>
+  </div>`;
+}
+
+/* ---- FINAL SCORECARD ---- */
+RENDER.scorecard = () => {
+  const dims = [
+    ['Trigger Configuration', !!state.selectedTrigger],
+    ['Channels', state.selectedChannels.length>0],
+    ['Templates', !!state.template.subject],
+    ['Placeholders', state.template.message.includes('{{')],
+    ['Escalation', state.escalationCfg.level!==''],
+    ['Digest', !!state.digestMode],
+    ['Critical Alerts', state.deliveryLog.some(d=>d.trigger==='Journal Export Failed')],
+    ['Delivery Logs', state.deliveryLog.length>0],
+    ['Troubleshooting', true],
+    ['Scenarios', state.scenarioScore!==null],
+  ];
+  const examPct = state.examScore || 0;
+  const dimsPct = Math.round(dims.filter(d=>d[1]).length/dims.length*100);
+  const overall = Math.round((examPct*0.5 + dimsPct*0.5));
+  const badge = overall>=80;
+  return `
+  <div class="grid" style="grid-template-columns:220px 1fr;gap:26px;align-items:center;">
+    ${scoreRing(overall)}
+    <div>
+      <div class="panel-title">Overall Readiness</div>
+      <div class="panel-sub">Combines exam performance and lab coverage</div>
+      ${badge ? '<div style="margin-top:10px;"><span class="badge badge-success" style="font-size:12.5px;padding:9px 16px;">🏆 Notification Engine Specialist</span></div>' : '<div class="locked-note">Reach 80% overall to unlock the Notification Engine Specialist badge.</div>'}
+    </div>
+  </div>
+  <div class="panel" style="margin-top:20px;">
+    <div class="panel-title">Coverage Breakdown</div>
+    ${dims.map(([label,ok])=>`<div class="checklist-item"><span>${label}</span>${ok?'<span class="badge badge-success">✓ Complete</span>':'<span class="badge badge-pending">Not yet</span>'}</div>`).join('')}
+    <div class="checklist-item"><span>Exam Score</span><b>${examPct}%</b></div>
+  </div>
+  <div class="panel" style="margin-top:14px;">
+    <div class="panel-title">Lifecycle Summary</div>
+    ${miniFlow(['Event','Trigger','Notify','Escalate','Deliver','Track','Resolve'], 6)}
+  </div>
+  `;
+};
+
+/* =========================================================
+   BOOT
+========================================================= */
+</script>
+</body>
+</html>
