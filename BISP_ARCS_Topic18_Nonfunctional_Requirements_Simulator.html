@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCS Topic 18 — Nonfunctional Requirements Simulator | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7;
+  --panel:#FFFFFF;
+  --panel-alt:#F7F9FC;
+  --sidebar:#0A2240;
+  --sidebar-hover:#123762;
+  --sidebar-active:#164A87;
+  --accent:#1B6FD1;
+  --accent-dark:#12518F;
+  --accent-orange:#E8622C;
+  --text:#10233F;
+  --text-muted:#5B6B82;
+  --text-faint:#8A97AA;
+  --success:#16A34A;
+  --success-bg:#E8F8EE;
+  --warning:#D97706;
+  --warning-bg:#FEF3E2;
+  --danger:#DC2626;
+  --danger-bg:#FDECEC;
+  --info:#0891B2;
+  --info-bg:#E5F7FA;
+  --border:#E1E7F0;
+  --border-strong:#C6D0DE;
+  --shadow:0 1px 2px rgba(16,35,63,.06), 0 6px 16px rgba(16,35,63,.06);
+  --radius:10px;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  font-size:14px;
+  -webkit-font-smoothing:antialiased;
+}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#C7D2E0;border-radius:8px;}
+button{font-family:var(--sans);cursor:pointer;}
+input,select{font-family:var(--sans);}
+a{color:inherit;}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.hidden{display:none !important;}
+
+/* ===== APP SHELL ===== */
+#app{display:grid;grid-template-columns:248px 1fr;grid-template-rows:60px 1fr;height:100vh;grid-template-areas:"sidebar header" "sidebar main";}
+@media (max-width:980px){
+  #app{grid-template-columns:1fr;}
+  #sidebar{position:fixed;left:0;top:0;bottom:0;width:248px;z-index:200;transform:translateX(-100%);transition:transform .2s;}
+  #sidebar.open{transform:translateX(0);}
+  #header{grid-column:1/-1;}
+  #main{grid-column:1/-1;}
+}
+
+/* ===== SIDEBAR ===== */
+#sidebar{grid-area:sidebar;background:var(--sidebar);color:#CFE0F5;overflow-y:auto;display:flex;flex-direction:column;}
+.brand{display:flex;align-items:center;gap:10px;padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.brand img{height:30px;background:#fff;border-radius:6px;padding:3px 6px;}
+.brand-text{line-height:1.15;}
+.brand-text .t1{font-weight:800;font-size:13px;color:#fff;letter-spacing:.2px;}
+.brand-text .t2{font-size:10.5px;color:#8FB4E0;}
+.app-id{padding:12px 16px 6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:#5F84B3;font-weight:700;}
+nav.navgroups{padding:2px 8px 16px;flex:1;}
+.navgroup{margin-bottom:2px;}
+.navgroup-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#5F84B3;font-weight:700;padding:14px 10px 6px;}
+.navitem{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#CFE0F5;cursor:pointer;font-weight:500;border:none;background:none;width:100%;text-align:left;}
+.navitem:hover{background:var(--sidebar-hover);}
+.navitem.active{background:var(--sidebar-active);color:#fff;box-shadow:inset 3px 0 0 var(--accent-orange);}
+.navitem .ic{width:18px;text-align:center;font-size:13px;opacity:.9;}
+.navitem.sub{padding-left:30px;font-size:12.5px;color:#A9C3E3;}
+.sidebar-foot{padding:12px 16px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:10.5px;color:#5F84B3;}
+.sidebar-foot a{color:#8FB4E0;text-decoration:none;}
+
+/* ===== HEADER ===== */
+#header{grid-area:header;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;}
+#menuToggle{display:none;background:none;border:1px solid var(--border);border-radius:8px;width:34px;height:34px;font-size:16px;}
+.hdr-title{font-weight:700;font-size:14.5px;color:var(--text);white-space:nowrap;}
+.hdr-title small{display:block;font-weight:500;color:var(--text-muted);font-size:11px;}
+.hdr-sep{width:1px;height:26px;background:var(--border);}
+.hdr-field{display:flex;flex-direction:column;gap:1px;}
+.hdr-field label{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:700;}
+.hdr-field select{border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:12.5px;background:var(--panel-alt);color:var(--text);font-weight:600;}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--success-bg);color:var(--success);}
+.status-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+.status-pill.warn{background:var(--warning-bg);color:var(--warning);}
+.status-pill.warn .dot{background:var(--warning);box-shadow:0 0 0 3px rgba(217,119,6,.18);}
+.status-pill.crit{background:var(--danger-bg);color:var(--danger);}
+.status-pill.crit .dot{background:var(--danger);box-shadow:0 0 0 3px rgba(220,38,38,.18);}
+#headerSearch{margin-left:auto;display:flex;align-items:center;gap:8px;}
+#headerSearch input{border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12.5px;width:190px;background:var(--panel-alt);}
+.icon-btn{position:relative;background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);}
+.icon-btn .badge{position:absolute;top:-5px;right:-5px;background:var(--accent-orange);color:#fff;font-size:9.5px;font-weight:800;border-radius:999px;padding:1px 5px;line-height:1.3;}
+.user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--panel-alt);border:1px solid var(--border);}
+.user-chip .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;}
+.user-chip .nm{font-size:12px;font-weight:700;line-height:1.1;}
+.user-chip .rl{font-size:10px;color:var(--text-muted);}
+
+/* ===== MAIN ===== */
+#main{grid-area:main;overflow-y:auto;padding:22px 26px 60px;}
+.view{max-width:1280px;margin:0 auto;}
+.view-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+.view-head h1{font-size:20px;margin:0 0 4px;font-weight:800;letter-spacing:-.2px;}
+.view-head p{margin:0;color:var(--text-muted);font-size:13px;max-width:640px;}
+.view-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+.btn{border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:.12s;}
+.btn:hover{border-color:var(--accent);color:var(--accent-dark);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn.primary:hover{background:var(--accent-dark);}
+.btn.orange{background:var(--accent-orange);border-color:var(--accent-orange);color:#fff;}
+.btn.orange:hover{filter:brightness(.94);}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff;}
+.btn.danger:hover{filter:brightness(.94);}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-muted);}
+.btn.ghost:hover{background:var(--panel-alt);color:var(--text);}
+.btn.sm{padding:5px 10px;font-size:11.5px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+.disclaimer{background:var(--info-bg);border:1px solid #BEE6ED;color:#0B5C6B;border-radius:8px;padding:9px 12px;font-size:11.5px;font-weight:600;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start;}
+.disclaimer .ic{font-size:14px;}
+.disclaimer.warn{background:var(--warning-bg);border-color:#F3D8A8;color:#8A5A05;}
+
+.grid{display:grid;gap:14px;}
+.grid.kpi{grid-template-columns:repeat(6,1fr);}
+.grid.kpi2{grid-template-columns:repeat(4,1fr);}
+.grid.cols2{grid-template-columns:1fr 1fr;}
+.grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+@media (max-width:1180px){.grid.kpi{grid-template-columns:repeat(3,1fr);}.grid.kpi2{grid-template-columns:repeat(2,1fr);}.grid.cols2,.grid.cols3{grid-template-columns:1fr;}}
+@media (max-width:640px){.grid.kpi{grid-template-columns:repeat(2,1fr);}}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+.card.tight{padding:12px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;}
+.card-head h3{font-size:13.5px;margin:0;font-weight:700;}
+.card-head .sub{font-size:11px;color:var(--text-faint);}
+
+.kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:13px 14px;position:relative;overflow:hidden;}
+.kpi-card .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:700;margin-bottom:6px;}
+.kpi-card .val{font-family:var(--mono);font-size:21px;font-weight:700;letter-spacing:-.3px;}
+.kpi-card .trend{font-size:10.5px;font-weight:700;margin-top:4px;}
+.kpi-card .trend.up{color:var(--success);}
+.kpi-card .trend.down{color:var(--danger);}
+.kpi-card .trend.flat{color:var(--text-faint);}
+.kpi-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
+.kpi-card.warn::after{background:var(--warning);}
+.kpi-card.crit::after{background:var(--danger);}
+.kpi-card.ok::after{background:var(--success);}
+
+.field-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:150px;}
+.field label{font-size:11px;font-weight:700;color:var(--text-muted);display:flex;justify-content:space-between;}
+.field label span.v{color:var(--accent-dark);font-family:var(--mono);}
+.field input[type=text],.field input[type=number],.field select{padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:12.5px;background:var(--panel-alt);}
+.field input[type=range]{width:100%;accent-color:var(--accent);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--border);font-size:12.5px;font-weight:600;}
+.toggle-row:last-child{border-bottom:none;}
+.switch{position:relative;width:40px;height:22px;flex:none;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .slider{position:absolute;inset:0;background:#CBD5E1;border-radius:999px;transition:.15s;}
+.switch .slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+.switch input:checked + .slider{background:var(--success);}
+.switch input:checked + .slider::before{transform:translateX(18px);}
+
+table{width:100%;border-collapse:collapse;font-size:12px;}
+table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);padding:8px 10px;border-bottom:2px solid var(--border);font-weight:800;white-space:nowrap;}
+table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table tr:last-child td{border-bottom:none;}
+table tbody tr:hover{background:var(--panel-alt);}
+.table-wrap{overflow-x:auto;}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;}
+.badge.ok{background:var(--success-bg);color:var(--success);}
+.badge.warn{background:var(--warning-bg);color:var(--warning);}
+.badge.crit{background:var(--danger-bg);color:var(--danger);}
+.badge.info{background:var(--info-bg);color:var(--info);}
+.badge.neutral{background:#EEF1F6;color:var(--text-muted);}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;}
+.tab{padding:9px 14px;font-size:12.5px;font-weight:700;color:var(--text-muted);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent-dark);border-bottom-color:var(--accent);}
+.tabpanel{display:none;}
+.tabpanel.active{display:block;}
+
+.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;}
+.flow-node{padding:9px 13px;border:1.5px solid var(--border-strong);border-radius:9px;font-size:11.5px;font-weight:700;background:var(--panel-alt);white-space:nowrap;}
+.flow-node.active{border-color:var(--accent);background:#EAF3FD;color:var(--accent-dark);}
+.flow-node.ok{border-color:var(--success);background:var(--success-bg);color:var(--success);}
+.flow-node.crit{border-color:var(--danger);background:var(--danger-bg);color:var(--danger);}
+.flow-arrow{color:var(--text-faint);font-size:14px;}
+
+.log-line{font-family:var(--mono);font-size:11.5px;padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:10px;}
+.log-line:last-child{border-bottom:none;}
+.log-line .t{color:var(--text-faint);flex:none;}
+.logbox{max-height:220px;overflow-y:auto;background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;}
+
+.progress{height:8px;border-radius:999px;background:#E7ECF3;overflow:hidden;}
+.progress > div{height:100%;background:var(--accent);transition:width .25s;}
+.progress.success > div{background:var(--success);}
+.progress.danger > div{background:var(--danger);}
+
+.node-box{border:1.5px solid var(--border-strong);border-radius:10px;padding:12px;text-align:center;background:var(--panel-alt);}
+.node-box.dead{opacity:.4;border-style:dashed;}
+.node-box.ok{border-color:var(--success);}
+
+.toast-wrap{position:fixed;top:70px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:320px;}
+.toast{background:#10233F;color:#fff;padding:11px 14px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.22);border-left:4px solid var(--accent);animation:slidein .18s ease-out;}
+.toast.ok{border-left-color:var(--success);}
+.toast.warn{border-left-color:var(--warning);}
+.toast.crit{border-left-color:var(--danger);}
+@keyframes slidein{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,40,.55);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal-head h3{margin:0;font-size:15px;}
+.modal-body{padding:18px 20px;}
+.modal-close{background:none;border:none;font-size:18px;color:var(--text-muted);}
+
+.chip-list{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:var(--panel-alt);border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:600;}
+
+.exercise-card,.scenario-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:8px;}
+.exercise-card .num,.scenario-card .num{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--accent);}
+.exercise-card h4,.scenario-card h4{margin:0;font-size:13.5px;}
+.exercise-card p,.scenario-card p{margin:0;font-size:12px;color:var(--text-muted);flex:1;}
+.score-pill{font-family:var(--mono);font-weight:800;font-size:11.5px;}
+
+.canvas-wrap{position:relative;}
+canvas{width:100%;display:block;}
+
+.mini-note{font-size:11px;color:var(--text-faint);margin-top:6px;}
+.ledger-tape{font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:1px;color:var(--accent-dark);}
+.pulse-rail{display:flex;align-items:center;gap:0;margin:14px 0 4px;}
+.pulse-node{width:78px;height:78px;border-radius:50%;border:2px solid var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:var(--panel-alt);flex:none;position:relative;z-index:2;}
+.pulse-node .st{font-size:9px;font-weight:700;color:var(--text-faint);margin-top:2px;}
+.pulse-node.on{border-color:var(--success);color:var(--success);background:var(--success-bg);}
+.pulse-node.down{border-color:var(--danger);color:var(--danger);background:var(--danger-bg);}
+.pulse-line{flex:1;height:3px;background:var(--border-strong);position:relative;margin:0 -2px;}
+.pulse-line.on{background:var(--success);}
+.pulse-line.on::after{content:'';position:absolute;top:-3px;width:9px;height:9px;border-radius:50%;background:var(--success);animation:travel 1.6s linear infinite;}
+@keyframes travel{from{left:-5px;}to{left:100%;}}
+
+.section-block{margin-bottom:26px;}
+.small-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:800;margin-bottom:8px;}
+hr.div{border:none;border-top:1px solid var(--border);margin:16px 0;}
+footer.app-foot{text-align:center;color:var(--text-faint);font-size:11px;padding:26px 0 10px;}
+footer.app-foot b{color:var(--text-muted);}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAQEBAQFBAUGBgUHCAcIBwoKCQkKChALDAsMCxAYDxEPDxEPGBUZFRMVGRUmHhoaHiYsJSMlLDUvLzVDP0NXV3UBBAQEBAUEBQYGBQcIBwgHCgoJCQoKEAsMCwwLEBgPEQ8PEQ8YFRkVExUZFSYeGhoeJiwlIyUsNS8vNUM/Q1dXdf/CABEIAEAAwAMBIgACEQEDEQH/xAAdAAACAgMBAQEAAAAAAAAAAAAABwYIAwQFAgEJ/9oACAEBAAAAAL/ALvn5AOU5QAAAK74AisqPk3bKzgPL92DQ7G2YzIc639sRYPcFmz/AlrArKmb3WM/Rdk1HdRO+EbZWrLze4c2C+xYNvr0kma7uRTyyMSVL479fGhryx7gAJawJ+cz3jsJili5Xv1If6jvTt1edAAYF3YQo52+E8UM89La4EzUlxCC8DBnNfJha26eebv8AnPzNvY1Nsx5Ko9rLj9S6B7XJ7JMYbscGSd/h5+LhncVl3//EABsBAAIDAQEBAAAAAAAAAAAAAAAEAwUGBwIB/9oACAECEAAAALYQmQkt00q/yamqU9WF/pYeU5lCTrdWfXbW2Z5rhY981KCIAB//xAAbAQACAwEBAQAAAAAAAAAAAAAABQMEBgcBCP/aAAgBAxAAAABYamjc8yttg2kMczfx0EGNl7brXcHz0yPKS1VX6p1OfilWMLnoAH//xAA0EAABBAIBAAYIBQUBAAAAAAAEAgMFBgEHAAgSExYXNxARFBU1VVZXICMwNlMiJCYxMlH/2gAIAQEAAQwA/BsuWkI6t/2T2WnmtQ1HqJ7b255zwipn8JfPCKmfwl88IqZ/CXzwipn8JfBIlNSu8KHHlk5A/VsdkuFsuh9Zrh+I4Xwrv33MkOeFd++5khzwrv33MkOW+h2yKjhHzLsWe3nVV++5khzwrv33MkOZ1lshj8wbZJantXXWSnxZICWZw1L8tX7+o3Lbvxmv2OSiVV9x7IfSHMNSrIlJOfwD0k4fJWGj4AwZMJNxc3GMHxxSHxrL0gmYOwycXmvLezrfYaLtHGlpjlC4t+xICs9Vp9S3y87Itqme3RQJHsKdseGsr7omG3RTr3eG6mIE+sFZPEb8ZdWlDdcIUpzfTLK+o9Wyms1LYtdsyltDLW0VqzzB2b+Da2erX43Of9L/AO1enWfmts30WjPq2DRv/dt+ZFl50ZPhtk50ghRWNiOLaxjGejI+Z/kbOcq9l2b5g2jnRlz6q3P8Ysamr0mZMRl7kNPRMyEkmPLbfbt1YsD+youWio5WUb9+DwvKB+9a9zcwQr9JJfW0nLtWLeEskO+1nOF6s8wdm/gl4kGXjyQDGuuO3QJphCW2LzMoa7i2D69mOdxbB9ezHKXXJQ2+3UJixmjPeH9k+vpjleozEXJqky5IyRP235kWXmnZHYwYUx3Zigi27qRYiraW/Z2XmC9NGUddYyNXlu+vZvmBZ+dGf9uTXNo0A6Iky5MRnK44M0wR9L4xDrDlE3GegkcCcyl5rfvwiE5WJMeKsEYc/hWWtg7THskZ7rjgX0Na11xNHTQUkaKsYLVnmDs39DWnmts307b8yLLzoyfDbJzpMtoxM15WMY6+hSyGdjgNtqz1dm+YFn50b8u4qliy2nGVawu05aT5hqSUP2dp0/W5ZDrwSPYSzxHgiiRn09V3bmXc0in5e9fbURCV3OBQvGFIbCDa/qbHaTnkFKh0za9uFmXcCs97ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOFXemisOPvWCOw3ppL0rO3Kz4ZW2H6Nk63vcpep8wOBKeH12xtekinsj0lwnlrp237tYPbTYBbOdS6lzUcvHnvNvSV/1te5C6WEsSAKcH0LW56AgpZmUj3BXJah26t2Z+cq/UdZd2JsjqdhijvpIqOppo6XxK2L1ITuSvzUxFxLUcCshVNoVyCtUKSRCkNs+iRaoFvW7GEuxki74Hat+n+M6X1O/h3sYZtfPA7Vv0/zwO1b9P8APBjU+Scj+5m+38EtW9fqe40dfwm1EER+ZGBpcDaDaFYQKhpLHoWtKG1KVnGExU3CTA7r0dJCloQQMt51lL7eXnDRUrShZDSV8lJmHiWEvyUgMG0GaEYK2QMQ0+zxB4KhfaMFM5Y9AxA76MOsvNup5G1S7tvuoEAlEFzuNiSLJ5bMfYG2y4DYZOZZ3KZZhx2L2Os2x4U9MIWILsPBtXeyDLeq4VywGXhJAiDEByVYvjBuSRRZVa2qvdXeqS4GY6+4XcclKAANkvf8dXryaw2089OthPBbJXGH5wzO4sMBETxFCswciCYY3HRlrR7S5mLmlRUDH3+KkGpUuPlnUgVrZbKH3mhZFEyNA2uQNbabRYxYOXr9tmYfWuHMqaPJodiiFntxpcu80iJvS22Mge+GI9MDc3XmmpICYexCwOziu1Ykn5lPKMHaQrlNpMak1ggVS5sNnLwiTY5TvfwMiYqUBn3Sv//EADoQAAIBBAADBgMEBwkAAAAAAAECAwAEERITFCEFEDFBdLJRcdIVIHLRBiIwMmFikiMkM0JDgZGjs//aAAgBAQANPwD7l1dw2ol84xMcFhWP1pGupMufMnBr1Uleqkr1UleqkrtOO5WS1lkMgR4U3DoT+27OH9+vsZcuemq1+F/rr8D/AF1+B/rp76CJYnVgEdzgSdWPVa/C/wBdfgf66UZQSK+hPwOWNdlT8C7xgB/IOB3b3/8A5VaShDILgLtkA+GtKQGMUpkA/pSs4cq4kKfNSFqUHR1+I8QR5EVaXDw8QXIUNr541qCcQ4Mgk26A5plyttD1br4FvICsZyW64+WtICWtpsZIHjqfOp5WQBXCYwM+YNMcBROCfbXmDKAf+CtBdjbyjDkfFSMgiufT3v8AcHbFkT/VWT38eLuzfH/qrml9grmrf2mpbCB5fx9VpeAw+AlOa+0Zq54ewUnaLSSJ4kqGIwM/AeFEDOp6r/Bh4g1AIGnmyqKxDEN8zrXNyeyuejqCWJo3x1BLhTS3sOMdMgsAa59Pe/3JRhhnBBHUEHyIoDCIdW1XyGa+S18lq0mQS3cYXe5/i9fJK4ZjWe5bPDQ+SAeFc0vsFGaIz8dwpDanGASKcpxUVQpWMDCiME4xUTbXSTgC43b/ADOBX2jLX2gPYKnkMhKjPBdj1DfBaXqHjYqenyqRwiXfg6E9Bv5EVzknsq2uEkcIASQPhTyI0jyY2YKcgBVzVtKso4q6tMynICqfKufT3v8AsONF380vsFc1b+001pOCf4BxU9tcJKB5qEL19oy0L3I+YjqCCLWFI9RlyQ2c5NHJBj/wmP8AMlQSPHIo8mQ4NYj3+fBFNfRggjNfFUA7u1nS4tLmTpGRsTgtXqo/zr1Uf516qP8AOvVR/nXqo/zr1Uf50gy2LhHP+yqSSa7RvQtruMF1QnJ75bkNHKCuGAQVdyI7GSRVKlARWgSJDIixQoPIEtU0egEfVIE8wCfEmp76R4nGmGU096HQPjJXQCpWYvak4/fOWTBwCtMMA6SMoJozmZ7cnZ5nJz+vjooqK5d2CY6ApUN2jSOdcKo74CxaATI8sRU6t+4dlwa9RL9VJIyPrcyNq6nBU4bxFeol+qvUS/VQQOY+Zk2CHoDjasA45iXOP6qjAYpLcv4HOCVZ/wCU0EXhCMAJoR01x0x3qpJJOAAOuTUb6s8EqyqGHkSpODUaqXQMCyb+Gw8s4ouEWPYAsxBbAHxwCe5nCK88qxKWIzgFiOtOMxyRsHRh8QR0PdtoJQ41L76a5+O3T59+7LlGDLsh1YdPMEYPdAf0h0M0VtbwQc4JuDJbTxkSPIWZcbU1xb8taszIX1tArbcGVHi/tfBuoB6kVHa9oz2cUF5oObNwjQ50ID4XIGehFML4l4AWWRHnUwCHecLkJ5IEOMgnNRyBDbm5lEQjFycyu7SlkPD/ANOYPlcKDmpYex4J57eYwsYo7id5k3UhgMMM01nb28s3GeVns7W/nLRnWVGMhiZCMEMRmuRiEckmFlXQX3DU7SSHKCVPEk0yX8KnnVa1AjssxRmLfCujfFRhqEl8yoZ5baVCLUCPLGeWQgy5Iy3jUlqDBcC5VbNYjbIGTTcLxt8+Wd+uauGnW0s7l3tpWgeMKYxJJJO67NnBc0s1kty7QQ2fa00MYkBhzalOJHGShz0JGaa6tOMiuslzLbCG6SNJeo3eMvHvVza2DvPLMHQvFYTwkMSxG6y4ozyERXF66XSsLRgxdw5fQy41Gf3qtpUk7QuJYUuOC5spEcujHBJdsVFYRzJy9wLYT3N1dPJeaRoVQScI4TyFXt7JZiK5uSbizs5eHJzJ3YnKlHC5O2GFc/ayWPCnxbQpF2g0svMqHAOUwRkHpTz2aX7JI8IduZzK8MvGYheHkHhhRisT6XF3M2AeNmNAu7o408HQL06MM1Bx57OKK4McTTydqTzFiithyYSM7dMUzyJdyNOJLSR5LjEb28ZY4VUOSVxha//EADsRAAIBBAADAgoFDQAAAAAAAAECAwAEBRESEzEGIRUiQVFUcZGSk9EHEBRTYSMkMDI0QlVyc4GhsbL/2gAIAQIBAT8AGNiRENxexQuyhghVmIB6b4RX2HH/AMVi+HJ8qGOx0t5Osl/EVRI+EmNyPG3vQ1XgTDeS+tvhP8qucXDbzvFJBHxL5gCCD3gisXj7m6luIbaLi4G3rYGhoeej2ezA3+a7I6gOpPsBq1x17dSyRQwkug8ZSQpHtq/1YNIt0RGUOm2flUeTspJEjEhDN+qGVl36tgVcZfH28xilnCuNbHCT19QqDL46eQRx3Clz0BBU/wCazX7e39KH/gfURLHO7LGXDKvQgEa9dc6f0ZveX51lbi5N0vFZup5EPcXU/uDzGuwyv4QvGYaLx717oq1tHHaS8n5seuWBwBtv0HUVipud2iyT8po/yYHCw0e7Q2a+kaK5OSeaIEiKbib2DRpM5aZBYobpWhYSKwdemx/qs2yrnwxOgGiJ/tqsiwv8zCbQF9BAWA7gQetZeGV7tZFjZkeGIqwBIICAVyJ/un901yJ/un900Le4JAEMhP8AKazPdflfKsUKt+BVACK7JTww305klRAYSNsQPKKjjiXtHLetdW4h13Hmrs+KF6Va5SwmztzIsyKgtlQOxChiG33brtfLOM59ogLSQLIeYsZ3xAqAD3ddVk7O3vp4hY2zq5J5jcBRAPx3WTtLg5uMrDIyAw+MFJHdqgAOgFQ3t5CvDFcyovmVyBXhTJem3HxGrwpkvTbj4jV4UyXps/xGrv2Sf0H/xAA7EQACAQMCBAEIBA8AAAAAAAABAgMABAUREgYTITFRBxUiMkFUkpMQU1XRFBYjJDA0QmFyc5GUobLS/9oACAEDAQE/ADkJHZ+RaSSqrFS4KqCR301Nfhl99myfGn30MzmMfgMc9pbzwvNcXPNMciqx2bAupB7da/HHi0d3yH9wPvq34szk8KyJlbzQ+MjAiuJclFHb4m7u5vyk1qd8hGpdlldQTp3OgoZ3FdPzgAHsSrAf5FXOQtLaJJJZQEf1SASD/SsZDNk2jWyjaYuCVCj2Crjh7LwW8kzQBo4/XMciSbP4ghOlWPDGdvrVbi2sy8Ta6NvQduh7kVe8MZ6ytzPPYuIgNS4KuAPE7SaxH6iv8yX/AHP0Qvj7vF2tvNerbyQSzNq0bMrrJt7bAdCNtebsV9twfJm/4rGYvEC2IGet2HNl68iYftnxWvKFPavYYuCCUypbryzJtKhiWdzoD109Kri5U8P2kPKk1367yui9z2NZOIRYHHpzA/pk6g6jrqa8kFxYC1ktbghWurbYhJ016nVQfE1Nwfk8HJc3eOdLpDBIjQyAhtjd+3rVwjG8nBBRFJZo7kAeJJNYFGwfCd0uUIiLNKVjdhqQygBQPE1ipoktTG0iq6SyBlJ0I1YmufB9anxCufB9anxCjcW4BJmT4hWJ62Yb2NJIw/eGYkGuKIZZbOERxs5EvZRr7DUjyNgIrRbacy6jUctunpa1c469iwsCNE5czl9oGpUEVwNFYSYG5s7nlQ3UkKm3lmG0IysSV1Pqk1w9lb7C2dycxfxPEqjkIJllkY+C7SelcPZOwHCE6vdQRyMl0RGZAGG4sQAKLMx1JJqWztJW3SW8bt4soJrzbj/dIPlrXm3H+6QfLWvN2P8AdIfgFAADQfoP/9k=" alt="BISP logo">
+      <div class="brand-text">
+        <div class="t1">BISP Trainings</div>
+        <div class="t2">www.bisptrainings.com</div>
+      </div>
+    </div>
+    <div class="app-id">ARCS Simulator · Topic 18</div>
+    <nav class="navgroups" id="navgroups"></nav>
+    <div class="sidebar-foot">
+      Educational simulation only. Not affiliated with or representing Oracle Corporation's actual product implementation.
+      <br><br>© <span id="yr"></span> <a href="http://www.bisptrainings.com" target="_blank" rel="noopener">BISP Trainings</a>
+    </div>
+  </aside>
+
+  <header id="header">
+    <button id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div class="hdr-title">ARCS Nonfunctional Requirements Simulator<small>Scale · Secure · Recover · Govern</small></div>
+    <div class="hdr-sep"></div>
+    <div class="hdr-field">
+      <label>Environment</label>
+      <select id="envSelect" onchange="onEnvChange()">
+        <option>PROD</option>
+        <option>TEST</option>
+        <option>DEV</option>
+      </select>
+    </div>
+    <div class="hdr-field">
+      <label>Current Period</label>
+      <select id="periodSelect">
+        <option>Sep-2026</option>
+        <option>Aug-2026</option>
+        <option>Jul-2026</option>
+      </select>
+    </div>
+    <div class="hdr-sep"></div>
+    <div id="statusPillWrap"></div>
+    <div id="headerSearch">
+      <input type="text" id="globalSearch" placeholder="Search transactions, jobs, users…" onkeydown="if(event.key==='Enter')globalSearch()">
+      <button class="icon-btn" title="Notifications" onclick="toggleNotifPanel()">🔔<span class="badge" id="notifBadge">0</span></button>
+      <button class="icon-btn" title="Reset simulation / demo mode" onclick="resetSimulation()">⟲</button>
+      <div class="user-chip">
+        <div class="av">JD</div>
+        <div>
+          <div class="nm">J. Delgado</div>
+          <div class="rl">Reconciliation Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="view" id="viewRoot"></div>
+    <footer class="app-foot">
+      <b>ARCS Topic 18 Simulator</b> — an original, educational, ARCS‑inspired training tool built by BISP Trainings. All figures are simulated for learning purposes and do not represent Oracle Corporation product benchmarks, internal architecture, or official guidance.
+    </footer>
+  </main>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+<div id="modalRoot"></div>
+<script>
+/* =========================================================================
+   ARCS TOPIC 18 — NONFUNCTIONAL REQUIREMENTS SIMULATOR
+   Built by BISP Trainings. Educational simulation — mock data & client-side
+   JavaScript only. No connection to Oracle systems. No real backend.
+   ========================================================================= */
+
+/* ---------------------------- NAVIGATION MAP ---------------------------- */
+const NAV = [
+  {group:'Overview', items:[
+    {id:'dashboard', label:'Dashboard', ic:'◆'}
+  ]},
+  {group:'Performance', items:[
+    {id:'perf', label:'Performance', ic:'⚡'},
+    {id:'perf', sub:'matching', label:'Matching Scale', ic:''},
+    {id:'perf', sub:'dataload', label:'Data Loading', ic:''},
+    {id:'perf', sub:'search', label:'Search', ic:''},
+    {id:'perf', sub:'reports', label:'Reports', ic:''}
+  ]},
+  {group:'Reliability', items:[
+    {id:'reliability', label:'Reliability', ic:'♻'},
+    {id:'reliability', sub:'jobs', label:'Jobs', ic:''},
+    {id:'reliability', sub:'backupdr', label:'Backup & DR', ic:''},
+    {id:'reliability', sub:'ha', label:'High Availability', ic:''}
+  ]},
+  {group:'Security', items:[
+    {id:'security', label:'Security', ic:'🔒'},
+    {id:'security', sub:'sso', label:'SSO / MFA', ic:''},
+    {id:'security', sub:'apisec', label:'API Security', ic:''}
+  ]},
+  {group:'Governance', items:[
+    {id:'governance', label:'Governance', ic:'📋'},
+    {id:'governance', sub:'configmig', label:'Configuration Migration', ic:''},
+    {id:'governance', sub:'envcompare', label:'Environment Comparison', ic:''},
+    {id:'governance', sub:'retention', label:'Retention & Legal Hold', ic:''}
+  ]},
+  {group:'Operations', items:[
+    {id:'monitoring', label:'Monitoring', ic:'📈'},
+    {id:'testing', label:'Testing / Failure Injection', ic:'🧪'},
+    {id:'scenarios', label:'Scenarios', ic:'🎯'},
+    {id:'financial', label:'Financial Impact', ic:'💰'}
+  ]},
+  {group:'Learning', items:[
+    {id:'learning', label:'Certification Prep', ic:'🎓'},
+    {id:'compliance', label:'Compliance Center', ic:'⚖'},
+    {id:'training', label:'Training Center', ic:'🏋'}
+  ]},
+  {group:'Governance Trail', items:[
+    {id:'audit', label:'Audit', ic:'🧾'}
+  ]}
+];
+
+/* ------------------------------- MOCK STATE ------------------------------ */
+const STATE = {
+  env:'PROD',
+  txProcessed: 18432190,
+  matchRate: 94.2,
+  jobSuccessRate: 97.1,
+  failedJobs: 3,
+  apiRequests: 812340,
+  apiThrottled: 214,
+  rpoMinutes: 15,
+  rtoMinutes: 120,
+  securityAlerts: 1,
+  configDrift: 2,
+  activeWorkers: 10,
+  systemStatus: 'ok', // ok | warn | crit
+  workers: [], // performance workers
+  nodes: [
+    {name:'Node 1', healthy:true},
+    {name:'Node 2', healthy:true},
+    {name:'Node 3', healthy:true}
+  ],
+  dr:{stage:'steady', primaryUp:true, drUp:true, lastFailover:null},
+  jobsList: [
+    {id:'JOB-1001', type:'AutoMatch', state:'Completed'},
+    {id:'JOB-1002', type:'Bulk Import', state:'Completed'},
+    {id:'JOB-1003', type:'Report - Aging', state:'Running'}
+  ],
+  backups: [
+    {ts:'2026-08-17 02:00', size:'412 GB', type:'Full'},
+    {ts:'2026-08-18 02:00', size:'44 GB', type:'Incremental'}
+  ],
+  snapshots: [],
+  secrets: [
+    {name:'ERP_INTEGRATION_KEY', kind:'API Key'},
+    {name:'ARCS_DB_CRED', kind:'Database Credential'},
+    {name:'SSO_CLIENT_SECRET', kind:'Integration Secret'}
+  ],
+  ipAllow: ['10.20.0.0/16','203.0.113.0/24'],
+  ipBlock: ['198.51.100.0/24'],
+  configVersions: [
+    {v:'v1.0', user:'m.chen', date:'2026-05-02', change:'Initial ruleset', approval:'Approved', status:'Superseded'},
+    {v:'v1.1', user:'a.iyer', date:'2026-06-11', change:'Added FX tolerance rule', approval:'Approved', status:'Superseded'},
+    {v:'v1.2', user:'j.delgado', date:'2026-07-20', change:'Bank feed mapping update', approval:'Approved', status:'Active (TEST)'},
+    {v:'v2.0', user:'j.delgado', date:'2026-08-15', change:'Q3 close ruleset refactor', approval:'Pending', status:'Draft'}
+  ],
+  envConfig: {
+    DEV:{format:'v2.0', profile:'v2.0', rule:'v2.0', security:'v1.9', integration:'v2.0'},
+    TEST:{format:'v1.2', profile:'v1.2', rule:'v1.2', security:'v1.9', integration:'v1.1'},
+    PROD:{format:'v1.1', profile:'v1.1', rule:'v1.1', security:'v1.8', integration:'v1.1'}
+  },
+  legalHold:{active:false, protectedRecords:0, appliedBy:null, ts:null},
+  retentionRecords: [
+    {type:'Bank Transaction', policy:'7 years', age:'2 years'},
+    {type:'Journal Entry', policy:'10 years', age:'6 years'},
+    {type:'Attachment', policy:'7 years', age:'8 years'},
+    {type:'Audit Log', policy:'Permanent', age:'3 years'}
+  ],
+  thresholds:{p95:800, jobSuccess:95, apiErrorRate:2, cacheAgeMin:30},
+  alerts: [],
+  auditLog: [],
+  scenarioProgress: {},
+  exerciseProgress: {},
+  reportQueue: [],
+  reportCounter: 0,
+  txSeriesBase: 18400000,
+  chartTick: 0
+};
+
+/* -------------------------------- UTIL ----------------------------------- */
+function $(id){return document.getElementById(id);}
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstElementChild;}
+function fmt(n){return Math.round(n).toLocaleString('en-US');}
+function fmt1(n){return (Math.round(n*10)/10).toLocaleString('en-US');}
+function pct(n){return (Math.round(n*10)/10)+'%';}
+function nowStr(){const d=new Date();return d.toISOString().slice(0,19).replace('T',' ');}
+function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,7).toUpperCase();}
+
+function toast(msg, type='info'){
+  const t = el(`<div class="toast ${type==='ok'?'ok':type==='warn'?'warn':type==='crit'?'crit':''}">${msg}</div>`);
+  $('toastWrap').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);}, 3600);
+}
+
+function logAudit(action, obj, detail, result='Success', role='Reconciliation Admin'){
+  const entry = {
+    ts: nowStr(), user:'j.delgado', role, env: STATE.env,
+    object: obj, action, oldValue: detail.old||'—', newValue: detail.new||'—', result
+  };
+  STATE.auditLog.unshift(entry);
+  if(STATE.auditLog.length>500) STATE.auditLog.pop();
+  const badge = $('notifBadge');
+  if(badge){ badge.textContent = Math.min(99, STATE.auditLog.length); }
+  if($('viewRoot') && $('viewRoot').dataset.view==='audit') renderAudit();
+}
+
+function pushAlert(msg, level='warn'){
+  STATE.alerts.unshift({ts:nowStr(), msg, level});
+  if(STATE.alerts.length>50) STATE.alerts.pop();
+  toast(msg, level);
+}
+
+function badgeFor(status){
+  const map = {
+    ok:'ok', success:'ok', completed:'ok', approved:'ok', allowed:'ok', healthy:'ok', active:'ok', pass:'ok',
+    warn:'warn', running:'warn', pending:'warn', throttled:'warn', queued:'warn', retrying:'warn', drift:'warn',
+    crit:'crit', failed:'crit', denied:'crit', quarantined:'crit', down:'crit', fail:'crit', blocked:'crit',
+    info:'info', draft:'info', recovering:'info'
+  };
+  const key = String(status).toLowerCase();
+  return map[key] || 'neutral';
+}
+function badgeHtml(status){
+  return `<span class="badge ${badgeFor(status)}">${status}</span>`;
+}
+
+/* -------------------------------- ROUTER ---------------------------------- */
+let currentView = 'dashboard';
+let currentSub = null;
+const RENDERERS = {}; // view -> function
+
+function showView(id, sub){
+  currentView = id;
+  currentSub = sub || null;
+  $('viewRoot').dataset.view = id;
+  renderNav();
+  if(RENDERERS[id]) RENDERERS[id](sub);
+  window.scrollTo?.(0,0);
+  $('main').scrollTop = 0;
+  if(window.innerWidth<=980) $('sidebar').classList.remove('open');
+}
+
+function renderNav(){
+  const wrap = $('navgroups');
+  wrap.innerHTML='';
+  NAV.forEach(g=>{
+    const gd = el(`<div class="navgroup"><div class="navgroup-title">${g.group}</div></div>`);
+    g.items.forEach(it=>{
+      const isActive = currentView===it.id && ((it.sub||null)===currentSub);
+      const btn = el(`<button class="navitem ${it.sub?'sub':''} ${isActive?'active':''}"><span class="ic">${it.ic||'·'}</span>${it.label}</button>`);
+      btn.onclick = ()=>showView(it.id, it.sub||null);
+      gd.appendChild(btn);
+    });
+    wrap.appendChild(gd);
+  });
+}
+
+function onEnvChange(){
+  STATE.env = $('envSelect').value;
+  logAudit('Environment Switch','Session',{old:'—',new:STATE.env});
+  toast('Switched to '+STATE.env+' environment','info');
+  showView(currentView, currentSub);
+}
+
+function renderStatusPill(){
+  const s = STATE.systemStatus;
+  const label = s==='ok'?'All Systems Operational': s==='warn' ? 'Degraded Performance' : 'Critical Incident';
+  $('statusPillWrap').innerHTML = `<div class="status-pill ${s==='ok'?'':s}"><span class="dot"></span>${label}</div>`;
+}
+
+function globalSearch(){
+  const q = $('globalSearch').value.trim();
+  if(!q) return;
+  toast('Simulated search for "'+q+'" — see Audit for matching records.', 'info');
+  logAudit('Global Search','Search Index',{old:'—',new:q});
+}
+
+let notifOpen = false;
+function toggleNotifPanel(){
+  showView('audit');
+}
+
+/* Simple canvas line/bar chart helper (no external chart library — fully offline) */
+function drawChart(canvas, series, opts={}){
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio||1;
+  const w = canvas.clientWidth||300, h = opts.height||120;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  canvas.style.height = h+'px';
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:36,r:10,t:10,b:18};
+  const max = opts.max || Math.max(...series.map(s=>Math.max(...s.data)))*1.15 || 1;
+  const min = opts.min || 0;
+  const plotW = w-pad.l-pad.r, plotH = h-pad.t-pad.b;
+  ctx.strokeStyle = '#E1E7F0'; ctx.lineWidth=1; ctx.font='9px Inter, sans-serif'; ctx.fillStyle='#8A97AA';
+  for(let i=0;i<=3;i++){
+    const y = pad.t + plotH*i/3;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    const val = max - (max-min)*i/3;
+    ctx.fillText(opts.fmt?opts.fmt(val):Math.round(val), 2, y+3);
+  }
+  series.forEach(s=>{
+    const n = s.data.length;
+    if(opts.bar){
+      const bw = plotW/n*0.6;
+      s.data.forEach((v,i)=>{
+        const x = pad.l + (plotW/n)*i + (plotW/n-bw)/2;
+        const y = pad.t + plotH*(1-(v-min)/(max-min));
+        ctx.fillStyle = s.color||'#1B6FD1';
+        ctx.fillRect(x,y,bw,pad.t+plotH-y);
+      });
+    } else {
+      ctx.beginPath();
+      s.data.forEach((v,i)=>{
+        const x = pad.l + plotW*(i/(n-1||1));
+        const y = pad.t + plotH*(1-(v-min)/(max-min));
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle = s.color||'#1B6FD1'; ctx.lineWidth=2; ctx.stroke();
+      if(s.fill){
+        ctx.lineTo(pad.l+plotW, pad.t+plotH); ctx.lineTo(pad.l, pad.t+plotH); ctx.closePath();
+        ctx.fillStyle = (s.color||'#1B6FD1')+'22'; ctx.fill();
+      }
+    }
+  });
+}
+
+function randWalk(base, n, vol){
+  const out=[]; let v=base;
+  for(let i=0;i<n;i++){ v += (Math.random()-0.5)*vol; out.push(Math.max(0,v)); }
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  $('yr').textContent = new Date().getFullYear();
+  const logoImg = document.querySelector('.brand img');
+  logoImg.onerror = ()=>{ logoImg.replaceWith(el('<div style="font-weight:900;color:#1B6FD1;background:#fff;padding:4px 8px;border-radius:6px;font-size:14px;">BISP</div>')); };
+  renderStatusPill();
+  showView('dashboard');
+  setInterval(liveTick, 2500);
+});
+
+function liveTick(){
+  STATE.txProcessed += Math.round(400+Math.random()*1400);
+  STATE.apiRequests += Math.round(20+Math.random()*80);
+  STATE.chartTick++;
+  if(currentView==='dashboard') renderDashboard();
+}
+
+/* ===========================================================================
+   DASHBOARD
+   =========================================================================== */
+RENDERERS.dashboard = function(){
+  const s = STATE;
+  $('viewRoot').innerHTML = `
+  <div class="view-head">
+    <div>
+      <h1>Reconciliation Operations Dashboard</h1>
+      <p>Live (simulated) view of throughput, reliability, security and governance posture for the ${s.env} environment.</p>
+    </div>
+    <div class="view-actions">
+      <button class="btn" onclick="showView('monitoring')">📈 Open Monitoring</button>
+      <button class="btn primary" onclick="showView('testing')">🧪 Failure Injection Lab</button>
+    </div>
+  </div>
+  <div class="disclaimer"><span class="ic">ℹ️</span> All KPIs and charts below are generated by an in-browser simulation engine for training purposes. They do not reflect real Oracle ARCS telemetry.</div>
+
+  <div class="grid kpi" style="margin-bottom:14px;">
+    ${kpiCard('Transactions Processed', fmt(s.txProcessed), '+'+fmt(600)+'/tick','up','ok')}
+    ${kpiCard('Transactions / Second', fmt1(180+Math.sin(s.chartTick/3)*20), 'rolling avg','flat','ok')}
+    ${kpiCard('Active Workers', s.activeWorkers, s.activeWorkers+'/12 provisioned','flat','ok')}
+    ${kpiCard('Match Rate', pct(s.matchRate), s.matchRate>93?'within target':'below target', s.matchRate>93?'up':'down', s.matchRate>93?'ok':'warn')}
+    ${kpiCard('Job Success Rate', pct(s.jobSuccessRate), 'last 24h','flat', s.jobSuccessRate>=95?'ok':'warn')}
+    ${kpiCard('Failed Jobs', s.failedJobs, 'requires review', s.failedJobs>0?'down':'flat', s.failedJobs>0?'warn':'ok')}
+    ${kpiCard('API Requests', fmt(s.apiRequests), 'this period','flat','ok')}
+    ${kpiCard('API Throttled', fmt(s.apiThrottled), pct(s.apiThrottled/s.apiRequests*100)+' of traffic','flat', s.apiThrottled>500?'warn':'ok')}
+    ${kpiCard('RPO Target', s.rpoMinutes+' min', 'recovery point','flat','ok')}
+    ${kpiCard('RTO Target', s.rtoMinutes+' min', 'recovery time','flat','ok')}
+    ${kpiCard('Security Alerts', s.securityAlerts, 'open items','flat', s.securityAlerts>0?'warn':'ok')}
+    ${kpiCard('Configuration Drift', s.configDrift, 'fields differ DEV↔PROD','flat', s.configDrift>0?'warn':'ok')}
+  </div>
+
+  <div class="grid cols2" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="card-head"><h3>Transaction Volume &amp; Throughput</h3><span class="sub">simulated, 24 intervals</span></div>
+      <div class="canvas-wrap"><canvas id="chartTxVol"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Match Rate &amp; Job Success</h3><span class="sub">simulated, 24 intervals</span></div>
+      <div class="canvas-wrap"><canvas id="chartMatch"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid cols2" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="card-head"><h3>API Usage</h3><span class="sub">requests vs. throttled, per interval</span></div>
+      <div class="canvas-wrap"><canvas id="chartApi"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Aging &amp; Financial Risk (illustrative)</h3><span class="sub">open unmatched items by age bucket</span></div>
+      <div class="canvas-wrap"><canvas id="chartAging"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card section-block">
+    <div class="card-head"><h3>System Resilience Rail — System Availability</h3><span class="sub">Primary ⇄ Sync ⇄ Disaster Recovery</span></div>
+    <div class="pulse-rail">
+      <div class="pulse-node ${s.dr.primaryUp?'on':'down'}">PRIMARY<span class="st">${s.dr.primaryUp?'ACTIVE':'DOWN'}</span></div>
+      <div class="pulse-line ${s.dr.primaryUp&&s.dr.drUp?'on':''}"></div>
+      <div class="pulse-node ${s.dr.drUp?'on':'down'}">DR SITE<span class="st">${s.dr.drUp?'STANDBY':'DOWN'}</span></div>
+      <div class="pulse-line ${s.dr.drUp?'on':''}"></div>
+      <div class="pulse-node on">LEDGER<span class="st">SYNCED</span></div>
+    </div>
+    <div class="mini-note">Go to <b>Reliability → Backup &amp; DR</b> to run a simulated failover and see this rail update in real time.</div>
+  </div>
+
+  <div class="ledger-tape">TX #${fmt(s.txProcessed)}</div>
+  <div class="mini-note">Live simulated transaction counter — advances automatically to illustrate continuous processing load.</div>
+  `;
+  const tx = randWalk(180000,24,25000);
+  drawChart($('chartTxVol'), [{data:tx, color:'#1B6FD1', fill:true}], {fmt:v=>Math.round(v/1000)+'k'});
+  const mr = randWalk(94,24,3), js = randWalk(97,24,2.5);
+  drawChart($('chartMatch'), [{data:mr,color:'#16A34A'},{data:js,color:'#E8622C'}], {max:100,min:80,fmt:v=>Math.round(v)+'%'});
+  const apiReq = randWalk(700,24,120), apiThr = randWalk(15,24,10);
+  drawChart($('chartApi'), [{data:apiReq,color:'#1B6FD1',fill:true},{data:apiThr,color:'#DC2626'}], {fmt:v=>Math.round(v)});
+  drawChart($('chartAging'), [{data:[42,27,15,9,4],color:'#D97706'}], {bar:true, fmt:v=>Math.round(v)});
+};
+
+function kpiCard(label, val, trend, dir, tone){
+  return `<div class="kpi-card ${tone||''}">
+    <div class="lbl">${label}</div>
+    <div class="val mono">${val}</div>
+    <div class="trend ${dir}">${dir==='up'?'▲':dir==='down'?'▼':'—'} ${trend}</div>
+  </div>`;
+}
+
+/* ===========================================================================
+   PERFORMANCE
+   =========================================================================== */
+const PERF_TABS = [
+  {id:'overview', label:'Volume &amp; Workers'},
+  {id:'matching', label:'Parallel AutoMatch'},
+  {id:'pagination', label:'Pagination'},
+  {id:'bulk', label:'Bulk Profile Import'},
+  {id:'incremental', label:'Incremental Load'},
+  {id:'search', label:'Indexed Search'},
+  {id:'reports', label:'Cached Dashboard &amp; Reports'}
+];
+let perfActiveTab='overview';
+
+RENDERERS.perf = function(sub){
+  const map = {matching:'matching', dataload:'bulk', search:'search', reports:'reports'};
+  perfActiveTab = map[sub] || perfActiveTab || 'overview';
+  $('viewRoot').innerHTML = `
+    <div class="view-head">
+      <div><h1>Performance Simulator</h1><p>Configure volume, parallelism and caching to see conceptual processing-time estimates. Educational simulations only — not Oracle product benchmarks.</p></div>
+    </div>
+    <div class="tabs">${PERF_TABS.map(t=>`<button class="tab ${perfActiveTab===t.id?'active':''}" onclick="perfActiveTab='${t.id}';RENDERERS.perf()">${t.label}</button>`).join('')}</div>
+    <div id="perfPanel"></div>
+  `;
+  renderPerfPanel();
+};
+
+function renderPerfPanel(){
+  const panel = $('perfPanel');
+  if(perfActiveTab==='overview') panel.innerHTML = perfOverviewHtml();
+  else if(perfActiveTab==='matching') panel.innerHTML = perfMatchingHtml();
+  else if(perfActiveTab==='pagination') panel.innerHTML = perfPaginationHtml();
+  else if(perfActiveTab==='bulk') panel.innerHTML = perfBulkHtml();
+  else if(perfActiveTab==='incremental') panel.innerHTML = perfIncrementalHtml();
+  else if(perfActiveTab==='search') panel.innerHTML = perfSearchHtml();
+  else if(perfActiveTab==='reports') panel.innerHTML = perfReportsHtml();
+  if(perfActiveTab==='reports') initReportQueueUI();
+}
+
+/* ---- Volume & Workers estimator ---- */
+const perfCfg = {volume:5000000, workers:10, batchSize:5000, pageSize:100, indexEnabled:true, incrementalLoad:true, dashboardCache:true, backgroundReports:true};
+function perfOverviewHtml(){
+  const c = perfCfg;
+  const perWorker = Math.ceil(c.volume/c.workers);
+  const batches = Math.ceil(perWorker/c.batchSize);
+  const baseRatePerBatch = c.indexEnabled?45:110; // ms, conceptual
+  const estSeconds = (batches*baseRatePerBatch)/1000;
+  return `
+  <div class="disclaimer"><span class="ic">🧮</span> EDUCATIONAL SIMULATION — the estimate below is a conceptual model for teaching how volume, workers and batch size interact. It is not an Oracle ARCS performance benchmark.</div>
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Processing Configuration</h3></div>
+      ${rangeField('Transaction Volume', 'cfgVolume', 100000, 20000000, 100000, c.volume, v=>{perfCfg.volume=+v;renderPerfPanel();})}
+      ${rangeField('Worker Count', 'cfgWorkers', 1, 32, 1, c.workers, v=>{perfCfg.workers=+v;renderPerfPanel();})}
+      ${rangeField('Batch Size', 'cfgBatch', 500, 20000, 500, c.batchSize, v=>{perfCfg.batchSize=+v;renderPerfPanel();})}
+      ${rangeField('Page Size', 'cfgPage', 25, 500, 25, c.pageSize, v=>{perfCfg.pageSize=+v;renderPerfPanel();})}
+      <div class="toggle-row">Index Enabled ${switchHtml('cfgIndex', c.indexEnabled, ck=>{perfCfg.indexEnabled=ck;renderPerfPanel();})}</div>
+      <div class="toggle-row">Incremental Load ${switchHtml('cfgIncr', c.incrementalLoad, ck=>{perfCfg.incrementalLoad=ck;renderPerfPanel();})}</div>
+      <div class="toggle-row">Dashboard Cache ${switchHtml('cfgCache', c.dashboardCache, ck=>{perfCfg.dashboardCache=ck;renderPerfPanel();})}</div>
+      <div class="toggle-row">Background Reports ${switchHtml('cfgBg', c.backgroundReports, ck=>{perfCfg.backgroundReports=ck;renderPerfPanel();})}</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Conceptual Processing Estimate</h3><span class="sub">simulation output</span></div>
+      <div class="grid kpi2">
+        ${kpiCard('Txns / Worker', fmt(perWorker), 'per worker share','flat','ok')}
+        ${kpiCard('Batches / Worker', fmt(batches), c.batchSize+' rows/batch','flat','ok')}
+        ${kpiCard('Est. Completion', estSeconds<60?fmt1(estSeconds)+' s':fmt1(estSeconds/60)+' min', c.indexEnabled?'index-assisted':'full scan mode', c.indexEnabled?'up':'down', c.indexEnabled?'ok':'warn')}
+        ${kpiCard('Index Benefit', c.indexEnabled?'~2.4×':'1×','conceptual multiplier','flat', c.indexEnabled?'ok':'warn')}
+      </div>
+      <hr class="div">
+      <div class="small-label">Worker Distribution Preview</div>
+      <div class="canvas-wrap"><canvas id="chartWorkerDist"></canvas></div>
+    </div>
+  </div>`;
+}
+function afterPerfOverviewRender(){
+  const c=perfCfg;
+  const n=Math.min(c.workers,16);
+  const per=Math.ceil(c.volume/c.workers);
+  drawChart($('chartWorkerDist'), [{data:Array(n).fill(per),color:'#1B6FD1'}], {bar:true, fmt:v=>Math.round(v/1000)+'k'});
+}
+
+/* ---- Parallel AutoMatch ---- */
+const matchState = {volume:5000000, workers:10, failWorker:null, running:false, results:[]};
+function perfMatchingHtml(){
+  const m = matchState;
+  const perWorker = Math.floor(m.volume/m.workers);
+  let rows='';
+  for(let i=1;i<=m.workers;i++){
+    const failed = m.failWorker===i;
+    rows += `<tr><td>Worker ${i}</td><td class="mono">${fmt(perWorker)}</td><td>${failed?badgeHtml('Failed'):badgeHtml('Healthy')}</td><td>${failed?'Reassigning to healthy workers':'Processing'}</td></tr>`;
+  }
+  return `
+  <div class="disclaimer"><span class="ic">🧮</span> EDUCATIONAL SIMULATION of parallel AutoMatch distribution across workers. Not a real matching engine.</div>
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Parallel AutoMatch Configuration</h3></div>
+      ${rangeField('Total Transactions','matchVol',100000,20000000,100000,m.volume,v=>{matchState.volume=+v;renderPerfPanel();})}
+      ${rangeField('Worker Count','matchWorkers',2,20,1,m.workers,v=>{matchState.workers=+v;matchState.failWorker=null;renderPerfPanel();})}
+      <div class="field-row">
+        <button class="btn primary" onclick="runAutoMatch()">▶ Run AutoMatch</button>
+        <button class="btn danger" onclick="failRandomWorker()">⚠ Simulate Worker Failure</button>
+        <button class="btn ghost" onclick="matchState.failWorker=null;renderPerfPanel();">Reset Workers</button>
+      </div>
+      <div id="matchProgressWrap"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Worker Assignment</h3><span class="sub">${m.workers} workers · ${fmt(perWorker)} txns each</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Worker</th><th>Assigned</th><th>Status</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>
+  </div>`;
+}
+function failRandomWorker(){
+  matchState.failWorker = 1+Math.floor(Math.random()*matchState.workers);
+  pushAlert('Worker '+matchState.failWorker+' failed during AutoMatch — remaining work redistributed to healthy workers.', 'warn');
+  logAudit('Worker Failure','AutoMatch Job',{old:'Healthy',new:'Failed (Worker '+matchState.failWorker+')'},'Recovered');
+  renderPerfPanel();
+}
+function runAutoMatch(){
+  const wrap = $('matchProgressWrap');
+  if(!wrap) return;
+  let pct=0;
+  wrap.innerHTML = `<div class="small-label" style="margin-top:10px;">Run Progress</div><div class="progress"><div style="width:0%"></div></div><div class="mini-note" id="matchProgTxt">Starting…</div>`;
+  const bar = wrap.querySelector('.progress > div');
+  const txt = $('matchProgTxt');
+  const timer = setInterval(()=>{
+    pct += 8+Math.random()*10;
+    if(pct>=100){pct=100;clearInterval(timer);
+      const healthy = matchState.failWorker?matchState.workers-1:matchState.workers;
+      txt.innerHTML = `Completed. ${healthy}/${matchState.workers} workers healthy. Match rate ${pct1()}%`;
+      toast('AutoMatch run completed — '+pct1()+'% matched (simulated)','ok');
+      logAudit('Run AutoMatch','Matching Job',{old:'Queued',new:'Completed'});
+    }
+    bar.style.width = pct+'%';
+    if(pct<100) txt.textContent = 'Processing… '+Math.round(pct)+'%'+(matchState.failWorker?' (recovering from worker failure)':'');
+  }, 220);
+}
+function pct1(){return (91+Math.random()*6).toFixed(1);}
+
+/* ---- Pagination ---- */
+const pagState = {total:2000000, pageSize:100, page:1};
+function perfPaginationHtml(){
+  const p = pagState;
+  const pages = Math.ceil(p.total/p.pageSize);
+  return `
+  <div class="disclaimer"><span class="ic">🧮</span> EDUCATIONAL SIMULATION of paginated query navigation over a mock recordset.</div>
+  <div class="card">
+    <div class="card-head"><h3>Pagination Simulator</h3></div>
+    <div class="field-row">
+      ${numberField('Total Records','pagTotal',p.total,v=>{pagState.total=+v;pagState.page=1;renderPerfPanel();})}
+      ${numberField('Page Size','pagSize',p.pageSize,v=>{pagState.pageSize=Math.max(1,+v);pagState.page=1;renderPerfPanel();})}
+    </div>
+    <div class="grid kpi2">
+      ${kpiCard('Total Pages', fmt(pages), 'computed','flat','ok')}
+      ${kpiCard('Current Page', fmt(p.page)+' / '+fmt(pages), '', 'flat','ok')}
+      ${kpiCard('Records Shown', Math.min(p.pageSize, p.total-(p.page-1)*p.pageSize), 'on this page','flat','ok')}
+      ${kpiCard('Offset', fmt((p.page-1)*p.pageSize), 'row offset','flat','ok')}
+    </div>
+    <div class="field-row" style="align-items:center;">
+      <button class="btn" onclick="pagState.page=1;renderPerfPanel();">⏮ First</button>
+      <button class="btn" onclick="pagState.page=Math.max(1,pagState.page-1);renderPerfPanel();">‹ Prev</button>
+      <input type="number" value="${p.page}" min="1" max="${pages}" style="width:90px;padding:8px;border:1px solid var(--border-strong);border-radius:8px;" onchange="pagState.page=Math.min(${pages},Math.max(1,+this.value));renderPerfPanel();">
+      <button class="btn" onclick="pagState.page=Math.min(${pages},pagState.page+1);renderPerfPanel();">Next ›</button>
+      <button class="btn" onclick="pagState.page=${pages};renderPerfPanel();">Last ⏭</button>
+    </div>
+    <div class="mini-note">Example from spec: 2,000,000 records at 100/page → 20,000 pages.</div>
+  </div>`;
+}
+
+/* ---- Bulk Profile Import ---- */
+const bulkState = {count:50000, dupRate:4, invalidRate:2, last:null};
+function perfBulkHtml(){
+  const b = bulkState;
+  return `
+  <div class="disclaimer"><span class="ic">🧮</span> EDUCATIONAL SIMULATION of a bulk profile import with mock validation logic.</div>
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Bulk Profile Import</h3></div>
+      ${numberField('Number of Profiles','bulkCount',b.count,v=>{bulkState.count=+v;renderPerfPanel();})}
+      ${rangeField('Duplicate Rate (%)','bulkDup',0,40,1,b.dupRate,v=>{bulkState.dupRate=+v;renderPerfPanel();})}
+      ${rangeField('Invalid Rate (%)','bulkInvalid',0,40,1,b.invalidRate,v=>{bulkState.invalidRate=+v;renderPerfPanel();})}
+      <button class="btn primary" onclick="runBulkImport()">▶ Run Import</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Import Result</h3></div>
+      <div id="bulkResult">${b.last? bulkResultHtml(b.last) : '<div class="mini-note">Run an import to see validation results.</div>'}</div>
+    </div>
+  </div>`;
+}
+function runBulkImport(){
+  const total = bulkState.count;
+  const dup = Math.round(total*bulkState.dupRate/100);
+  const invalid = Math.round(total*bulkState.invalidRate/100);
+  const loaded = total-dup-invalid;
+  bulkState.last = {total,dup,invalid,loaded,ts:nowStr()};
+  $('bulkResult').innerHTML = bulkResultHtml(bulkState.last);
+  toast('Bulk import complete: '+fmt(loaded)+' profiles loaded','ok');
+  logAudit('Bulk Profile Import','Profile Table',{old:'—',new:fmt(loaded)+' loaded / '+fmt(total)+' submitted'});
+}
+function bulkResultHtml(r){
+  return `<div class="grid kpi2">
+    ${kpiCard('Total Submitted', fmt(r.total),'','flat','ok')}
+    ${kpiCard('Valid & Loaded', fmt(r.loaded),'','up','ok')}
+    ${kpiCard('Duplicate', fmt(r.dup),'skipped','flat','warn')}
+    ${kpiCard('Rejected (Invalid)', fmt(r.invalid),'failed validation','down','crit')}
+  </div><div class="mini-note">Run completed ${r.ts}</div>`;
+}
+
+/* ---- Incremental Load ---- */
+const incState = {total:10000000, changed:50000};
+function perfIncrementalHtml(){
+  const c = incState;
+  const fullSeconds = c.total/50000; // conceptual rows/sec
+  const incSeconds = c.changed/50000;
+  const reduction = 100*(1-incSeconds/fullSeconds);
+  return `
+  <div class="disclaimer"><span class="ic">🧮</span> EDUCATIONAL SIMULATION comparing full vs. incremental data loads.</div>
+  <div class="card">
+    <div class="card-head"><h3>Incremental Load Simulator</h3></div>
+    <div class="field-row">
+      ${numberField('Total Dataset','incTotal',c.total,v=>{incState.total=+v;renderPerfPanel();})}
+      ${numberField('Changed Records','incChanged',c.changed,v=>{incState.changed=+v;renderPerfPanel();})}
+    </div>
+    <div class="grid cols2">
+      <div>
+        <div class="small-label">Full Load</div>
+        <div class="grid kpi2">
+          ${kpiCard('Records Processed', fmt(c.total),'','flat','ok')}
+          ${kpiCard('Est. Duration', fmt1(fullSeconds)+' s','conceptual rate','flat','ok')}
+        </div>
+      </div>
+      <div>
+        <div class="small-label">Incremental Load</div>
+        <div class="grid kpi2">
+          ${kpiCard('Records Processed', fmt(c.changed),'changed only','up','ok')}
+          ${kpiCard('Est. Duration', fmt1(incSeconds)+' s','conceptual rate','up','ok')}
+        </div>
+      </div>
+    </div>
+    ${kpiCard('Estimated Workload Reduction', pct(reduction),'vs. full load','up','ok')}
+    <div class="mini-note">Simulation output only — actual reduction depends on change-data-capture design, not modeled here.</div>
+  </div>`;
+}
+
+/* ---- Indexed Search ---- */
+const searchState = {indexOn:true, lastQuery:null};
+function perfSearchHtml(){
+  const s = searchState;
+  return `
+  <div class="disclaimer"><span class="ic">🧮</span> EDUCATIONAL SIMULATION — conceptual comparison only, not a real production benchmark.</div>
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Transaction Search</h3></div>
+      <div class="field-row">
+        ${textField('Transaction ID','srchTxId','TXN-885213')}
+        ${textField('Account','srchAcct','1000-4400')}
+      </div>
+      <div class="field-row">
+        ${textField('Entity','srchEntity','US-EAST')}
+        ${textField('Amount','srchAmt','12,450.00')}
+        ${textField('Date','srchDate','2026-08-15')}
+      </div>
+      <div class="toggle-row">Index Enabled ${switchHtml('srchIndex', s.indexOn, ck=>{searchState.indexOn=ck;renderPerfPanel();})}</div>
+      <button class="btn primary" onclick="runIndexedSearch()">🔎 Run Search</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Conceptual Effort Comparison</h3></div>
+      <div class="canvas-wrap"><canvas id="chartSearchEffort"></canvas></div>
+      <div id="searchResultBox" class="mini-note">${s.lastQuery?('Last search ("'+s.lastQuery+'") '+(s.indexOn?'used the index — fewer rows scanned.':'performed a full scan — more rows scanned.')):'Run a search to compare effort.'}</div>
+    </div>
+  </div>`;
+}
+function afterPerfSearchRender(){
+  drawChart($('chartSearchEffort'), [{data: searchState.indexOn?[8,6,9,7]:[92,88,95,90], color: searchState.indexOn?'#16A34A':'#DC2626'}], {bar:true, max:100, fmt:v=>Math.round(v)+'%'});
+}
+function runIndexedSearch(){
+  const id = $('srchTxId').value || 'TXN-885213';
+  searchState.lastQuery = id;
+  toast('Search executed ('+(searchState.indexOn?'indexed':'full scan')+') — simulated effort '+(searchState.indexOn?'low':'high'), searchState.indexOn?'ok':'warn');
+  logAudit('Indexed Search','Transaction Index',{old:'—',new:id});
+  renderPerfPanel();
+}
+
+/* ---- Cached Dashboard + Background Reports ---- */
+const cacheState = {enabled:true, refreshInterval:15, lastRefresh:Date.now()};
+function perfReportsHtml(){
+  const c = cacheState;
+  const ageSec = Math.round((Date.now()-c.lastRefresh)/1000);
+  const stale = ageSec > c.refreshInterval*60;
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Cached Dashboard Simulator</h3></div>
+      <div class="toggle-row">Cache Enabled ${switchHtml('cacheEnabled', c.enabled, ck=>{cacheState.enabled=ck;renderPerfPanel();})}</div>
+      ${rangeField('Refresh Interval (min)','cacheInterval',1,60,1,c.refreshInterval,v=>{cacheState.refreshInterval=+v;renderPerfPanel();})}
+      <button class="btn" onclick="cacheState.lastRefresh=Date.now();renderPerfPanel();toast('Dashboard cache manually refreshed','ok');">🔄 Manual Refresh</button>
+      <div class="grid kpi2" style="margin-top:12px;">
+        ${kpiCard('Last Refresh', new Date(c.lastRefresh).toLocaleTimeString(),'','flat','ok')}
+        ${kpiCard('Cache Age', ageSec+' s','','flat', stale?'warn':'ok')}
+      </div>
+      ${!c.enabled? '<div class="disclaimer warn"><span class="ic">⚠️</span> Caching disabled — dashboard queries hit the live dataset every request (higher load).</div>' : stale? '<div class="disclaimer warn"><span class="ic">⚠️</span> Dashboard data may be stale.</div>' : '<div class="disclaimer"><span class="ic">✅</span> Cache fresh.</div>'}
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Background Report Engine</h3></div>
+      <div class="field-row">
+        ${textField('Report Name','reportName','Aging Summary — Sep 2026')}
+        <button class="btn primary" onclick="queueReport()" style="align-self:flex-end;">＋ Generate Report</button>
+      </div>
+      <div class="small-label">Queue</div>
+      <div id="reportQueueBox"></div>
+    </div>
+  </div>`;
+}
+function initReportQueueUI(){ renderReportQueue(); }
+function queueReport(){
+  const nameEl = $('reportName');
+  const name = (nameEl && nameEl.value) || ('Report '+(STATE.reportCounter+1));
+  STATE.reportCounter++;
+  const job = {id:'RPT-'+(1000+STATE.reportCounter), name, stage:'Queued', pct:0};
+  STATE.reportQueue.unshift(job);
+  logAudit('Generate Report','Background Report',{old:'—',new:name});
+  renderReportQueue();
+  advanceReport(job);
+}
+function advanceReport(job){
+  const stages = ['Queued','Processing','Completed'];
+  let idx=0;
+  const timer = setInterval(()=>{
+    job.pct = Math.min(100, job.pct + 12 + Math.random()*15);
+    if(job.pct<40) job.stage='Queued';
+    else if(job.pct<95) job.stage='Processing';
+    if(job.pct>=100){ job.pct=100; job.stage='Completed'; clearInterval(timer); toast('Report "'+job.name+'" ready — notification sent (simulated)','ok'); }
+    renderReportQueue();
+  }, 400);
+}
+function renderReportQueue(){
+  const box = $('reportQueueBox');
+  if(!box) return;
+  if(STATE.reportQueue.length===0){ box.innerHTML='<div class="mini-note">No reports queued yet.</div>'; return; }
+  box.innerHTML = STATE.reportQueue.map(j=>`
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px;"><span>${j.name} <span class="mono" style="color:var(--text-faint);font-weight:600;">${j.id}</span></span>${badgeHtml(j.stage)}</div>
+      <div class="progress ${j.stage==='Completed'?'success':''}"><div style="width:${j.pct}%"></div></div>
+    </div>`).join('');
+}
+
+/* ---- Shared form field builders ---- */
+function rangeField(label,id,min,max,step,val,onChange){
+  window['_h_'+id] = onChange;
+  return `<div class="field">
+    <label>${label} <span class="v" id="${id}_v">${fmt(val)}</span></label>
+    <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"
+      oninput="document.getElementById('${id}_v').textContent=Number(this.value).toLocaleString('en-US');"
+      onchange="window['_h_${id}'](this.value)">
+  </div>`;
+}
+function numberField(label,id,val,onChange){
+  window['_h_'+id]=onChange;
+  return `<div class="field"><label>${label}</label><input type="number" id="${id}" value="${val}" onchange="window['_h_${id}'](this.value)"></div>`;
+}
+function textField(label,id,placeholder){
+  return `<div class="field"><label>${label}</label><input type="text" id="${id}" placeholder="${placeholder||''}"></div>`;
+}
+function switchHtml(id, checked, onChange){
+  window['_h_'+id]=onChange;
+  return `<label class="switch"><input type="checkbox" id="${id}" ${checked?'checked':''} onchange="window['_h_${id}'](this.checked)"><span class="slider"></span></label>`;
+}
+
+/* Hook post-render chart draws for performance tab */
+const _origRenderPerfPanel = renderPerfPanel;
+renderPerfPanel = function(){
+  _origRenderPerfPanel();
+  if(perfActiveTab==='overview') afterPerfOverviewRender();
+  if(perfActiveTab==='search') afterPerfSearchRender();
+};
+
+/* ===========================================================================
+   RELIABILITY
+   =========================================================================== */
+const REL_TABS = [
+  {id:'idempotency', label:'Idempotent Imports'},
+  {id:'retry', label:'Retry'},
+  {id:'rollback', label:'Rollback'},
+  {id:'jobs', label:'Job Recovery'},
+  {id:'backupdr', label:'Backup, DR &amp; Snapshots'},
+  {id:'ha', label:'High Availability'}
+];
+let relActiveTab='idempotency';
+RENDERERS.reliability = function(sub){
+  const map={jobs:'jobs', backupdr:'backupdr', ha:'ha'};
+  relActiveTab = map[sub] || relActiveTab || 'idempotency';
+  $('viewRoot').innerHTML = `
+    <div class="view-head"><div><h1>Reliability Simulator</h1><p>Explore idempotent processing, retries, rollback, job recovery, backup/restore, disaster recovery and high availability.</p></div></div>
+    <div class="tabs">${REL_TABS.map(t=>`<button class="tab ${relActiveTab===t.id?'active':''}" onclick="relActiveTab='${t.id}';renderRelPanel()">${t.label}</button>`).join('')}</div>
+    <div id="relPanel"></div>`;
+  renderRelPanel();
+};
+function renderRelPanel(){
+  const p=$('relPanel');
+  if(relActiveTab==='idempotency') p.innerHTML = relIdempHtml();
+  else if(relActiveTab==='retry') p.innerHTML = relRetryHtml();
+  else if(relActiveTab==='rollback') p.innerHTML = relRollbackHtml();
+  else if(relActiveTab==='jobs') p.innerHTML = relJobsHtml();
+  else if(relActiveTab==='backupdr') p.innerHTML = relBackupDrHtml();
+  else if(relActiveTab==='ha') p.innerHTML = relHaHtml();
+}
+
+/* ---- Idempotent Import ---- */
+const idempState = {importId:'IMP-2026-0091', count:25000, runs:[]};
+function relIdempHtml(){
+  const s = idempState;
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Idempotent Import Test</h3></div>
+      <div class="field-row">
+        ${textFieldVal('Import ID','idImportId',s.importId)}
+        ${numberField('Record Count','idCount',s.count,v=>{idempState.count=+v;})}
+      </div>
+      <button class="btn primary" onclick="runIdempotentImport()">▶ Run Import (same ID twice)</button>
+      <div class="mini-note">Runs the same Import ID twice to verify no duplicate records are created.</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Audit Events</h3></div>
+      <div class="logbox" id="idempLog">${s.runs.length? s.runs.map(r=>`<div class="log-line"><span class="t">${r.ts}</span>${r.msg}</div>`).join('') : '<div class="mini-note" style="padding:10px;">No runs yet.</div>'}</div>
+    </div>
+  </div>`;
+}
+function runIdempotentImport(){
+  const id = $('idImportId').value || idempState.importId;
+  idempState.importId = id;
+  const first = !idempState.runs.some(r=>r.importId===id && r.result==='Loaded');
+  if(first){
+    idempState.runs.unshift({ts:nowStr(), importId:id, result:'Loaded', msg:`Import <b>${id}</b> — ${badgeHtml('Loaded')} ${fmt(idempState.count)} records`});
+    logAudit('Import','Import Batch',{old:'—',new:id+' loaded'});
+    toast('First run: '+fmt(idempState.count)+' records loaded','ok');
+  } else {
+    idempState.runs.unshift({ts:nowStr(), importId:id, result:'Duplicate', msg:`Import <b>${id}</b> — ${badgeHtml('Duplicate')} duplicate execution detected · no unintended duplicate records created`});
+    logAudit('Import (duplicate detected)','Import Batch',{old:id+' loaded',new:id+' re-submitted'},'Blocked (idempotent)');
+    toast('Second run: duplicate execution detected — no duplicate records created','warn');
+  }
+  renderRelPanel();
+}
+
+/* ---- Retry ---- */
+const retryState = {failProb:35, maxRetries:4, backoff:'Exponential', attempts:[]};
+function relRetryHtml(){
+  const s = retryState;
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Retry Simulator</h3></div>
+      ${rangeField('Failure Probability (%)','retryFail',0,90,5,s.failProb,v=>{retryState.failProb=+v;})}
+      ${rangeField('Maximum Retries','retryMax',1,8,1,s.maxRetries,v=>{retryState.maxRetries=+v;})}
+      <div class="field"><label>Backoff Strategy</label>
+        <select id="retryBackoff" onchange="retryState.backoff=this.value">
+          <option ${s.backoff==='Fixed'?'selected':''}>Fixed</option>
+          <option ${s.backoff==='Linear'?'selected':''}>Linear</option>
+          <option ${s.backoff==='Exponential'?'selected':''}>Exponential</option>
+        </select>
+      </div>
+      <button class="btn primary" onclick="runRetryJob()">▶ Run Job</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Attempt Log</h3></div>
+      <div class="logbox" id="retryLog">${s.attempts.length? s.attempts.map(a=>`<div class="log-line"><span class="t">Attempt ${a.n}</span>${a.msg}</div>`).join('') : '<div class="mini-note" style="padding:10px;">No attempts yet.</div>'}</div>
+    </div>
+  </div>`;
+}
+function runRetryJob(){
+  retryState.attempts = [];
+  let n=1, success=false;
+  const box = $('retryLog');
+  function attempt(){
+    const fail = Math.random()*100 < retryState.failProb;
+    const delay = retryState.backoff==='Fixed'?1000: retryState.backoff==='Linear'? 500*n : 300*Math.pow(2,n-1);
+    if(!fail){
+      retryState.attempts.push({n, msg:`${badgeHtml('Success')} job completed after ${n} attempt(s)`});
+      success=true;
+      logAudit('Retry','Background Job',{old:'Running',new:'Success ('+n+' attempts)'});
+      toast('Job succeeded after '+n+' attempt(s)','ok');
+      box.innerHTML = retryState.attempts.map(a=>`<div class="log-line"><span class="t">Attempt ${a.n}</span>${a.msg}</div>`).join('');
+      return;
+    }
+    retryState.attempts.push({n, msg:`${badgeHtml('Failed')} transient error — backing off ${Math.round(delay)}ms (${retryState.backoff})`});
+    box.innerHTML = retryState.attempts.map(a=>`<div class="log-line"><span class="t">Attempt ${a.n}</span>${a.msg}</div>`).join('');
+    if(n>=retryState.maxRetries){
+      retryState.attempts.push({n:n+1, msg:`${badgeHtml('Failed')} maximum retries exceeded — job marked Failed, routed to Job Recovery`});
+      logAudit('Retry Exhausted','Background Job',{old:'Retrying',new:'Failed'},'Failed');
+      toast('Maximum retries exceeded — job failed','crit');
+      box.innerHTML = retryState.attempts.map(a=>`<div class="log-line"><span class="t">Attempt ${a.n}</span>${a.msg}</div>`).join('');
+      return;
+    }
+    n++;
+    setTimeout(attempt, 450);
+  }
+  attempt();
+}
+
+/* ---- Rollback ---- */
+const rollbackState = {total:10000, invalid:500, mode:'Reject & Continue', last:null};
+function relRollbackHtml(){
+  const s = rollbackState;
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Rollback Simulator</h3></div>
+      ${numberField('Record Count','rbTotal',s.total,v=>{rollbackState.total=+v;})}
+      ${numberField('Invalid Records','rbInvalid',s.invalid,v=>{rollbackState.invalid=+v;})}
+      <div class="field"><label>Mode</label>
+        <select id="rbMode" onchange="rollbackState.mode=this.value">
+          <option ${s.mode==='Full Rollback'?'selected':''}>Full Rollback</option>
+          <option ${s.mode==='Reject & Continue'?'selected':''}>Reject & Continue</option>
+        </select>
+      </div>
+      <button class="btn primary" onclick="runRollback()">▶ Run Load</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Resulting Data State</h3></div>
+      <div id="rbResult">${s.last?rbResultHtml(s.last):'<div class="mini-note">Run a load to see the resulting data state.</div>'}</div>
+    </div>
+  </div>`;
+}
+function runRollback(){
+  const total=rollbackState.total, invalid=Math.min(rollbackState.invalid,total), valid=total-invalid;
+  let state;
+  if(rollbackState.mode==='Full Rollback'){
+    state = {loaded:0, rejected:0, rolledBack:total, note:'All records rolled back because invalid rows were detected (Full Rollback mode).'};
+    logAudit('Rollback','Load Batch',{old:total+' submitted',new:'0 committed — full rollback'},'Rolled Back');
+  } else {
+    state = {loaded:valid, rejected:invalid, rolledBack:0, note:'Valid records committed; invalid records rejected individually (Reject & Continue mode).'};
+    logAudit('Load with Rejects','Load Batch',{old:total+' submitted',new:valid+' committed / '+invalid+' rejected'},'Partial Success');
+  }
+  rollbackState.last = state;
+  $('rbResult').innerHTML = rbResultHtml(state);
+  toast('Load finished — '+rollbackState.mode, state.rolledBack?'warn':'ok');
+}
+function rbResultHtml(s){
+  return `<div class="grid kpi2">
+    ${kpiCard('Committed', fmt(s.loaded),'','flat', s.loaded?'ok':'neutral')}
+    ${kpiCard('Rejected', fmt(s.rejected),'','flat', s.rejected?'warn':'ok')}
+    ${kpiCard('Rolled Back', fmt(s.rolledBack),'','flat', s.rolledBack?'crit':'ok')}
+  </div><div class="mini-note">${s.note}</div>`;
+}
+
+/* ---- Job Recovery (state machine) ---- */
+const JOB_STATES = ['Created','Running','Failed','Recovering','Retrying','Completed'];
+const jobRecovery = {state:'Created'};
+function relJobsHtml(){
+  const j = jobRecovery;
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Job Recovery — State Machine</h3></div>
+    <div class="flow">${JOB_STATES.map(st=>`<div class="flow-node ${st===j.state?(st==='Failed'?'crit':'active'):''}">${st}</div>`).join('<span class="flow-arrow">→</span>')}</div>
+    <div class="field-row">
+      <button class="btn" onclick="jobRecovery.state='Created';renderRelPanel();">Reset to Created</button>
+      <button class="btn" onclick="advanceJob()">▶ Advance</button>
+      <button class="btn danger" onclick="jobRecovery.state='Failed';renderRelPanel();logAudit('Job Failure','Job JOB-'+Math.floor(Math.random()*9000+1000),{old:'Running',new:'Failed'},'Failed');toast('Job failed — triggering recovery workflow','crit');">⚠ Trigger Failure</button>
+    </div>
+    <div class="mini-note">Current job list below reflects simulated background jobs (Reliability + Performance modules).</div>
+    <div class="table-wrap" style="margin-top:12px;">
+      <table><thead><tr><th>Job ID</th><th>Type</th><th>State</th></tr></thead>
+      <tbody>${STATE.jobsList.map(j2=>`<tr><td class="mono">${j2.id}</td><td>${j2.type}</td><td>${badgeHtml(j2.state)}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+function advanceJob(){
+  const order = ['Created','Running','Completed'];
+  const failOrder = ['Failed','Recovering','Retrying','Running','Completed'];
+  const j = jobRecovery;
+  if(j.state==='Failed'){ j.state='Recovering'; }
+  else if(j.state==='Recovering'){ j.state='Retrying'; }
+  else if(j.state==='Retrying'){ j.state='Running'; }
+  else if(j.state==='Created'){ j.state='Running'; }
+  else if(j.state==='Running'){ j.state='Completed'; toast('Job completed','ok'); logAudit('Job Completed','Background Job',{old:'Running',new:'Completed'}); }
+  else if(j.state==='Completed'){ toast('Job already completed — reset to run again','info'); }
+  renderRelPanel();
+}
+
+/* ---- Backup / DR / HA / Snapshots ---- */
+function relBackupDrHtml(){
+  const s = STATE;
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Backup &amp; Restore</h3></div>
+      <div class="field-row">
+        <button class="btn primary" onclick="runBackupNow()">💾 Backup Now</button>
+        <button class="btn" onclick="restoreLatestBackup()">↩ Restore Latest</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Type</th><th>Size</th></tr></thead>
+      <tbody>${s.backups.map(b=>`<tr><td class="mono">${b.ts}</td><td>${b.type}</td><td>${b.size}</td></tr>`).join('')}</tbody></table></div>
+      <div id="restoreStatus" class="mini-note"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>RPO / RTO Simulator</h3></div>
+      ${rangeField('RPO (minutes)','rpoInput',5,120,5,s.rpoMinutes,v=>{STATE.rpoMinutes=+v;})}
+      ${rangeField('RTO (minutes)','rtoInput',15,480,15,s.rtoMinutes,v=>{STATE.rtoMinutes=+v;})}
+      <button class="btn" onclick="calcRpoRto()">Calculate SLA Status</button>
+      <div id="rpoResult"></div>
+      <div class="disclaimer" style="margin-top:10px;"><span class="ic">🧮</span> Educational simulation — not a formal SLA calculation.</div>
+    </div>
+  </div>
+
+  <div class="card section-block">
+    <div class="card-head"><h3>Disaster Recovery</h3></div>
+    <div class="pulse-rail">
+      <div class="pulse-node ${s.dr.primaryUp?'on':'down'}">PRIMARY<span class="st">${s.dr.primaryUp?'ACTIVE':'DOWN'}</span></div>
+      <div class="pulse-line ${s.dr.primaryUp&&s.dr.drUp?'on':''}"></div>
+      <div class="pulse-node ${s.dr.drUp?'on':'down'}">DR SITE<span class="st">${s.dr.drUp?(s.dr.stage==='failedover'?'ACTIVE':'STANDBY'):'DOWN'}</span></div>
+      <div class="pulse-line ${s.dr.drUp?'on':''}"></div>
+      <div class="pulse-node ${s.dr.stage==='validated'||s.dr.stage==='steady'?'on':''}">VALIDATE<span class="st">${s.dr.stage==='validated'?'PASSED':'—'}</span></div>
+    </div>
+    <div class="field-row">
+      <button class="btn danger" onclick="drAction('fail')">⚠ Simulate Failure</button>
+      <button class="btn orange" onclick="drAction('failover')">⇄ Failover</button>
+      <button class="btn" onclick="drAction('validate')">✓ Validate</button>
+      <button class="btn primary" onclick="drAction('failback')">↩ Failback</button>
+    </div>
+    <div class="mini-note">Stage: <b>${s.dr.stage}</b>${s.dr.lastFailover? ' · Last failover: '+s.dr.lastFailover:''}</div>
+  </div>
+
+  <div class="card section-block">
+    <div class="card-head"><h3>Reconciliation Snapshots</h3></div>
+    <div class="field-row">
+      <button class="btn primary" onclick="createSnapshot()">📸 Create Snapshot</button>
+      <button class="btn" onclick="compareSnapshots()">⇄ Compare Snapshots</button>
+    </div>
+    <div id="snapshotBox">${renderSnapshotList()}</div>
+  </div>`;
+}
+function runBackupNow(){
+  const b = {ts:nowStr(), size:(30+Math.random()*40).toFixed(0)+' GB', type:'Incremental'};
+  STATE.backups.unshift(b);
+  logAudit('Backup Now','Database',{old:'—',new:b.ts});
+  toast('Backup completed: '+b.ts,'ok');
+  renderRelPanel();
+}
+function restoreLatestBackup(){
+  const b = STATE.backups[0];
+  if(!b){toast('No backups available','warn');return;}
+  $('restoreStatus').innerHTML = `${badgeHtml('Restoring')} restoring snapshot from ${b.ts}…`;
+  logAudit('Restore Initiated','Database',{old:'Live',new:'Restoring from '+b.ts});
+  setTimeout(()=>{
+    $('restoreStatus').innerHTML = `${badgeHtml('Completed')} restore from ${b.ts} completed successfully (simulated).`;
+    logAudit('Restore Completed','Database',{old:'Restoring',new:'Live (restored '+b.ts+')'});
+    toast('Restore completed','ok');
+  }, 1400);
+}
+function calcRpoRto(){
+  const rpo=STATE.rpoMinutes, rto=STATE.rtoMinutes;
+  const exposure = Math.round(rpo*(0.4+Math.random()*0.6));
+  const recovery = Math.round(rto*(0.5+Math.random()*0.5));
+  const sla = recovery<=rto && exposure<=rpo;
+  $('rpoResult').innerHTML = `<div class="grid kpi2" style="margin-top:10px;">
+    ${kpiCard('Data Exposure Window', exposure+' min','vs RPO target '+rpo,'flat', exposure<=rpo?'ok':'crit')}
+    ${kpiCard('Recovery Duration', recovery+' min','vs RTO target '+rto,'flat', recovery<=rto?'ok':'crit')}
+  </div>${badgeHtml(sla?'SLA Met':'SLA Breach')}`;
+  logAudit('RPO/RTO Calculation','DR Plan',{old:'—',new:'Exposure '+exposure+'min / Recovery '+recovery+'min'});
+}
+function drAction(step){
+  const s=STATE.dr;
+  if(step==='fail'){ s.primaryUp=false; s.stage='primary-down'; pushAlert('Primary site failure simulated.','crit'); logAudit('Simulate Failure','Primary Site',{old:'Active',new:'Down'},'Failed'); }
+  else if(step==='failover'){ if(!s.drUp){toast('DR site unavailable','crit');return;} s.stage='failedover'; s.lastFailover=nowStr(); pushAlert('Failover to DR site executed.','warn'); logAudit('Failover','DR Site',{old:'Standby',new:'Active'}); }
+  else if(step==='validate'){ s.stage='validated'; toast('DR validation passed (simulated)','ok'); logAudit('DR Validation','DR Site',{old:'Active',new:'Validated'}); }
+  else if(step==='failback'){ s.primaryUp=true; s.drUp=true; s.stage='steady'; toast('Failback to primary complete — business resumed','ok'); logAudit('Failback','Primary Site',{old:'Down',new:'Active'}); }
+  renderRelPanel();
+}
+function createSnapshot(){
+  const label = ['Aug 31','Sep 30','Oct 31'][STATE.snapshots.length%3] || ('Period '+(STATE.snapshots.length+1));
+  const snap = {label, ts:nowStr(), balances:(2.1+Math.random()*0.4).toFixed(2)+'M', unmatched: Math.floor(20+Math.random()*80), status: Math.random()>0.3?'Balanced':'Variance'};
+  STATE.snapshots.unshift(snap);
+  logAudit('Create Snapshot','Reconciliation Period',{old:'—',new:label});
+  toast('Snapshot created: '+label,'ok');
+  $('snapshotBox').innerHTML = renderSnapshotList();
+}
+function compareSnapshots(){
+  if(STATE.snapshots.length<2){toast('Create at least two snapshots to compare','warn');return;}
+  const [a,b] = STATE.snapshots;
+  toast('Comparing '+a.label+' vs '+b.label,'info');
+  logAudit('Compare Snapshot','Reconciliation Period',{old:b.label,new:a.label});
+  $('snapshotBox').innerHTML = `
+    <div class="table-wrap"><table><thead><tr><th></th><th>${b.label}</th><th>${a.label}</th></tr></thead>
+    <tbody>
+      <tr><td>Balances</td><td class="mono">$${b.balances}</td><td class="mono">$${a.balances}</td></tr>
+      <tr><td>Status</td><td>${badgeHtml(b.status)}</td><td>${badgeHtml(a.status)}</td></tr>
+      <tr><td>Unmatched Items</td><td class="mono">${b.unmatched}</td><td class="mono">${a.unmatched}</td></tr>
+      <tr><td>Adjustments</td><td class="mono">${Math.floor(b.unmatched*0.2)}</td><td class="mono">${Math.floor(a.unmatched*0.2)}</td></tr>
+    </tbody></table></div>
+    <button class="btn ghost sm" onclick="$('snapshotBox').innerHTML=renderSnapshotList();">‹ Back to list</button>`;
+}
+function renderSnapshotList(){
+  if(STATE.snapshots.length===0) return '<div class="mini-note">No snapshots yet — create one to begin tracking period-over-period changes.</div>';
+  return `<div class="table-wrap"><table><thead><tr><th>Period</th><th>Created</th><th>Balances</th><th>Status</th><th>Unmatched</th></tr></thead>
+  <tbody>${STATE.snapshots.map(s=>`<tr><td>${s.label}</td><td class="mono">${s.ts}</td><td class="mono">$${s.balances}</td><td>${badgeHtml(s.status)}</td><td class="mono">${s.unmatched}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ---- High Availability ---- */
+function relHaHtml(){
+  const nodes = STATE.nodes;
+  return `
+  <div class="card">
+    <div class="card-head"><h3>High Availability — Application Nodes</h3></div>
+    <div class="grid cols3">
+      ${nodes.map((n,i)=>`
+        <div class="node-box ${n.healthy?'ok':'dead'}">
+          <div style="font-weight:800;">${n.name}</div>
+          <div style="margin:6px 0;">${badgeHtml(n.healthy?'Healthy':'Failed')}</div>
+          <button class="btn sm ${n.healthy?'danger':'primary'}" onclick="toggleNode(${i})">${n.healthy?'Kill Node':'Restore Node'}</button>
+        </div>`).join('')}
+    </div>
+    <hr class="div">
+    <div class="grid kpi2">
+      ${kpiCard('Healthy Nodes', nodes.filter(n=>n.healthy).length+' / '+nodes.length,'','flat','ok')}
+      ${kpiCard('Failed Nodes', nodes.filter(n=>!n.healthy).length,'','flat', nodes.some(n=>!n.healthy)?'warn':'ok')}
+      ${kpiCard('Availability State', nodes.every(n=>n.healthy)?'Fully Available': nodes.some(n=>n.healthy)?'Degraded':'Unavailable','','flat', nodes.every(n=>n.healthy)?'ok':nodes.some(n=>n.healthy)?'warn':'crit')}
+    </div>
+    <div class="mini-note">Killing a node redistributes its workload across remaining healthy nodes (simulated).</div>
+  </div>`;
+}
+function toggleNode(i){
+  const n = STATE.nodes[i];
+  n.healthy = !n.healthy;
+  logAudit(n.healthy?'Restore Node':'Kill Node','App Node '+(i+1),{old:n.healthy?'Failed':'Healthy',new:n.healthy?'Healthy':'Failed'}, n.healthy?'Success':'Failed');
+  pushAlert(n.name+' '+(n.healthy?'restored — workload rebalanced.':'failed — workload redistributed to remaining nodes.'), n.healthy?'ok':'crit');
+  STATE.systemStatus = STATE.nodes.every(x=>x.healthy)?'ok':STATE.nodes.some(x=>x.healthy)?'warn':'crit';
+  renderStatusPill();
+  renderRelPanel();
+}
+function textFieldVal(label,id,val){
+  return `<div class="field"><label>${label}</label><input type="text" id="${id}" value="${val}"></div>`;
+}
+
+/* ===========================================================================
+   SECURITY
+   =========================================================================== */
+const SEC_TABS = [
+  {id:'encryption', label:'Encryption'},
+  {id:'vault', label:'Secret Vault'},
+  {id:'sso', label:'SSO / MFA'},
+  {id:'masking', label:'Data Masking'},
+  {id:'ip', label:'IP Restrictions'},
+  {id:'attach', label:'Attachment Scanning'},
+  {id:'api', label:'API Rate Limiting'}
+];
+let secActiveTab='encryption';
+const secState = {encryption:true};
+RENDERERS.security = function(sub){
+  const map={sso:'sso', apisec:'api'};
+  secActiveTab = map[sub] || secActiveTab || 'encryption';
+  $('viewRoot').innerHTML = `
+    <div class="view-head"><div><h1>Security Center</h1><p>Interactive modules covering encryption, secrets, identity, masking, network controls, attachment scanning and API protection.</p></div></div>
+    <div class="tabs">${SEC_TABS.map(t=>`<button class="tab ${secActiveTab===t.id?'active':''}" onclick="secActiveTab='${t.id}';renderSecPanel()">${t.label}</button>`).join('')}</div>
+    <div id="secPanel"></div>`;
+  renderSecPanel();
+};
+function renderSecPanel(){
+  const p=$('secPanel');
+  if(secActiveTab==='encryption') p.innerHTML = secEncryptionHtml();
+  else if(secActiveTab==='vault') p.innerHTML = secVaultHtml();
+  else if(secActiveTab==='sso') p.innerHTML = secSsoHtml();
+  else if(secActiveTab==='masking') p.innerHTML = secMaskingHtml();
+  else if(secActiveTab==='ip') p.innerHTML = secIpHtml();
+  else if(secActiveTab==='attach') p.innerHTML = secAttachHtml();
+  else if(secActiveTab==='api') p.innerHTML = secApiHtml();
+}
+
+function secEncryptionHtml(){
+  const on = secState.encryption;
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Encryption Simulator</h3></div>
+    <div class="flow">
+      <div class="flow-node active">User</div><span class="flow-arrow">→</span>
+      <div class="flow-node ${on?'ok':'crit'}">${on?'Encrypted':'Plaintext'} Transport</div><span class="flow-arrow">→</span>
+      <div class="flow-node active">Application</div><span class="flow-arrow">→</span>
+      <div class="flow-node ${on?'ok':'crit'}">${on?'Encrypted':'Plaintext'} Storage</div>
+    </div>
+    <div class="toggle-row" style="max-width:260px;">Encryption ${switchHtml('encToggle', on, ck=>{secState.encryption=ck; logAudit('Toggle Encryption','Security Config',{old:on,new:ck}, ck?'Success':'High Risk'); renderSecPanel();})}</div>
+    ${!on? '<div class="disclaimer warn"><span class="ic">🚨</span> HIGH-RISK: encryption is disabled. Data in transit and at rest is unprotected in this simulation.</div>' : '<div class="disclaimer"><span class="ic">✅</span> Data is encrypted in transit (TLS) and at rest (simulated AES-256).</div>'}
+  </div>`;
+}
+
+function secVaultHtml(){
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Secret Vault</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Secret</th><th>Kind</th><th></th></tr></thead>
+      <tbody>${STATE.secrets.map(s=>`<tr><td class="mono">${s.name}</td><td>${s.kind}</td><td><button class="btn sm" onclick="requestSecret('${s.name}')">Request</button></td></tr>`).join('')}</tbody></table></div>
+      <div class="mini-note">Secret values are never displayed — the vault returns a scoped access token to the application only.</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Access Flow</h3></div>
+      <div class="logbox" id="vaultLog"><div class="mini-note" style="padding:10px;">Request a secret to see the vault access flow.</div></div>
+    </div>
+  </div>`;
+}
+function requestSecret(name){
+  const box = $('vaultLog');
+  box.innerHTML = `
+    <div class="log-line"><span class="t">${nowStr()}</span>Application requested <b>${name}</b></div>
+    <div class="log-line"><span class="t">${nowStr()}</span>${badgeHtml('Vault Response')} scoped token issued (TTL 300s) — value not exposed</div>
+    <div class="log-line"><span class="t">${nowStr()}</span>${badgeHtml('Access Granted')} application authenticated with target system</div>` + box.innerHTML;
+  logAudit('Secret Requested','Secret Vault',{old:'—',new:name});
+  toast('Secret "'+name+'" retrieved via scoped token (value never exposed)','ok');
+}
+
+const ssoState = {stage:'idle'};
+function secSsoHtml(){
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>SSO / MFA Login Simulation</h3></div>
+      <div class="field-row">${textField('Username','ssoUser','j.delgado@company.com')}</div>
+      <div class="field-row">
+        <button class="btn primary" onclick="runSsoFlow(true)">✓ Simulate Successful MFA</button>
+        <button class="btn danger" onclick="runSsoFlow(false)">✗ Simulate Failed MFA</button>
+      </div>
+      <div class="flow" id="ssoFlow" style="margin-top:14px;">
+        <div class="flow-node">Username</div><span class="flow-arrow">→</span>
+        <div class="flow-node">SSO</div><span class="flow-arrow">→</span>
+        <div class="flow-node">Password</div><span class="flow-arrow">→</span>
+        <div class="flow-node">MFA Challenge</div><span class="flow-arrow">→</span>
+        <div class="flow-node">Access</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Security Audit Event</h3></div>
+      <div id="ssoResult" class="mini-note">Run a login simulation to see the audit event.</div>
+    </div>
+  </div>`;
+}
+function runSsoFlow(success){
+  const user = $('ssoUser').value || 'j.delgado@company.com';
+  const flow = $('ssoFlow');
+  const nodes = flow.querySelectorAll('.flow-node');
+  nodes.forEach(n=>n.classList.remove('active','ok','crit'));
+  let i=0;
+  const step = ()=>{
+    if(i<nodes.length){
+      if(i===4 && !success){ nodes[i].classList.add('crit'); nodes[i].textContent='Denied'; }
+      else nodes[i].classList.add(i===4?'ok':'active');
+      i++; setTimeout(step,220);
+    } else {
+      $('ssoResult').innerHTML = success
+        ? `${badgeHtml('Success')} <b>${user}</b> authenticated via SSO + MFA. Session issued.`
+        : `${badgeHtml('Failed')} <b>${user}</b> failed MFA challenge. Access denied, account flagged for review.`;
+      logAudit('MFA Challenge','Identity Provider',{old:'Unauthenticated',new:user}, success?'Success':'Failed');
+      toast(success?'MFA succeeded — access granted':'MFA failed — access denied', success?'ok':'crit');
+    }
+  };
+  step();
+}
+
+function secMaskingHtml(){
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Data Masking</h3></div>
+    <div class="field-row">
+      ${textFieldVal('Sensitive Value','maskInput','1234-5678-9012-3456')}
+      <button class="btn primary" onclick="runMasking()" style="align-self:flex-end;">Mask Value</button>
+    </div>
+    <div id="maskResult"></div>
+  </div>`;
+}
+function runMasking(){
+  const raw = $('maskInput').value || '';
+  const clean = raw.replace(/[^0-9A-Za-z]/g,'');
+  let masked;
+  if(clean.length>=4){
+    const last4 = clean.slice(-4);
+    masked = raw.replace(/[0-9A-Za-z]/g, (c,idx)=>{
+      return idx >= raw.length-4 ? c : (/\d/.test(c)?'X':c);
+    });
+  } else masked = 'XXXX';
+  $('maskResult').innerHTML = `<div class="grid kpi2" style="margin-top:10px;">
+    ${kpiCard('Original', raw,'','flat','info')}
+    ${kpiCard('Masked', masked,'shown to non-privileged roles','flat','ok')}
+  </div>`;
+  logAudit('Data Masking Preview','Sensitive Field',{old:raw,new:masked});
+}
+
+function secIpHtml(){
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>IP Restriction Rules</h3></div>
+      <div class="small-label">Allowed Ranges</div>
+      <div class="chip-list">${STATE.ipAllow.map(r=>`<span class="chip">${r}</span>`).join('')}</div>
+      <div class="small-label" style="margin-top:10px;">Blocked Ranges</div>
+      <div class="chip-list">${STATE.ipBlock.map(r=>`<span class="chip">${r}</span>`).join('')}</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Access Test</h3></div>
+      <div class="field-row">${textFieldVal('IP Address','ipTest','203.0.113.44')}
+      <button class="btn primary" onclick="runIpTest()" style="align-self:flex-end;">Test Access</button></div>
+      <div id="ipResult"></div>
+    </div>
+  </div>`;
+}
+function ipInRange(ip, cidr){
+  try{
+    const [range, bits] = cidr.split('/');
+    const ipNum = ip.split('.').reduce((a,o)=>(a<<8)+ +o,0)>>>0;
+    const rangeNum = range.split('.').reduce((a,o)=>(a<<8)+ +o,0)>>>0;
+    const mask = bits==='0'?0:(~0 << (32-bits))>>>0;
+    return (ipNum & mask) === (rangeNum & mask);
+  }catch(e){return false;}
+}
+function runIpTest(){
+  const ip = $('ipTest').value.trim() || '0.0.0.0';
+  const blocked = STATE.ipBlock.some(r=>ipInRange(ip,r));
+  const allowed = !blocked && STATE.ipAllow.some(r=>ipInRange(ip,r));
+  const result = blocked?'Denied':(allowed?'Allowed':'Denied');
+  $('ipResult').innerHTML = `<div style="margin-top:8px;">${badgeHtml(result)} <span class="mono">${ip}</span> ${result==='Allowed'?'matched an allowed range.':'did not match an allowed range (or matched a blocked range).'}</div>`;
+  logAudit('IP Access Test','Network ACL',{old:'—',new:ip+' → '+result}, result);
+}
+
+const attachState = {history:[]};
+function secAttachHtml(){
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Attachment Upload Simulation</h3></div>
+      <div class="field-row">
+        ${textFieldVal('File Name','attName','bank_statement_aug.pdf')}
+        <div class="field"><label>File Type</label><select id="attType"><option>pdf</option><option>xlsx</option><option>docx</option><option>exe</option><option>zip</option></select></div>
+        <div class="field"><label>File Size (MB)</label><input type="number" id="attSize" value="3"></div>
+      </div>
+      <button class="btn primary" onclick="runAttachmentScan()">⬆ Upload &amp; Scan</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Scan Flow</h3></div>
+      <div class="flow" id="attFlow">
+        <div class="flow-node">Upload</div><span class="flow-arrow">→</span>
+        <div class="flow-node">Validate</div><span class="flow-arrow">→</span>
+        <div class="flow-node">Scan</div><span class="flow-arrow">→</span>
+        <div class="flow-node">Decision</div><span class="flow-arrow">→</span>
+        <div class="flow-node">Audit</div>
+      </div>
+      <div id="attResult" class="mini-note">Upload a file to run the scan flow.</div>
+    </div>
+  </div>`;
+}
+function runAttachmentScan(){
+  const name=$('attName').value||'file.pdf', type=$('attType').value, size=+$('attSize').value||1;
+  const risky = type==='exe' || type==='zip' || size>25;
+  const flow=$('attFlow'); const nodes=flow.querySelectorAll('.flow-node'); nodes.forEach(n=>n.classList.remove('active','ok','crit'));
+  let i=0;
+  const step=()=>{
+    if(i<4){ nodes[i].classList.add(i===3 && risky?'crit':'active'); i++; setTimeout(step,220); }
+    else {
+      nodes[4].classList.add('active');
+      const status = risky?'Quarantined':'Approved';
+      $('attResult').innerHTML = `${badgeHtml(status)} <b>${name}</b> (${type}, ${size}MB) — ${risky?'flagged as high risk and quarantined.':'passed scanning and is approved for use.'}`;
+      logAudit('Attachment Scan','Attachment',{old:'Uploaded',new:status}, status);
+      toast(name+' → '+status, risky?'crit':'ok');
+    }
+  };
+  step();
+}
+
+const apiRateState = {limit:1000, window:1, sent:0, allowed:0, throttled:0, series:[]};
+function secApiHtml(){
+  const s = apiRateState;
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>API Rate Limiting</h3></div>
+      ${numberField('Rate Limit (requests/window)','rlLimit',s.limit,v=>{apiRateState.limit=+v;})}
+      ${numberField('Requests to Simulate','rlSend',1200,v=>{apiRateState._send=+v;})}
+      <button class="btn primary" onclick="runRateLimitTest()">▶ Simulate Traffic</button>
+      <div class="grid kpi2" style="margin-top:12px;">
+        ${kpiCard('Allowed', fmt(s.allowed),'','flat','ok')}
+        ${kpiCard('Throttled', fmt(s.throttled),'','flat', s.throttled?'warn':'ok')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Traffic Chart</h3></div>
+      <div class="canvas-wrap"><canvas id="chartRateLimit"></canvas></div>
+    </div>
+  </div>`;
+}
+function runRateLimitTest(){
+  const s = apiRateState;
+  const send = s._send || 1200;
+  s.allowed = Math.min(send, s.limit);
+  s.throttled = Math.max(0, send-s.limit);
+  s.series = Array.from({length:12}, (_,i)=> i<9? s.limit/12*(1+Math.random()*0.2) : (s.limit/12)*(0.4+Math.random()*1.4));
+  logAudit('API Throttle Test','API Gateway',{old:'—',new:fmt(s.allowed)+' allowed / '+fmt(s.throttled)+' throttled'});
+  toast(fmt(s.throttled)+' of '+fmt(send)+' requests throttled','warn');
+  renderSecPanel();
+  drawChart($('chartRateLimit'), [{data:s.series.map(v=>Math.min(v,s.limit/9)),color:'#1B6FD1',fill:true}], {fmt:v=>Math.round(v)});
+}
+
+/* ===========================================================================
+   GOVERNANCE
+   =========================================================================== */
+const GOV_TABS = [
+  {id:'configmig', label:'Configuration Migration'},
+  {id:'version', label:'Version Control'},
+  {id:'promotion', label:'Environment Promotion'},
+  {id:'envcompare', label:'Environment Comparison'},
+  {id:'retention', label:'Retention'},
+  {id:'legalhold', label:'Legal Hold'}
+];
+let govActiveTab='configmig';
+RENDERERS.governance = function(sub){
+  const map={configmig:'configmig', envcompare:'envcompare', retention:'retention'};
+  govActiveTab = map[sub] || govActiveTab || 'configmig';
+  $('viewRoot').innerHTML = `
+    <div class="view-head"><div><h1>Governance Center</h1><p>Configuration migration, version control, environment promotion, drift comparison, retention and legal hold.</p></div></div>
+    <div class="tabs">${GOV_TABS.map(t=>`<button class="tab ${govActiveTab===t.id?'active':''}" onclick="govActiveTab='${t.id}';renderGovPanel()">${t.label}</button>`).join('')}</div>
+    <div id="govPanel"></div>`;
+  renderGovPanel();
+};
+function renderGovPanel(){
+  const p=$('govPanel');
+  if(govActiveTab==='configmig') p.innerHTML = govMigrationHtml();
+  else if(govActiveTab==='version') p.innerHTML = govVersionHtml();
+  else if(govActiveTab==='promotion') p.innerHTML = govPromotionHtml();
+  else if(govActiveTab==='envcompare') p.innerHTML = govCompareHtml();
+  else if(govActiveTab==='retention') p.innerHTML = govRetentionHtml();
+  else if(govActiveTab==='legalhold') p.innerHTML = govLegalHoldHtml();
+}
+
+const migState = {stage:0};
+const MIG_STAGES = ['Export','Review','Validate','Approve','Deploy','Verify'];
+function govMigrationHtml(){
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Configuration Migration — DEV → TEST → PROD</h3></div>
+    <div class="flow">${MIG_STAGES.map((s,i)=>`<div class="flow-node ${i<migState.stage?'ok':i===migState.stage?'active':''}">${s}</div>`).join('<span class="flow-arrow">→</span>')}</div>
+    <div class="field-row">
+      <button class="btn primary" onclick="advanceMigration()">▶ ${migState.stage>=MIG_STAGES.length?'Restart':'Advance Stage'}</button>
+      <button class="btn ghost" onclick="migState.stage=0;renderGovPanel();">Reset</button>
+    </div>
+    <div class="small-label" style="margin-top:14px;">Configuration Package</div>
+    <div class="chip-list">
+      <span class="chip">Format</span><span class="chip">Profile</span><span class="chip">Rule</span><span class="chip">Security</span><span class="chip">Integration</span>
+    </div>
+    <div class="mini-note">${migState.stage===0?'Package not yet exported.': migState.stage>=MIG_STAGES.length?'Migration verified in target environment.':'Currently at stage: '+MIG_STAGES[migState.stage]+'.'}</div>
+  </div>`;
+}
+function advanceMigration(){
+  if(migState.stage>=MIG_STAGES.length){ migState.stage=0; renderGovPanel(); return; }
+  const stageName = MIG_STAGES[migState.stage];
+  migState.stage++;
+  logAudit(stageName,'Configuration Package',{old:migState.stage>1?MIG_STAGES[migState.stage-2]:'—',new:stageName});
+  if(stageName==='Approve') toast('Approval recorded — deployment unblocked','ok');
+  if(stageName==='Deploy') toast('Configuration deployed to target environment','ok');
+  if(stageName==='Verify') toast('Migration verified successfully','ok');
+  renderGovPanel();
+}
+
+function govVersionHtml(){
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Version Control</h3><span class="sub">${STATE.configVersions.length} versions tracked</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Version</th><th>User</th><th>Date</th><th>Change</th><th>Approval</th><th>Status</th></tr></thead>
+    <tbody>${STATE.configVersions.map(v=>`<tr><td class="mono">${v.v}</td><td>${v.user}</td><td class="mono">${v.date}</td><td>${v.change}</td><td>${badgeHtml(v.approval)}</td><td>${badgeHtml(v.status)}</td></tr>`).join('')}</tbody></table></div>
+    <button class="btn" style="margin-top:10px;" onclick="createNewVersion()">＋ Create Draft Version</button>
+  </div>`;
+}
+function createNewVersion(){
+  const last = STATE.configVersions[STATE.configVersions.length-1];
+  const parts = last.v.replace('v','').split('.').map(Number);
+  parts[1]++;
+  const v = 'v'+parts.join('.');
+  STATE.configVersions.push({v, user:'j.delgado', date:new Date().toISOString().slice(0,10), change:'New draft change set', approval:'Pending', status:'Draft'});
+  logAudit('Create Version','Configuration',{old:last.v,new:v});
+  toast('Draft version '+v+' created','ok');
+  renderGovPanel();
+}
+
+const promoState = {stage:'DEV', approved:false};
+function govPromotionHtml(){
+  const s=promoState;
+  const stages = ['DEV','TEST','PROD'];
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Environment Promotion</h3></div>
+    <div class="flow">
+      <div class="flow-node ${s.stage==='DEV'?'active':'ok'}">DEV</div><span class="flow-arrow">→</span>
+      <div class="flow-node ${s.stage==='TEST'?'active':(stages.indexOf(s.stage)>1?'ok':'')}">TEST</div><span class="flow-arrow">→</span>
+      <div class="flow-node ${s.approved?'ok':''}">Approval</div><span class="flow-arrow">→</span>
+      <div class="flow-node ${s.stage==='PROD'?'ok':''}">PROD</div>
+    </div>
+    <div class="field-row">
+      <button class="btn" onclick="promoteTo('TEST')" ${s.stage!=='DEV'?'disabled':''}>Promote DEV → TEST</button>
+      <button class="btn" onclick="promoState.approved=true;renderGovPanel();toast('Approval granted','ok');logAudit('Approval','Promotion Request',{old:'Pending',new:'Approved'});" ${s.stage!=='TEST'||s.approved?'disabled':''}>Approve for PROD</button>
+      <button class="btn primary" onclick="promoteTo('PROD')" ${!(s.stage==='TEST'&&s.approved)?'disabled':''}>Promote TEST → PROD</button>
+      <button class="btn ghost" onclick="promoState.stage='DEV';promoState.approved=false;renderGovPanel();">Reset</button>
+    </div>
+    ${s.stage==='TEST' && !s.approved ? '<div class="disclaimer warn"><span class="ic">🔒</span> PROD promotion is blocked until an approval is recorded.</div>':''}
+  </div>`;
+}
+function promoteTo(env){
+  logAudit('Promote Configuration','Environment',{old:promoState.stage,new:env});
+  promoState.stage = env;
+  toast('Promoted to '+env,'ok');
+  renderGovPanel();
+}
+
+function govCompareHtml(){
+  const c = STATE.envConfig;
+  const keys = Object.keys(c.DEV);
+  function rowsFor(a,b){
+    return keys.map(k=>{
+      const va=c[a][k], vb=c[b][k];
+      const same = va===vb;
+      return `<tr><td style="text-transform:capitalize;">${k}</td><td class="mono">${va}</td><td class="mono">${vb}</td><td>${same?badgeHtml('Same'):badgeHtml('Different')}</td></tr>`;
+    }).join('');
+  }
+  const drift = keys.filter(k=>c.DEV[k]!==c.TEST[k]).length + keys.filter(k=>c.TEST[k]!==c.PROD[k]).length;
+  STATE.configDrift = drift;
+  return `
+  <div class="disclaimer"><span class="ic">🔍</span> ${drift} configuration field(s) differ across environments — reflected on the Dashboard as Configuration Drift.</div>
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>DEV vs TEST</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Field</th><th>DEV</th><th>TEST</th><th></th></tr></thead><tbody>${rowsFor('DEV','TEST')}</tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>TEST vs PROD</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Field</th><th>TEST</th><th>PROD</th><th></th></tr></thead><tbody>${rowsFor('TEST','PROD')}</tbody></table></div>
+    </div>
+  </div>`;
+}
+
+function govRetentionHtml(){
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Retention Simulator</h3></div>
+    <div class="table-wrap"><table><thead><tr><th>Record Type</th><th>Policy</th><th>Age</th><th>Status</th></tr></thead>
+    <tbody>${STATE.retentionRecords.map(r=>{
+      const status = retentionStatus(r);
+      return `<tr><td>${r.type}</td><td class="mono">${r.policy}</td><td class="mono">${r.age}</td><td>${badgeHtml(status)}</td></tr>`;
+    }).join('')}</tbody></table></div>
+    <div class="disclaimer" style="margin-top:12px;"><span class="ic">🛡️</span> Destructive deletion is not implemented by default. Records "Eligible for Deletion" require a separate confirmed action outside this simulator.</div>
+  </div>`;
+}
+function retentionStatus(r){
+  if(STATE.legalHold.active) return 'Retained';
+  const policyYears = r.policy==='Permanent'?9999:parseInt(r.policy);
+  const ageYears = parseInt(r.age);
+  if(r.policy==='Permanent') return 'Active';
+  if(ageYears>=policyYears) return 'Eligible for deletion';
+  if(ageYears>=policyYears-2) return 'Archive';
+  return 'Active';
+}
+
+function govLegalHoldHtml(){
+  const lh = STATE.legalHold;
+  return `
+  <div class="card">
+    <div class="card-head"><h3>Legal Hold</h3></div>
+    ${lh.active ? `<div class="disclaimer warn"><span class="ic">🔒</span> Legal hold is ACTIVE — deletion is disabled for all in-scope records.</div>` : `<div class="disclaimer"><span class="ic">🔓</span> No legal hold is currently active.</div>`}
+    <div class="grid kpi2">
+      ${kpiCard('Hold Status', lh.active?'Active':'Inactive','','flat', lh.active?'warn':'ok')}
+      ${kpiCard('Protected Records', fmt(lh.protectedRecords),'','flat','ok')}
+      ${kpiCard('Applied By', lh.appliedBy||'—','','flat','ok')}
+      ${kpiCard('Timestamp', lh.ts||'—','','flat','ok')}
+    </div>
+    <div class="field-row" style="margin-top:10px;">
+      <button class="btn danger" onclick="applyLegalHold()" ${lh.active?'disabled':''}>🔒 Apply Legal Hold</button>
+      <button class="btn" onclick="releaseLegalHold()" ${!lh.active?'disabled':''}>🔓 Release Legal Hold</button>
+    </div>
+  </div>`;
+}
+function applyLegalHold(){
+  STATE.legalHold = {active:true, protectedRecords: 12000+Math.floor(Math.random()*5000), appliedBy:'j.delgado', ts:nowStr()};
+  logAudit('Apply Legal Hold','Retention Policy',{old:'Inactive',new:'Active'});
+  toast('Legal hold applied — deletion disabled','warn');
+  renderGovPanel();
+}
+function releaseLegalHold(){
+  logAudit('Release Legal Hold','Retention Policy',{old:'Active',new:'Inactive'});
+  STATE.legalHold = {active:false, protectedRecords:0, appliedBy:null, ts:null};
+  toast('Legal hold released','ok');
+  renderGovPanel();
+}
+
+/* ===========================================================================
+   MONITORING
+   =========================================================================== */
+RENDERERS.monitoring = function(){
+  const t = STATE.thresholds;
+  const metrics = [
+    {name:'Response Time (avg)', val: 210+Math.round(Math.random()*40), unit:'ms', warnAt:600},
+    {name:'P95 Response Time', val: 640+Math.round(Math.random()*180), unit:'ms', warnAt:t.p95},
+    {name:'P99 Response Time', val: 1100+Math.round(Math.random()*300), unit:'ms', warnAt:t.p95*2},
+    {name:'Throughput', val: 170+Math.round(Math.random()*30), unit:'tx/s', warnAt:0, invert:true, min:120},
+    {name:'Job Success Rate', val: STATE.jobSuccessRate, unit:'%', warnAt:t.jobSuccess, invert:true},
+    {name:'Import Failure Rate', val: 1.2, unit:'%', warnAt:5},
+    {name:'Match Rate', val: STATE.matchRate, unit:'%', warnAt:90, invert:true},
+    {name:'API Error Rate', val: 0.8, unit:'%', warnAt:t.apiErrorRate},
+    {name:'API Throttling', val: fmtPctNum(STATE.apiThrottled/STATE.apiRequests*100), unit:'%', warnAt:5},
+    {name:'RPO', val: STATE.rpoMinutes, unit:'min', warnAt:60},
+    {name:'RTO', val: STATE.rtoMinutes, unit:'min', warnAt:240},
+    {name:'Availability', val: 99.95, unit:'%', warnAt:99.5, invert:true},
+    {name:'Dashboard Cache Age', val: Math.round((Date.now()-cacheState.lastRefresh)/60000), unit:'min', warnAt:t.cacheAgeMin}
+  ];
+  const rows = metrics.map(m=>{
+    const breach = m.invert ? m.val < m.warnAt : m.val > m.warnAt;
+    return `<tr><td>${m.name}</td><td class="mono">${m.val}${m.unit}</td><td class="mono">${m.invert?'≥ ':'≤ '}${m.warnAt}${m.unit}</td><td>${badgeHtml(breach?'Alert':'Normal')}</td></tr>`;
+  }).join('');
+  $('viewRoot').innerHTML = `
+  <div class="view-head">
+    <div><h1>Monitoring Center</h1><p>Configure alert thresholds and review real-time (simulated) metric status.</p></div>
+    <div class="view-actions"><button class="btn primary" onclick="refreshMonitoring()">🔄 Refresh Metrics</button></div>
+  </div>
+  <div class="grid cols2" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="card-head"><h3>Threshold Configuration</h3></div>
+      ${rangeField('P95 Response Time (ms)','thP95',300,2000,50,t.p95,v=>{STATE.thresholds.p95=+v;})}
+      ${rangeField('Min Job Success Rate (%)','thJob',80,100,1,t.jobSuccess,v=>{STATE.thresholds.jobSuccess=+v;})}
+      ${rangeField('Max API Error Rate (%)','thApi',0,10,0.5,t.apiErrorRate,v=>{STATE.thresholds.apiErrorRate=+v;})}
+      ${rangeField('Max Cache Age (min)','thCache',5,120,5,t.cacheAgeMin,v=>{STATE.thresholds.cacheAgeMin=+v;})}
+      <button class="btn" onclick="renderMonitoringOnly()">Apply Thresholds</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Active Alerts</h3></div>
+      <div class="logbox" id="alertsLog">${STATE.alerts.length? STATE.alerts.slice(0,12).map(a=>`<div class="log-line"><span class="t">${a.ts}</span>${badgeHtml(a.level==='crit'?'Critical':a.level==='warn'?'Warning':'Info')} ${a.msg}</div>`).join('') : '<div class="mini-note" style="padding:10px;">No alerts generated yet.</div>'}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Metric Status</h3><span class="sub">threshold breaches auto-generate alerts</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Metric</th><th>Value</th><th>Threshold</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
+  metrics.forEach(m=>{
+    const breach = m.invert ? m.val < m.warnAt : m.val > m.warnAt;
+    if(breach && Math.random()>0.6) pushAlert(m.name+' breached threshold ('+m.val+m.unit+')', 'warn');
+  });
+};
+function fmtPctNum(n){return Math.round(n*10)/10;}
+function refreshMonitoring(){ toast('Metrics refreshed','info'); RENDERERS.monitoring(); }
+function renderMonitoringOnly(){ toast('Thresholds applied','ok'); logAudit('Update Thresholds','Monitoring Config',{old:'—',new:'updated'}); RENDERERS.monitoring(); }
+
+/* ===========================================================================
+   TESTING / FAILURE INJECTION LAB
+   =========================================================================== */
+const FAILURE_TYPES = [
+  {id:'worker', label:'Worker Failure'},
+  {id:'network', label:'Network Failure'},
+  {id:'dupimport', label:'Duplicate Import'},
+  {id:'database', label:'Database Failure'},
+  {id:'integration', label:'Integration Failure'},
+  {id:'auth', label:'Authentication Failure'},
+  {id:'apispike', label:'API Spike'},
+  {id:'drift', label:'Configuration Drift'}
+];
+RENDERERS.testing = function(){
+  $('viewRoot').innerHTML = `
+  <div class="view-head"><div><h1>Failure Injection Lab</h1><p>Inject a controlled failure and walk through detection, impact, recovery and audit — the core loop of resilience training.</p></div></div>
+  <div class="disclaimer"><span class="ic">🧪</span> All failures below are simulated in the browser only. Nothing is actually broken.</div>
+  <div class="grid cols3" style="margin-bottom:16px;">
+    ${FAILURE_TYPES.map(f=>`<button class="btn" style="justify-content:center;" onclick="injectFailure('${f.id}','${f.label}')">⚠ ${f.label}</button>`).join('')}
+  </div>
+  <div id="failureResult"></div>`;
+};
+function injectFailure(id,label){
+  const box = $('failureResult');
+  box.innerHTML = `<div class="card"><div class="card-head"><h3>${label} — Injection in Progress</h3></div>
+    <div class="flow" id="failFlow">
+      <div class="flow-node active">Detection</div><span class="flow-arrow">→</span>
+      <div class="flow-node">Impact</div><span class="flow-arrow">→</span>
+      <div class="flow-node">Recovery</div><span class="flow-arrow">→</span>
+      <div class="flow-node">Audit</div><span class="flow-arrow">→</span>
+      <div class="flow-node">Final State</div>
+    </div>
+    <div id="failNarrative"></div>
+  </div>`;
+  logAudit('Inject Failure: '+label,'Failure Injection Lab',{old:'Stable',new:label},'Injected');
+  const narratives = failureNarrative(id,label);
+  const nodes = document.querySelectorAll('#failFlow .flow-node');
+  let i=0;
+  const step = ()=>{
+    nodes.forEach(n=>n.classList.remove('active'));
+    if(i>0) nodes[i-1].classList.add('ok');
+    if(i<nodes.length){ nodes[i].classList.add('active'); }
+    $('failNarrative').innerHTML = `<div class="log-line" style="border:none;padding:10px 0;"><b>${['Detection','Impact','Recovery','Audit','Final State'][i]}:</b> ${narratives[i]}</div>` + ($('failNarrative').innerHTML||'');
+    i++;
+    if(i<nodes.length) setTimeout(step, 650);
+    else { toast(label+' scenario complete — system recovered (simulated)','ok'); pushAlert(label+' resolved after simulated recovery workflow.','info'); }
+  };
+  step();
+}
+function failureNarrative(id,label){
+  const base = {
+    worker:['Monitoring detected a worker heartbeat timeout on AutoMatch Worker 4.','In-flight batch (≈50,000 txns) paused; queue depth rising.','Orchestrator reassigned the batch to healthy workers; job resumed.','Failure and recovery events recorded with timestamps and affected job ID.','All workers healthy, match rate restored to baseline.'],
+    network:['API gateway reported elevated timeout rate to the integration layer.','Inbound bank feed delayed; downstream import job queued.','Automatic retry with exponential backoff re-established connectivity.','Network incident and retry attempts logged for audit review.','Connectivity restored, backlog drained within SLA.'],
+    dupimport:['Duplicate Import ID detected against the idempotency ledger.','Zero risk of duplicate records — import blocked before commit.','No recovery action required; original data set remains authoritative.','Blocked duplicate execution logged with original + duplicate import IDs.','System state unchanged; audit trail preserved.'],
+    database:['Connection pool exhaustion detected on primary database.','Write operations queued; read replicas continued serving reports.','Failover to standby database node completed automatically.','Database failover event and duration logged.','Primary promoted, replication re-established, system stable.'],
+    integration:['ERP integration endpoint returned repeated 5xx errors.','Outbound journal postings queued instead of lost.','Circuit breaker engaged; integration retried on cool-down schedule.','Integration failure window and queued message count logged.','Endpoint recovered; queued postings flushed successfully.'],
+    auth:['Multiple failed MFA attempts detected for a single account.','Account temporarily locked to prevent brute-force access.','Security team notified; step-up verification required to unlock.','Authentication failure streak logged with IP and device fingerprint.','Account unlocked after verified re-authentication.'],
+    apispike:['Inbound request rate exceeded 3× the configured rate limit.','Excess requests throttled; core reconciliation jobs unaffected.','Rate limiter absorbed the spike; backlog processed within window.','Spike duration, peak RPS and throttle count logged.','Traffic normalized; no data loss, some client-side retries.'],
+    drift:['Environment comparison detected PROD ruleset diverging from TEST.','Risk of inconsistent matching behavior between environments.','Change owner notified; drift queued for governance review.','Drifted fields and detection timestamp logged for audit.','Drift acknowledged and scheduled for reconciliation via Configuration Migration.']
+  };
+  return base[id] || Array(5).fill('Simulated step for '+label+'.');
+}
+
+/* ===========================================================================
+   FINANCIAL IMPACT SIMULATOR
+   =========================================================================== */
+const finState = {txns:5000, avgValue:1200, failureType:'Duplicate Import', delay:3};
+RENDERERS.financial = function(){
+  const f = finState;
+  const exposure = f.txns*f.avgValue;
+  const delayFactor = 1 + f.delay*0.015;
+  const risk = exposure*0.02*delayFactor;
+  $('viewRoot').innerHTML = `
+  <div class="view-head"><div><h1>Financial Impact Simulator</h1><p>Explore illustrative business exposure from reconciliation failures — for training discussion, not real accounting output.</p></div></div>
+  <div class="disclaimer warn"><span class="ic">⚠️</span> EDUCATIONAL IMPACT SIMULATION — figures are illustrative only and do not constitute financial, accounting or audit guidance.</div>
+  <div class="grid cols2">
+    <div class="card">
+      <div class="card-head"><h3>Scenario Inputs</h3></div>
+      ${numberField('Affected Transactions','finTxns',f.txns,v=>{finState.txns=+v;RENDERERS.financial();})}
+      ${numberField('Average Transaction Value ($)','finAvg',f.avgValue,v=>{finState.avgValue=+v;RENDERERS.financial();})}
+      <div class="field"><label>Failure Type</label>
+        <select id="finType" onchange="finState.failureType=this.value;RENDERERS.financial();">
+          ${['Duplicate Import','Incorrect Balance','Delayed Close','Missing Evidence','Incorrect Adjustment'].map(t=>`<option ${f.failureType===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      ${rangeField('Recovery Delay (days)','finDelay',0,30,1,f.delay,v=>{finState.delay=+v;RENDERERS.financial();})}
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Illustrative Business Exposure</h3></div>
+      <div class="grid kpi2">
+        ${kpiCard('Transactions Exposed', fmt(f.txns),'','flat','warn')}
+        ${kpiCard('Gross Exposure', '$'+fmt(exposure),'txns × avg value','flat','warn')}
+        ${kpiCard('Estimated Risk Value', '$'+fmt(risk),'illustrative, 2% × delay factor','flat','crit')}
+        ${kpiCard('Delay Factor', fmt1(delayFactor)+'×','from recovery delay','flat','info')}
+      </div>
+    </div>
+  </div>
+  <div class="card section-block">
+    <div class="card-head"><h3>Illustrative Statement Impact — ${f.failureType}</h3></div>
+    <div class="grid cols3">
+      <div><div class="small-label">Balance Sheet</div><div class="mini-note">${statementNote(f.failureType,'bs')}</div></div>
+      <div><div class="small-label">P&amp;L</div><div class="mini-note">${statementNote(f.failureType,'pl')}</div></div>
+      <div><div class="small-label">Cash Flow</div><div class="mini-note">${statementNote(f.failureType,'cf')}</div></div>
+    </div>
+  </div>`;
+};
+function statementNote(type,stmt){
+  const map = {
+    'Duplicate Import':{bs:'Overstated receivable/payable until duplicate is identified and reversed.',pl:'No direct P&L effect if caught pre-close; risk of overstated revenue if undetected.',cf:'Cash forecast may misstate near-term inflows/outflows.'},
+    'Incorrect Balance':{bs:'Misstated account balance pending correcting entry.',pl:'Potential misclassification between accounts affecting reported results.',cf:'Minimal direct effect unless tied to cash accounts.'},
+    'Delayed Close':{bs:'Late-posted entries may leave balances provisional at reporting date.',pl:'Reporting timeline risk; may require disclosure of subsequent events.',cf:'Delayed visibility into period-end cash position.'},
+    'Missing Evidence':{bs:'Supporting documentation gap increases audit risk on the balance.',pl:'No direct P&L effect; increases control-deficiency risk.',cf:'No direct effect; may slow audit sign-off timelines.'},
+    'Incorrect Adjustment':{bs:'Adjustment may need reversal, affecting the underlying balance.',pl:'Possible restatement of the period if adjustment reaches P&L.',cf:'Indirect effect via any related cash entries.'}
+  };
+  return (map[type]||{})[stmt] || 'Illustrative note not available.';
+}
+
+/* ===========================================================================
+   CERTIFICATION PREP (ACCA / CFA / CMA / CPA)
+   =========================================================================== */
+const CERT_CONTENT = {
+  ACCA:{focus:'Internal controls, audit evidence, financial reporting',items:[
+    {t:'Internal Controls', d:'Consider how automated matching and approval workflows in a reconciliation platform serve as preventive and detective controls, and where segregation of duties is enforced.'},
+    {t:'Audit Evidence', d:'Discuss how system-generated audit trails, snapshots and version history could serve as evidence of control operation during an engagement.'},
+    {t:'Financial Reporting', d:'Consider how unresolved unmatched items at period-end could affect the completeness assertion for account balances.'}
+  ]},
+  CFA:{focus:'Operational risk, financial analysis, cash flow',items:[
+    {t:'Operational Risk', d:'Evaluate how single points of failure (e.g., no high availability) increase operational risk exposure for a finance close process.'},
+    {t:'Financial Analysis', d:'Consider how reconciliation delays could distort short-term liquidity ratios if account balances are provisional.'},
+    {t:'Cash Flow', d:'Discuss how a delayed bank reconciliation might obscure the true cash position used in forecasting.'}
+  ]},
+  CMA:{focus:'Efficiency, performance, cost of downtime, management control',items:[
+    {t:'Efficiency', d:'Compare the conceptual workload reduction from incremental loading versus full reprocessing, and its effect on close-cycle time.'},
+    {t:'Performance', d:'Discuss how KPIs like match rate and job success rate could feed into a management dashboard for the controllership function.'},
+    {t:'Cost of Downtime', d:'Estimate the illustrative cost of a failed job needing manual reconciliation versus automated recovery.'},
+    {t:'Management Control', d:'Consider how approval gates before production deployment support management oversight of the close process.'}
+  ]},
+  CPA:{focus:'IT controls, data integrity, audit trail, financial reporting',items:[
+    {t:'IT General Controls', d:'Map SSO/MFA, IP restriction and encryption controls to typical ITGC domains (access, change management, operations).'},
+    {t:'Data Integrity', d:'Discuss how idempotent imports and rollback capability protect against duplicate or partial postings.'},
+    {t:'Audit Trail', d:'Consider what fields a complete audit log needs (who, what, when, before/after) to support an examination.'},
+    {t:'Financial Reporting', d:'Discuss how legal hold interacts with retention policy to preserve records relevant to litigation or investigation.'}
+  ]}
+};
+let certActiveTab='ACCA';
+RENDERERS.learning = function(){
+  $('viewRoot').innerHTML = `
+  <div class="view-head"><div><h1>Certification Prep — ACCA / CFA / CMA / CPA</h1><p>Original, educational discussion prompts connecting ARCS-style nonfunctional requirements to each certification's exam domains. Not official exam questions.</p></div></div>
+  <div class="tabs">${Object.keys(CERT_CONTENT).map(k=>`<button class="tab ${certActiveTab===k?'active':''}" onclick="certActiveTab='${k}';RENDERERS.learning()">${k}</button>`).join('')}</div>
+  <div id="certPanel"></div>`;
+  const c = CERT_CONTENT[certActiveTab];
+  $('certPanel').innerHTML = `
+  <div class="card">
+    <div class="card-head"><h3>${certActiveTab} Focus Areas</h3><span class="sub">${c.focus}</span></div>
+    <div class="grid cols2">
+      ${c.items.map(it=>`<div class="card tight"><div style="font-weight:800;font-size:12.5px;margin-bottom:4px;">${it.t}</div><div class="mini-note">${it.d}</div></div>`).join('')}
+    </div>
+  </div>`;
+};
+
+/* ===========================================================================
+   COMPLIANCE CENTER
+   =========================================================================== */
+const COMPLIANCE_CONTENT = {
+  'US GAAP':'Under US GAAP, reconciliation processes support the completeness and existence assertions for cash, intercompany and other balance-sheet accounts. Timely account reconciliation is commonly viewed as a key control supporting reliable financial statements.',
+  'IFRS':'Under IFRS, robust reconciliation practices help ensure that reported balances are fairly presented and that period-end cut-off is respected, supporting the qualitative characteristics of faithful representation.',
+  'IAS':'Certain IAS standards (e.g., around presentation and disclosure) benefit from strong underlying reconciliation evidence, particularly where estimates or adjustments require clear support.',
+  'Internal Controls':'A well-designed reconciliation platform can contribute preventive controls (e.g., approval gates, idempotent imports) and detective controls (e.g., variance reporting, audit trails) within a broader internal control framework such as COSO.',
+  'Audit Evidence':'System-generated logs, snapshots, and version history can serve as a form of audit evidence, provided the system itself has reliable access controls, change management and an intact audit trail.'
+};
+let complianceActiveTab='US GAAP';
+RENDERERS.compliance = function(){
+  $('viewRoot').innerHTML = `
+  <div class="view-head"><div><h1>Compliance Center</h1><p>High-level educational notes only.</p></div></div>
+  <div class="disclaimer warn"><span class="ic">⚖️</span> This simulator is educational and does not constitute accounting, legal, regulatory or audit advice.</div>
+  <div class="tabs">${Object.keys(COMPLIANCE_CONTENT).map(k=>`<button class="tab ${complianceActiveTab===k?'active':''}" onclick="complianceActiveTab='${k}';RENDERERS.compliance()">${k}</button>`).join('')}</div>
+  <div class="card"><div class="card-head"><h3>${complianceActiveTab}</h3></div><p style="font-size:13px;line-height:1.6;color:var(--text);margin:0;">${COMPLIANCE_CONTENT[complianceActiveTab]}</p></div>`;
+};
+
+/* ===========================================================================
+   SCENARIO ENGINE
+   =========================================================================== */
+const SCENARIOS = [
+  {id:'s1', title:'Five-Million-Transaction Processing', situation:'Month-end close triggers AutoMatch across 5,000,000 transactions.', starting:'10 workers provisioned, index enabled, cache warm.', objective:'Complete the match run within the estimated window without worker starvation.', actions:['Configure Performance → Volume & Workers','Run Parallel AutoMatch','Review worker distribution'], response:'Workers process ~500,000 transactions each; estimated completion shown in the Performance tab.', expected:'All workers report Healthy and the run completes.', financial:'Low — on-time close avoids any exposure window.', evidence:'AutoMatch job log + worker assignment table.'},
+  {id:'s2', title:'Duplicate Bank Import', situation:'A scheduled bank feed import is accidentally triggered twice with the same Import ID.', starting:'Import ID IMP-2026-0091, 25,000 records.', objective:'Confirm the platform prevents duplicate postings.', actions:['Open Reliability → Idempotent Imports','Run the same Import ID twice'], response:'Second run is detected as a duplicate execution and blocked.', expected:'No unintended duplicate records; audit event recorded.', financial:'None if caught — otherwise risk of overstated balances.', evidence:'Idempotency audit log entries.'},
+  {id:'s3', title:'Worker Failure Mid-Run', situation:'A worker fails partway through a large AutoMatch run.', starting:'10 workers, one selected to fail.', objective:'Verify workload is redistributed and the run still completes.', actions:['Open Performance → Parallel AutoMatch','Simulate Worker Failure','Run AutoMatch'], response:'Remaining workers absorb the failed worker\'s share.', expected:'Run completes with a note on recovery.', financial:'Minimal — brief delay only.', evidence:'Worker failure + recovery narrative in Failure Injection Lab.'},
+  {id:'s4', title:'Data-Load Failure with Invalid Rows', situation:'A load batch contains 500 invalid rows out of 10,000.', starting:'Mode defaults to Reject & Continue.', objective:'Compare outcomes between Full Rollback and Reject & Continue.', actions:['Open Reliability → Rollback','Run both modes and compare'], response:'Reject & Continue commits valid rows; Full Rollback commits none.', expected:'Understand the trade-off between data availability and all-or-nothing consistency.', financial:'Depends on mode chosen — Full Rollback delays all data availability.', evidence:'Rollback result panel + audit log.'},
+  {id:'s5', title:'Disaster Recovery Failover', situation:'The primary site becomes unavailable during a reconciliation period.', starting:'Primary Active, DR Standby, RPO 15 min, RTO 2 hr.', objective:'Fail over to DR, validate, and eventually fail back.', actions:['Open Reliability → Backup, DR & Snapshots','Simulate Failure → Failover → Validate → Failback'], response:'DR site becomes active; resilience rail updates on the Dashboard.', expected:'Business resumes on DR within the RTO target.', financial:'Depends on recovery duration vs. RTO — modeled in RPO/RTO Simulator.', evidence:'DR stage transitions in the audit log.'},
+  {id:'s6', title:'Security Breach Attempt', situation:'Repeated failed MFA attempts are observed on one account, alongside an IP outside allowed ranges.', starting:'SSO/MFA and IP restriction modules configured.', objective:'Demonstrate detection and containment.', actions:['Open Security → SSO/MFA → Simulate Failed MFA','Open Security → IP Restrictions → test a blocked IP'], response:'Failed MFA and denied IP access are both logged as security audit events.', expected:'No unauthorized access granted.', financial:'Low if contained; reputational/regulatory risk if undetected.', evidence:'Security audit events for MFA + IP test.'},
+  {id:'s7', title:'Production Deployment', situation:'A new ruleset (v2.0) is ready to move from DEV to PROD.', starting:'Draft version pending approval.', objective:'Move the configuration through the full governance flow.', actions:['Open Governance → Configuration Migration','Advance through Export → Review → Validate → Approve → Deploy → Verify'], response:'Each stage is logged; PROD promotion is blocked without approval.', expected:'Deployment completes only after approval is recorded.', financial:'Low if governed correctly; high if unapproved changes reach PROD.', evidence:'Migration stage log + version control table.'},
+  {id:'s8', title:'Legal Hold Investigation', situation:'Legal counsel requests that certain financial records be preserved for a pending matter.', starting:'Retention policy would otherwise mark some records eligible for deletion.', objective:'Apply a legal hold and confirm deletion is blocked.', actions:['Open Governance → Retention & Legal Hold','Apply Legal Hold','Review Retention tab status'], response:'All in-scope records show as Retained regardless of age-based policy.', expected:'No deletions occur while the hold is active.', financial:'Avoids potential spoliation risk / legal exposure.', evidence:'Legal hold audit trail (applied by, timestamp, release).'}
+];
+RENDERERS.scenarios = function(){
+  $('viewRoot').innerHTML = `
+  <div class="view-head"><div><h1>Scenario Engine</h1><p>Eight guided scenarios connecting the simulators above to realistic reconciliation situations.</p></div></div>
+  <div class="grid cols3" id="scenarioGrid"></div>`;
+  const grid = $('scenarioGrid');
+  SCENARIOS.forEach((sc,i)=>{
+    const scored = STATE.scenarioProgress[sc.id];
+    const card = el(`<div class="scenario-card">
+      <div class="num">SCENARIO ${i+1}</div>
+      <h4>${sc.title}</h4>
+      <p>${sc.situation}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        ${scored? `<span class="score-pill" style="color:var(--success);">${scored}/100</span>` : `<span class="mini-note">Not yet run</span>`}
+        <button class="btn sm primary" onclick="openScenario('${sc.id}')">Open</button>
+      </div>
+    </div>`);
+    grid.appendChild(card);
+  });
+};
+function openScenario(id){
+  const sc = SCENARIOS.find(s=>s.id===id);
+  const modal = el(`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-head"><h3>${sc.title}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="small-label">Situation</div><p style="margin-top:0;">${sc.situation}</p>
+        <div class="small-label">Starting Data</div><p style="margin-top:0;">${sc.starting}</p>
+        <div class="small-label">User Objective</div><p style="margin-top:0;">${sc.objective}</p>
+        <div class="small-label">Suggested Actions</div>
+        <ul>${sc.actions.map(a=>`<li>${a}</li>`).join('')}</ul>
+        <div class="small-label">System Response</div><p style="margin-top:0;">${sc.response}</p>
+        <div class="small-label">Expected Result</div><p style="margin-top:0;">${sc.expected}</p>
+        <div class="small-label">Financial Impact</div><p style="margin-top:0;">${sc.financial}</p>
+        <div class="small-label">Audit Evidence</div><p style="margin-top:0;">${sc.evidence}</p>
+        <hr class="div">
+        <button class="btn primary" onclick="completeScenario('${sc.id}')">✓ Mark Scenario Complete &amp; Score</button>
+      </div>
+    </div>
+  </div>`);
+  $('modalRoot').appendChild(modal);
+}
+function closeModal(){ $('modalRoot').innerHTML=''; }
+function completeScenario(id){
+  const score = 78+Math.floor(Math.random()*23);
+  STATE.scenarioProgress[id]=score;
+  logAudit('Complete Scenario','Scenario '+id,{old:'In Progress',new:'Completed — Score '+score});
+  toast('Scenario scored: '+score+'/100','ok');
+  closeModal();
+  RENDERERS.scenarios();
+}
+
+/* ===========================================================================
+   TRAINING CENTER
+   =========================================================================== */
+const EXERCISES = [
+  {id:'e1', title:'Configure High-Volume Matching', instructions:'Set Transaction Volume to at least 10,000,000 and Worker Count to at least 8 in Performance → Volume & Workers.', go:()=>showView('perf'), validate:()=>perfCfg.volume>=10000000 && perfCfg.workers>=8},
+  {id:'e2', title:'Configure Pagination', instructions:'Set Page Size to 100 or fewer with a Total Records value above 1,000,000 in Performance → Pagination.', go:()=>{showView('perf');perfActiveTab='pagination';RENDERERS.perf();}, validate:()=>pagState.pageSize<=100 && pagState.total>1000000},
+  {id:'e3', title:'Run Incremental Load', instructions:'Open Performance → Incremental Load and confirm changed records are far fewer than the total dataset.', go:()=>{showView('perf');perfActiveTab='incremental';RENDERERS.perf();}, validate:()=>incState.changed < incState.total*0.05},
+  {id:'e4', title:'Test Idempotency', instructions:'In Reliability → Idempotent Imports, run the same Import ID twice and confirm a duplicate is detected.', go:()=>{showView('reliability');relActiveTab='idempotency';RENDERERS.reliability();}, validate:()=>idempState.runs.some(r=>r.result==='Duplicate')},
+  {id:'e5', title:'Recover a Failed Job', instructions:'In Reliability → Job Recovery, trigger a failure and advance the state machine all the way to Completed.', go:()=>{showView('reliability');relActiveTab='jobs';RENDERERS.reliability();}, validate:()=>jobRecovery.state==='Completed'},
+  {id:'e6', title:'Execute DR Failover', instructions:'In Reliability → Backup, DR & Snapshots, simulate a failure, then failover and validate the DR site.', go:()=>{showView('reliability');relActiveTab='backupdr';RENDERERS.reliability();}, validate:()=>STATE.dr.stage==='validated'||STATE.dr.stage==='failedover'},
+  {id:'e7', title:'Configure MFA', instructions:'In Security → SSO/MFA, run a successful MFA simulation.', go:()=>{showView('security');secActiveTab='sso';RENDERERS.security();}, validate:()=>!!($('ssoResult') && $('ssoResult').textContent.includes('authenticated'))},
+  {id:'e8', title:'Promote Configuration DEV → TEST → PROD', instructions:'In Governance → Environment Promotion, promote to TEST, get approval, then promote to PROD.', go:()=>{showView('governance');govActiveTab='promotion';RENDERERS.governance();}, validate:()=>promoState.stage==='PROD'},
+  {id:'e9', title:'Apply Legal Hold', instructions:'In Governance → Retention & Legal Hold, apply a legal hold and confirm deletion is disabled.', go:()=>{showView('governance');govActiveTab='legalhold';RENDERERS.governance();}, validate:()=>STATE.legalHold.active===true},
+  {id:'e10', title:'Investigate Configuration Drift', instructions:'In Governance → Environment Comparison, identify at least one field marked "Different" between TEST and PROD.', go:()=>{showView('governance');govActiveTab='envcompare';RENDERERS.governance();}, validate:()=>STATE.configDrift>0}
+];
+RENDERERS.training = function(){
+  $('viewRoot').innerHTML = `
+  <div class="view-head"><div><h1>Training Center</h1><p>Ten hands-on exercises. Complete the action in the linked module, then return here to validate.</p></div></div>
+  <div class="grid cols3" id="exerciseGrid"></div>`;
+  const grid = $('exerciseGrid');
+  EXERCISES.forEach((ex,i)=>{
+    const state = STATE.exerciseProgress[ex.id];
+    const card = el(`<div class="exercise-card">
+      <div class="num">EXERCISE ${i+1}</div>
+      <h4>${ex.title}</h4>
+      <p>${ex.instructions}</p>
+      ${state? `<span class="badge ${state==='Pass'?'ok':'crit'}">${state}</span>`:'<span class="badge neutral">Not Attempted</span>'}
+      <div class="field-row" style="margin-top:6px;">
+        <button class="btn sm" onclick='exGo("${ex.id}")'>Go to Module</button>
+        <button class="btn sm primary" onclick='exValidate("${ex.id}")'>Validate</button>
+      </div>
+    </div>`);
+    grid.appendChild(card);
+  });
+};
+function exGo(id){ EXERCISES.find(e=>e.id===id).go(); }
+function exValidate(id){
+  const ex = EXERCISES.find(e=>e.id===id);
+  let pass=false;
+  try{ pass = !!ex.validate(); }catch(e){ pass=false; }
+  STATE.exerciseProgress[id] = pass?'Pass':'Fail';
+  logAudit('Validate Exercise: '+ex.title,'Training Center',{old:'Not Attempted',new:pass?'Pass':'Fail'}, pass?'Success':'Failed');
+  toast(pass? 'Exercise passed! ✓' : 'Not yet — follow the instructions, then validate again.', pass?'ok':'warn');
+  RENDERERS.training();
+}
+
+/* ===========================================================================
+   AUDIT ENGINE
+   =========================================================================== */
+let auditFilter = '';
+RENDERERS.audit = function(){
+  $('viewRoot').innerHTML = `
+  <div class="view-head">
+    <div><h1>Audit Engine</h1><p>Every simulated action across the platform is recorded here with timestamp, user, object and result.</p></div>
+    <div class="view-actions"><button class="btn ghost" onclick="STATE.auditLog=[];RENDERERS.audit();">Clear (demo)</button></div>
+  </div>
+  <div class="card">
+    <div class="field-row" style="margin-bottom:6px;">
+      <input type="text" placeholder="Filter by action, object, user…" style="flex:2;padding:9px 12px;border:1px solid var(--border-strong);border-radius:8px;" oninput="auditFilter=this.value;renderAuditTable();">
+    </div>
+    <div class="table-wrap" id="auditTableWrap"></div>
+  </div>`;
+  renderAuditTable();
+};
+function renderAuditTable(){
+  const wrap = $('auditTableWrap');
+  if(!wrap) return;
+  const q = auditFilter.toLowerCase();
+  const rows = STATE.auditLog.filter(a=> !q || (a.action+a.object+a.user+a.result).toLowerCase().includes(q)).slice(0,200);
+  if(rows.length===0){ wrap.innerHTML = '<div class="mini-note" style="padding:14px;">No matching audit events yet — interact with any simulator to generate activity.</div>'; return; }
+  wrap.innerHTML = `<table><thead><tr><th>Timestamp</th><th>User</th><th>Role</th><th>Env</th><th>Object</th><th>Action</th><th>Old</th><th>New</th><th>Result</th></tr></thead>
+  <tbody>${rows.map(a=>`<tr><td class="mono">${a.ts}</td><td>${a.user}</td><td>${a.role}</td><td>${a.env}</td><td>${a.object}</td><td>${a.action}</td><td class="mono">${a.oldValue}</td><td class="mono">${a.newValue}</td><td>${badgeHtml(a.result)}</td></tr>`).join('')}</tbody></table>`;
+}
+function renderAudit(){ if(currentView==='audit') renderAuditTable(); }
+
+/* ===========================================================================
+   RESET / DEMO MODE
+   =========================================================================== */
+function resetSimulation(){
+  if(!confirm('Reset the entire simulation to its default demo state?')) return;
+  location.reload();
+}
+</script>
+
+</body>
+</html>
