@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCS Implementation Simulator — Topic 19 | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1F3C;
+  --navy-2:#122c52;
+  --blue:#1B5FAE;
+  --blue-light:#3D8BD4;
+  --orange:#F5821F;
+  --orange-2:#FFA94D;
+  --bg:#EEF2F7;
+  --surface:#FFFFFF;
+  --line:#DDE4ED;
+  --text:#131B2C;
+  --muted:#5C6B82;
+  --muted-2:#8894A6;
+  --success:#178A4C;
+  --success-bg:#E6F5EC;
+  --warn:#B36A00;
+  --warn-bg:#FFF2DE;
+  --danger:#C6323A;
+  --danger-bg:#FCE9EA;
+  --locked:#AEB8C6;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(10,31,60,0.06), 0 8px 24px -12px rgba(10,31,60,0.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:'Space Grotesk',system-ui,sans-serif; margin:0; letter-spacing:-0.01em;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--orange-2); color:var(--navy);}
+
+/* ---------- SHELL ---------- */
+#app{display:flex; min-height:100vh;}
+
+#sidebar{
+  width:264px; flex-shrink:0; background:linear-gradient(180deg,var(--navy) 0%, var(--navy-2) 100%);
+  color:#DCE6F5; position:sticky; top:0; height:100vh; overflow-y:auto; z-index:40;
+}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15); border-radius:4px;}
+
+.brand{padding:20px 18px 14px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:10px;}
+.brand img{height:34px; background:#fff; padding:5px 8px; border-radius:6px; display:block;}
+.brand-name{font-family:'Space Grotesk'; font-weight:700; font-size:14.5px; color:#fff; line-height:1.25;}
+.brand-sub{font-size:11px; color:#9FB2CC; letter-spacing:.03em;}
+
+.navgroup{padding:10px 10px 4px;}
+.navgroup-label{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:#6E84A8; padding:12px 10px 6px; font-weight:600;}
+.navitem{
+  display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:8px; cursor:pointer;
+  font-size:13.3px; color:#C6D3E8; margin:1px 2px; transition:background .12s, color .12s;
+}
+.navitem:hover{background:rgba(255,255,255,0.06); color:#fff;}
+.navitem.active{background:var(--orange); color:#1a1200; font-weight:600;}
+.navitem .dot{width:6px; height:6px; border-radius:50%; background:#4C6488; flex-shrink:0;}
+.navitem.active .dot{background:#1a1200;}
+.navitem .lockbadge{margin-left:auto; font-size:9.5px; color:#8194B4; border:1px solid #3a4c6e; border-radius:4px; padding:1px 5px;}
+.navitem.active .lockbadge{color:#5a3f00; border-color:#c96b00;}
+
+.sidebar-foot{padding:14px 16px 20px; font-size:11px; color:#7C90B2; border-top:1px solid rgba(255,255,255,0.08); margin-top:6px;}
+.sidebar-foot b{color:#C6D3E8;}
+
+#main{flex:1; min-width:0; display:flex; flex-direction:column;}
+
+#topbar{
+  position:sticky; top:0; z-index:30; background:var(--surface); border-bottom:1px solid var(--line);
+  padding:12px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+#topbar .titles h1{font-size:18px;}
+#topbar .titles .crumb{font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px;}
+.topbar-actions{display:flex; align-items:center; gap:8px;}
+.btn{
+  border:1px solid var(--line); background:var(--surface); color:var(--text); padding:8px 13px; border-radius:8px;
+  font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:all .12s;
+}
+.btn:hover{border-color:var(--blue); color:var(--blue); transform:translateY(-1px);}
+.btn-primary{background:var(--blue); border-color:var(--blue); color:#fff;}
+.btn-primary:hover{background:var(--navy-2); border-color:var(--navy-2); color:#fff;}
+.btn-orange{background:var(--orange); border-color:var(--orange); color:#2a1600;}
+.btn-orange:hover{background:#d96f0f; border-color:#d96f0f; color:#fff;}
+.btn-ghost{background:transparent; border-color:transparent; color:var(--muted);}
+.btn-ghost:hover{color:var(--blue); border-color:var(--line);}
+.btn-sm{padding:5px 10px; font-size:11.5px; border-radius:6px;}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+
+#content{padding:22px 26px 60px; max-width:1280px; width:100%; margin:0 auto;}
+
+/* toast */
+#toastwrap{position:fixed; bottom:18px; right:18px; z-index:200; display:flex; flex-direction:column; gap:8px;}
+.toast{background:var(--navy); color:#fff; padding:11px 16px; border-radius:8px; font-size:13px; box-shadow:var(--shadow); max-width:340px; display:flex; gap:8px; align-items:flex-start; animation:in .18s ease;}
+.toast.ok{background:var(--success);}
+.toast.warn{background:var(--warn);}
+.toast.err{background:var(--danger);}
+@keyframes in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+/* ---------- COMMON WIDGETS ---------- */
+.grid{display:grid; gap:14px;}
+.g2{grid-template-columns:repeat(2,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);}
+.card h3{font-size:14.5px; margin-bottom:2px;}
+.card .hint{font-size:12px; color:var(--muted); margin-bottom:10px;}
+.section-title{display:flex; align-items:baseline; gap:10px; margin:26px 0 12px;}
+.section-title h2{font-size:16px;}
+.section-title .n{font-family:'IBM Plex Mono'; font-size:11px; color:var(--orange); font-weight:600;}
+.section-title:first-child{margin-top:0;}
+
+.kpi{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+.kpi .label{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600;}
+.kpi .value{font-family:'Space Grotesk'; font-size:25px; font-weight:700; margin-top:4px;}
+.kpi .sub{font-size:11.5px; color:var(--muted-2); margin-top:3px;}
+.kpi .value.small{font-size:19px;}
+
+.badge{display:inline-flex; align-items:center; gap:4px; font-size:10.8px; font-weight:700; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em;}
+.b-ok{background:var(--success-bg); color:var(--success);}
+.b-warn{background:var(--warn-bg); color:var(--warn);}
+.b-bad{background:var(--danger-bg); color:var(--danger);}
+.b-locked{background:#EEF1F5; color:var(--locked);}
+.b-info{background:#E7EFFB; color:var(--blue);}
+
+.progressbar{height:8px; border-radius:6px; background:#E7ECF3; overflow:hidden;}
+.progressbar > div{height:100%; background:linear-gradient(90deg,var(--blue),var(--blue-light)); border-radius:6px; transition:width .4s ease;}
+.progressbar.orange > div{background:linear-gradient(90deg,var(--orange),var(--orange-2));}
+
+table{width:100%; border-collapse:collapse; font-size:12.6px;}
+th{text-align:left; font-size:10.8px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line); background:#F7F9FC;}
+td{padding:8px 10px; border-bottom:1px solid #EEF1F6; vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.tablewrap{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:var(--surface); box-shadow:var(--shadow);}
+
+input[type=text],input[type=number],select,textarea{
+  width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:7px; font-size:12.8px; font-family:inherit; background:#fff; color:var(--text);
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue-light); outline-offset:1px; border-color:var(--blue);}
+label.f{font-size:11.5px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;}
+.field{margin-bottom:10px;}
+.formrow{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+.pillrow{display:flex; flex-wrap:wrap; gap:6px;}
+.pill{font-size:11.3px; padding:5px 10px; border-radius:20px; border:1px solid var(--line); background:#fff; cursor:pointer; color:var(--muted); font-weight:600;}
+.pill.on{background:var(--blue); border-color:var(--blue); color:#fff;}
+.pill.locked{opacity:.5; cursor:not-allowed;}
+
+.checklist{display:flex; flex-direction:column; gap:2px;}
+.checkitem{display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid #F1F4F8; font-size:12.8px;}
+.checkitem:last-child{border-bottom:none;}
+.checkitem .box{width:18px; height:18px; border-radius:5px; border:1.6px solid var(--line); flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; background:#fff;}
+.checkitem .box.done{background:var(--success); border-color:var(--success); color:#fff; font-size:12px;}
+.checkitem .txt{flex:1;}
+.checkitem .txt .d{font-size:11px; color:var(--muted-2);}
+
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:14px; flex-wrap:wrap;}
+.tab{padding:8px 13px; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+.tab:hover{color:var(--blue);}
+.tab.active{color:var(--blue); border-color:var(--blue);}
+
+.flow{display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:14px; background:#F7F9FC; border-radius:var(--radius); border:1px dashed var(--line);}
+.flow .step{background:#fff; border:1px solid var(--line); border-radius:8px; padding:9px 13px; font-size:12px; font-weight:600; box-shadow:var(--shadow); display:flex; align-items:center; gap:6px;}
+.flow .step.on{border-color:var(--blue); color:var(--blue); background:#EDF3FC;}
+.flow .step.done{border-color:var(--success); color:var(--success); background:var(--success-bg);}
+.flow .step.blocked{border-color:var(--danger); color:var(--danger); background:var(--danger-bg);}
+.flow .arrow{color:var(--muted-2); font-size:14px;}
+
+.chip{font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:5px; background:#EEF1F6; color:var(--muted);}
+
+.empty{padding:26px; text-align:center; color:var(--muted); font-size:12.8px; border:1px dashed var(--line); border-radius:var(--radius); background:#F9FAFC;}
+
+.phaseband{display:flex; gap:10px; margin-bottom:6px; overflow-x:auto; padding-bottom:6px;}
+.phasecard{
+  flex:1; min-width:172px; background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:14px 14px 12px;
+  cursor:pointer; transition:all .14s; position:relative; box-shadow:var(--shadow);
+}
+.phasecard:hover{border-color:var(--blue-light); transform:translateY(-2px);}
+.phasecard.locked{opacity:.55; cursor:not-allowed;}
+.phasecard.locked:hover{transform:none; border-color:var(--line);}
+.phasecard.current{border-color:var(--orange); box-shadow:0 0 0 3px rgba(245,130,31,0.13), var(--shadow);}
+.phasecard .pnum{font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--muted-2); font-weight:600;}
+.phasecard h4{font-size:13.5px; margin:4px 0 8px;}
+.phasecard .stat{font-size:11px; color:var(--muted);}
+
+.maturity{display:flex; align-items:center; gap:0; margin:4px 0 2px;}
+.maturity .seg{flex:1; height:34px; display:flex; align-items:center; justify-content:center; font-size:10.6px; font-weight:700; color:#fff; position:relative;}
+.maturity .seg:first-child{border-radius:8px 0 0 8px;}
+.maturity .seg:last-child{border-radius:0 8px 8px 0;}
+.maturity .seg.off{background:#DDE4ED; color:#8894A6;}
+.maturity .marker{position:absolute; top:-9px; width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:9px solid var(--navy); left:50%; transform:translateX(-50%);}
+
+.dep-item{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; margin-bottom:7px; font-size:12.4px; background:#fff;}
+.dep-item .arrow{color:var(--orange); font-weight:700;}
+.dep-item .status{margin-left:auto;}
+
+.riskmatrix{display:grid; grid-template-columns:repeat(3,1fr); gap:4px; max-width:340px;}
+.riskcell{aspect-ratio:1.5; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:#fff;}
+
+.scorewheel{display:flex; align-items:center; gap:16px;}
+.barlist{display:flex; flex-direction:column; gap:8px;}
+.barlist .row{display:grid; grid-template-columns:110px 1fr 34px; gap:8px; align-items:center; font-size:11.6px;}
+
+.exercisecard{border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; background:#fff; margin-bottom:10px; box-shadow:var(--shadow);}
+.exercisecard .head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+.exercisecard .body{font-size:12.6px; color:var(--muted); margin:6px 0 10px; line-height:1.55;}
+
+.scenariocard{border:1px solid var(--line); border-radius:var(--radius); padding:16px; background:#fff; box-shadow:var(--shadow);}
+.scenariocard .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px;}
+.scenariocard .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted-2); font-weight:700; margin-bottom:3px;}
+
+.chart-wrap{padding:6px 0;}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:11.5px;}
+.legend .li{display:flex; align-items:center; gap:6px; color:var(--muted);}
+.legend .sw{width:10px; height:10px; border-radius:3px;}
+
+.slider-row{display:flex; align-items:center; gap:10px;}
+input[type=range]{flex:1; accent-color:var(--blue);}
+
+.readiness-flag{display:flex; align-items:center; gap:8px; font-family:'Space Grotesk'; font-weight:700; font-size:14px; padding:12px 14px; border-radius:8px; margin-bottom:14px;}
+
+.hero{background:linear-gradient(120deg,var(--navy) 0%, var(--navy-2) 60%, #17325c 100%); color:#fff; border-radius:14px; padding:26px 28px; margin-bottom:22px; position:relative; overflow:hidden;}
+.hero:before{content:""; position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(245,130,31,0.28),transparent 70%);}
+.hero .eyebrow{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--orange-2); font-weight:700;}
+.hero h1{font-size:26px; color:#fff; margin:6px 0 8px;}
+.hero p{font-size:13px; color:#B9C7DE; max-width:640px; line-height:1.6; margin:0;}
+.hero .tel{margin-top:14px; font-size:12.5px; color:#D9E3F2;}
+
+footer.appfoot{margin-top:40px; padding:18px 0 4px; border-top:1px solid var(--line); font-size:11.5px; color:var(--muted-2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;}
+footer.appfoot b{color:var(--muted);}
+
+@media(max-width:880px){
+  #sidebar{position:fixed; left:-264px; transition:left .2s; box-shadow:var(--shadow);}
+  #sidebar.open{left:0;}
+  .formrow{grid-template-columns:1fr;}
+  #content{padding:16px;}
+}
+.hamburger{display:none; background:none; border:1px solid var(--line); border-radius:7px; padding:7px 9px; cursor:pointer;}
+@media(max-width:880px){.hamburger{display:inline-flex;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar"></aside>
+  <div id="main">
+    <div id="topbar"></div>
+    <div id="content"></div>
+    <footer class="appfoot" style="margin:0 26px 30px;">
+      <span><b>BISP Trainings</b> — Educational simulation. Not affiliated with or endorsed by Oracle Corporation. All figures are illustrative training data.</span>
+      <span>www.bisptrainings.com &nbsp;·&nbsp; Call Us: +91 769-409-5404</span>
+    </footer>
+  </div>
+</div>
+<div id="toastwrap"></div>
+<script id="logo-data" type="application/octet-stream">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</script>
+<script>
+/* =========================================================================
+   BISP TRAININGS — ARCS IMPLEMENTATION SIMULATOR — TOPIC 19
+   Single-file training application. All data is illustrative/mock.
+   ========================================================================= */
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------------
+   STATIC DATA
+--------------------------------------------------------------------- */
+const NAV = [
+  {group:"Overview", items:[
+    {id:"dashboard", label:"Implementation Dashboard"},
+    {id:"roadmap", label:"Phase Roadmap"},
+  ]},
+  {group:"Implementation Phases", items:[
+    {id:"phase1", label:"Phase 1 — MVP"},
+    {id:"phase2", label:"Phase 2 — Compliance"},
+    {id:"phase3", label:"Phase 3 — Matching"},
+    {id:"phase4", label:"Phase 4 — Integration"},
+    {id:"phase5", label:"Phase 5 — AI"},
+  ]},
+  {group:"Governance & Delivery", items:[
+    {id:"dependencies", label:"Dependencies"},
+    {id:"migration", label:"Data Migration"},
+    {id:"testing", label:"Testing"},
+    {id:"security", label:"Security"},
+    {id:"governance", label:"Governance"},
+  ]},
+  {group:"Insight", items:[
+    {id:"financial", label:"Financial Impact"},
+    {id:"kpis", label:"KPIs"},
+    {id:"risks", label:"Risk Register"},
+  ]},
+  {group:"Practice", items:[
+    {id:"scenarios", label:"Scenarios"},
+    {id:"training", label:"Training Center"},
+    {id:"audit", label:"Audit"},
+  ]},
+];
+
+const PHASES = [
+  {n:1, id:"phase1", key:"p1", title:"Reconciliation MVP", tag:"Foundation",
+    objective:"Stand up the core reconciliation lifecycle: identity, calendar, profiles, formats, balance loading, preparer/reviewer workflow, and traceability.",
+    capabilities:["Users & Roles","Periods","Profiles","Formats","Balance Imports","Reconciliation Generation","Preparer/Reviewer Workflow","Comments","Attachments","Basic Dashboard","Audit History","Email Notifications"],
+    dependencies:["None — MVP is the foundation layer"],
+    exit:["All Phase 1 readiness gates complete","At least one reconciliation cycle fully closed (prepared → reviewed → approved)","UAT signed off"]},
+  {n:2, id:"phase2", key:"p2", title:"Advanced Compliance", tag:"Control",
+    objective:"Layer control and scale onto the MVP: automated matching logic, grouped reconciliations, aging visibility, alerting and multi-level review.",
+    capabilities:["Rules Engine","Auto-Reconciliation","Group Reconciliations","Aging","Alerts","Multi-Level Review","Custom Attributes","Report Binders","Advanced Dashboards"],
+    dependencies:["Requires Phase 1 Ready"],
+    exit:["Auto-reconciliation rate baseline established","Aging buckets populated and reviewed","Multi-level review path tested"]},
+  {n:3, id:"phase3", key:"p3", title:"Transaction Matching", tag:"Automation",
+    objective:"Introduce high-volume transaction matching between source systems using exact and tolerance-based rules, with human oversight of exceptions.",
+    capabilities:["Match Types","Data Sources","Transaction Imports","Exact Rules","Tolerance Rules","AutoMatch","Manual Matching","Unmatched Management","Adjustments","Match Analytics"],
+    dependencies:["Requires stable Phase 1/2 reconciliation baseline"],
+    exit:["Match engine run against sample dataset","Unmatched items triaged","Match analytics reviewed"]},
+  {n:4, id:"phase4", key:"p4", title:"Enterprise Integration", tag:"Integration",
+    objective:"Connect the platform to enterprise systems: ERP connectors, APIs, scheduled jobs, journal export, SSO, and environment promotion discipline.",
+    capabilities:["ERP Connectors","REST APIs","Job Scheduler","Journal Export","SSO","Environment Migration","Advanced Reporting","Performance Optimization"],
+    dependencies:["Requires Phase 3 Ready + Integration Foundation"],
+    exit:["DEV → TEST → PROD promotion executed with gating","Journal export path validated","Performance benchmarks met"]},
+  {n:5, id:"phase5", key:"p5", title:"AI & Touchless Close", tag:"Intelligence",
+    objective:"Apply AI assistance on top of a stable, integrated, well-governed platform — always with human review in the approval path.",
+    capabilities:["Suggested Matches","Anomaly Detection","Reconciliation Summaries","Risk Prediction","Intelligent Workload Assignment","Natural-Language Search","Close-Completion Forecasting"],
+    dependencies:["Requires Phase 4 Ready + Quality Data + Security"],
+    exit:["AI suggestion acceptance rate reviewed by owners","Touchless-close maturity assessed","Controls confirm no unsupervised auto-posting"]},
+];
+
+const MATURITY_LEVELS = ["Foundation","Control","Automation","Integration","Intelligence"];
+
+const DEP_GRAPH = [
+  {from:"Profiles", to:"Reconciliations", check:s=>s.entities.profiles.length>0},
+  {from:"Reconciliations", to:"Advanced Rules (Phase 2)", check:s=>s.entities.reconciliations.length>0},
+  {from:"Stable Reconciliation", to:"Transaction Matching (Phase 3)", check:s=>s.phases.p2.ready},
+  {from:"Integration Foundation", to:"AI (Phase 5)", check:s=>s.phases.p4.ready},
+  {from:"Quality Data", to:"AI Predictions", check:s=>s.migration.runs.length>0 && s.migration.runs.every(r=>r.rejected===0)},
+  {from:"Security", to:"Production", check:s=>securityScore(s)>=100},
+  {from:"Testing", to:"Deployment", check:s=>!s.testing.blockedProduction},
+];
+
+const AGING_BUCKETS = ["0–30","31–60","61–90","91–180","181–365","365+"];
+
+const TESTING_TABS = ["Unit","Integration","System","Data","Security","Performance","Regression","UAT","Production Validation"];
+const CRITICAL_TABS = ["Security","UAT","Production Validation"];
+
+const SECURITY_CONTROLS = [
+  {k:"roles", label:"Roles & Least-Privilege Model", d:"Role-based access aligned to preparer/reviewer/admin duties.", critical:true},
+  {k:"sso", label:"Single Sign-On", d:"Enterprise identity provider integration.", critical:true},
+  {k:"mfa", label:"Multi-Factor Authentication", d:"Second factor required for privileged roles.", critical:true},
+  {k:"encryption", label:"Encryption In Transit & At Rest", d:"TLS in transit, encrypted storage at rest.", critical:true},
+  {k:"audit", label:"Audit Logging", d:"Immutable audit trail of configuration and transactional actions.", critical:true},
+  {k:"leastPriv", label:"Least-Privilege Review Cadence", d:"Periodic access recertification.", critical:false},
+];
+
+const RISK_SEED = [
+  {risk:"Poor data quality", phase:1, prob:"High", impact:"High", mitigation:"Source-to-target validation before load", owner:"Data Lead", status:"Open"},
+  {risk:"Weak security configuration", phase:1, prob:"Medium", impact:"High", mitigation:"Enforce SSO/MFA before production", owner:"Security Lead", status:"Open"},
+  {risk:"Incorrect reconciliation/matching rules", phase:2, prob:"Medium", impact:"Medium", mitigation:"Peer review of rule logic; test dataset run", owner:"Functional Lead", status:"Open"},
+  {risk:"Integration failure with ERP", phase:4, prob:"Medium", impact:"High", mitigation:"Sandbox connector testing prior to TEST promotion", owner:"Integration Lead", status:"Open"},
+  {risk:"Performance issue at volume", phase:4, prob:"Medium", impact:"Medium", mitigation:"Load testing with representative volumes", owner:"Platform Lead", status:"Open"},
+  {risk:"Insufficient UAT coverage", phase:1, prob:"Medium", impact:"High", mitigation:"UAT script coverage mapped to requirements", owner:"QA Lead", status:"Open"},
+  {risk:"User adoption resistance", phase:1, prob:"Medium", impact:"Medium", mitigation:"Role-based training and champions network", owner:"Change Lead", status:"Open"},
+  {risk:"Configuration drift across environments", phase:4, prob:"Medium", impact:"Medium", mitigation:"Version-controlled config promotion", owner:"Platform Lead", status:"Open"},
+  {risk:"AI over-reliance without review", phase:5, prob:"Low", impact:"High", mitigation:"Mandatory human approval on AI suggestions", owner:"Controller", status:"Open"},
+  {risk:"Incomplete audit trail", phase:1, prob:"Low", impact:"High", mitigation:"Enable audit logging before go-live", owner:"Security Lead", status:"Open"},
+  {risk:"Migration errors (duplicates/rejects)", phase:1, prob:"Medium", impact:"Medium", mitigation:"Reconciliation of migration counts pre/post load", owner:"Data Lead", status:"Open"},
+  {risk:"Production deployment failure", phase:4, prob:"Low", impact:"High", mitigation:"Gated promotion with rollback plan", owner:"Release Manager", status:"Open"},
+];
+
+const SCENARIOS = [
+  {id:1, title:"MVP Go-Live", situation:"The Phase 1 build is functionally complete and the business wants to close this period on the new platform.",
+    start:"Phase 1 gates partially complete; UAT not yet signed off.",
+    objective:"Decide whether to proceed to go-live.",
+    actions:[
+      {label:"Go live now to hit the deadline", response:"Going live without UAT sign-off risks unreconciled balances and control failures in the first live close.", score:35, financial:"Possible rework cost if errors surface post go-live.", control:"Control gap — UAT is a required gate."},
+      {label:"Complete remaining gates, then go live", response:"Closing the outstanding gates (notifications, audit) before go-live keeps the control environment intact.", score:95, financial:"Short delay, no rework cost.", control:"Gate discipline preserved."},
+      {label:"Go live in parallel with legacy process", response:"Running in parallel reduces risk but doubles preparer effort for one cycle.", score:75, financial:"Temporary duplicate labor cost.", control:"Lower risk, slower automation benefit realization."},
+    ]},
+  {id:2, title:"Auto-Reconciliation Rollout", situation:"Phase 2 rules are configured and ready to pilot on live balances.",
+    start:"Rules engine configured; no production rule tuning yet.",
+    objective:"Choose a rollout approach for auto-reconciliation.",
+    actions:[
+      {label:"Enable auto-recon for all accounts immediately", response:"Enabling broadly without tuning risks mis-matching accounts with unusual patterns.", score:40, financial:"Potential exception rework cost.", control:"Insufficient validation before broad rollout."},
+      {label:"Pilot on a low-risk account population first", response:"A phased pilot validates rule accuracy before scaling, a standard control practice.", score:95, financial:"Delayed full benefit, but avoids costly rework.", control:"Strong — staged validation."},
+      {label:"Skip auto-recon, keep manual review for now", response:"This avoids risk entirely but forfeits the automation benefit this phase was built for.", score:60, financial:"No automation benefit realized yet.", control:"Conservative but no risk exposure."},
+    ]},
+  {id:3, title:"Transaction Matching Rollout", situation:"The matching engine is ready for a large transaction population.",
+    start:"1,000,000 bank vs 980,000 GL transactions queued.",
+    objective:"Decide how to tune the matching engine before full rollout.",
+    actions:[
+      {label:"Set tolerance very high to maximize match rate", response:"An overly generous tolerance can mask real breaks as matches — a control risk.", score:30, financial:"Understated exceptions could mask real cash breaks.", control:"Weak — tolerance too permissive."},
+      {label:"Start tight, review unmatched, then widen tolerance deliberately", response:"Starting conservative and adjusting based on evidence keeps matching auditable.", score:95, financial:"Slightly slower initial match rate, but defensible.", control:"Strong — evidence-based tuning."},
+      {label:"Rely entirely on manual matching", response:"Manual-only matching at this volume is not sustainable and defeats the phase objective.", score:20, financial:"High labor cost at this volume.", control:"No automation control benefit."},
+    ]},
+  {id:4, title:"ERP Integration", situation:"The team is ready to connect the platform to the ERP for journal export.",
+    start:"REST API and connector built in DEV only.",
+    objective:"Decide the integration testing approach before promoting.",
+    actions:[
+      {label:"Connect directly to production ERP to save time", response:"Testing directly against production ERP risks corrupting live financial data.", score:10, financial:"Potential material financial data risk.", control:"Severe control failure."},
+      {label:"Test against a sandbox ERP instance first", response:"Sandbox testing validates the connector safely before any production exposure.", score:95, financial:"No risk to live data; modest testing time cost.", control:"Strong practice."},
+      {label:"Skip integration testing, rely on manual journal entry", response:"This avoids integration risk but forfeits the Phase 4 automation objective.", score:55, financial:"Ongoing manual effort cost.", control:"No integration risk, no automation benefit."},
+    ]},
+  {id:5, title:"Performance Scaling", situation:"Match volumes are growing and job run times are increasing.",
+    start:"Single worker configuration; run times climbing.",
+    objective:"Address the performance risk.",
+    actions:[
+      {label:"Ignore it — it still finishes eventually", response:"Deferred performance issues tend to compound as volume grows, risking missed close deadlines.", score:25, financial:"Risk of missed close deadline penalties.", control:"Emerging operational risk."},
+      {label:"Increase worker count and re-benchmark", response:"Scaling workers and validating with a benchmark is the standard performance response.", score:90, financial:"Modest infrastructure cost, avoids deadline risk.", control:"Proactive and measured."},
+      {label:"Reduce transaction volume by sampling", response:"Sampling transactions for matching undermines completeness of the reconciliation.", score:15, financial:"N/A", control:"Serious completeness/control risk."},
+    ]},
+  {id:6, title:"AI Rollout", situation:"AI-suggested matches are available and performing well in testing.",
+    start:"AI suggestion engine configured; not yet used in production.",
+    objective:"Decide how AI suggestions should be adopted operationally.",
+    actions:[
+      {label:"Auto-approve all AI suggestions to save reviewer time", response:"Auto-approving AI output removes human judgment from an accounting decision — not acceptable practice.", score:5, financial:"N/A", control:"Critical control failure — no human review."},
+      {label:"Use AI to suggest, require human approval for every match", response:"This keeps AI as a productivity aid while preserving accountable human sign-off.", score:98, financial:"Meaningful review time reduction with control intact.", control:"Strong — human-in-the-loop preserved."},
+      {label:"Disable AI suggestions entirely", response:"This avoids any AI-related risk but forfeits available efficiency gains.", score:65, financial:"No efficiency gain captured.", control:"No risk, no benefit."},
+    ]},
+  {id:7, title:"Production Deployment Failure", situation:"A PROD promotion was attempted and the job scheduler failed post-deployment.",
+    start:"PROD environment partially updated; scheduler errors logged.",
+    objective:"Respond to the failed deployment.",
+    actions:[
+      {label:"Leave it running and monitor", response:"Leaving a known-failed production deployment live risks compounding errors into the close.", score:20, financial:"Potential downstream reconciliation errors.", control:"Risk left unmanaged."},
+      {label:"Roll back to the last known-good configuration", response:"Rolling back to a stable, tested configuration is the standard incident response.", score:95, financial:"Short delay, no data integrity risk.", control:"Strong — protects production integrity."},
+      {label:"Push a hotfix directly to PROD without testing", response:"An untested hotfix in production bypasses the governance gate that exists to prevent this exact situation.", score:15, financial:"High risk of compounding the failure.", control:"Bypasses governance controls."},
+    ]},
+  {id:8, title:"Audit Investigation", situation:"An auditor requests evidence of who approved a reconciliation adjustment and when.",
+    start:"Audit logging has been enabled since Phase 1.",
+    objective:"Respond to the audit request.",
+    actions:[
+      {label:"Provide the audit log export for the object and date range", response:"A complete, timestamped audit trail is exactly what this control was designed to produce.", score:95, financial:"N/A", control:"Audit control functioning as designed."},
+      {label:"Reconstruct the answer manually from memory/email", response:"Reconstructing evidence outside the system undermines the reliability of the control.", score:20, financial:"N/A", control:"Weak — audit trail not relied upon."},
+      {label:"Tell the auditor the data isn't available", response:"This implies a broken audit control and would likely be reported as a deficiency.", score:5, financial:"N/A", control:"Audit control failure."},
+    ]},
+];
+
+const TRAINING_EXERCISES = [
+  {id:1, title:"Build the MVP foundation", instr:"In Phase 1, create at least one user, one period, one profile, one format, load a balance, and generate a reconciliation.",
+    validate:s=>s.entities.users.length>0 && s.entities.periods.length>0 && s.entities.profiles.length>0 && s.entities.formats.length>0 && s.entities.balances.length>0 && s.entities.reconciliations.length>0,
+    explain:"The MVP requires all six foundation objects to exist before a reconciliation can be prepared."},
+  {id:2, title:"Configure and complete the workflow", instr:"Take a reconciliation through Submit → Review → Approve in Phase 1.",
+    validate:s=>s.entities.reconciliations.some(r=>r.status==="Approved"),
+    explain:"Preparer/reviewer segregation of duties is core to the reconciliation control — this exercise confirms the workflow path.  "},
+  {id:3, title:"Implement a reconciliation rule", instr:"In Phase 2, add at least one rule to the Rules Engine.",
+    validate:s=>s.rules.length>0,
+    explain:"Rules are the building block that later drives auto-reconciliation."},
+  {id:4, title:"Configure aging", instr:"In Phase 2, run the aging simulator at least once.",
+    validate:s=>s.aging!==null,
+    explain:"Aging visibility is a key compliance control for outstanding items."},
+  {id:5, title:"Build transaction matching", instr:"In Phase 3, run the matching engine simulation at least once.",
+    validate:s=>s.matching.results!==null,
+    explain:"Running the match engine demonstrates exact/tolerance rule application at volume."},
+  {id:6, title:"Configure ERP integration", instr:"In Phase 4, run the integration architecture simulation.",
+    validate:s=>s.integration.lastRun,
+    explain:"Validating the ERP → Platform → ERP journal path is required before promotion."},
+  {id:7, title:"Promote DEV → TEST → PROD", instr:"In Phase 4, successfully promote the environment all the way to PROD (requires UAT pass and Approval).",
+    validate:s=>s.integration.env==="PROD" && s.integration.promotions.some(p=>p.to==="PROD" && p.result==="Success"),
+    explain:"Production promotion is gated on UAT and Approval — bypassing gates is a control failure."},
+  {id:8, title:"Calculate the business case", instr:"In Financial Impact, run the business-case calculator.",
+    validate:s=>s.financial.computed,
+    explain:"Quantifying labor savings against implementation cost supports the investment decision."},
+  {id:9, title:"Deploy AI-assisted matching", instr:"In Phase 5, run the AI suggestion simulator and review acceptance vs rejection.",
+    validate:s=>s.ai.run,
+    explain:"AI suggestions must always be reviewed — this exercise reinforces human-in-the-loop practice."},
+  {id:10, title:"Achieve controlled touchless-close readiness", instr:"Progress the Touchless Close Maturity model to Level 6 — Controlled Touchless Close.",
+    validate:s=>s.touchlessLevel>=6,
+    explain:"Level 6 requires every underlying capability and control to be in place — the capstone of the roadmap."},
+];
+
+const FIN_SCENARIOS = [
+  {name:"Manual reconciliation difference identified", bs:"No impact until investigated and posted.", pl:"No impact until investigated and posted.", cf:"No impact.", label:"Potential Impact"},
+  {name:"Duplicate transaction detected", bs:"Overstated balance if not corrected.", pl:"Possible overstatement of expense/revenue.", cf:"No direct cash impact.", label:"Potential Impact"},
+  {name:"Approved adjustment", bs:"Adjusts the affected account once posted in the GL by the accounting team.", pl:"May adjust P&L once posted in the GL.", cf:"No direct cash impact.", label:"Control — requires GL posting outside this simulator"},
+  {name:"Delayed close", bs:"Reporting delay risk; no balance change.", pl:"Reporting delay risk; no balance change.", cf:"No direct impact.", label:"Potential Impact"},
+  {name:"Incorrect data load", bs:"Risk of materially misstated balances until corrected.", pl:"Risk of materially misstated results until corrected.", cf:"No direct impact.", label:"Potential Impact"},
+  {name:"Controlled journal export", bs:"Reflects balances only after journal is reviewed and posted in the ERP.", pl:"Reflects results only after journal is reviewed and posted in the ERP.", cf:"Reflects cash items only after posting.", label:"Actual Posting occurs in the ERP, not this simulator"},
+];
+
+/* ---------------------------------------------------------------------
+   STATE
+--------------------------------------------------------------------- */
+function freshState(){
+  return {
+    user:"T. Trainee",
+    nav:"dashboard",
+    phaseDetailTab:"Objectives",
+    testingTab:"Unit",
+    scenarioIdx:0,
+    phases:{
+      p1:{ready:false}, p2:{ready:false}, p3:{ready:false}, p4:{ready:false}, p5:{ready:false},
+    },
+    gatesP1:{security:false, profiles:false, formats:false, import:false, workflow:false, audit:false, notifications:false, uat:false},
+    entities:{users:[], periods:[], profiles:[], formats:[], balances:[], reconciliations:[]},
+    rules:[],
+    autoRecon:null,
+    aging:null,
+    matching:{tolerance:1.0, workers:4, ruleSet:"Standard", results:null},
+    integration:{env:"DEV", uatPassed:false, approval:false, promotions:[], lastRun:false},
+    ai:{threshold:80, run:false, results:null},
+    touchlessLevel:1,
+    migration:{runs:[]},
+    testing:{},
+    security:{roles:false, sso:false, mfa:false, encryption:false, audit:false, leastPriv:false},
+    governance:{crs:[], versions:[]},
+    financial:{manualHours:20000, automationPct:30, hourlyCost:40, implCost:180000, trainingCost:25000, integrationCost:60000, computed:false, result:null},
+    risks: RISK_SEED.map((r,i)=>({...r, id:i+1})),
+    scenarioProgress:{},
+    training:{},
+    auditLog:[],
+    idSeq:1,
+  };
+}
+TESTING_TABS.forEach(t=>{});
+let S = freshState();
+TESTING_TABS.forEach(t=>{ S.testing[t]={passed:0,failed:0,blocked:0,run:false}; });
+S.testing.blockedProduction = false;
+
+/* ---------------------------------------------------------------------
+   UTIL
+--------------------------------------------------------------------- */
+function nid(){ return S.idSeq++; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtN(n){ return Number(n).toLocaleString(); }
+function fmtPct(n){ return (Math.round(n*10)/10)+"%"; }
+function fmtUSD(n){ return "$"+Math.round(n).toLocaleString(); }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+function nowStamp(){ const d=new Date(); return d.toLocaleString(); }
+
+function toast(msg,type){
+  type = type||"ok";
+  const wrap = document.getElementById("toastwrap");
+  const el = document.createElement("div");
+  el.className = "toast "+type;
+  el.innerHTML = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(),300); }, 3400);
+}
+
+function audit(object, action, result, oldV, newV, env){
+  S.auditLog.unshift({
+    ts: nowStamp(), user:S.user, phase:currentPhaseLabel(), env: env||S.integration.env,
+    object, action, result, oldV: oldV===undefined?"—":String(oldV), newV: newV===undefined?"—":String(newV),
+  });
+  if(S.auditLog.length>400) S.auditLog.length=400;
+}
+function currentPhaseLabel(){
+  for(let i=5;i>=1;i--){ if(S.phases["p"+i].ready) continue; }
+  const p = PHASES.find(p=>!S.phases[p.key].ready) || PHASES[4];
+  return "Phase "+p.n;
+}
+
+/* ---------------------------------------------------------------------
+   COMPUTED / SCORING
+--------------------------------------------------------------------- */
+function gateCount(){
+  const g=S.gatesP1; const vals=Object.values(g);
+  return {done:vals.filter(Boolean).length, total:vals.length};
+}
+function phase1Ready(){ const g=gateCount(); return g.done===g.total; }
+
+function foundationScore(){
+  const parts = [S.entities.users.length>0, S.entities.periods.length>0, S.entities.profiles.length>0, S.entities.formats.length>0, S.entities.balances.length>0, S.entities.reconciliations.length>0];
+  return Math.round(100*parts.filter(Boolean).length/parts.length);
+}
+function securityScore(s){
+  s = s||S;
+  const vals = Object.values(s.security);
+  return Math.round(100*vals.filter(Boolean).length/vals.length);
+}
+function dataQualityScore(){
+  if(S.migration.runs.length===0) return 20;
+  const totals = S.migration.runs.reduce((a,r)=>({loaded:a.loaded+r.loaded, rejected:a.rejected+r.rejected}), {loaded:0,rejected:0});
+  if(totals.loaded===0) return 20;
+  return Math.round(100*clamp((totals.loaded-totals.rejected)/totals.loaded,0,1));
+}
+function testingScore(){
+  const tabs = Object.keys(S.testing).filter(k=>TESTING_TABS.includes(k));
+  const ran = tabs.filter(t=>S.testing[t].run);
+  if(ran.length===0) return 10;
+  let total=0,pass=0;
+  ran.forEach(t=>{ total += S.testing[t].passed+S.testing[t].failed; pass += S.testing[t].passed; });
+  return total===0? 10 : Math.round(100*pass/total);
+}
+function governanceScore(){
+  if(S.governance.crs.length===0) return 30;
+  const approved = S.governance.crs.filter(c=>c.stage>=5).length;
+  return Math.round(100*clamp(approved/S.governance.crs.length,0.2,1));
+}
+function automationScore(){
+  let score=0,n=0;
+  if(S.autoRecon){ score+=S.autoRecon.autoRate; n++; }
+  if(S.matching.results){ score+=S.matching.results.totalRate; n++; }
+  return n? Math.round(score/n) : 5;
+}
+function integrationScore(){
+  let score = 20;
+  if(S.integration.lastRun) score+=30;
+  if(S.integration.env==="TEST") score = Math.max(score,55);
+  if(S.integration.env==="PROD") score = Math.max(score,90);
+  return clamp(score,0,100);
+}
+function performanceScore(){
+  if(!S.matching.results) return 30;
+  return clamp(100 - (S.matching.workers<4? 30:0) - (S.matching.results.unmatchedRate>5?20:0), 0, 100);
+}
+function aiReadinessScore(){
+  if(!S.phases.p4.ready) return 10;
+  if(!S.ai.run) return 35;
+  return clamp(Math.round(S.ai.results.acceptRate),0,100);
+}
+function overallScore(){
+  const parts = {
+    Foundation:foundationScore(), Security:securityScore(), "Data Quality":dataQualityScore(),
+    Testing:testingScore(), Governance:governanceScore(), Automation:automationScore(),
+    Integration:integrationScore(), Performance:performanceScore(), "AI Readiness":aiReadinessScore(),
+  };
+  const avg = Object.values(parts).reduce((a,b)=>a+b,0)/Object.keys(parts).length;
+  return {parts, avg:Math.round(avg)};
+}
+function readinessLabel(){
+  const {avg} = overallScore();
+  if(!phase1Ready()) return {label:"Not Ready", cls:"b-bad"};
+  if(avg<45) return {label:"Foundation Ready", cls:"b-warn"};
+  if(S.testing.blockedProduction || securityScore()<100) return {label:"Foundation Ready", cls:"b-warn"};
+  if(avg<62) return {label:"Production Ready", cls:"b-info"};
+  if(avg<75) return {label:"Enterprise Ready", cls:"b-info"};
+  if(avg<88 || !S.ai.run) return {label:"AI Ready", cls:"b-ok"};
+  if(S.touchlessLevel>=6) return {label:"Touchless-Close Ready", cls:"b-ok"};
+  return {label:"AI Ready", cls:"b-ok"};
+}
+function maturityIndex(){
+  // 0..4 across Foundation, Control, Automation, Integration, Intelligence
+  if(S.phases.p5.ready || S.touchlessLevel>=5) return 4;
+  if(S.phases.p4.ready) return 3;
+  if(S.phases.p3.ready) return 2;
+  if(S.phases.p2.ready) return 1;
+  return 0;
+}
+function phaseUnlocked(n){
+  if(n===1) return true;
+  return S.phases["p"+(n-1)].ready;
+}
+function recomputePhaseReadiness(){
+  S.phases.p1.ready = phase1Ready();
+  S.phases.p2.ready = S.phases.p1.ready && S.rules.length>0 && S.autoRecon!==null && S.aging!==null;
+  S.phases.p3.ready = S.phases.p2.ready && S.matching.results!==null;
+  S.phases.p4.ready = S.phases.p3.ready && S.integration.lastRun && S.integration.env==="PROD";
+  S.phases.p5.ready = S.phases.p4.ready && S.ai.run;
+}
+
+/* ---------------------------------------------------------------------
+   RENDER ENGINE
+--------------------------------------------------------------------- */
+function go(id){ S.nav=id; render(); window.scrollTo({top:0,behavior:"smooth"}); document.getElementById("sidebar").classList.remove("open"); }
+window.go = go;
+
+function render(){
+  recomputePhaseReadiness();
+  renderSidebar();
+  renderTopbar();
+  const c = document.getElementById("content");
+  const map = {
+    dashboard:renderDashboard, roadmap:renderRoadmap,
+    phase1:()=>renderPhaseDetail(1), phase2:()=>renderPhaseDetail(2), phase3:()=>renderPhaseDetail(3), phase4:()=>renderPhaseDetail(4), phase5:()=>renderPhaseDetail(5),
+    dependencies:renderDependencies, migration:renderMigration, testing:renderTesting, security:renderSecurity, governance:renderGovernance,
+    financial:renderFinancial, kpis:renderKpis, risks:renderRisks,
+    scenarios:renderScenarios, training:renderTraining, audit:renderAudit,
+  };
+  c.innerHTML = "";
+  (map[S.nav]||renderDashboard)(c);
+}
+
+function renderSidebar(){
+  const logo = document.getElementById("logo-data").textContent.trim();
+  const sb = document.getElementById("sidebar");
+  let html = `<div class="brand">
+      <img src="data:image/jpeg;base64,${logo}" alt="BISP logo">
+      <div>
+        <div class="brand-name">ARCS Implementation<br>Simulator</div>
+        <div class="brand-sub">Topic 19 · BISP Trainings</div>
+      </div>
+    </div>`;
+  NAV.forEach(group=>{
+    html += `<div class="navgroup"><div class="navgroup-label">${group.group}</div>`;
+    group.items.forEach(it=>{
+      let lock = "";
+      const m = it.id.match(/^phase(\d)$/);
+      if(m){ const n=+m[1]; if(!phaseUnlocked(n)) lock = `<span class="lockbadge">LOCKED</span>`; else if(S.phases["p"+n].ready) lock = `<span class="lockbadge">READY</span>`; }
+      html += `<div class="navitem ${S.nav===it.id?'active':''}" onclick="go('${it.id}')"><span class="dot"></span>${it.label}${lock}</div>`;
+    });
+    html += `</div>`;
+  });
+  html += `<div class="sidebar-foot"><b>www.bisptrainings.com</b><br>Call Us: +91 769-409-5404<br><span style="opacity:.7">Educational simulator · not Oracle software</span></div>`;
+  sb.innerHTML = html;
+}
+
+function renderTopbar(){
+  const item = NAV.flatMap(g=>g.items).find(i=>i.id===S.nav);
+  const tb = document.getElementById("topbar");
+  tb.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="titles">
+        <div class="crumb">BISP Trainings · ARCS Simulator</div>
+        <h1>${item?item.label:"Dashboard"}</h1>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="window.doDemo()">Load Demo</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.doFailure()">Load Failure Scenario</button>
+      <button class="btn btn-sm" onclick="window.doReset()">Reset Project</button>
+    </div>`;
+}
+
+/* ---------------------------------------------------------------------
+   SHARED WIDGETS
+--------------------------------------------------------------------- */
+function kpiCard(label,value,sub,small){
+  return `<div class="kpi"><div class="label">${label}</div><div class="value ${small?'small':''}">${value}</div>${sub?`<div class="sub">${sub}</div>`:""}</div>`;
+}
+function progress(pct,cls){ return `<div class="progressbar ${cls||''}"><div style="width:${clamp(pct,0,100)}%"></div></div>`; }
+function badge(text,cls){ return `<span class="badge ${cls}">${text}</span>`; }
+function barChart(rows, colorVar){
+  // rows: [{label, value, max}]
+  colorVar = colorVar||"var(--blue)";
+  return `<div class="barlist">${rows.map(r=>`
+    <div class="row">
+      <div>${esc(r.label)}</div>
+      <div class="progressbar"><div style="width:${clamp(100*r.value/(r.max||100),0,100)}%; background:${r.color||colorVar}"></div></div>
+      <div class="mono" style="text-align:right;">${r.display!==undefined?r.display:r.value}</div>
+    </div>`).join("")}</div>`;
+}
+function donut(segments, size){
+  size = size||130;
+  let acc=0; const stops=[];
+  const total = segments.reduce((a,s)=>a+s.value,0)||1;
+  segments.forEach(s=>{ const start=acc/total*360; acc+=s.value; const end=acc/total*360; stops.push(`${s.color} ${start}deg ${end}deg`); });
+  return `<div style="display:flex; align-items:center; gap:18px;">
+    <div style="width:${size}px;height:${size}px;border-radius:50%;background:conic-gradient(${stops.join(",")}); flex-shrink:0; box-shadow: inset 0 0 0 14px #fff;"></div>
+    <div class="legend" style="flex-direction:column; align-items:flex-start; margin-top:0;">
+      ${segments.map(s=>`<div class="li"><span class="sw" style="background:${s.color}"></span>${esc(s.label)}: <b>&nbsp;${fmtN(s.value)}</b> (${fmtPct(100*s.value/total)})</div>`).join("")}
+    </div></div>`;
+}
+function flowDiagram(steps, activeIdx, blockedIdx){
+  return `<div class="flow">${steps.map((s,i)=>{
+    let cls = i<activeIdx?"done":(i===activeIdx?"on":"");
+    if(blockedIdx===i) cls="blocked";
+    return `<div class="step ${cls}">${s}</div>` + (i<steps.length-1?`<span class="arrow">→</span>`:"");
+  }).join("")}</div>`;
+}
+function checklist(items){
+  return `<div class="checklist">${items.map(it=>`
+    <div class="checkitem">
+      <div class="box ${it.done?'done':''}" ${it.onClick?`onclick="${it.onClick}"`:""} style="${it.onClick?'cursor:pointer':''}">${it.done?"✓":""}</div>
+      <div class="txt">${esc(it.label)}${it.desc?`<div class="d">${esc(it.desc)}</div>`:""}</div>
+      ${it.badge||""}
+    </div>`).join("")}</div>`;
+}
+function sectionTitle(n,title){ return `<div class="section-title"><span class="n">${n}</span><h2>${title}</h2></div>`; }
+
+/* ---------------------------------------------------------------------
+   DASHBOARD
+--------------------------------------------------------------------- */
+function renderDashboard(c){
+  const {parts, avg} = overallScore();
+  const ready = readinessLabel();
+  const mIdx = maturityIndex();
+  const currentPhaseObj = PHASES.find(p=>!S.phases[p.key].ready) || PHASES[4];
+
+  c.innerHTML = `
+  <div class="hero">
+    <div class="eyebrow">BISP Trainings · Oracle ARCS-Inspired Simulation</div>
+    <h1>Implementation Dashboard</h1>
+    <p>Topic 19 — Recommended Implementation Phases. Walk a mock reconciliation platform through five maturity phases: Plan, Build, Validate, Scale, Automate. Every number on this screen is generated by your own actions in the simulator.</p>
+    <div class="tel">www.bisptrainings.com &nbsp;·&nbsp; Call Us: +91 769-409-5404</div>
+  </div>
+
+  ${sectionTitle("01","Maturity & Readiness")}
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Implementation maturity</h3>
+    <div class="hint">Foundation → Control → Automation → Integration → Intelligence</div>
+    <div class="maturity">
+      ${MATURITY_LEVELS.map((m,i)=>`<div class="seg ${i<=mIdx?'':'off'}" style="${i<=mIdx?`background:${["#8894A6","#3D8BD4","#1B5FAE","#0A1F3C","#F5821F"][i]}`:""}">${i===mIdx?`<span class="marker"></span>`:""}${m}</div>`).join("")}
+    </div>
+  </div>
+
+  <div class="grid g4">
+    ${kpiCard("Current Phase", "Phase "+currentPhaseObj.n, currentPhaseObj.title)}
+    ${kpiCard("Overall Completion", avg+"%", "Weighted across 9 readiness dimensions")}
+    ${kpiCard("Capabilities Implemented", capsImplementedCount()+" / "+capsTotalCount(), "Across all five phases")}
+    ${kpiCard("Open Risks", S.risks.filter(r=>r.status==="Open").length, S.risks.length+" total tracked")}
+  </div>
+  <div class="grid g4" style="margin-top:14px;">
+    ${kpiCard("Testing Status", S.testing.blockedProduction?"Blocked":(testingScore()+"% pass"), S.testing.blockedProduction?"Critical test failure":"Across executed suites")}
+    ${kpiCard("Security Status", securityScore()+"%", securityScore()<100?"Controls incomplete":"All controls configured")}
+    ${kpiCard("Production Readiness", ready.label, "")}
+    ${kpiCard("Automation Rate", automationScore()+"%", "Auto-recon + matching blend")}
+  </div>
+  <div class="grid g3" style="margin-top:14px;">
+    ${kpiCard("Financial Benefit", S.financial.computed?fmtUSD(S.financial.result.annualBenefit):"Not calculated", S.financial.computed?"Illustrative annual labor benefit":"Run the Financial Impact calculator")}
+    ${kpiCard("Match Rate", S.matching.results?fmtPct(S.matching.results.totalRate):"—", S.matching.results?"Exact + tolerance":"Run Phase 3 matching")}
+    ${kpiCard("Close Cycle Time", closeCycleTimeDays()+" days", "Illustrative, improves with automation")}
+  </div>
+
+  ${sectionTitle("02","Five-Phase Snapshot")}
+  <div class="phaseband">
+    ${PHASES.map(p=>phaseCardHtml(p)).join("")}
+  </div>
+
+  ${sectionTitle("03","Overall Score Composition")}
+  <div class="card">
+    <h3>Readiness dimensions</h3>
+    <div class="hint">Each dimension is derived live from your configuration across the app.</div>
+    ${barChart(Object.entries(parts).map(([k,v])=>({label:k, value:v, max:100})))}
+  </div>
+  `;
+}
+function capsTotalCount(){ return PHASES.reduce((a,p)=>a+p.capabilities.length,0); }
+function capsImplementedCount(){
+  let n=0;
+  if(S.phases.p1.ready) n+=PHASES[0].capabilities.length; else n+= Math.round(PHASES[0].capabilities.length * foundationScore()/100);
+  [2,3,4,5].forEach(k=>{ if(S.phases["p"+k].ready) n+=PHASES[k-1].capabilities.length; });
+  return Math.min(n, capsTotalCount());
+}
+function closeCycleTimeDays(){
+  let d=10;
+  if(S.phases.p1.ready) d-=1;
+  if(S.phases.p2.ready) d-=2;
+  if(S.phases.p3.ready) d-=2;
+  if(S.phases.p4.ready) d-=1.5;
+  if(S.phases.p5.ready) d-=1.5;
+  return Math.max(2, d);
+}
+function phaseCardHtml(p){
+  const unlocked = phaseUnlocked(p.n);
+  const ready = S.phases[p.key].ready;
+  const cur = unlocked && !ready && PHASES.every(pp=>pp.n>=p.n || S.phases[pp.key].ready);
+  return `<div class="phasecard ${unlocked?'':'locked'} ${cur?'current':''}" onclick="${unlocked?`go('${p.id}')`:""}">
+    <div class="pnum">PHASE ${p.n} · ${p.tag.toUpperCase()}</div>
+    <h4>${p.title}</h4>
+    <div class="stat">${ready?badge("Ready","b-ok"):(unlocked?badge("In Progress","b-warn"):badge("Locked","b-locked"))}</div>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------------
+   ROADMAP
+--------------------------------------------------------------------- */
+function renderRoadmap(c){
+  c.innerHTML = `
+  ${sectionTitle("—","Interactive Five-Phase Roadmap")}
+  <div class="card hint" style="margin-bottom:16px;">Click a phase to open its objectives, capabilities, dependencies, configuration actions, testing, risks, KPIs and exit criteria. Phase 2 onward stays locked until the prior phase's readiness gates are complete.</div>
+  <div class="phaseband" style="flex-wrap:wrap;">
+    ${PHASES.map(p=>phaseCardHtml(p)).join("")}
+  </div>
+  <div class="grid g2" style="margin-top:18px;">
+    ${PHASES.map(p=>`
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <h3>Phase ${p.n} — ${p.title}</h3>
+          ${S.phases[p.key].ready?badge("Ready","b-ok"):(phaseUnlocked(p.n)?badge("Unlocked","b-info"):badge("Locked","b-locked"))}
+        </div>
+        <div class="hint">${p.objective}</div>
+        <div class="pillrow">${p.capabilities.map(cp=>`<span class="pill ${phaseUnlocked(p.n)?'':'locked'}">${cp}</span>`).join("")}</div>
+        <div style="margin-top:10px;"><button class="btn btn-sm" ${phaseUnlocked(p.n)?"":"disabled"} onclick="go('${p.id}')">Open Phase ${p.n} →</button></div>
+      </div>`).join("")}
+  </div>`;
+}
+
+/* ---------------------------------------------------------------------
+   PHASE DETAIL (shared shell + phase-specific simulators)
+--------------------------------------------------------------------- */
+function renderPhaseDetail(n){
+  return function(c){
+    const p = PHASES[n-1];
+    const unlocked = phaseUnlocked(n);
+    if(!unlocked){
+      c.innerHTML = `<div class="card"><div class="readiness-flag" style="background:var(--danger-bg); color:var(--danger);">🔒 Phase ${n} is locked</div>
+      <p style="color:var(--muted); font-size:13px;">Complete Phase ${n-1}'s readiness gate before this phase unlocks. This mirrors real implementation discipline — later capabilities depend on a stable foundation.</p>
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="go('phase${n-1}')">Go to Phase ${n-1} →</button></div>`;
+      return;
+    }
+    const tabs = ["Objectives","Capabilities","Dependencies","Configuration","Testing","Risks","KPIs","Exit Criteria"];
+    if(!tabs.includes(S.phaseDetailTab)) S.phaseDetailTab="Objectives";
+    let body = "";
+    if(S.phaseDetailTab==="Objectives") body = `<div class="card"><h3>Objective</h3><p style="font-size:13px;color:var(--muted);line-height:1.6;">${p.objective}</p></div>`;
+    else if(S.phaseDetailTab==="Capabilities") body = `<div class="card"><h3>Capabilities in this phase</h3><div class="pillrow" style="margin-top:8px;">${p.capabilities.map(cp=>`<span class="pill on">${cp}</span>`).join("")}</div></div>`;
+    else if(S.phaseDetailTab==="Dependencies") body = `<div class="card"><h3>Dependencies</h3>${p.dependencies.map(d=>`<div class="dep-item"><span>${d}</span><span class="status">${badge(unlocked?"Satisfied":"Blocked", unlocked?"b-ok":"b-bad")}</span></div>`).join("")}</div>`;
+    else if(S.phaseDetailTab==="Configuration") body = phaseConfigBody(n);
+    else if(S.phaseDetailTab==="Testing") body = phaseTestingSummary(n);
+    else if(S.phaseDetailTab==="Risks") body = `<div class="card"><h3>Risks tied to Phase ${n}</h3>${riskTable(S.risks.filter(r=>r.phase===n))}</div>`;
+    else if(S.phaseDetailTab==="KPIs") body = phaseKpiBody(n);
+    else if(S.phaseDetailTab==="Exit Criteria") body = `<div class="card"><h3>Exit criteria</h3>${checklist(p.exit.map(e=>({label:e, done:S.phases[p.key].ready})))}
+      <div style="margin-top:12px;">${S.phases[p.key].ready? `<div class="readiness-flag" style="background:var(--success-bg); color:var(--success);">✓ Phase ${n} Ready</div>` : `<div class="readiness-flag" style="background:var(--warn-bg); color:var(--warn);">In progress — complete configuration to satisfy exit criteria</div>`}</div></div>`;
+
+    c.innerHTML = `
+    <div class="card" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div class="hint" style="margin-bottom:2px;">PHASE ${p.n} · ${p.tag.toUpperCase()}</div>
+        <h3 style="font-size:18px;">${p.title}</h3>
+      </div>
+      ${S.phases[p.key].ready?badge("Phase Ready","b-ok"):badge("In Progress","b-warn")}
+    </div>
+    <div class="tabs">${tabs.map(t=>`<div class="tab ${S.phaseDetailTab===t?'active':''}" onclick="window.setPhaseTab('${t}')">${t}</div>`).join("")}</div>
+    ${body}
+    `;
+  };
+}
+window.setPhaseTab = function(t){ S.phaseDetailTab=t; render(); };
+
+function phaseConfigBody(n){
+  if(n===1) return phase1Config();
+  if(n===2) return phase2Config();
+  if(n===3) return phase3Config();
+  if(n===4) return phase4Config();
+  if(n===5) return phase5Config();
+}
+function phaseTestingSummary(n){
+  const map = {1:["Unit","UAT"],2:["Integration","Regression"],3:["Data","Performance"],4:["Security","Production Validation"],5:["System","UAT"]};
+  const tabs = map[n]||["Unit"];
+  return `<div class="card"><h3>Relevant test suites</h3><div class="hint">Run these from the Testing Center — results feed the phase readiness and overall score.</div>
+  <div class="grid g2">${tabs.map(t=>{
+    const d = S.testing[t];
+    return `<div class="card"><h3 style="font-size:13px;">${t}</h3>
+      ${d.run? `<div class="pillrow"><span class="pill on" style="background:var(--success);border-color:var(--success);">Passed ${d.passed}</span><span class="pill on" style="background:var(--danger);border-color:var(--danger);">Failed ${d.failed}</span><span class="pill on" style="background:var(--muted-2);border-color:var(--muted-2);">Blocked ${d.blocked}</span></div>` : `<div class="hint">Not yet run.</div>`}
+      <button class="btn btn-sm" style="margin-top:8px;" onclick="go('testing')">Open Testing Center →</button>
+    </div>`;
+  }).join("")}</div></div>`;
+}
+function phaseKpiBody(n){
+  const rows = {
+    1:[{label:"Reconciliation Completion Rate", value:reconCompletionRate(), max:100},
+       {label:"Data Load Success Rate", value:dataQualityScore(), max:100}],
+    2:[{label:"Auto-Reconciliation Rate", value:S.autoRecon?S.autoRecon.autoRate:0, max:100},
+       {label:"Exception Rate", value:S.autoRecon?S.autoRecon.exceptionRate:0, max:100}],
+    3:[{label:"Match Rate", value:S.matching.results?S.matching.results.totalRate:0, max:100},
+       {label:"Unmatched Rate", value:S.matching.results?S.matching.results.unmatchedRate:0, max:100}],
+    4:[{label:"Integration Readiness", value:integrationScore(), max:100},
+       {label:"Performance Score", value:performanceScore(), max:100}],
+    5:[{label:"AI Suggestion Acceptance", value:S.ai.results?S.ai.results.acceptRate:0, max:100},
+       {label:"Touchless Maturity Level", value:S.touchlessLevel, max:6, display:S.touchlessLevel+" / 6"}],
+  };
+  return `<div class="card"><h3>Phase ${n} KPIs</h3>${barChart(rows[n])}</div>`;
+}
+function reconCompletionRate(){
+  if(S.entities.reconciliations.length===0) return 0;
+  return Math.round(100*S.entities.reconciliations.filter(r=>r.status==="Approved").length/S.entities.reconciliations.length);
+}
+
+/* ---- PHASE 1 CONFIG ---- */
+function phase1Config(){
+  const g = S.gatesP1;
+  const gateItems = [
+    {key:"security", label:"Security configured", desc:"Roles and access baseline in place"},
+    {key:"profiles", label:"Profiles created", desc:"At least one reconciliation profile"},
+    {key:"formats", label:"Formats validated", desc:"At least one import format"},
+    {key:"import", label:"Import successful", desc:"At least one balance loaded"},
+    {key:"workflow", label:"Workflow tested", desc:"A reconciliation approved end-to-end"},
+    {key:"audit", label:"Audit working", desc:"At least one audit entry recorded"},
+    {key:"notifications", label:"Notifications working", desc:"Notification test sent"},
+    {key:"uat", label:"UAT passed", desc:"User acceptance sign-off recorded"},
+  ];
+  gateItems.forEach(it=>{
+    if(it.key==="profiles") it.done = S.entities.profiles.length>0;
+    else if(it.key==="formats") it.done = S.entities.formats.length>0;
+    else if(it.key==="import") it.done = S.entities.balances.length>0;
+    else if(it.key==="workflow") it.done = S.entities.reconciliations.some(r=>r.status==="Approved");
+    else if(it.key==="audit") it.done = S.auditLog.length>0;
+    else it.done = g[it.key];
+    it.onClick = `window.toggleGate('${it.key}')`;
+  });
+  const ready = phase1Ready();
+  return `
+  <div class="grid g2">
+    <div class="card">
+      <h3>1. Users & Roles</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Name</label><input id="u_name" type="text" placeholder="e.g. Priya Shah"></div>
+        <div class="field"><label class="f">Role</label><select id="u_role"><option>Preparer</option><option>Reviewer</option><option>Admin</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.addUser()">Create user</button>
+      <div class="tablewrap" style="margin-top:10px;">${simpleTable(["Name","Role"], S.entities.users.map(u=>[u.name,u.role]))}</div>
+    </div>
+    <div class="card">
+      <h3>2. Periods</h3>
+      <div class="field"><label class="f">Period label</label><input id="pr_name" type="text" placeholder="e.g. Aug-2026"></div>
+      <button class="btn btn-primary btn-sm" onclick="window.addPeriod()">Create period</button>
+      <div class="tablewrap" style="margin-top:10px;">${simpleTable(["Period","Status"], S.entities.periods.map(p=>[p.name,p.status]))}</div>
+    </div>
+    <div class="card">
+      <h3>3. Profiles</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Profile name</label><input id="pf_name" type="text" placeholder="e.g. Bank Accounts"></div>
+        <div class="field"><label class="f">Frequency</label><select id="pf_freq"><option>Monthly</option><option>Weekly</option><option>Daily</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.addProfile()">Create profile</button>
+      <div class="tablewrap" style="margin-top:10px;">${simpleTable(["Profile","Frequency"], S.entities.profiles.map(p=>[p.name,p.freq]))}</div>
+    </div>
+    <div class="card">
+      <h3>4. Formats</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Format name</label><input id="fm_name" type="text" placeholder="e.g. GL Trial Balance CSV"></div>
+        <div class="field"><label class="f">Type</label><select id="fm_type"><option>CSV</option><option>Fixed-width</option><option>ERP Extract</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.addFormat()">Create & validate format</button>
+      <div class="tablewrap" style="margin-top:10px;">${simpleTable(["Format","Type","Status"], S.entities.formats.map(f=>[f.name,f.type,"Validated"]))}</div>
+    </div>
+    <div class="card">
+      <h3>5. Balance Imports</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Source</label><input id="bal_src" type="text" placeholder="e.g. SAP GL Extract"></div>
+        <div class="field"><label class="f">Balance amount</label><input id="bal_amt" type="number" placeholder="e.g. 458200"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" ${S.entities.formats.length?"":"disabled"} onclick="window.addBalance()">Load balance</button>
+      ${S.entities.formats.length?"":`<div class="hint">Create a format first.</div>`}
+      <div class="tablewrap" style="margin-top:10px;">${simpleTable(["Source","Amount"], S.entities.balances.map(b=>[b.src, fmtUSD(b.amt)]))}</div>
+    </div>
+    <div class="card">
+      <h3>6. Reconciliation Generation & Workflow</h3>
+      <button class="btn btn-primary btn-sm" ${(S.entities.profiles.length&&S.entities.periods.length&&S.entities.balances.length)?"":"disabled"} onclick="window.genRecon()">Generate reconciliation</button>
+      ${(S.entities.profiles.length&&S.entities.periods.length&&S.entities.balances.length)?"":`<div class="hint">Requires a profile, period and loaded balance.</div>`}
+      <div class="tablewrap" style="margin-top:10px;">${reconTable()}</div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:14px;">
+    <div class="card"><h3>Comments, Attachments & Notifications</h3>
+      <div class="field"><label class="f">Add a comment to latest reconciliation</label><input id="cmt" type="text" placeholder="Reviewed against sub-ledger, no exceptions"></div>
+      <button class="btn btn-sm" ${S.entities.reconciliations.length?"":"disabled"} onclick="window.addComment()">Add comment</button>
+      <button class="btn btn-sm" style="margin-left:6px;" ${S.entities.reconciliations.length?"":"disabled"} onclick="window.addAttachment()">Attach supporting file</button>
+      <button class="btn btn-sm" style="margin-left:6px;" onclick="window.sendNotif()">Send test notification</button>
+      <div class="hint" style="margin-top:8px;">Comments: ${S.entities.reconciliations.reduce((a,r)=>a+r.comments.length,0)} · Attachments: ${S.entities.reconciliations.reduce((a,r)=>a+r.attachments,0)} · Notifications sent: ${g.notifications?"Yes":"No"}</div>
+    </div>
+    <div class="card"><h3>Phase 1 Readiness Gate</h3>
+      ${checklist(gateItems)}
+    </div>
+  </div>
+  <div style="margin-top:14px;">
+    ${ready? `<div class="readiness-flag" style="background:var(--success-bg); color:var(--success);">✓ Phase 1 Ready — Phase 2 unlocked</div>` : `<div class="readiness-flag" style="background:var(--warn-bg); color:var(--warn);">Gate ${gateCount().done}/${gateCount().total} complete — Phase 2 remains locked</div>`}
+  </div>`;
+}
+function simpleTable(headers, rows){
+  if(rows.length===0) return `<div class="empty">No records yet.</div>`;
+  return `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+function reconTable(){
+  if(S.entities.reconciliations.length===0) return `<div class="empty">No reconciliations generated yet.</div>`;
+  return `<table><thead><tr><th>ID</th><th>Profile</th><th>Period</th><th>Status</th><th>Action</th></tr></thead><tbody>
+  ${S.entities.reconciliations.map(r=>`<tr><td class="mono">REC-${r.id}</td><td>${r.profile}</td><td>${r.period}</td><td>${badge(r.status, r.status==="Approved"?"b-ok":(r.status==="In Review"?"b-info":"b-warn"))}</td>
+  <td>${reconActionBtn(r)}</td></tr>`).join("")}
+  </tbody></table>`;
+}
+function reconActionBtn(r){
+  if(r.status==="Draft") return `<button class="btn btn-sm" onclick="window.reconSubmit(${r.id})">Submit</button>`;
+  if(r.status==="In Review") return `<button class="btn btn-sm" onclick="window.reconApprove(${r.id})">Approve</button>`;
+  return `<span class="chip">Complete</span>`;
+}
+
+/* Phase 1 handlers */
+window.toggleGate = function(k){ S.gatesP1[k]=!S.gatesP1[k]; audit("Phase 1 Gate: "+k,"Toggle", S.gatesP1[k]?"Enabled":"Disabled"); render(); };
+window.addUser = function(){
+  const name = document.getElementById("u_name").value.trim(); const role = document.getElementById("u_role").value;
+  if(!name){ toast("Enter a user name","warn"); return; }
+  S.entities.users.push({id:nid(), name, role}); audit("User: "+name, "Create", "Success","—",role); toast("User created","ok"); render();
+};
+window.addPeriod = function(){
+  const name = document.getElementById("pr_name").value.trim();
+  if(!name){ toast("Enter a period label","warn"); return; }
+  S.entities.periods.push({id:nid(), name, status:"Open"}); audit("Period: "+name,"Create","Success"); toast("Period created","ok"); render();
+};
+window.addProfile = function(){
+  const name = document.getElementById("pf_name").value.trim(); const freq = document.getElementById("pf_freq").value;
+  if(!name){ toast("Enter a profile name","warn"); return; }
+  S.entities.profiles.push({id:nid(), name, freq}); audit("Profile: "+name,"Create","Success","—",freq); toast("Profile created","ok"); render();
+};
+window.addFormat = function(){
+  const name = document.getElementById("fm_name").value.trim(); const type = document.getElementById("fm_type").value;
+  if(!name){ toast("Enter a format name","warn"); return; }
+  S.entities.formats.push({id:nid(), name, type}); audit("Format: "+name,"Create & Validate","Success"); toast("Format created and validated","ok"); render();
+};
+window.addBalance = function(){
+  const src = document.getElementById("bal_src").value.trim(); const amt = parseFloat(document.getElementById("bal_amt").value)||0;
+  if(!src){ toast("Enter a source","warn"); return; }
+  S.entities.balances.push({id:nid(), src, amt}); audit("Balance import: "+src,"Load","Success","—",fmtUSD(amt)); toast("Balance loaded","ok"); render();
+};
+window.genRecon = function(){
+  const prof = S.entities.profiles[S.entities.profiles.length-1];
+  const per = S.entities.periods[S.entities.periods.length-1];
+  const rec = {id:nid(), profile:prof.name, period:per.name, status:"Draft", comments:[], attachments:0};
+  S.entities.reconciliations.push(rec);
+  audit("Reconciliation REC-"+rec.id,"Generate","Success");
+  toast("Reconciliation generated","ok"); render();
+};
+window.reconSubmit = function(id){ const r=S.entities.reconciliations.find(x=>x.id===id); r.status="In Review"; audit("Reconciliation REC-"+id,"Submit","Success","Draft","In Review"); render(); };
+window.reconApprove = function(id){ const r=S.entities.reconciliations.find(x=>x.id===id); r.status="Approved"; audit("Reconciliation REC-"+id,"Approve","Success","In Review","Approved"); toast("Reconciliation approved","ok"); render(); };
+window.addComment = function(){
+  const t = document.getElementById("cmt").value.trim(); if(!t) { toast("Enter a comment","warn"); return; }
+  const r = S.entities.reconciliations[S.entities.reconciliations.length-1]; r.comments.push(t);
+  audit("Reconciliation REC-"+r.id,"Add comment","Success"); toast("Comment added","ok"); render();
+};
+window.addAttachment = function(){
+  const r = S.entities.reconciliations[S.entities.reconciliations.length-1]; r.attachments++;
+  audit("Reconciliation REC-"+r.id,"Attach file","Success"); toast("Attachment added","ok"); render();
+};
+window.sendNotif = function(){ S.gatesP1.notifications=true; audit("Notification","Send test","Success"); toast("Test notification sent","ok"); render(); };
+
+/* ---- PHASE 2 CONFIG ---- */
+function phase2Config(){
+  return `
+  <div class="grid g2">
+    <div class="card">
+      <h3>Rules Engine</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Rule name</label><input id="rl_name" type="text" placeholder="Auto-match bank fees under $50"></div>
+        <div class="field"><label class="f">Type</label><select id="rl_type"><option>Threshold</option><option>Pattern</option><option>Composite</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.addRule()">Add rule</button>
+      <div class="tablewrap" style="margin-top:10px;">${simpleTable(["Rule","Type"], S.rules.map(r=>[r.name,r.type]))}</div>
+    </div>
+    <div class="card">
+      <h3>Custom Attributes & Group Reconciliations</h3>
+      <button class="btn btn-sm" onclick="window.addAttr()">Add custom attribute</button>
+      <button class="btn btn-sm" style="margin-left:6px;" ${S.entities.reconciliations.length>1?"":"disabled"} onclick="window.groupRecon()">Create group reconciliation</button>
+      <div class="hint" style="margin-top:8px;">Custom attributes: ${S._attrs||0} · Groups created: ${S._groups||0}</div>
+    </div>
+  </div>
+
+  ${sectionTitle("","Auto-Reconciliation Simulator")}
+  <div class="card">
+    <div class="hint">Adjust the pilot population, then run the engine. Results feed the Auto-Reconciliation Rate KPI.</div>
+    <div class="grid g3">
+      <div class="field"><label class="f">Total reconciliations</label><input id="ar_total" type="number" value="1000"></div>
+      <div class="field"><label class="f">Auto-reconciled</label><input id="ar_auto" type="number" value="600"></div>
+      <div class="field"><label class="f">Manual review</label><input id="ar_manual" type="number" value="300"></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="window.runAutoRecon()">Run auto-reconciliation</button>
+    ${S.autoRecon? `<div style="margin-top:14px;">${donut([
+        {label:"Auto-reconciled", value:S.autoRecon.auto, color:"var(--success)"},
+        {label:"Manual review", value:S.autoRecon.manual, color:"var(--blue)"},
+        {label:"Exceptions", value:S.autoRecon.exceptions, color:"var(--danger)"},
+      ])}
+      <div class="grid g3" style="margin-top:14px;">
+        ${kpiCard("Auto-Reconciliation Rate", fmtPct(S.autoRecon.autoRate))}
+        ${kpiCard("Manual Review Rate", fmtPct(S.autoRecon.manualRate))}
+        ${kpiCard("Exception Rate", fmtPct(S.autoRecon.exceptionRate))}
+      </div>` : `<div class="empty" style="margin-top:12px;">Not yet run.</div>`}
+  </div>
+
+  ${sectionTitle("","Aging Simulator")}
+  <div class="card">
+    <div class="hint">Generate an aging distribution for open reconciling items across standard buckets.</div>
+    <button class="btn btn-primary btn-sm" onclick="window.runAging()">Generate aging data</button>
+    ${S.aging ? `<div class="tablewrap" style="margin-top:12px;">
+      <table><thead><tr><th>Bucket</th><th>Count</th><th>Amount</th><th>%</th></tr></thead>
+      <tbody>${S.aging.rows.map(r=>`<tr><td>${r.bucket}</td><td>${fmtN(r.count)}</td><td>${fmtUSD(r.amount)}</td><td>${fmtPct(r.pct)}</td></tr>`).join("")}</tbody></table>
+      </div>
+      <div style="margin-top:12px;">${barChart(S.aging.rows.map(r=>({label:r.bucket, value:r.pct, max:Math.max(...S.aging.rows.map(x=>x.pct)), display:fmtPct(r.pct)})), "var(--orange)")}</div>
+      ` : `<div class="empty" style="margin-top:12px;">Not yet generated.</div>`}
+  </div>
+
+  ${sectionTitle("","Alerts & Multi-Level Review")}
+  <div class="card">
+    <button class="btn btn-sm" onclick="window.triggerAlert()">Trigger sample alert (item aged &gt; 90 days)</button>
+    <button class="btn btn-sm" style="margin-left:6px;" onclick="window.addReviewLevel()">Add review level</button>
+    <div class="hint" style="margin-top:8px;">Alerts triggered: ${S._alerts||0} · Review levels configured: ${S._levels||1}</div>
+  </div>
+  `;
+}
+window.addRule = function(){
+  const name=document.getElementById("rl_name").value.trim(); const type=document.getElementById("rl_type").value;
+  if(!name){ toast("Enter a rule name","warn"); return; }
+  S.rules.push({id:nid(),name,type}); audit("Rule: "+name,"Create","Success"); toast("Rule added","ok"); render();
+};
+window.addAttr = function(){ S._attrs=(S._attrs||0)+1; audit("Custom attribute","Create","Success"); toast("Custom attribute added","ok"); render(); };
+window.groupRecon = function(){ S._groups=(S._groups||0)+1; audit("Group reconciliation","Create","Success"); toast("Group reconciliation created","ok"); render(); };
+window.runAutoRecon = function(){
+  const total = parseInt(document.getElementById("ar_total").value)||1000;
+  const auto = parseInt(document.getElementById("ar_auto").value)||0;
+  const manual = parseInt(document.getElementById("ar_manual").value)||0;
+  const exceptions = Math.max(0, total-auto-manual);
+  S.autoRecon = {total, auto, manual, exceptions,
+    autoRate: 100*auto/total, manualRate:100*manual/total, exceptionRate:100*exceptions/total};
+  audit("Auto-Reconciliation","Run simulation","Success","—", auto+"/"+total+" auto");
+  toast("Auto-reconciliation simulated","ok"); render();
+};
+window.runAging = function(){
+  let remaining = 2400; const rows=[];
+  AGING_BUCKETS.forEach((b,i)=>{
+    const share = i<AGING_BUCKETS.length-1 ? Math.round(remaining*(0.42-0.06*i)*(0.7+Math.random()*0.6)) : remaining;
+    const count = Math.max(0, i===AGING_BUCKETS.length-1? remaining : Math.min(share, remaining));
+    remaining -= count;
+    rows.push({bucket:b, count, amount: Math.round(count*(1800+Math.random()*4200))});
+  });
+  const totalCount = rows.reduce((a,r)=>a+r.count,0)||1;
+  rows.forEach(r=>r.pct = 100*r.count/totalCount);
+  S.aging = {rows};
+  audit("Aging","Generate distribution","Success");
+  toast("Aging data generated","ok"); render();
+};
+window.triggerAlert = function(){ S._alerts=(S._alerts||0)+1; audit("Alert","Trigger (item aged > 90 days)","Success"); toast("Alert triggered","warn"); render(); };
+window.addReviewLevel = function(){ S._levels=(S._levels||1)+1; audit("Multi-level review","Add level","Success"); toast("Review level added","ok"); render(); };
+
+/* ---- PHASE 3 CONFIG ---- */
+function phase3Config(){
+  const r = S.matching.results;
+  return `
+  <div class="grid g2">
+    <div class="card">
+      <h3>Match Types & Data Sources</h3>
+      <button class="btn btn-sm" onclick="window.addMatchType()">Add match type</button>
+      <button class="btn btn-sm" style="margin-left:6px;" onclick="window.addDataSource()">Add data source</button>
+      <div class="hint" style="margin-top:8px;">Match types: ${S._matchTypes||0} · Data sources: ${S._dataSources||0}</div>
+    </div>
+    <div class="card">
+      <h3>Transaction Imports</h3>
+      <button class="btn btn-sm" onclick="window.importTxns()">Import bank & GL transaction files</button>
+      <div class="hint" style="margin-top:8px;">Imports run: ${S._txnImports||0}</div>
+    </div>
+  </div>
+
+  ${sectionTitle("","Matching Engine Simulation")}
+  <div class="card">
+    <div class="hint">1,000,000 bank transactions vs 980,000 GL transactions. Adjust tolerance, rule set and worker count — results recompute live.</div>
+    <div class="grid g3">
+      <div class="field"><label class="f">Tolerance (± amount)</label>
+        <div class="slider-row"><input type="range" min="0" max="10" step="0.25" value="${S.matching.tolerance}" oninput="window.setTolerance(this.value)"><span class="mono" id="tol_val">${S.matching.tolerance}</span></div>
+      </div>
+      <div class="field"><label class="f">Rule set</label><select id="ruleset" onchange="window.setRuleset(this.value)">
+        <option ${S.matching.ruleSet==="Standard"?"selected":""}>Standard</option>
+        <option ${S.matching.ruleSet==="Strict"?"selected":""}>Strict</option>
+        <option ${S.matching.ruleSet==="Relaxed"?"selected":""}>Relaxed</option>
+      </select></div>
+      <div class="field"><label class="f">Worker count</label>
+        <div class="slider-row"><input type="range" min="1" max="16" step="1" value="${S.matching.workers}" oninput="window.setWorkers(this.value)"><span class="mono" id="wrk_val">${S.matching.workers}</span></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="window.runMatching()">Run AutoMatch</button>
+    ${r? `<div style="margin-top:14px;">${donut([
+        {label:"Exact match", value:r.exact, color:"var(--success)"},
+        {label:"Tolerance match", value:r.tolerance, color:"var(--blue-light)"},
+        {label:"Unmatched", value:r.unmatched, color:"var(--danger)"},
+      ])}
+      <div class="grid g4" style="margin-top:14px;">
+        ${kpiCard("Exact Match Rate", fmtPct(r.exactRate),"",true)}
+        ${kpiCard("Tolerance Match Rate", fmtPct(r.toleranceRate),"",true)}
+        ${kpiCard("Total Match Rate", fmtPct(r.totalRate),"",true)}
+        ${kpiCard("Unmatched Rate", fmtPct(r.unmatchedRate),"",true)}
+      </div>
+      <div class="hint" style="margin-top:8px;">Estimated run time: ${r.runtime}s across ${S.matching.workers} workers.</div>
+      ` : `<div class="empty" style="margin-top:12px;">Not yet run.</div>`}
+  </div>
+
+  ${sectionTitle("","Manual Matching & Unmatched Management")}
+  <div class="card">
+    <button class="btn btn-sm" ${r?"":"disabled"} onclick="window.manualMatch()">Manually resolve one unmatched item</button>
+    <button class="btn btn-sm" style="margin-left:6px;" ${r?"":"disabled"} onclick="window.postAdjustment()">Post adjustment for a break</button>
+    <div class="hint" style="margin-top:8px;">Manually resolved: ${S._manualResolved||0} · Adjustments posted: ${S._adjustments||0}</div>
+  </div>
+
+  ${sectionTitle("","Match Analytics")}
+  <div class="card">
+    ${r? barChart([
+      {label:"Exact", value:r.exact, max:r.total, color:"var(--success)"},
+      {label:"Tolerance", value:r.tolerance, max:r.total, color:"var(--blue-light)"},
+      {label:"Unmatched", value:r.unmatched, max:r.total, color:"var(--danger)"},
+    ]) : `<div class="empty">Run the matching engine to see analytics.</div>`}
+  </div>
+  `;
+}
+window.addMatchType = function(){ S._matchTypes=(S._matchTypes||0)+1; audit("Match type","Create","Success"); render(); };
+window.addDataSource = function(){ S._dataSources=(S._dataSources||0)+1; audit("Data source","Create","Success"); render(); };
+window.importTxns = function(){ S._txnImports=(S._txnImports||0)+1; audit("Transaction import","Run","Success"); toast("Transaction files imported","ok"); render(); };
+window.setTolerance = function(v){ S.matching.tolerance=parseFloat(v); document.getElementById("tol_val").textContent=v; };
+window.setRuleset = function(v){ S.matching.ruleSet=v; };
+window.setWorkers = function(v){ S.matching.workers=parseInt(v); document.getElementById("wrk_val").textContent=v; };
+window.runMatching = function(){
+  const bank=1000000, gl=980000, total=Math.min(bank,gl);
+  const tolBoost = clamp(S.matching.tolerance*2.1, 0, 21);
+  const ruleAdj = S.matching.ruleSet==="Strict"?-4:(S.matching.ruleSet==="Relaxed"?4:0);
+  let exactRate = clamp(74 + ruleAdj - (S.matching.tolerance*0.3) + (Math.random()*2-1), 40, 92);
+  let toleranceRate = clamp(tolBoost + ruleAdj*0.4 + (Math.random()*2-1), 0, 24);
+  if(exactRate+toleranceRate>98) toleranceRate = 98-exactRate;
+  const unmatchedRate = clamp(100-exactRate-toleranceRate, 0.5, 100);
+  const exact = Math.round(total*exactRate/100);
+  const tolerance = Math.round(total*toleranceRate/100);
+  const unmatched = total-exact-tolerance;
+  const runtime = Math.max(4, Math.round((total/ (S.matching.workers*38000))*10)/10);
+  S.matching.results = {total, exact, tolerance, unmatched, exactRate, toleranceRate, unmatchedRate, totalRate:exactRate+toleranceRate, runtime};
+  audit("AutoMatch","Run engine","Success","—", exact+" exact / "+tolerance+" tolerance / "+unmatched+" unmatched");
+  toast("Matching engine executed","ok"); render();
+};
+window.manualMatch = function(){ S._manualResolved=(S._manualResolved||0)+1; if(S.matching.results){S.matching.results.unmatched=Math.max(0,S.matching.results.unmatched-1);} audit("Unmatched item","Manual match","Success"); render(); };
+window.postAdjustment = function(){ S._adjustments=(S._adjustments||0)+1; audit("Adjustment","Post (educational — not a real GL posting)","Success"); toast("Adjustment recorded (illustrative)","ok"); render(); };
+
+/* ---- PHASE 4 CONFIG ---- */
+function phase4Config(){
+  const arch = ["ERP","API / Connector","Integration Job","Validation","Reconciliation Platform","Journal Export","ERP"];
+  const envSteps = ["DEV","TEST","Approval","PROD"];
+  const envIdx = envSteps.indexOf(S.integration.env==="PROD"?"PROD":S.integration.env);
+  return `
+  <div class="grid g2">
+    <div class="card"><h3>ERP Connectors, APIs, Scheduler, SSO</h3>
+      <button class="btn btn-sm" onclick="window.toggleFlag('_erp')">${S._erp?"✓ ":""}Configure ERP connector</button>
+      <button class="btn btn-sm" style="margin-left:6px;" onclick="window.toggleFlag('_api')">${S._api?"✓ ":""}Publish REST API</button><br><br>
+      <button class="btn btn-sm" onclick="window.toggleFlag('_sched')">${S._sched?"✓ ":""}Configure job scheduler</button>
+      <button class="btn btn-sm" style="margin-left:6px;" onclick="window.toggleFlag('_ssoP4')">${S._ssoP4?"✓ ":""}Enable SSO</button>
+    </div>
+    <div class="card"><h3>Integration Architecture</h3>
+      <div class="hint">Run the end-to-end simulation across the architecture below.</div>
+      <button class="btn btn-primary btn-sm" onclick="window.runIntegration()">Run integration simulation</button>
+      <div style="margin-top:12px;">${flowDiagram(arch, S.integration.lastRun? arch.length : 0)}</div>
+    </div>
+  </div>
+
+  ${sectionTitle("","Environment Promotion")}
+  <div class="card">
+    <div class="hint">Promotion is gated: PROD requires UAT passed and Approval granted.</div>
+    <div style="margin:12px 0;">${flowDiagram(envSteps, envIdx+1)}</div>
+    <div class="grid g3">
+      <div class="checkitem" style="border:1px solid var(--line); border-radius:8px; padding:10px;">
+        <div class="box ${S.integration.uatPassed?'done':''}" onclick="window.toggleUAT()">${S.integration.uatPassed?"✓":""}</div>
+        <div class="txt">UAT passed<div class="d">Toggle once UAT suite passes</div></div>
+      </div>
+      <div class="checkitem" style="border:1px solid var(--line); border-radius:8px; padding:10px;">
+        <div class="box ${S.integration.approval?'done':''}" onclick="window.toggleApproval()">${S.integration.approval?"✓":""}</div>
+        <div class="txt">Approval granted<div class="d">Governance sign-off</div></div>
+      </div>
+      <div>
+        <button class="btn btn-primary btn-sm" onclick="window.promote()">Promote to next environment</button>
+        <div class="hint" style="margin-top:6px;">Current: <b>${S.integration.env}</b></div>
+      </div>
+    </div>
+    <div class="tablewrap" style="margin-top:12px;">${simpleTable(["When","From","To","Result"], S.integration.promotions.map(p=>[p.ts,p.from,p.to,badge(p.result,p.result==="Success"?"b-ok":"b-bad")]))}</div>
+  </div>
+
+  ${sectionTitle("","Advanced Reporting & Performance")}
+  <div class="card">
+    <button class="btn btn-sm" onclick="window.toggleFlag('_advRep')">${S._advRep?"✓ ":""}Build advanced report</button>
+    <button class="btn btn-sm" style="margin-left:6px;" onclick="window.toggleFlag('_perfOpt')">${S._perfOpt?"✓ ":""}Run performance optimization pass</button>
+    <div class="hint" style="margin-top:8px;">Performance score: ${performanceScore()}%</div>
+  </div>
+  `;
+}
+window.toggleFlag = function(k){ S[k]=!S[k]; audit(k,"Toggle", S[k]?"Enabled":"Disabled"); render(); };
+window.runIntegration = function(){ S.integration.lastRun=true; audit("Integration architecture","Run simulation","Success"); toast("Integration path validated ERP → Platform → ERP","ok"); render(); };
+window.toggleUAT = function(){ S.integration.uatPassed=!S.integration.uatPassed; audit("UAT (Phase 4)","Toggle", S.integration.uatPassed?"Passed":"Not passed"); render(); };
+window.toggleApproval = function(){ S.integration.approval=!S.integration.approval; audit("Approval (Governance)","Toggle", S.integration.approval?"Granted":"Not granted"); render(); };
+window.promote = function(){
+  const steps=["DEV","TEST","PROD"];
+  const cur = S.integration.env;
+  if(cur==="PROD"){ toast("Already at PROD","warn"); return; }
+  const to = cur==="DEV"?"TEST":"PROD";
+  if(to==="PROD"){
+    if(!S.integration.uatPassed){ audit("Environment promotion","Promote to PROD","Blocked — UAT not passed",cur,to); toast("Blocked: UAT has not passed","err"); render(); return; }
+    if(!S.integration.approval){ audit("Environment promotion","Promote to PROD","Blocked — Approval missing",cur,to); toast("Blocked: Approval not granted","err"); render(); return; }
+  }
+  S.integration.env = to;
+  S.integration.promotions.push({ts:nowStamp(), from:cur, to, result:"Success"});
+  audit("Environment promotion","Promote","Success",cur,to);
+  toast("Promoted to "+to,"ok"); render();
+};
+
+/* ---- PHASE 5 CONFIG ---- */
+function phase5Config(){
+  const r = S.ai.results;
+  const levels = [
+    {n:1,label:"Manual",req:()=>true},
+    {n:2,label:"Workflow",req:s=>s.phases.p1.ready},
+    {n:3,label:"Rule Automation",req:s=>s.phases.p2.ready},
+    {n:4,label:"Integrated Automation",req:s=>s.phases.p3.ready && s.phases.p4.ready},
+    {n:5,label:"AI Assisted",req:s=>s.ai.run},
+    {n:6,label:"Controlled Touchless Close",req:s=>s.ai.run && securityScore(s)===100 && !s.testing.blockedProduction && s.governance.crs.some(c=>c.stage>=5)},
+  ];
+  return `
+  <div class="card">
+    <h3>AI Suggestion Simulator</h3>
+    <div class="hint">10,000 transactions run through suggested-match AI. Adjust the acceptance confidence threshold — every suggestion still requires human approval before it becomes a match.</div>
+    <div class="field" style="max-width:340px;"><label class="f">Confidence threshold for review priority</label>
+      <div class="slider-row"><input type="range" min="50" max="99" value="${S.ai.threshold}" oninput="window.setAiThreshold(this.value)"><span class="mono" id="ai_val">${S.ai.threshold}%</span></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="window.runAi()">Run AI suggestion pass</button>
+    ${r? `<div style="margin-top:14px;">
+      <div class="grid g2">
+        <div class="card"><h3 style="font-size:13px;">AI Suggested</h3><div class="kpi"><div class="value">${fmtN(r.suggested)}</div><div class="sub">of ${fmtN(r.total)} transactions</div></div></div>
+        <div class="card"><h3 style="font-size:13px;">Human Approved</h3><div class="kpi"><div class="value">${fmtN(r.approved)}</div><div class="sub">Reviewed and confirmed by a human preparer/reviewer</div></div></div>
+      </div>
+      <div style="margin-top:12px;">${donut([
+        {label:"Human approved", value:r.approved, color:"var(--success)"},
+        {label:"Human rejected", value:r.rejected, color:"var(--danger)"},
+        {label:"Pending review", value:r.pending, color:"var(--muted-2)"},
+      ])}</div>
+      <div class="grid g3" style="margin-top:14px;">
+        ${kpiCard("Suggestion Rate", fmtPct(r.suggestRate),"",true)}
+        ${kpiCard("Acceptance Rate", fmtPct(r.acceptRate),"of suggestions, by humans",true)}
+        ${kpiCard("Rejection Rate", fmtPct(r.rejectRate),"",true)}
+      </div>
+      <div class="card" style="margin-top:12px; background:var(--warn-bg); border-color:#f0d9a8;">
+        <b style="color:var(--warn);">Control note:</b> <span style="font-size:12.5px;">AI suggestions are never treated as approved accounting decisions in this simulator. Every match shown as "approved" required an explicit human action.</span>
+      </div>
+      ` : `<div class="empty" style="margin-top:12px;">Not yet run.</div>`}
+  </div>
+
+  ${sectionTitle("","Other AI Capabilities")}
+  <div class="grid g2">
+    <div class="card"><h3>Anomaly Detection & Risk Prediction</h3>
+      <button class="btn btn-sm" onclick="window.toggleFlag('_anomaly')">${S._anomaly?"✓ ":""}Run anomaly scan</button>
+      <button class="btn btn-sm" style="margin-left:6px;" onclick="window.toggleFlag('_riskPred')">${S._riskPred?"✓ ":""}Generate risk prediction</button>
+    </div>
+    <div class="card"><h3>Summaries, Workload & Search</h3>
+      <button class="btn btn-sm" onclick="window.toggleFlag('_summ')">${S._summ?"✓ ":""}Generate reconciliation summaries</button>
+      <button class="btn btn-sm" style="margin-left:6px;" onclick="window.toggleFlag('_workload')">${S._workload?"✓ ":""}Run workload assignment</button>
+      <button class="btn btn-sm" style="margin-top:6px;" onclick="window.toggleFlag('_nlsearch')">${S._nlsearch?"✓ ":""}Test natural-language search</button>
+      <button class="btn btn-sm" style="margin-left:6px;margin-top:6px;" onclick="window.toggleFlag('_forecast')">${S._forecast?"✓ ":""}Run close-completion forecast</button>
+    </div>
+  </div>
+
+  ${sectionTitle("","Touchless Close Maturity")}
+  <div class="card">
+    <div class="hint">Levels unlock only once the required capabilities and controls are actually in place.</div>
+    <div class="grid g3">
+      ${levels.map(l=>{
+        const unlocked = l.req(S);
+        return `<div class="card" style="background:${unlocked?'#F7FBF8':'#F9FAFC'}; border-color:${unlocked?'var(--success)':'var(--line)'};">
+          <div class="pnum">LEVEL ${l.n}</div><h4 style="font-size:13px;margin:4px 0 8px;">${l.label}</h4>
+          ${unlocked? badge("Unlocked","b-ok") : badge("Locked","b-locked")}
+          ${unlocked && S.touchlessLevel<l.n ? `<div style="margin-top:8px;"><button class="btn btn-sm" onclick="window.setTouchless(${l.n})">Set as current level</button></div>` : ""}
+          ${S.touchlessLevel===l.n? `<div style="margin-top:6px;">${badge("Current","b-info")}</div>`:""}
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
+window.setAiThreshold = function(v){ S.ai.threshold=parseInt(v); document.getElementById("ai_val").textContent=v+"%"; };
+window.runAi = function(){
+  const total=10000;
+  const suggested = Math.round(total*(0.80+ (S.ai.threshold-80)*-0.002 + (Math.random()*0.02-0.01))*100)/100 | 0;
+  const suggestedFinal = clamp(Math.round(total*0.85 - (S.ai.threshold-80)*8),6000,9500);
+  const approved = clamp(Math.round(suggestedFinal*(0.90 + (80-S.ai.threshold)*0.001)), 0, suggestedFinal);
+  const rejected = Math.round((suggestedFinal-approved)*0.85);
+  const pending = suggestedFinal-approved-rejected;
+  S.ai.results = {total, suggested:suggestedFinal, approved, rejected, pending:Math.max(0,pending),
+    suggestRate:100*suggestedFinal/total, acceptRate:100*approved/suggestedFinal, rejectRate:100*rejected/suggestedFinal};
+  S.ai.run = true;
+  audit("AI Suggested Matches","Run pass","Success","—", approved+" human-approved of "+suggestedFinal+" suggested");
+  toast("AI suggestion pass complete — human approval still required","ok"); render();
+};
+window.setTouchless = function(n){ S.touchlessLevel=n; audit("Touchless Close Maturity","Advance level","Success","—","Level "+n); toast("Touchless maturity set to Level "+n,"ok"); render(); };
+
+/* ---------------------------------------------------------------------
+   DEPENDENCIES
+--------------------------------------------------------------------- */
+function renderDependencies(c){
+  c.innerHTML = `
+  ${sectionTitle("—","Dependency Engine")}
+  <div class="card hint" style="margin-bottom:14px;">Capabilities in this platform are intentionally sequenced. Each dependency below is evaluated live against your current configuration.</div>
+  <div class="card">
+    ${DEP_GRAPH.map(d=>{
+      const ok = d.check(S);
+      return `<div class="dep-item"><span>${d.from}</span><span class="arrow">→</span><span>${d.to}</span>
+      <span class="status">${ok?badge("Satisfied","b-ok"):badge("Blocked — dependency incomplete","b-bad")}</span></div>`;
+    }).join("")}
+  </div>
+  ${sectionTitle("","Phase Unlock Chain")}
+  <div class="card">${flowDiagram(PHASES.map(p=>"Phase "+p.n), PHASES.filter(p=>S.phases[p.key].ready).length+1)}</div>
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   DATA MIGRATION
+--------------------------------------------------------------------- */
+function renderMigration(c){
+  const stages = ["Source","Profile","Clean","Map","Transform","Validate","Mock Load","Reconcile","Production"];
+  const entityTypes = ["Users","Profiles","Balances","Historical Data","Reference Data"];
+  c.innerHTML = `
+  ${sectionTitle("—","Data Migration Center")}
+  <div class="card">
+    <div class="hint">Migration pipeline</div>
+    ${flowDiagram(stages, S.migration.runs.length? stages.length : 0)}
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3>Run a migration batch</h3>
+    <div class="pillrow">${entityTypes.map(e=>`<span class="pill" onclick="window.runMigration('${e}')" style="cursor:pointer;">Simulate: ${e}</span>`).join("")}</div>
+    <div class="tablewrap" style="margin-top:12px;">
+      ${S.migration.runs.length===0? `<div class="empty">No migration batches run yet.</div>` :
+      `<table><thead><tr><th>Entity</th><th>Loaded</th><th>Rejected</th><th>Duplicate</th><th>Validated</th></tr></thead>
+      <tbody>${S.migration.runs.map(r=>`<tr><td>${r.entity}</td><td>${fmtN(r.loaded)}</td><td>${fmtN(r.rejected)}</td><td>${fmtN(r.duplicate)}</td><td>${fmtN(r.validated)}</td></tr>`).join("")}</tbody></table>`}
+    </div>
+  </div>
+  <div class="grid g4" style="margin-top:14px;">
+    ${kpiCard("Data Quality Score", dataQualityScore()+"%")}
+    ${kpiCard("Batches Run", S.migration.runs.length)}
+    ${kpiCard("Total Loaded", fmtN(S.migration.runs.reduce((a,r)=>a+r.loaded,0)))}
+    ${kpiCard("Total Rejected", fmtN(S.migration.runs.reduce((a,r)=>a+r.rejected,0)))}
+  </div>`;
+}
+window.runMigration = function(entity){
+  const base = 500+Math.floor(Math.random()*4500);
+  const rejected = Math.round(base*(0.01+Math.random()*0.03));
+  const duplicate = Math.round(base*(0.005+Math.random()*0.02));
+  const validated = base-rejected-duplicate;
+  S.migration.runs.push({entity, loaded:base, rejected, duplicate, validated});
+  audit("Data migration: "+entity,"Run batch","Success","—", validated+" validated / "+rejected+" rejected");
+  toast(entity+" migration batch complete","ok"); render();
+};
+
+/* ---------------------------------------------------------------------
+   TESTING CENTER
+--------------------------------------------------------------------- */
+function renderTesting(c){
+  if(!TESTING_TABS.includes(S.testingTab)) S.testingTab=TESTING_TABS[0];
+  const d = S.testing[S.testingTab];
+  c.innerHTML = `
+  ${sectionTitle("—","Testing Center")}
+  <div class="tabs">${TESTING_TABS.map(t=>`<div class="tab ${S.testingTab===t?'active':''}" onclick="window.setTestTab('${t}')">${t}${CRITICAL_TABS.includes(t)?' *':''}</div>`).join("")}</div>
+  <div class="card">
+    <h3>${S.testingTab} testing ${CRITICAL_TABS.includes(S.testingTab)?badge("Critical suite","b-warn"):""}</h3>
+    <div class="hint">Run this suite against the current configuration. A critical failure in Security, UAT or Production Validation blocks production.</div>
+    <button class="btn btn-primary btn-sm" onclick="window.runTest('${S.testingTab}')">Run tests</button>
+    ${d.run? `<div class="grid g3" style="margin-top:14px;">
+        ${kpiCard("Passed", d.passed, "", true)}
+        ${kpiCard("Failed", d.failed, "", true)}
+        ${kpiCard("Blocked", d.blocked, "", true)}
+      </div>
+      <div style="margin-top:10px;">${barChart([{label:"Pass rate",value:Math.round(100*d.passed/(d.passed+d.failed+d.blocked||1)),max:100}])}</div>
+      ` : `<div class="empty" style="margin-top:12px;">Not yet run.</div>`}
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3>Suite summary</h3>
+    <div class="tablewrap">
+      <table><thead><tr><th>Suite</th><th>Passed</th><th>Failed</th><th>Blocked</th><th>Status</th></tr></thead>
+      <tbody>${TESTING_TABS.map(t=>{
+        const x=S.testing[t];
+        return `<tr><td>${t}${CRITICAL_TABS.includes(t)?' *':''}</td><td>${x.passed}</td><td>${x.failed}</td><td>${x.blocked}</td><td>${x.run?(x.failed>0&&CRITICAL_TABS.includes(t)?badge("Critical failure","b-bad"):badge("Executed","b-ok")):badge("Not run","b-locked")}</td></tr>`;
+      }).join("")}</tbody></table>
+    </div>
+    <div style="margin-top:12px;">
+    ${S.testing.blockedProduction? `<div class="readiness-flag" style="background:var(--danger-bg);color:var(--danger);">✕ Production deployment blocked — resolve critical failures</div>`
+      : `<div class="readiness-flag" style="background:var(--success-bg);color:var(--success);">✓ No critical blockers detected</div>`}
+    </div>
+  </div>`;
+}
+window.setTestTab = function(t){ S.testingTab=t; render(); };
+window.runTest = function(t){
+  const n = 40+Math.floor(Math.random()*60);
+  const critical = CRITICAL_TABS.includes(t);
+  const failChance = critical? 0.22 : 0.12;
+  let failed = 0, blocked=0;
+  for(let i=0;i<n;i++){ const r=Math.random(); if(r<failChance*0.6) failed++; else if(r<failChance) blocked++; }
+  const passed = n-failed-blocked;
+  S.testing[t] = {passed, failed, blocked, run:true};
+  if(critical && failed>0) S.testing.blockedProduction = true;
+  audit("Testing: "+t,"Run suite","Success","—", passed+" passed / "+failed+" failed / "+blocked+" blocked");
+  toast(t+" suite executed — "+passed+" passed, "+failed+" failed", failed>0?"warn":"ok");
+  render();
+};
+
+/* ---------------------------------------------------------------------
+   SECURITY CENTER
+--------------------------------------------------------------------- */
+function renderSecurity(c){
+  const items = SECURITY_CONTROLS.map(sc=>({
+    key:sc.k, label:sc.label+(sc.critical?" (critical)":""), desc:sc.d, done:S.security[sc.k],
+    onClick:`window.toggleSecurity('${sc.k}')`,
+  }));
+  const score = securityScore();
+  c.innerHTML = `
+  ${sectionTitle("—","Security Center")}
+  <div class="grid g2">
+    <div class="card"><h3>Controls</h3>${checklist(items)}</div>
+    <div class="card">
+      <h3>Security score</h3>
+      <div class="kpi" style="margin-bottom:10px;"><div class="value">${score}%</div><div class="sub">All critical controls must be enabled for production readiness</div></div>
+      ${progress(score)}
+      <div style="margin-top:14px;">
+        ${score===100? `<div class="readiness-flag" style="background:var(--success-bg);color:var(--success);">✓ Production security readiness: READY</div>`
+          : `<div class="readiness-flag" style="background:var(--danger-bg);color:var(--danger);">✕ Production readiness: NOT READY — critical controls incomplete</div>`}
+      </div>
+    </div>
+  </div>`;
+}
+window.toggleSecurity = function(k){ S.security[k]=!S.security[k]; audit("Security control: "+k,"Toggle", S.security[k]?"Enabled":"Disabled"); render(); };
+
+/* ---------------------------------------------------------------------
+   GOVERNANCE CENTER
+--------------------------------------------------------------------- */
+function renderGovernance(c){
+  const stages = ["Change Request","Impact Analysis","Development","Testing","Approval","Production","Audit"];
+  c.innerHTML = `
+  ${sectionTitle("—","Governance Center")}
+  <div class="card">
+    <h3>Change control pipeline</h3>
+    <div class="field" style="max-width:380px;"><label class="f">New change request</label><input id="cr_title" type="text" placeholder="e.g. Add tolerance rule for FX accounts"></div>
+    <button class="btn btn-primary btn-sm" onclick="window.newCR()">Log change request</button>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3>Active change requests</h3>
+    ${S.governance.crs.length===0? `<div class="empty">No change requests logged yet.</div>` :
+    S.governance.crs.map(cr=>`
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;"><b>${esc(cr.title)}</b>${badge(stages[cr.stage],cr.stage>=5?"b-ok":"b-info")}</div>
+        <div style="margin-top:8px;">${flowDiagram(stages, cr.stage+1)}</div>
+        <button class="btn btn-sm" style="margin-top:8px;" ${cr.stage>=stages.length-1?"disabled":""} onclick="window.advanceCR(${cr.id})">Advance to next stage</button>
+      </div>`).join("")}
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3>Configuration version history</h3>
+    ${S.governance.versions.length===0? `<div class="empty">No versions recorded yet.</div>` :
+      simpleTable(["Version","Change","When"], S.governance.versions.map(v=>["v"+v.n, v.change, v.ts]))}
+  </div>`;
+}
+window.newCR = function(){
+  const t = document.getElementById("cr_title").value.trim(); if(!t){ toast("Enter a change request title","warn"); return; }
+  S.governance.crs.push({id:nid(), title:t, stage:0});
+  audit("Change Request: "+t,"Create","Success");
+  toast("Change request logged","ok"); render();
+};
+window.advanceCR = function(id){
+  const cr = S.governance.crs.find(x=>x.id===id); cr.stage++;
+  const stages = ["Change Request","Impact Analysis","Development","Testing","Approval","Production","Audit"];
+  audit("Change Request: "+cr.title,"Advance stage","Success","—",stages[cr.stage]);
+  if(cr.stage===stages.length-1){
+    S.governance.versions.push({n:S.governance.versions.length+1, change:cr.title, ts:nowStamp()});
+  }
+  toast("Advanced to "+stages[cr.stage],"ok"); render();
+};
+
+/* ---------------------------------------------------------------------
+   FINANCIAL IMPACT
+--------------------------------------------------------------------- */
+function renderFinancial(c){
+  const f = S.financial;
+  c.innerHTML = `
+  ${sectionTitle("—","Financial Impact Simulator")}
+  <div class="card hint" style="margin-bottom:14px; background:var(--warn-bg); border-color:#f0d9a8; color:var(--warn);">These are educational business-case simulations using illustrative inputs — not a substitute for a formal ROI study.</div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Inputs</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Manual hours / year</label><input id="fi_hours" type="number" value="${f.manualHours}"></div>
+        <div class="field"><label class="f">Automation %</label><input id="fi_auto" type="number" value="${f.automationPct}"></div>
+      </div>
+      <div class="formrow">
+        <div class="field"><label class="f">Hourly cost ($)</label><input id="fi_hourly" type="number" value="${f.hourlyCost}"></div>
+        <div class="field"><label class="f">Implementation cost ($)</label><input id="fi_impl" type="number" value="${f.implCost}"></div>
+      </div>
+      <div class="formrow">
+        <div class="field"><label class="f">Training cost ($)</label><input id="fi_train" type="number" value="${f.trainingCost}"></div>
+        <div class="field"><label class="f">Integration cost ($)</label><input id="fi_integ" type="number" value="${f.integrationCost}"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.calcFinancial()">Calculate business case</button>
+    </div>
+    <div class="card">
+      <h3>Illustrative results</h3>
+      ${f.computed? `
+        <div class="grid g2">
+          ${kpiCard("Hours Saved", fmtN(f.result.hoursSaved)+" hrs/yr","",true)}
+          ${kpiCard("Annual Labor Benefit", fmtUSD(f.result.annualBenefit),"",true)}
+          ${kpiCard("Total Implementation Cost", fmtUSD(f.result.totalCost),"",true)}
+          ${kpiCard("Net Benefit (Yr 1)", fmtUSD(f.result.netBenefit),"",true)}
+          ${kpiCard("Payback Period", f.result.payback+" months","",true)}
+        </div>
+      ` : `<div class="empty">Not yet calculated.</div>`}
+    </div>
+  </div>
+
+  ${sectionTitle("","Financial Statement Impact Scenarios")}
+  <div class="hint" style="margin-bottom:8px;">Illustrative only — this simulator never automatically posts accounting entries. "Actual Posting" always occurs in the ERP/GL after human review.</div>
+  <div class="grid g2">
+    ${FIN_SCENARIOS.map(fs=>`
+      <div class="card">
+        <h3 style="font-size:13.5px;">${fs.name}</h3>
+        <div class="chip" style="margin-bottom:8px;">${fs.label}</div>
+        <div style="font-size:12.2px;"><div class="scenariocard-row"><b>Balance Sheet:</b> ${fs.bs}</div>
+        <div style="margin-top:4px;"><b>P&amp;L:</b> ${fs.pl}</div>
+        <div style="margin-top:4px;"><b>Cash Flow:</b> ${fs.cf}</div></div>
+      </div>`).join("")}
+  </div>`;
+}
+window.calcFinancial = function(){
+  const f = S.financial;
+  f.manualHours = parseFloat(document.getElementById("fi_hours").value)||0;
+  f.automationPct = parseFloat(document.getElementById("fi_auto").value)||0;
+  f.hourlyCost = parseFloat(document.getElementById("fi_hourly").value)||0;
+  f.implCost = parseFloat(document.getElementById("fi_impl").value)||0;
+  f.trainingCost = parseFloat(document.getElementById("fi_train").value)||0;
+  f.integrationCost = parseFloat(document.getElementById("fi_integ").value)||0;
+  const hoursSaved = Math.round(f.manualHours*f.automationPct/100);
+  const annualBenefit = Math.round(hoursSaved*f.hourlyCost);
+  const totalCost = f.implCost+f.trainingCost+f.integrationCost;
+  const netBenefit = annualBenefit-totalCost;
+  const payback = annualBenefit>0 ? Math.round((totalCost/(annualBenefit/12))*10)/10 : "N/A";
+  f.result = {hoursSaved, annualBenefit, totalCost, netBenefit, payback};
+  f.computed = true;
+  audit("Financial business case","Calculate","Success","—", fmtUSD(annualBenefit)+" annual benefit");
+  toast("Business case calculated","ok"); render();
+};
+
+/* ---------------------------------------------------------------------
+   KPI ENGINE
+--------------------------------------------------------------------- */
+function renderKpis(c){
+  c.innerHTML = `
+  ${sectionTitle("—","Implementation KPI Engine")}
+  <div class="grid g4">
+    ${kpiCard("Reconciliation Completion Rate", fmtPct(reconCompletionRate()))}
+    ${kpiCard("Overdue Rate", fmtPct(S.entities.reconciliations.length? 100*S.entities.reconciliations.filter(r=>r.status!=="Approved").length/S.entities.reconciliations.length*0.4 : 0))}
+    ${kpiCard("Auto-Reconciliation Rate", S.autoRecon?fmtPct(S.autoRecon.autoRate):"—")}
+    ${kpiCard("Match Rate", S.matching.results?fmtPct(S.matching.results.totalRate):"—")}
+  </div>
+  <div class="grid g4" style="margin-top:14px;">
+    ${kpiCard("Exception Rate", S.autoRecon?fmtPct(S.autoRecon.exceptionRate):"—")}
+    ${kpiCard("Unmatched Amount", S.matching.results?fmtN(S.matching.results.unmatched):"—")}
+    ${kpiCard("Review Time (avg)", reviewTimeHrs()+" hrs")}
+    ${kpiCard("Data Load Success Rate", fmtPct(dataQualityScore()))}
+  </div>
+  <div class="grid g3" style="margin-top:14px;">
+    ${kpiCard("User Adoption", userAdoptionPct()+"%")}
+    ${kpiCard("Close Cycle Time", closeCycleTimeDays()+" days")}
+    ${kpiCard("AI Suggestion Acceptance Rate", S.ai.results?fmtPct(S.ai.results.acceptRate):"—")}
+  </div>
+  ${sectionTitle("","Trend view")}
+  <div class="card">${barChart([
+    {label:"Foundation", value:foundationScore(), max:100},
+    {label:"Automation", value:automationScore(), max:100},
+    {label:"Integration", value:integrationScore(), max:100},
+    {label:"AI Readiness", value:aiReadinessScore(), max:100},
+  ])}</div>`;
+}
+function reviewTimeHrs(){ let h=6; if(S.phases.p2.ready) h-=1.5; if(S.phases.p3.ready) h-=1.5; if(S.phases.p5.ready) h-=1.5; return Math.max(1,h); }
+function userAdoptionPct(){ return clamp(30 + S.entities.users.length*8 + (S.phases.p1.ready?15:0),0,98); }
+
+/* ---------------------------------------------------------------------
+   RISK REGISTER
+--------------------------------------------------------------------- */
+let riskFilter = {phase:"all", status:"all"};
+function renderRisks(c){
+  const filtered = S.risks.filter(r=>(riskFilter.phase==="all"||r.phase==+riskFilter.phase)&&(riskFilter.status==="all"||r.status===riskFilter.status));
+  c.innerHTML = `
+  ${sectionTitle("—","Risk Register")}
+  <div class="grid g2" style="margin-bottom:14px;">
+    <div class="card">
+      <h3>Filters</h3>
+      <div class="formrow">
+        <div class="field"><label class="f">Phase</label><select onchange="window.setRiskFilter('phase',this.value)">
+          <option value="all">All phases</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${riskFilter.phase==n?"selected":""}>Phase ${n}</option>`).join("")}
+        </select></div>
+        <div class="field"><label class="f">Status</label><select onchange="window.setRiskFilter('status',this.value)">
+          <option value="all">All statuses</option>
+          <option ${riskFilter.status==="Open"?"selected":""}>Open</option>
+          <option ${riskFilter.status==="Mitigated"?"selected":""}>Mitigated</option>
+          <option ${riskFilter.status==="Closed"?"selected":""}>Closed</option>
+        </select></div>
+      </div>
+    </div>
+    <div class="card"><h3>Risk matrix</h3>${riskMatrix()}</div>
+  </div>
+  <div class="card">${riskTable(filtered, true)}</div>`;
+}
+window.setRiskFilter = function(k,v){ riskFilter[k]=v; render(); };
+function riskTable(risks, withActions){
+  if(risks.length===0) return `<div class="empty">No risks in this view.</div>`;
+  return `<table><thead><tr><th>Risk</th><th>Phase</th><th>Probability</th><th>Impact</th><th>Mitigation</th><th>Owner</th><th>Status</th>${withActions?"<th></th>":""}</tr></thead>
+  <tbody>${risks.map(r=>`<tr><td>${esc(r.risk)}</td><td>P${r.phase}</td><td>${probBadge(r.prob)}</td><td>${probBadge(r.impact)}</td><td style="font-size:11.8px;color:var(--muted)">${esc(r.mitigation)}</td><td>${esc(r.owner)}</td><td>${statusBadge(r.status)}</td>
+  ${withActions? `<td><button class="btn btn-sm" onclick="window.cycleRiskStatus(${r.id})">Advance</button></td>`:""}</tr>`).join("")}</tbody></table>`;
+}
+function probBadge(v){ const cls = v==="High"?"b-bad":(v==="Medium"?"b-warn":"b-ok"); return badge(v,cls); }
+function statusBadge(v){ const cls = v==="Open"?"b-bad":(v==="Mitigated"?"b-warn":"b-ok"); return badge(v,cls); }
+window.cycleRiskStatus = function(id){
+  const r = S.risks.find(x=>x.id===id); const seq=["Open","Mitigated","Closed"];
+  const next = seq[(seq.indexOf(r.status)+1)%seq.length];
+  audit("Risk: "+r.risk,"Status change","Success",r.status,next); r.status=next; toast("Risk status updated","ok"); render();
+};
+function riskMatrix(){
+  const levels=["Low","Medium","High"];
+  const grid = levels.slice().reverse().map(imp=>levels.map(prob=>S.risks.filter(r=>r.impact===imp&&r.prob===prob).length));
+  const colors = {"0,0":"var(--success)","default":"var(--warn)"};
+  return `<div class="riskmatrix">${grid.flat().map((n,i)=>{
+    const row=Math.floor(i/3), col=i%3;
+    const sev = row+col;
+    const color = sev>=3?"var(--danger)":(sev>=1.5?"var(--warn)":"var(--success)");
+    return `<div class="riskcell" style="background:${color}">${n}</div>`;
+  }).join("")}</div>
+  <div class="legend"><div class="li">Rows: Impact (High→Low) · Columns: Probability (Low→High)</div></div>`;
+}
+
+/* ---------------------------------------------------------------------
+   SCENARIO ENGINE
+--------------------------------------------------------------------- */
+function renderScenarios(c){
+  const sc = SCENARIOS[S.scenarioIdx];
+  const progress_ = S.scenarioProgress[sc.id];
+  c.innerHTML = `
+  ${sectionTitle("—","Scenario Engine")}
+  <div class="pillrow" style="margin-bottom:14px;">${SCENARIOS.map((s,i)=>`<span class="pill ${i===S.scenarioIdx?'on':''}" onclick="window.setScenario(${i})">${s.id}. ${s.title} ${S.scenarioProgress[s.id]?'✓':''}</span>`).join("")}</div>
+  <div class="scenariocard">
+    <h3>${sc.id}. ${sc.title}</h3>
+    <div class="grid2">
+      <div><div class="lbl">Situation</div><div style="font-size:12.8px;">${sc.situation}</div></div>
+      <div><div class="lbl">Starting State</div><div style="font-size:12.8px;">${sc.start}</div></div>
+    </div>
+    <div style="margin-top:10px;"><div class="lbl">Objective</div><div style="font-size:12.8px;">${sc.objective}</div></div>
+    <div style="margin-top:14px;"><div class="lbl">Choose an action</div>
+      <div class="pillrow" style="margin-top:6px;">
+        ${sc.actions.map((a,i)=>`<button class="btn btn-sm ${progress_&&progress_.actionIdx===i?'btn-primary':''}" onclick="window.pickScenarioAction(${sc.id},${i})">${a.label}</button>`).join("")}
+      </div>
+    </div>
+    ${progress_? `
+      <div class="card" style="margin-top:14px; background:#F7F9FC;">
+        <div class="grid2">
+          <div><div class="lbl">System Response</div><div style="font-size:12.8px;">${sc.actions[progress_.actionIdx].response}</div></div>
+          <div><div class="lbl">Result</div><div style="font-size:12.8px;">Score: <b>${sc.actions[progress_.actionIdx].score}/100</b></div></div>
+        </div>
+        <div class="grid2" style="margin-top:10px;">
+          <div><div class="lbl">Financial Impact</div><div style="font-size:12.8px;">${sc.actions[progress_.actionIdx].financial}</div></div>
+          <div><div class="lbl">Control Impact</div><div style="font-size:12.8px;">${sc.actions[progress_.actionIdx].control}</div></div>
+        </div>
+      </div>` : ""}
+  </div>
+  <div style="margin-top:14px; display:flex; gap:8px;">
+    <button class="btn btn-sm" ${S.scenarioIdx===0?"disabled":""} onclick="window.setScenario(${S.scenarioIdx-1})">← Previous</button>
+    <button class="btn btn-sm" ${S.scenarioIdx===SCENARIOS.length-1?"disabled":""} onclick="window.setScenario(${S.scenarioIdx+1})">Next →</button>
+    <div style="margin-left:auto; align-self:center;" class="hint">Completed ${Object.keys(S.scenarioProgress).length} / ${SCENARIOS.length} · Average score ${avgScenarioScore()}</div>
+  </div>`;
+}
+window.setScenario = function(i){ S.scenarioIdx=i; render(); };
+window.pickScenarioAction = function(id,i){
+  S.scenarioProgress[id]={actionIdx:i};
+  const sc=SCENARIOS.find(s=>s.id===id);
+  audit("Scenario: "+sc.title,"Select action","Recorded","—",sc.actions[i].label);
+  render();
+};
+function avgScenarioScore(){
+  const keys=Object.keys(S.scenarioProgress); if(keys.length===0) return "—";
+  const total = keys.reduce((a,id)=>{ const sc=SCENARIOS.find(s=>s.id==id); return a+sc.actions[S.scenarioProgress[id].actionIdx].score; },0);
+  return Math.round(total/keys.length);
+}
+
+/* ---------------------------------------------------------------------
+   TRAINING CENTER
+--------------------------------------------------------------------- */
+function renderTraining(c){
+  const passedCount = TRAINING_EXERCISES.filter(e=>e.validate(S)).length;
+  c.innerHTML = `
+  ${sectionTitle("—","Training Center")}
+  <div class="grid g4" style="margin-bottom:16px;">
+    ${kpiCard("Exercises Passed", passedCount+" / "+TRAINING_EXERCISES.length)}
+    ${kpiCard("Overall Training Score", Math.round(100*passedCount/TRAINING_EXERCISES.length)+"%")}
+    ${kpiCard("Implementation Score", overallScore().avg+"%")}
+    ${kpiCard("Readiness", readinessLabel().label,"",true)}
+  </div>
+  ${TRAINING_EXERCISES.map(e=>{
+    const pass = e.validate(S);
+    return `<div class="exercisecard">
+      <div class="head"><h3 style="font-size:14px;">${e.id}. ${e.title}</h3>${pass?badge("Pass","b-ok"):badge("Not yet","b-warn")}</div>
+      <div class="body">${e.instr}</div>
+      <button class="btn btn-sm" onclick="window.validateExercise(${e.id})">Check / Validate</button>
+      ${S.training[e.id]!==undefined? `<div class="hint" style="margin-top:8px;"><b>Explanation:</b> ${e.explain}</div>`:""}
+    </div>`;
+  }).join("")}
+  <button class="btn" style="margin-top:6px;" onclick="window.doRestartTraining()">Restart Training</button>`;
+}
+window.validateExercise = function(id){
+  const e = TRAINING_EXERCISES.find(x=>x.id===id);
+  const pass = e.validate(S);
+  S.training[id]=pass;
+  audit("Training exercise "+id+": "+e.title,"Validate", pass?"Pass":"Fail");
+  toast(pass? "Exercise "+id+" passed":"Not yet — review the instructions", pass?"ok":"warn");
+  render();
+};
+
+/* ---------------------------------------------------------------------
+   AUDIT ENGINE
+--------------------------------------------------------------------- */
+function renderAudit(c){
+  c.innerHTML = `
+  ${sectionTitle("—","Audit Engine")}
+  <div class="card hint" style="margin-bottom:12px;">Every configuration, test, promotion, match and AI action in this simulator is recorded here — newest first.</div>
+  <div class="tablewrap">
+    ${S.auditLog.length===0? `<div class="empty">No audit entries yet — start configuring Phase 1.</div>` :
+    `<table><thead><tr><th>Timestamp</th><th>User</th><th>Phase</th><th>Env</th><th>Object</th><th>Action</th><th>Result</th><th>Old → New</th></tr></thead>
+    <tbody>${S.auditLog.slice(0,200).map(a=>`<tr><td class="mono" style="white-space:nowrap;">${a.ts}</td><td>${a.user}</td><td>${a.phase}</td><td>${a.env}</td><td>${esc(a.object)}</td><td>${a.action}</td><td>${a.result.includes("Blocked")||a.result.includes("Fail")?badge(a.result,"b-bad"):badge(a.result,"b-ok")}</td><td class="mono">${esc(a.oldV)} → ${esc(a.newV)}</td></tr>`).join("")}</tbody></table>`}
+  </div>
+  <button class="btn" style="margin-top:12px;" onclick="window.doClearAudit()">Clear Audit</button>`;
+}
+
+/* ---------------------------------------------------------------------
+   RESET / DEMO MODE
+--------------------------------------------------------------------- */
+window.doReset = function(){
+  S = freshState(); TESTING_TABS.forEach(t=>{ S.testing[t]={passed:0,failed:0,blocked:0,run:false}; }); S.testing.blockedProduction=false;
+  toast("Project reset","ok"); go("dashboard");
+};
+window.doClearAudit = function(){ S.auditLog=[]; toast("Audit log cleared","ok"); render(); };
+window.doRestartTraining = function(){ S.training={}; toast("Training progress reset","ok"); render(); };
+
+window.doDemo = function(){
+  window.doReset();
+  // Phase 1
+  S.entities.users = [{id:nid(),name:"Priya Shah",role:"Admin"},{id:nid(),name:"Arjun Mehta",role:"Preparer"},{id:nid(),name:"Kavya Nair",role:"Reviewer"}];
+  S.entities.periods = [{id:nid(),name:"Aug-2026",status:"Open"}];
+  S.entities.profiles = [{id:nid(),name:"Bank Accounts",freq:"Monthly"},{id:nid(),name:"Intercompany",freq:"Monthly"}];
+  S.entities.formats = [{id:nid(),name:"GL Trial Balance CSV",type:"CSV"}];
+  S.entities.balances = [{id:nid(),src:"SAP GL Extract",amt:458200},{id:nid(),src:"Bank Statement",amt:461900}];
+  S.entities.reconciliations = [{id:nid(),profile:"Bank Accounts",period:"Aug-2026",status:"Approved",comments:["Reviewed against sub-ledger, no exceptions"],attachments:1}];
+  Object.keys(S.gatesP1).forEach(k=>S.gatesP1[k]=true);
+  audit("Demo project","Load","Success");
+  // Phase 2
+  S.rules=[{id:nid(),name:"Auto-match bank fees under $50",type:"Threshold"}];
+  S.autoRecon={total:1000,auto:600,manual:300,exceptions:100,autoRate:60,manualRate:30,exceptionRate:10};
+  window.runAging.call(null); // uses randomness but fine
+  // Phase 3
+  S.matching.tolerance=1.5; S.matching.workers=8;
+  S.matching.results={total:980000, exact:715400, tolerance:186200, unmatched:78400, exactRate:73, toleranceRate:19, unmatchedRate:8, totalRate:92, runtime:3.2};
+  // Phase 4
+  S._erp=true; S._api=true; S._sched=true; S._ssoP4=true;
+  S.integration.lastRun=true; S.integration.uatPassed=true; S.integration.approval=true;
+  S.integration.env="PROD"; S.integration.promotions=[{ts:nowStamp(),from:"DEV",to:"TEST",result:"Success"},{ts:nowStamp(),from:"TEST",to:"PROD",result:"Success"}];
+  // Security
+  Object.keys(S.security).forEach(k=>S.security[k]=true);
+  // Testing
+  TESTING_TABS.forEach(t=>{ S.testing[t]={passed:70,failed:2,blocked:0,run:true}; });
+  S.testing.blockedProduction=false;
+  // Governance
+  S.governance.crs=[{id:nid(),title:"Enable ERP journal export",stage:6}];
+  S.governance.versions=[{n:1,change:"Enable ERP journal export",ts:nowStamp()}];
+  // Migration
+  S.migration.runs=[{entity:"Users",loaded:120,rejected:1,duplicate:0,validated:119},{entity:"Balances",loaded:4500,rejected:35,duplicate:12,validated:4453}];
+  // Financial
+  window.calcFinancialSilently(20000,30,40,180000,25000,60000);
+  // AI
+  S.ai.run=true; S.ai.results={total:10000,suggested:8500,approved:8000,rejected:400,pending:100,suggestRate:85,acceptRate:94.1,rejectRate:4.7};
+  S.touchlessLevel=6;
+  toast("Demo project loaded — fully implemented walkthrough","ok"); go("dashboard");
+};
+window.calcFinancialSilently = function(h,a,hc,ic,tc,intc){
+  const f=S.financial; f.manualHours=h; f.automationPct=a; f.hourlyCost=hc; f.implCost=ic; f.trainingCost=tc; f.integrationCost=intc;
+  const hoursSaved=Math.round(h*a/100); const annualBenefit=Math.round(hoursSaved*hc); const totalCost=ic+tc+intc;
+  const netBenefit=annualBenefit-totalCost; const payback = annualBenefit>0? Math.round((totalCost/(annualBenefit/12))*10)/10 : "N/A";
+  f.result={hoursSaved,annualBenefit,totalCost,netBenefit,payback}; f.computed=true;
+};
+
+window.doFailure = function(){
+  window.doReset();
+  S.entities.users=[{id:nid(),name:"Test User",role:"Preparer"}];
+  S.entities.periods=[{id:nid(),name:"Aug-2026",status:"Open"}];
+  S.entities.profiles=[{id:nid(),name:"Bank Accounts",freq:"Monthly"}];
+  S.entities.formats=[{id:nid(),name:"GL Extract",type:"CSV"}];
+  S.entities.balances=[{id:nid(),src:"Bank Feed",amt:120000}];
+  S.gatesP1.security=true; S.gatesP1.profiles=true; S.gatesP1.formats=true; S.gatesP1.import=true;
+  // Deliberately leave workflow/audit/notifications/uat incomplete, and inject a critical test failure + missing security
+  S.security.roles=true; S.security.encryption=true; // leave sso/mfa/audit/leastPriv off — NOT READY
+  S.testing["Security"]={passed:30,failed:6,blocked:2,run:true};
+  S.testing.blockedProduction=true;
+  S.risks.find(r=>r.risk.includes("Weak security")).status="Open";
+  audit("Failure training scenario","Load","Success — intentionally incomplete for training");
+  toast("Failure scenario loaded — Phase 1 gate incomplete, security controls missing, a critical test suite has failed","warn");
+  go("testing");
+};
+
+/* ---------------------------------------------------------------------
+   INIT
+--------------------------------------------------------------------- */
+render();
+})();
+
+</script>
+</body>
+</html>
