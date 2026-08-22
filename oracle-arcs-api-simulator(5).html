@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle ARCS — API &amp; Automation Layer Simulator | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0F2A4D;
+    --navy-2:#123B6B;
+    --blue:#1C5D99;
+    --blue-light:#EAF2FA;
+    --oracle-red:#C74634;
+    --teal:#12879F;
+    --green:#1F9D6B;
+    --amber:#C98A1B;
+    --paper:#F6F8FB;
+    --card:#FFFFFF;
+    --ink:#101826;
+    --ink-soft:#4A5568;
+    --line:#DEE5EF;
+    --shadow: 0 1px 2px rgba(15,42,77,.04), 0 8px 24px -12px rgba(15,42,77,.18);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.55;
+  }
+  h1,h2,h3,h4{font-family:'Sora',sans-serif; margin:0; letter-spacing:-0.01em;}
+  code, .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  ::selection{background:var(--blue); color:#fff;}
+
+  /* ---------- Layout ---------- */
+  .app{display:grid; grid-template-columns:280px 1fr; min-height:100vh;}
+  .sidebar{
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:linear-gradient(185deg,var(--navy),var(--navy-2) 60%);
+    color:#EAF1FB; padding:22px 18px 18px; border-right:1px solid rgba(255,255,255,.06);
+  }
+  .sidebar::-webkit-scrollbar{width:6px;}
+  .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18); border-radius:4px;}
+  .brand{display:flex; align-items:center; gap:10px; padding:6px 8px 18px; border-bottom:1px solid rgba(255,255,255,.12); margin-bottom:14px;}
+  .brand img{height:34px; width:auto; background:#fff; border-radius:6px; padding:4px;}
+  .brand .name{font-family:'Sora',sans-serif; font-weight:700; font-size:13.5px; line-height:1.25; color:#fff;}
+  .brand .tag{font-size:10px; color:#9FB6D6; letter-spacing:.04em;}
+  nav.toc{display:flex; flex-direction:column; gap:2px;}
+  nav.toc a{
+    display:flex; gap:10px; align-items:baseline; padding:8px 10px; border-radius:8px;
+    text-decoration:none; color:#C7D6EC; font-size:12.7px; font-weight:500;
+    transition:background .15s ease, color .15s ease;
+  }
+  nav.toc a .num{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#6F8CB8; width:20px; flex:none;}
+  nav.toc a:hover{background:rgba(255,255,255,.07); color:#fff;}
+  nav.toc a.active{background:rgba(28,93,153,.55); color:#fff; box-shadow:inset 3px 0 0 var(--oracle-red);}
+  .sidebar-foot{margin-top:18px; padding-top:14px; border-top:1px solid rgba(255,255,255,.12); font-size:11.5px; color:#9FB6D6;}
+  .sidebar-foot a{color:#DCE8FA; text-decoration:none;}
+  .sidebar-foot .call{color:#FF9E86; font-weight:600;}
+
+  main{padding:0 0 60px;}
+  .section{padding:64px clamp(20px,4vw,64px) 8px; scroll-margin-top:20px; border-bottom:1px solid var(--line);}
+  .section:last-of-type{border-bottom:none;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; color:var(--blue); text-transform:uppercase; margin-bottom:10px;}
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--oracle-red);}
+  h2.title{font-size:clamp(22px,2.4vw,30px); margin-bottom:8px;}
+  p.lede{color:var(--ink-soft); max-width:760px; font-size:15px; margin:0 0 26px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+  .grid{display:grid; gap:16px;}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:1080px){.app{grid-template-columns:1fr;} .sidebar{position:relative; height:auto;}}
+  @media (max-width:760px){.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+  /* ---------- Hero / Command Center ---------- */
+  .hero{
+    padding:46px clamp(20px,4vw,64px) 40px;
+    background:
+      radial-gradient(1100px 480px at 85% -10%, rgba(28,93,153,.35), transparent 60%),
+      linear-gradient(160deg,var(--navy),#0A1E38 75%);
+    color:#fff; position:relative; overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:42px 42px; mask-image:radial-gradient(circle at 75% 20%, black, transparent 70%);
+    pointer-events:none;
+  }
+  .hero-top{display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; position:relative;}
+  .hero h1{font-size:clamp(28px,4vw,44px); max-width:620px; color:#fff;}
+  .hero h1 span{color:#FF9E86;}
+  .hero p.sub{color:#B9CBE6; max-width:560px; font-size:15px; margin-top:12px;}
+  .hero-actions{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap;}
+  .btn{
+    border:none; cursor:pointer; font-family:'Sora',sans-serif; font-weight:600; font-size:13.5px;
+    padding:12px 20px; border-radius:10px; transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--oracle-red); color:#fff; box-shadow:0 10px 24px -8px rgba(199,70,52,.6);}
+  .btn-ghost{background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.25);}
+  .btn-primary:hover{box-shadow:0 14px 28px -8px rgba(199,70,52,.75);}
+
+  .stat-row{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-top:32px; position:relative;}
+  @media (max-width:980px){.stat-row{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:560px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+  .stat{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:12px;
+    padding:14px 14px 12px; backdrop-filter:blur(6px);
+  }
+  .stat .label{font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:#9FB6D6; font-family:'IBM Plex Mono',monospace;}
+  .stat .value{font-family:'Sora',sans-serif; font-size:24px; font-weight:700; margin-top:6px; color:#fff;}
+  .stat .value.red{color:#FF9E86;}
+  .stat .value.green{color:#5FE0A9;}
+
+  .feed{
+    margin-top:20px; background:rgba(6,16,30,.55); border:1px solid rgba(255,255,255,.12); border-radius:12px;
+    padding:12px 14px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#9FE0C4;
+    height:112px; overflow:hidden; position:relative;
+  }
+  .feed .line{opacity:0; animation:feedin .4s ease forwards; white-space:nowrap;}
+  .feed .line .t{color:#6F8CB8; margin-right:8px;}
+  .feed .line .ok{color:#5FE0A9;}
+  .feed .line .warn{color:#FFB86B;}
+  .feed .line .err{color:#FF6B6B;}
+  @keyframes feedin{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- Flow diagrams ---------- */
+  .flow{display:flex; flex-wrap:wrap; align-items:center; gap:0; margin:18px 0;}
+  .flow-step{
+    background:var(--card); border:1.5px solid var(--blue); color:var(--navy); font-weight:600; font-size:12.5px;
+    font-family:'Sora',sans-serif; padding:12px 16px; border-radius:10px; box-shadow:var(--shadow);
+    min-width:112px; text-align:center;
+  }
+  .flow-step.accent{border-color:var(--oracle-red); color:var(--oracle-red);}
+  .flow-step.teal{border-color:var(--teal); color:var(--teal);}
+  .flow-arrow{color:var(--blue); font-size:18px; padding:0 8px; flex:none;}
+  .flow-vert{display:flex; flex-direction:column; gap:0;}
+  .flow-vert .flow-step{width:100%; text-align:left; display:flex; align-items:center; gap:10px;}
+  .flow-vert .flow-step .n{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:#fff; background:var(--navy);
+    width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .flow-vert .flow-arrow{align-self:center; padding:2px 0;}
+  .flow-vert{gap:0;}
+  .flow-vert-item{display:flex; flex-direction:column;}
+
+  /* ---------- Capability radial map ---------- */
+  .radial{position:relative; width:100%; max-width:620px; height:420px; margin:24px auto;}
+  .radial-core{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:118px; height:118px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--blue), var(--navy) 70%);
+    color:#fff; display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Sora',sans-serif; font-weight:700; font-size:13px; box-shadow:0 12px 30px -8px rgba(15,42,77,.5);
+    z-index:2;
+  }
+  .radial-node{
+    position:absolute; background:#fff; border:1.5px solid var(--line); border-radius:9px; padding:8px 12px;
+    font-size:12px; font-weight:600; color:var(--navy); box-shadow:var(--shadow); white-space:nowrap; z-index:2;
+  }
+  .radial svg{position:absolute; inset:0; z-index:1;}
+
+  /* ---------- Tables ---------- */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{
+    background:var(--navy); color:#fff; text-align:left; padding:10px 12px; font-family:'Sora',sans-serif;
+    font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
+  }
+  thead th:first-child{border-radius:8px 0 0 0;}
+  thead th:last-child{border-radius:0 8px 0 0;}
+  tbody td{padding:10px 12px; border-bottom:1px solid var(--line); color:var(--ink-soft);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--blue-light);}
+  td.status-ok{color:var(--green); font-weight:600;}
+  td.status-fail{color:var(--oracle-red); font-weight:600;}
+  td.status-run{color:var(--amber); font-weight:600;}
+  td.mono{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--navy);}
+
+  /* ---------- Misc components ---------- */
+  .note{
+    background:var(--blue-light); border:1px solid #CFE0F3; border-left:4px solid var(--blue);
+    border-radius:0 10px 10px 0; padding:14px 16px; font-size:13px; color:var(--navy); margin:18px 0;
+  }
+  .warn-note{background:#FFF4EE; border-color:#F4D6C8; border-left-color:var(--oracle-red); color:#7A2E22;}
+  ul.checks{list-style:none; margin:0; padding:0; display:grid; gap:8px;}
+  ul.checks li{display:flex; gap:10px; font-size:13.5px; color:var(--ink-soft);}
+  ul.checks li::before{content:"✓"; color:var(--green); font-weight:700; flex:none;}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:0; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line);}
+  @media (max-width:760px){.two-col{grid-template-columns:1fr;}}
+  .col-do{background:#F0FBF5; padding:20px 22px;}
+  .col-dont{background:#FDF1EF; padding:20px 22px;}
+  .col-do h4{color:var(--green);} .col-dont h4{color:var(--oracle-red);}
+  .col-do ul,.col-dont ul{list-style:none; margin:12px 0 0; padding:0; display:grid; gap:9px; font-size:13px;}
+  .col-do li::before{content:"✓ "; color:var(--green); font-weight:700;}
+  .col-dont li::before{content:"✗ "; color:var(--oracle-red); font-weight:700;}
+
+  .scenario{
+    border:1px dashed var(--blue); border-radius:12px; padding:16px 18px; background:#fff; margin-top:18px;
+  }
+  .scenario .k{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--blue); text-transform:uppercase;}
+
+  /* mini bar chart */
+  .chart-card{padding:16px;}
+  .chart-title{font-family:'Sora',sans-serif; font-weight:600; font-size:13px; margin-bottom:10px; color:var(--navy);}
+  .bars{display:flex; align-items:flex-end; gap:8px; height:120px;}
+  .bars .bar{flex:1; background:linear-gradient(180deg,var(--blue),var(--navy)); border-radius:5px 5px 2px 2px; position:relative;}
+  .bars .bar span{position:absolute; bottom:-20px; left:0; right:0; text-align:center; font-size:10px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;}
+  .bars.hbars{flex-direction:column; height:auto; gap:9px;}
+  .bars.hbars .bar{height:16px; flex:none; border-radius:3px; background:linear-gradient(90deg,var(--blue),var(--teal));}
+  .hbar-row{display:flex; align-items:center; gap:10px; font-size:11.5px; color:var(--ink-soft);}
+  .hbar-row .lbl{width:78px; flex:none; font-family:'IBM Plex Mono',monospace; font-size:10.5px;}
+  .hbar-row .track{flex:1; background:#EEF2F8; border-radius:4px; overflow:hidden;}
+
+  .sparkline{display:flex; align-items:flex-end; gap:4px; height:70px;}
+  .sparkline .pt{flex:1; background:var(--teal); border-radius:2px 2px 0 0; opacity:.85;}
+
+  /* flip cards */
+  .flip-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media (max-width:900px){.flip-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.flip-grid{grid-template-columns:1fr;}}
+  .flip{perspective:1200px; height:150px; cursor:pointer;}
+  .flip:focus-visible{outline:2px solid var(--blue); outline-offset:3px; border-radius:12px;}
+  .opt-btn:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+  .btn:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+  .flip-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+  .flip.is-flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:12px; padding:14px; border:1px solid var(--line); box-shadow:var(--shadow);}
+  .flip-front{background:#fff; display:flex; flex-direction:column; justify-content:space-between;}
+  .flip-front .q{font-family:'Sora',sans-serif; font-weight:600; font-size:13px; color:var(--navy);}
+  .flip-front .tap{font-size:10.5px; color:var(--blue); font-family:'IBM Plex Mono',monospace;}
+  .flip-back{background:var(--navy); color:#fff; transform:rotateY(180deg); font-size:12px; overflow-y:auto;}
+  .flip-back b{color:#5FE0A9;}
+
+  /* MCQ */
+  .mcq{border:1px solid var(--line); border-radius:12px; padding:16px; background:#fff; margin-bottom:12px;}
+  .mcq .qhead{display:flex; gap:10px; align-items:baseline; margin-bottom:10px;}
+  .mcq .qn{font-family:'IBM Plex Mono',monospace; color:var(--blue); font-weight:600; font-size:12px;}
+  .mcq .qtext{font-weight:600; font-size:13.5px; color:var(--ink);}
+  .mcq .opts{display:grid; gap:8px;}
+  .opt-btn{
+    text-align:left; padding:9px 12px; border-radius:8px; border:1px solid var(--line); background:var(--paper);
+    font-size:13px; cursor:pointer; font-family:'Inter',sans-serif; color:var(--ink-soft); transition:.15s;
+  }
+  .opt-btn:hover{border-color:var(--blue);}
+  .opt-btn.correct{background:#EAFBF2; border-color:var(--green); color:#0E6B41; font-weight:600;}
+  .opt-btn.incorrect{background:#FDECEA; border-color:var(--oracle-red); color:#8A2E22; font-weight:600;}
+  .mcq .why{display:none; margin-top:10px; font-size:12.5px; color:var(--ink-soft); background:var(--blue-light); padding:10px 12px; border-radius:8px;}
+  .mcq .why.show{display:block;}
+
+  .filterbar{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;}
+  .filterbar button{
+    border:1px solid var(--line); background:#fff; padding:8px 14px; border-radius:20px; font-size:12.5px;
+    cursor:pointer; font-family:'Sora',sans-serif; font-weight:600; color:var(--ink-soft);
+  }
+  .filterbar button.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+  .icon-row{display:flex; gap:18px; flex-wrap:wrap; margin:18px 0;}
+  .icon-card{flex:1; min-width:140px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; text-align:center; box-shadow:var(--shadow);}
+  .icon-card svg{margin-bottom:8px;}
+  .icon-card .t{font-family:'Sora',sans-serif; font-weight:600; font-size:12.5px; color:var(--navy);}
+  .icon-card .d{font-size:11px; color:var(--ink-soft); margin-top:4px;}
+
+  footer.site{
+    background:var(--navy); color:#B9CBE6; padding:40px clamp(20px,4vw,64px); text-align:center;
+  }
+  footer.site img{height:38px; background:#fff; padding:6px; border-radius:8px; margin-bottom:14px;}
+  footer.site .call{color:#FF9E86; font-weight:700;}
+  footer.site a{color:#DCE8FA; text-decoration:none;}
+
+  .pill{display:inline-block; font-size:10.5px; font-family:'IBM Plex Mono',monospace; padding:3px 9px; border-radius:20px; background:var(--blue-light); color:var(--blue); margin-left:8px;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <div>
+        <div class="name">Oracle ARCS<br>API Simulator</div>
+        <div class="tag">by BISP Trainings</div>
+      </div>
+    </div>
+    <nav class="toc" id="toc">
+      <a href="#hero" class="active"><span class="num">◆</span>Command Center</a>
+      <a href="#s01"><span class="num">01</span>Command Center KPIs</a>
+      <a href="#s02"><span class="num">02</span>API Architecture</a>
+      <a href="#s03"><span class="num">03</span>Capability Map</a>
+      <a href="#s04"><span class="num">04</span>Async Job Lifecycle</a>
+      <a href="#s05"><span class="num">05</span>Job API Visual</a>
+      <a href="#s06"><span class="num">06</span>Automation Pipeline</a>
+      <a href="#s07"><span class="num">07</span>Scheduler</a>
+      <a href="#s08"><span class="num">08</span>Webhook / Callback</a>
+      <a href="#s09"><span class="num">09</span>Retry + Error Queue</a>
+      <a href="#s10"><span class="num">10</span>Idempotency</a>
+      <a href="#s11"><span class="num">11</span>Job Dependency</a>
+      <a href="#s12"><span class="num">12</span>Monitoring Dashboard</a>
+      <a href="#s13"><span class="num">13</span>API Log</a>
+      <a href="#s14"><span class="num">14</span>End-to-End Scenario</a>
+      <a href="#s15"><span class="num">15</span>Troubleshooting</a>
+      <a href="#s16"><span class="num">16</span>Best Practices</a>
+      <a href="#s17"><span class="num">17</span>Interview Flashcards</a>
+      <a href="#s18"><span class="num">18</span>Certification Quiz</a>
+      <a href="#s20"><span class="num">20</span>Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div><a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a></div>
+      <div class="call">Call Us: +91 769-409-5404</div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main>
+
+    <!-- HERO / COMMAND CENTER -->
+    <section class="hero" id="hero">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow"><span class="dot"></span>Account Reconciliation Cloud Service</div>
+          <h1>Oracle ARCS <span>API &amp; Automation Layer</span> — Live Simulator</h1>
+          <p class="sub">An interactive walkthrough of the ARCS API automation stack: authentication, REST endpoints, async jobs, monitoring, retries, and callbacks — built by BISP Trainings for hands-on learning.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="runSim">▶ Run Simulation</button>
+            <button class="btn btn-ghost" id="viewArch">View Architecture ↓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row" id="statRow">
+        <div class="stat"><div class="label">API Requests</div><div class="value" id="v-req">1,248</div></div>
+        <div class="stat"><div class="label">Successful Jobs</div><div class="value green" id="v-ok">1,176</div></div>
+        <div class="stat"><div class="label">Failed Jobs</div><div class="value red" id="v-fail">28</div></div>
+        <div class="stat"><div class="label">Running Jobs</div><div class="value" id="v-run">14</div></div>
+        <div class="stat"><div class="label">Error Queue</div><div class="value red" id="v-err">7</div></div>
+        <div class="stat"><div class="label">Success Rate</div><div class="value green" id="v-rate">94.2%</div></div>
+      </div>
+
+      <div class="feed" id="feed"></div>
+      <p style="font-size:11px;color:#6F8CB8;margin-top:8px;">Illustrative simulation — numbers are generated client-side for training purposes and are not production data.</p>
+    </section>
+
+    <!-- 01 -->
+    <section class="section" id="s01">
+      <div class="eyebrow"><span class="dot"></span>01 · Observe · Control · Decide</div>
+      <h2 class="title">API Command Center</h2>
+      <p class="lede">A visual operational view of API activity, job health, and automation reliability — the three questions every ARCS operator asks before touching the pipeline.</p>
+      <div class="grid grid-3">
+        <div class="card" style="padding:18px;"><h4 style="color:var(--blue);font-size:13px;">Observe</h4><p style="font-size:13px;color:var(--ink-soft);margin:6px 0 0;">Request volume · running jobs · duration</p></div>
+        <div class="card" style="padding:18px;"><h4 style="color:var(--oracle-red);font-size:13px;">Control</h4><p style="font-size:13px;color:var(--ink-soft);margin:6px 0 0;">Failures · retries · error queue</p></div>
+        <div class="card" style="padding:18px;"><h4 style="color:var(--green);font-size:13px;">Decide</h4><p style="font-size:13px;color:var(--ink-soft);margin:6px 0 0;">Continue pipeline · investigate · recover</p></div>
+      </div>
+      <div class="scenario"><span class="k">Example</span><p style="margin:6px 0 0;font-size:13.5px;">A close-cycle operator opens the command center each morning, checks the error queue count first — if it's above threshold, they investigate before letting the scheduled pipeline continue to AutoMatch.</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="section" id="s02">
+      <div class="eyebrow"><span class="dot"></span>02 · Integration Path</div>
+      <h2 class="title">API Architecture</h2>
+      <p class="lede">The path a request travels from client to operational result.</p>
+      <div class="card" style="padding:22px;">
+        <div class="flow" id="flow02"></div>
+        <p style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;">API architecture concept — validate environment-specific implementation details before production use.</p>
+      </div>
+      <div class="note" style="margin-top:18px;">
+        <b>Architecture layers:</b> Client/Application → initiates the request. Authentication → establishes the access context. REST API → exposes the requested operation. ARCS → performs the business operation. Job → represents asynchronous work where applicable. Status/Log → provides monitoring evidence. Callback → can signal the next automation step.
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="section" id="s03">
+      <div class="eyebrow"><span class="dot"></span>03 · Capability Surface</div>
+      <h2 class="title">API Capability Map</h2>
+      <p class="lede">Major capability areas supplied in the training brief, radiating from the ARCS core.</p>
+      <div class="card"><div class="radial" id="radial"></div></div>
+      <p style="font-size:11.5px;color:var(--ink-soft);">Source note: the supplied brief identifies these API areas; exact endpoint names, payload fields and environment-specific behavior should be validated against applicable Oracle documentation.</p>
+    </section>
+
+    <!-- 04 -->
+    <section class="section" id="s04">
+      <div class="eyebrow"><span class="dot"></span>04 · State Machine</div>
+      <h2 class="title">Async Job Lifecycle</h2>
+      <p class="lede">Asynchronous processing separates request acceptance from background execution.</p>
+      <div class="grid grid-2">
+        <div class="card" style="padding:20px;">
+          <div class="flow-vert" id="flow04"></div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:13px;color:var(--navy);margin-bottom:10px;">Why this pattern matters</h4>
+          <ul class="checks">
+            <li>Capture a stable job reference.</li>
+            <li>Monitor instead of assuming completion.</li>
+            <li>Read logs when troubleshooting.</li>
+          </ul>
+          <div class="scenario"><span class="k">Example</span><p style="margin:6px 0 0;font-size:13px;">A balance-import request returns <code>jobId: JOB-1001</code> instantly. The client polls <code>GET /jobs/JOB-1001</code> every 15 seconds instead of holding the connection open.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="section" id="s05">
+      <div class="eyebrow"><span class="dot"></span>05 · Endpoints (as supplied)</div>
+      <h2 class="title">Job API Visual</h2>
+      <p class="lede">Endpoint paths are reproduced exactly as supplied in the source brief; they are not independently verified as official endpoint syntax.</p>
+      <div class="card" style="overflow-x:auto;">
+        <table id="tbl05"></table>
+      </div>
+      <div class="flow" style="margin-top:20px;" id="flow05"></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="section" id="s06">
+      <div class="eyebrow"><span class="dot"></span>06 · Orchestration</div>
+      <h2 class="title">API Automation Pipeline</h2>
+      <p class="lede">A dependency-driven sequence for a reconciliation automation scenario.</p>
+      <div class="card" style="padding:20px;">
+        <div class="flow-vert" id="flow06"></div>
+      </div>
+      <div class="note" style="margin-top:16px;">
+        <b>Pipeline gate logic:</b> Authenticate before protected operations · Check period readiness before loading · Load balances and transactions before AutoMatch.
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="section" id="s07">
+      <div class="eyebrow"><span class="dot"></span>07 · Recurrence</div>
+      <h2 class="title">Scheduler</h2>
+      <p class="lede">Use a scheduling layer to initiate repeatable automation patterns.</p>
+      <div class="grid grid-3" id="sched-cards" style="grid-template-columns:repeat(4,1fr);"></div>
+      <div class="card" style="padding:20px;margin-top:16px;"><div class="flow" id="flow07"></div></div>
+      <p style="font-size:11.5px;color:var(--ink-soft);">The supplied brief lists Daily, Weekly, Monthly and Period-End as scheduling scenarios. Exact scheduler implementation is an architecture decision and should be validated for the target environment.</p>
+    </section>
+
+    <!-- 08 -->
+    <section class="section" id="s08">
+      <div class="eyebrow"><span class="dot"></span>08 · Event Notification</div>
+      <h2 class="title">Webhook / Callback</h2>
+      <p class="lede">A callback/webhook pattern can connect an event outcome to the next external process.</p>
+      <div class="card" style="padding:22px;"><div class="flow" id="flow08"></div></div>
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card" style="padding:18px;">
+          <h4 style="font-size:13px;color:var(--navy);">Architecture concept</h4>
+          <ul class="checks" style="margin-top:10px;">
+            <li>Event occurs.</li><li>Notification is sent to the configured receiver.</li><li>External system validates the event/result.</li>
+          </ul>
+        </div>
+        <div class="note warn-note" style="margin:0;">
+          <b>Important:</b> the supplied brief explicitly asks for webhooks and success/failure callbacks, but this page presents the pattern as an architecture concept rather than claiming undocumented ARCS webhook mechanics.
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 -->
+    <section class="section" id="s09">
+      <div class="eyebrow"><span class="dot"></span>09 · Recovery Design</div>
+      <h2 class="title">Retry + Error Queue</h2>
+      <p class="lede">Recovery design should distinguish recoverable failures from failures requiring investigation.</p>
+      <div class="grid grid-2">
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:12.5px;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;">Controlled Retry</h4>
+          <div class="flow-vert" id="flow09a"></div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:12.5px;color:var(--oracle-red);text-transform:uppercase;letter-spacing:.05em;">Error Queue</h4>
+          <div class="flow-vert" id="flow09b"></div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:16px;">Examples in the supplied brief: authentication failure · invalid data · mapping issue · job failure · connection issue. Do not invent exact retry counts; use an approved retry policy and route persistent failures to controlled investigation.</div>
+    </section>
+
+    <!-- 10 -->
+    <section class="section" id="s10">
+      <div class="eyebrow"><span class="dot"></span>10 · Duplicate Safety</div>
+      <h2 class="title">Idempotency</h2>
+      <p class="lede">Idempotency helps an enterprise automation design handle duplicate submissions safely.</p>
+      <div class="card" style="padding:20px;"><div class="flow-vert" id="flow10"></div></div>
+      <div class="scenario" style="margin-top:16px;"><span class="k">Practical scenario</span>
+        <p style="margin:6px 0 0;font-size:13.5px;">A pipeline retries after a network interruption → the same business request may be submitted again → the idempotency key provides a design mechanism to detect duplicates.</p>
+      </div>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;">Source boundary: this page explains the concept requested in the brief. It does not invent an Oracle ARCS-specific idempotency implementation.</p>
+    </section>
+
+    <!-- 11 -->
+    <section class="section" id="s11">
+      <div class="eyebrow"><span class="dot"></span>11 · Execution Graph</div>
+      <h2 class="title">Job Dependency</h2>
+      <p class="lede">Dependencies turn individual jobs into a controlled execution graph.</p>
+      <div class="grid grid-2">
+        <div class="card" style="padding:20px;"><div class="flow-vert" id="flow11"></div></div>
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:13px;color:var(--navy);">Illustrative ARCS automation example</h4>
+          <div class="flow" id="flow11b" style="margin-top:12px;"></div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:12px;">Each downstream step is gated by the outcome of its prerequisite. If a prerequisite fails, the pipeline should stop, recover, or route the failure rather than blindly continue.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section class="section" id="s12">
+      <div class="eyebrow"><span class="dot"></span>12 · Illustrative Training Data</div>
+      <h2 class="title">API Monitoring Dashboard</h2>
+      <p class="lede">Visual operational signals for API automation — numbers below are illustrative training data, not production measurements.</p>
+      <div class="grid grid-3">
+        <div class="card chart-card"><div class="chart-title">API Requests Trend</div><div class="sparkline" id="sp1"></div></div>
+        <div class="card chart-card"><div class="chart-title">Jobs by Status (%)</div><div class="bars" id="bar1" style="height:100px;"></div></div>
+        <div class="card chart-card"><div class="chart-title">Failure Trend</div><div class="sparkline" id="sp2"></div></div>
+        <div class="card chart-card"><div class="chart-title">Processing Duration (min)</div><div class="bars" id="bar2" style="height:100px;"></div></div>
+        <div class="card chart-card"><div class="chart-title">Error Categories</div><div class="bars hbars" id="hbar1"></div></div>
+        <div class="card chart-card"><div class="chart-title">Automation Success %</div><div class="sparkline" id="sp3"></div></div>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="section" id="s13">
+      <div class="eyebrow"><span class="dot"></span>13 · Operational Record</div>
+      <h2 class="title">API Log</h2>
+      <p class="lede">A compact operational record for job monitoring and troubleshooting.</p>
+      <div class="card" style="overflow-x:auto;"><table id="tbl13"></table></div>
+      <div class="stat-row" style="margin-top:16px;color:var(--ink);" id="logStats"></div>
+    </section>
+
+    <!-- 14 -->
+    <section class="section" id="s14">
+      <div class="eyebrow"><span class="dot"></span>14 · Illustrative Scenario</div>
+      <h2 class="title">End-to-End Scenario: Bank + GL Automation</h2>
+      <p class="lede">A complete illustrative reconciliation-automation run, step by step.</p>
+      <div class="grid grid-2">
+        <div class="card" style="padding:20px;"><div class="flow-vert" id="flow14"></div></div>
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:13px;color:var(--navy);">Outcome</h4>
+          <ul class="checks" style="margin-top:10px;">
+            <li>Repeatable data ingestion.</li><li>Automated matching trigger.</li><li>Status-based downstream decisions.</li>
+          </ul>
+          <div class="scenario" style="margin-top:16px;"><span class="k">Try it</span><p style="margin:6px 0 0;font-size:13px;">Click "Run Simulation" at the top of the page to watch a compressed version of this exact 10-step flow move through the activity feed.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="section" id="s15">
+      <div class="eyebrow"><span class="dot"></span>15 · First-Response Matrix</div>
+      <h2 class="title">Troubleshooting</h2>
+      <p class="lede">Error matrix for first-response investigation.</p>
+      <div class="card" style="overflow-x:auto;"><table id="tbl15"></table></div>
+      <div class="note" style="margin-top:16px;">Investigation rule: first identify whether the issue is access, request, processing, dependency, data, or downstream notification. Then apply the approved recovery pattern.</div>
+    </section>
+
+    <!-- 16 -->
+    <section class="section" id="s16">
+      <div class="eyebrow"><span class="dot"></span>16 · Design Discipline</div>
+      <h2 class="title">Best Practices</h2>
+      <p class="lede">Enterprise automation is strongest when security, validation, monitoring, and recovery are designed together.</p>
+      <div class="two-col">
+        <div class="col-do"><h4>Do</h4><ul id="doList"></ul></div>
+        <div class="col-dont"><h4>Don't</h4><ul id="dontList"></ul></div>
+      </div>
+      <div class="card" style="padding:20px;margin-top:18px;"><div class="flow" id="flow16"></div></div>
+    </section>
+
+    <!-- 17 -->
+    <section class="section" id="s17">
+      <div class="eyebrow"><span class="dot"></span>17 · Tap to reveal</div>
+      <h2 class="title">Interview Flashcards</h2>
+      <p class="lede">12 original questions with concise answers. Tap a card to flip it.</p>
+      <div class="flip-grid" id="flipGrid"></div>
+    </section>
+
+    <!-- 18/19 -->
+    <section class="section" id="s18">
+      <div class="eyebrow"><span class="dot"></span>18–19 · Not copied from Oracle exams</div>
+      <h2 class="title">Certification Practice Quiz <span class="pill">20 original MCQs</span></h2>
+      <p class="lede">Pick an answer to check it instantly — this is a self-check simulator, not a scored exam.</p>
+      <div class="filterbar" id="mcqFilter"></div>
+      <div id="mcqWrap"></div>
+      <button class="btn btn-ghost" id="resetQuiz" style="background:var(--navy);margin-top:6px;">↺ Reset Quiz</button>
+    </section>
+
+    <!-- 20 -->
+    <section class="section" id="s20">
+      <div class="eyebrow"><span class="dot"></span>20 · Operational Reference</div>
+      <h2 class="title">API Cheat Sheet</h2>
+      <p class="lede">One-page operational reference for the API and Automation Layer.</p>
+      <div class="grid grid-2">
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:12.5px;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;">Core Automation Loop</h4>
+          <div class="flow-vert" id="flow20"></div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <h4 style="font-size:13px;color:var(--navy);">Production Readiness Checklist</h4>
+          <ul class="checks" id="checklist" style="margin-top:12px;"></ul>
+        </div>
+      </div>
+      <div class="icon-row" id="iconRow"></div>
+    </section>
+
+    <footer class="site">
+      <img src="data:image/jpeg;base64,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" alt="BISP logo">
+      <h3 style="color:#fff;font-size:20px;">Oracle ARCS — API and Automation Layer</h3>
+      <p style="margin:8px 0 4px;">Automate · Integrate · Monitor</p>
+      <p style="margin-top:18px;">BISP Trainings &nbsp;·&nbsp; <a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a> &nbsp;·&nbsp; <span class="call">Call Us: +91 769-409-5404</span></p>
+      <p style="font-size:11px;color:#6F8CB8;margin-top:18px;">© BISP Trainings · Illustrative training simulator. Endpoint names and metrics are supplied/illustrative and should be validated against applicable Oracle documentation before production use.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const flow02 = ["Client","Authentication","REST API","Oracle ARCS","Job","Status","Log","Callback"];
+const jobLifecycle = ["Request","Job Created","Job ID","Processing","Status","Log","Success / Failure / Cancel"];
+const jobTable = [
+  ["POST /jobs","CREATE","Create Job"],
+  ["GET /jobs/{jobId}","MONITOR","Get Job Status"],
+  ["POST /jobs/{jobId}/cancel","CANCEL","Cancel Job"],
+  ["GET /jobs/{jobId}/log","INSPECT","Read Job Log"],
+];
+const jobControl = ["Create","Monitor","Cancel","Inspect"];
+const pipeline06 = ["Auth","Period","Balance","Transaction","AutoMatch","Match Status","Report","Journal","Audit"];
+const schedCards = [
+  ["Daily","Recurring data/job cycle"],
+  ["Weekly","Operational consolidation"],
+  ["Monthly","Controlled monthly processing"],
+  ["Period-End","High-control close workflow"],
+];
+const flow07 = ["Scheduler","API","Job","Monitor","Result"];
+const flow08 = ["ARCS Event","Callback / Webhook","External System","Next Process"];
+const flow09a = ["Failure","Retry","Success"];
+const flow09b = ["Failure","Error Queue","Investigate","Correct","Retry"];
+const flow10 = ["Request","Idempotency Key","Duplicate Control","Safe Processing"];
+const flow11 = ["Job A","Job B","Job C","Job D"];
+const flow11b = ["Balance","Transactions","AutoMatch","Report"];
+const flow14 = ["Authenticate","Validate Period","Import Balance","Import Transactions","Run AutoMatch","Monitor Job","Check Match Status","Generate Report","Export Journal If Required","Capture Audit Result"];
+const flow16 = ["Validate","Execute","Monitor","Log","Handle Failure","Audit"];
+const flow20 = ["Auth","Request","Job","Job ID","Status","Log","Callback","Result"];
+
+const capability = ["Authentication","Periods","Profiles","Balances","Transactions","Reconciliations","Reassignment","Submit / Approve / Reject","AutoMatch","Match Status"];
+
+const doItems = ["Secure authentication","Validate before processing","Monitor async jobs","Maintain logs","Use controlled retries","Design dependencies","Handle failures","Use idempotency where appropriate","Maintain auditability","Separate environments"];
+const dontItems = ["Hard-code sensitive credentials","Send unvalidated data","Assume async success","Discard logs","Retry indefinitely","Ignore dependencies","Hide failures","Allow duplicate processing","Lose traceability","Mix environments"];
+
+const jobLog = [
+  ["JOB-1001","Balance Import","08:00","08:03","3m","Success","—","0"],
+  ["JOB-1002","Transaction Import","08:04","08:08","4m","Success","—","0"],
+  ["JOB-1003","AutoMatch","08:09","08:12","3m","Success","—","1"],
+  ["JOB-1004","Report","08:13","08:14","1m","Failed","Timeout","2"],
+  ["JOB-1005","Journal Export","08:15","08:17","2m","Running","—","0"],
+];
+
+const troubleshoot = [
+  ["Authentication","Credential/access issue","Review access context and response","Correct approved access configuration"],
+  ["Request","Invalid/unsupported request","Compare request with approved API contract","Correct request"],
+  ["Job","Processing failure","Check status and job log","Resolve issue; controlled retry"],
+  ["Timeout","Long-running/connectivity issue","Check asynchronous job state","Monitor job; recover as designed"],
+  ["Duplicate","Repeated submission","Check idempotency design","Handle duplicate safely"],
+  ["Data","Invalid/incomplete input","Inspect rejected records/logs","Correct source data"],
+  ["Dependency","Prerequisite failed","Review upstream job","Resolve upstream failure"],
+  ["Callback","Receiver unavailable","Review callback outcome/log","Restore receiver and safely re-drive"],
+];
+
+const flashcards = [
+  ["Why is asynchronous processing useful?","It allows a request to return a job reference while work continues in the background.<br><br><b>Scenario</b>: apply inside a controlled API pipeline."],
+  ["What is the role of a job ID?","It provides a reference for tracking asynchronous processing.<br><br><b>Scenario</b>: apply inside a controlled API pipeline."],
+  ["Why verify endpoint syntax before production?","The supplied paths are source-provided and should be validated against the applicable Oracle documentation/version."],
+  ["What is pipeline orchestration?","Coordinating multiple operations with sequencing and dependencies."],
+  ["Why use an error queue?","To isolate persistent failures for investigation and controlled recovery."],
+  ["What is idempotency?","A design approach that safely handles duplicate submissions."],
+  ["What is a callback used for?","To signal a next system action after processing reaches an outcome."],
+  ["What should a monitoring dashboard show?","Requests, job status, duration, retries, errors, and success rate."],
+  ["Why are dependencies important?","They prevent downstream work from running before prerequisites are successful."],
+  ["What is a controlled retry?","A retry governed by approved policy and failure analysis."],
+  ["What is a job log useful for?","Operational evidence and troubleshooting."],
+  ["Why separate environments?","To reduce deployment and operational risk across development, test, and production."],
+];
+
+const mcqs = [
+ {cat:"Architecture", q:"Which sequence best represents the supplied asynchronous pattern?", opts:["Job ID → POST → Log → Request","POST Request → Job Created → Job ID → Monitor","Log → Callback → POST → Job ID","Report → Cancel → Authenticate → POST"], correct:1, why:"The supplied lifecycle starts with a request, creates a job, and returns a job ID for monitoring."},
+ {cat:"Capability", q:"Which capability is explicitly listed?", opts:["Balance import","Network topology export","Database cloning","Code compilation"], correct:0, why:"Balance import is a supplied API capability."},
+ {cat:"Pipeline", q:"What should happen before a dependent job runs?", opts:["Ignore upstream status","Validate prerequisite outcome","Delete the log","Disable monitoring"], correct:1, why:"Dependency logic requires the prerequisite to be checked."},
+ {cat:"Recovery", q:"What is the purpose of an error queue?", opts:["Store successful jobs","Isolate failed work for investigation and correction","Replace authentication","Create periods"], correct:1, why:"The error queue pattern isolates failed work."},
+ {cat:"Endpoints", q:"Which supplied path is used to get a job?", opts:["GET /job/status/all","GET /jobs/{jobId}","POST /status/job","PUT /job/run"], correct:1, why:"This path is explicitly supplied in the brief."},
+ {cat:"Endpoints", q:"What does the source brief say about supplied endpoint paths?", opts:["They are verified official syntax","They should not silently be presented as verified official syntax","They are fictional","They should be replaced"], correct:1, why:"The brief explicitly instructs this source-discipline rule."},
+ {cat:"Pipeline", q:"Which step follows transaction import in the illustrative pipeline?", opts:["AutoMatch","Delete period","User creation","Theme change"], correct:0, why:"The supplied pipeline places AutoMatch after transaction import."},
+ {cat:"Monitoring", q:"What is a job log useful for?", opts:["Troubleshooting and operational visibility","Replacing authorization","Formatting reports","Changing UI themes"], correct:0, why:"The job flow includes reading the log."},
+ {cat:"Monitoring", q:"Which is a requested dashboard KPI?", opts:["Error Queue","Font Size","Screen Resolution","Keyboard Layout"], correct:0, why:"Error Queue is explicitly listed."},
+ {cat:"Best Practice", q:"Which is a best practice?", opts:["Infinite retries","Maintain logs","Skip validation","Mix environments"], correct:1, why:"Maintain logs is explicitly included."},
+ {cat:"Recovery", q:"What is the conceptual role of an idempotency key?", opts:["Duplicate-safe processing","Report formatting","Period naming","Email branding"], correct:0, why:"The supplied visual is request → idempotency key → duplicate control."},
+ {cat:"Capability", q:"Which capability is supplied?", opts:["Reassignment","Browser history","CSS export","Desktop backup"], correct:0, why:"Reassignment is listed."},
+ {cat:"Pipeline", q:"What can a scheduler initiate?", opts:["Repeatable API/job automation","Document styling","Hardware replacement","UI redesign"], correct:0, why:"The source shows scheduler → API → job → monitor → result."},
+ {cat:"Pipeline", q:"Which status is explicitly listed?", opts:["Submitted","QueuedForReviewX","ArchivedForever","ReconciledPlus"], correct:0, why:"Submitted is shown in the supplied status sequence."},
+ {cat:"Architecture", q:"What does a callback pattern support?", opts:["Next system action after processing","Column formatting","Password storage","UI animation"], correct:0, why:"The supplied callback flow ends in a next system action."},
+ {cat:"Scenario", q:"Which is part of the Bank + GL scenario?", opts:["Run AutoMatch","Rebuild server","Change UI theme","Install browser"], correct:0, why:"Run AutoMatch is explicitly included."},
+ {cat:"Monitoring", q:"Which chart is requested?", opts:["Failure Trend","Keyboard Usage","Browser Theme","Desktop Wallpaper"], correct:0, why:"Failure Trend is one of the requested charts."},
+ {cat:"Recovery", q:"Which troubleshooting category is listed?", opts:["Dependency Failure","Font Failure","Mouse Failure","Screen Failure"], correct:0, why:"Dependency Failure is in the source list."},
+ {cat:"Recovery", q:"What is the purpose of controlled retries?", opts:["Retry indefinitely","Retry according to approved logic and route persistent failures appropriately","Avoid logs","Skip analysis"], correct:1, why:"The source asks for retry plus error-queue handling."},
+ {cat:"Capability", q:"Which capability supports downstream integration?", opts:["Journal export","Desktop export","Browser export","Keyboard export"], correct:0, why:"Journal export is a supplied capability."},
+];
+
+const checklist = ["Verify endpoint syntax and payloads against applicable Oracle documentation","Secure credentials and access","Validate inputs","Monitor asynchronous jobs","Maintain logs and auditability","Design dependencies and recovery paths","Separate environments","Label illustrative architecture patterns as such"];
+
+/* ============ RENDER HELPERS ============ */
+function renderFlow(id, steps, opts){
+  opts = opts||{};
+  const el = document.getElementById(id);
+  el.innerHTML = steps.map((s,i)=>{
+    const cls = opts.accentLast && i===steps.length-1 ? "flow-step accent" : "flow-step";
+    return `<div class="${cls}">${s}</div>` + (i<steps.length-1 ? `<div class="flow-arrow">→</div>` : "");
+  }).join("");
+}
+function renderFlowVert(id, steps){
+  const el = document.getElementById(id);
+  el.innerHTML = steps.map((s,i)=>{
+    return `<div class="flow-vert-item"><div class="flow-step"><span class="n">${i+1}</span>${s}</div>${i<steps.length-1?'<div class="flow-arrow" style="text-align:center;">↓</div>':''}</div>`;
+  }).join("");
+}
+renderFlow("flow02", flow02);
+renderFlowVert("flow04", jobLifecycle);
+renderFlowVert("flow06", pipeline06);
+renderFlow("flow07", flow07);
+renderFlow("flow08", flow08);
+renderFlowVert("flow09a", flow09a);
+renderFlowVert("flow09b", flow09b);
+renderFlowVert("flow10", flow10);
+renderFlowVert("flow11", flow11);
+renderFlow("flow11b", flow11b);
+renderFlowVert("flow14", flow14);
+renderFlow("flow16", flow16);
+renderFlowVert("flow20", flow20);
+renderFlow("flow05", jobControl);
+
+// table 05
+document.getElementById("tbl05").innerHTML = `<thead><tr><th>Supplied Endpoint</th><th>Visual Role</th><th>Purpose</th></tr></thead>
+<tbody>${jobTable.map(r=>`<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody>`;
+
+// scheduler cards
+document.getElementById("sched-cards").innerHTML = schedCards.map(c=>`
+  <div class="card" style="padding:16px;text-align:center;">
+    <div style="font-family:'Sora',sans-serif;font-weight:700;color:var(--navy);font-size:14px;">${c[0]}</div>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">${c[1]}</div>
+  </div>`).join("");
+
+// capability radial map
+(function(){
+  const wrap = document.getElementById("radial");
+  const cx=310, cy=210, r=175;
+  const n = capability.length;
+  let svg = `<svg viewBox="0 0 620 420">`;
+  const nodePos = [];
+  capability.forEach((label,i)=>{
+    const angle = (i/n)*2*Math.PI - Math.PI/2;
+    const x = cx + r*Math.cos(angle);
+    const y = cy + r*0.82*Math.sin(angle);
+    nodePos.push([x,y,label]);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#B9CBE6" stroke-width="1.5"/>`;
+  });
+  svg += `</svg>`;
+  wrap.innerHTML = svg;
+  wrap.innerHTML += `<div class="radial-core">ORACLE<br>ARCS</div>`;
+  nodePos.forEach(([x,y,label])=>{
+    const node = document.createElement("div");
+    node.className="radial-node";
+    node.style.left = (x)+"px"; node.style.top=(y)+"px";
+    node.style.transform="translate(-50%,-50%)";
+    node.textContent = label;
+    wrap.appendChild(node);
+  });
+})();
+
+// best practices
+document.getElementById("doList").innerHTML = doItems.map(d=>`<li>${d}</li>`).join("");
+document.getElementById("dontList").innerHTML = dontItems.map(d=>`<li>${d}</li>`).join("");
+
+// job log table + stats
+document.getElementById("tbl13").innerHTML = `<thead><tr><th>Job ID</th><th>API</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th><th>Error</th><th>Retry</th></tr></thead>
+<tbody>${jobLog.map(r=>{
+  const statusClass = r[5]==="Success"?"status-ok":r[5]==="Failed"?"status-fail":"status-run";
+  return `<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td class="${statusClass}">${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td></tr>`;
+}).join("")}</tbody>`;
+const logStatsData = [["Jobs","5"],["Success","3"],["Running","1"],["Failed","1"],["Retries","3"],["Logs","5"]];
+document.getElementById("logStats").innerHTML = logStatsData.map(s=>`<div class="stat" style="background:#fff;border-color:var(--line);"><div class="label" style="color:var(--blue);">${s[0]}</div><div class="value" style="color:var(--navy);">${s[1]}</div></div>`).join("");
+
+// troubleshooting table
+document.getElementById("tbl15").innerHTML = `<thead><tr><th>Problem</th><th>Possible Cause</th><th>Investigation</th><th>Resolution</th></tr></thead>
+<tbody>${troubleshoot.map(r=>`<tr><td style="color:var(--navy);font-weight:600;">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody>`;
+
+// flashcards
+document.getElementById("flipGrid").innerHTML = flashcards.map((f,i)=>`
+  <div class="flip" data-flip="${i}" tabindex="0" role="button" aria-label="Flashcard ${i+1}, tap to reveal answer">
+    <div class="flip-inner">
+      <div class="flip-face flip-front"><div class="q">${i+1}. ${f[0]}</div><div class="tap">TAP TO REVEAL →</div></div>
+      <div class="flip-face flip-back">${f[1]}</div>
+    </div>
+  </div>`).join("");
+document.getElementById("flipGrid").addEventListener("click", (e)=>{
+  const card = e.target.closest(".flip");
+  if(card) card.classList.toggle("is-flipped");
+});
+document.getElementById("flipGrid").addEventListener("keydown", (e)=>{
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const card = e.target.closest(".flip");
+  if(card){ e.preventDefault(); card.classList.toggle("is-flipped"); }
+});
+
+const viewArchBtn = document.getElementById("viewArch");
+if(viewArchBtn){
+  viewArchBtn.addEventListener("click", ()=>{
+    document.getElementById("s02").scrollIntoView({behavior:"smooth"});
+  });
+}
+
+document.getElementById("resetQuiz").addEventListener("click", ()=>{
+  const activeBtn = document.querySelector("#mcqFilter button.active");
+  renderMcqs(activeBtn ? activeBtn.dataset.cat : "All");
+});
+
+// MCQ + filters
+const cats = ["All", ...Array.from(new Set(mcqs.map(m=>m.cat)))];
+document.getElementById("mcqFilter").innerHTML = cats.map((c,i)=>`<button data-cat="${c}" class="${i===0?'active':''}">${c}</button>`).join("");
+function renderMcqs(filter){
+  const wrap = document.getElementById("mcqWrap");
+  wrap.innerHTML = mcqs.map((m,i)=>{
+    if(filter!=="All" && m.cat!==filter) return "";
+    return `<div class="mcq">
+      <div class="qhead"><span class="qn">Q${i+1}</span><span class="qtext">${m.q}</span><span class="pill">${m.cat}</span></div>
+      <div class="opts">${m.opts.map((o,oi)=>`<button class="opt-btn" data-qi="${i}" data-oi="${oi}">${String.fromCharCode(65+oi)}. ${o}</button>`).join("")}</div>
+      <div class="why" id="why-${i}"><b>Why:</b> ${m.why}</div>
+    </div>`;
+  }).join("");
+}
+renderMcqs("All");
+document.getElementById("mcqFilter").addEventListener("click", (e)=>{
+  if(e.target.tagName!=="BUTTON") return;
+  document.querySelectorAll("#mcqFilter button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+  renderMcqs(e.target.dataset.cat);
+});
+document.getElementById("mcqWrap").addEventListener("click", (e)=>{
+  const btn = e.target.closest(".opt-btn");
+  if(!btn || btn.disabled) return;
+  const qi = Number(btn.dataset.qi), oi = Number(btn.dataset.oi);
+  const m = mcqs[qi];
+  const opts = btn.parentElement.querySelectorAll(".opt-btn");
+  opts.forEach((o,i)=>{
+    o.disabled = true;
+    if(i===m.correct) o.classList.add("correct");
+    else if(i===oi) o.classList.add("incorrect");
+  });
+  document.getElementById("why-"+qi).classList.add("show");
+});
+
+// cheat sheet checklist
+document.getElementById("checklist").innerHTML = checklist.map(c=>`<li>${c}</li>`).join("");
+
+// icon row (original oracle-inspired SVG iconography, not trademarked assets)
+const icons = [
+  {t:"Secure Auth", d:"Access context first", svg:`<svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 3 L34 9 V19 C34 28 28 34 20 37 C12 34 6 28 6 19 V9 Z" fill="none" stroke="#1C5D99" stroke-width="2"/><path d="M14 20 L18 24 L27 14" fill="none" stroke="#12879F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
+  {t:"Cloud Service", d:"ARCS runtime", svg:`<svg width="44" height="40" viewBox="0 0 44 40"><path d="M12 28 a7 7 0 010-14 a9 9 0 0117-3 a7 7 0 013 13.5 Z" fill="#EAF2FA" stroke="#0F2A4D" stroke-width="2"/></svg>`},
+  {t:"Async Job", d:"Background execution", svg:`<svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="#C74634" stroke-width="2" stroke-dasharray="6 5"/><path d="M20 12 v8 l6 4" stroke="#0F2A4D" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`},
+  {t:"Audit Trail", d:"Traceable outcomes", svg:`<svg width="34" height="40" viewBox="0 0 34 40"><rect x="4" y="3" width="26" height="34" rx="3" fill="none" stroke="#12879F" stroke-width="2"/><line x1="9" y1="12" x2="25" y2="12" stroke="#1C5D99" stroke-width="2"/><line x1="9" y1="19" x2="25" y2="19" stroke="#1C5D99" stroke-width="2"/><line x1="9" y1="26" x2="19" y2="26" stroke="#1C5D99" stroke-width="2"/></svg>`},
+];
+document.getElementById("iconRow").innerHTML = icons.map(i=>`<div class="icon-card">${i.svg}<div class="t">${i.t}</div><div class="d">${i.d}</div></div>`).join("");
+
+/* ============ LIVE SIMULATION ============ */
+let simState = {req:1248, ok:1176, fail:28, run:14, err:7};
+function fmt(n){ return n.toLocaleString(); }
+function updateStats(){
+  document.getElementById("v-req").textContent = fmt(simState.req);
+  document.getElementById("v-ok").textContent = fmt(simState.ok);
+  document.getElementById("v-fail").textContent = fmt(simState.fail);
+  document.getElementById("v-run").textContent = fmt(simState.run);
+  document.getElementById("v-err").textContent = fmt(simState.err);
+  const rate = (simState.ok/(simState.ok+simState.fail)*100).toFixed(1);
+  document.getElementById("v-rate").textContent = rate+"%";
+}
+updateStats();
+
+const feedTemplates = [
+  {t:"ok", msg:"Balance Import completed"},
+  {t:"ok", msg:"AutoMatch job succeeded"},
+  {t:"ok", msg:"Journal export completed"},
+  {t:"warn", msg:"Retry scheduled — connection issue"},
+  {t:"err", msg:"Report generation failed — timeout"},
+  {t:"ok", msg:"Callback delivered to external system"},
+  {t:"ok", msg:"Job status: Submitted → Running"},
+];
+function pushFeed(){
+  const feed = document.getElementById("feed");
+  const f = feedTemplates[Math.floor(Math.random()*feedTemplates.length)];
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const cls = f.t==="ok"?"ok":f.t==="warn"?"warn":"err";
+  const div = document.createElement("div");
+  div.className = "line";
+  div.innerHTML = `<span class="t">[${time}]</span><span class="${cls}">${f.t.toUpperCase()}</span> — ${f.msg}`;
+  feed.prepend(div);
+  while(feed.children.length>6) feed.removeChild(feed.lastChild);
+
+  if(f.t==="ok"){ simState.req++; simState.ok++; if(simState.run>3) simState.run--; }
+  else if(f.t==="warn"){ simState.req++; simState.run++; }
+  else { simState.req++; simState.fail++; simState.err++; if(simState.run>2) simState.run--; }
+  updateStats();
+}
+let simTimer=null;
+document.getElementById("runSim").addEventListener("click", function(){
+  if(simTimer){ clearInterval(simTimer); simTimer=null; this.textContent="▶ Run Simulation"; return; }
+  this.textContent="■ Stop Simulation";
+  pushFeed();
+  simTimer = setInterval(pushFeed, 1400);
+});
+
+/* mini charts */
+function bars(id, data, unit){
+  const el = document.getElementById(id);
+  const max = Math.max(...data.map(d=>d[1]));
+  el.innerHTML = data.map(d=>`<div class="bar" style="height:${(d[1]/max*100)}%;"><span>${d[0]}</span></div>`).join("");
+}
+bars("bar1",[["Succ",70],["Run",18],["Fail",8],["Canc",3]]);
+bars("bar2",[["J1",2.1],["J2",3.4],["J3",2.7],["J4",4.1],["J5",3.1],["J6",5],["J7",4.4],["J8",3.6]]);
+
+function sparkline(id, data){
+  const el = document.getElementById(id);
+  const max = Math.max(...data), min=Math.min(...data);
+  el.innerHTML = data.map(v=>`<div class="pt" style="height:${((v-min)/(max-min||1))*90+10}%;"></div>`).join("");
+}
+sparkline("sp1",[820,930,980,1130,1080,1260,1400,1470]);
+sparkline("sp2",[4,7,6,11,8,6,9,4]);
+sparkline("sp3",[91,93,92,95,94,96,95,97]);
+
+function hbars(id, data){
+  const el = document.getElementById(id);
+  const max = Math.max(...data.map(d=>d[1]));
+  el.innerHTML = data.map(d=>`<div class="hbar-row"><div class="lbl">${d[0]}</div><div class="track"><div class="bar" style="width:${(d[1]/max*100)}%;"></div></div></div>`).join("");
+}
+hbars("hbar1",[["Auth",37],["Data",23],["Request",16],["Dependency",11],["Callback",9]]);
+
+/* nav active state on scroll */
+const sections = document.querySelectorAll("main .section, .hero");
+const links = document.querySelectorAll("#toc a");
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      links.forEach(l=>l.classList.remove("active"));
+      const link = document.querySelector(`#toc a[href="#${entry.target.id}"]`);
+      if(link) link.classList.add("active");
+    }
+  });
+}, {rootMargin:"-40% 0px -55% 0px"});
+sections.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
