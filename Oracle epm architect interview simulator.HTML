@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Architect's Room — Oracle EPM Ecosystem Interview Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080B12;
+  --bg-panel:#0E131D;
+  --bg-elevated:#141B28;
+  --bg-elevated-2:#1A2333;
+  --border:rgba(148,163,196,0.14);
+  --border-soft:rgba(148,163,196,0.07);
+  --text:#E9EDF6;
+  --text-dim:#8592AB;
+  --text-faint:#5B6579;
+  --violet:#8B87F0;
+  --amber:#F4B942;
+  --teal:#1FD8B4;
+  --rose:#FF6E82;
+  --sky:#4FB6F0;
+  --neutral:#7C8AA3;
+  --shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(139,135,240,0.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 90% 10%, rgba(31,216,180,0.07), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Sans', sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+::selection{background:rgba(139,135,240,0.35);}
+::-webkit-scrollbar{width:9px; height:9px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#232C3D; border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:#2C374B;}
+
+a{color:inherit;}
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--sky); outline-offset:2px; border-radius:4px;}
+
+.mono{font-family:'IBM Plex Mono', monospace; letter-spacing:0.02em;}
+.display{font-family:'Space Grotesk', sans-serif;}
+
+/* ============ BISP BRAND STRIP ============ */
+.bisp-strip{
+  position:sticky; top:0; z-index:41;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px;
+  padding:9px 28px;
+  background:linear-gradient(90deg, #0A0F1A, #0D1420 55%, #0A0F1A);
+  border-bottom:1px solid rgba(244,185,66,0.18);
+}
+.bisp-strip-left{display:flex; align-items:center; gap:12px;}
+.bisp-logo-img{height:30px; width:auto; border-radius:4px; background:#fff; padding:3px 6px; display:block;}
+.bisp-strip-tag{font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-faint); letter-spacing:0.05em; border-left:1px solid var(--border); padding-left:12px; display:none;}
+@media (min-width:640px){ .bisp-strip-tag{display:inline; } }
+.bisp-strip-right{display:flex; align-items:center; gap:18px; font-family:'IBM Plex Mono'; font-size:12px;}
+.bisp-link{display:flex; align-items:center; gap:6px; color:var(--sky); text-decoration:none; transition:color .15s;}
+.bisp-link:hover{color:var(--teal);}
+.bisp-link svg{flex-shrink:0;}
+.bisp-call{color:var(--amber);}
+.bisp-call:hover{color:var(--teal);}
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky; top:48px; z-index:40;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(8,11,18,0.86);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border-soft);
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{
+  width:30px; height:30px; border-radius:8px;
+  background:linear-gradient(135deg, var(--violet), var(--sky));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk'; font-weight:700; font-size:14px; color:#0A0E17;
+  flex-shrink:0;
+}
+.brand-text{font-family:'Space Grotesk'; font-weight:600; font-size:14.5px; letter-spacing:0.01em;}
+.brand-sub{font-size:10.5px; color:var(--text-faint); font-family:'IBM Plex Mono'; letter-spacing:0.06em; text-transform:uppercase; margin-top:1px;}
+.topbar-right{display:flex; align-items:center; gap:16px; font-size:12px; color:var(--text-dim); font-family:'IBM Plex Mono';}
+.dot-live{width:6px;height:6px;border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(31,216,180,0.18); display:inline-block; margin-right:6px;}
+@media (max-width:640px){ .topbar{top:76px;} }
+
+/* ============ HERO ============ */
+.hero{
+  padding:64px 28px 40px;
+  max-width:1180px; margin:0 auto;
+  text-align:center;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono'; font-size:11.5px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--sky); margin-bottom:18px; display:inline-flex; align-items:center; gap:8px;
+}
+.eyebrow::before, .eyebrow::after{content:''; width:20px; height:1px; background:linear-gradient(90deg, transparent, var(--sky));}
+.eyebrow::after{background:linear-gradient(90deg, var(--sky), transparent);}
+.hero h1{
+  font-family:'Space Grotesk'; font-weight:700; font-size:clamp(30px, 5vw, 54px);
+  line-height:1.08; margin:0 0 18px; letter-spacing:-0.01em;
+}
+.hero h1 span{
+  background:linear-gradient(120deg, var(--violet), var(--sky) 60%, var(--teal));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero p.lede{
+  max-width:640px; margin:0 auto; color:var(--text-dim); font-size:16px; line-height:1.65;
+}
+
+/* ============ PIPELINE — signature element ============ */
+.pipeline-wrap{
+  max-width:1000px; margin:52px auto 0; padding:0 16px;
+}
+.pipeline{
+  position:relative;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:28px 6px;
+}
+.pipeline-line{
+  position:absolute; left:5%; right:5%; top:50%; height:2px;
+  background:linear-gradient(90deg, rgba(139,135,240,0.5), rgba(79,182,240,0.5), rgba(31,216,180,0.5), rgba(244,185,66,0.5));
+  transform:translateY(-50%);
+  z-index:0;
+}
+.pipeline-node{
+  position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:10px;
+  flex:1;
+}
+.node-dot{
+  width:13px; height:13px; border-radius:50%;
+  background:var(--bg-elevated); border:2px solid var(--sky);
+  box-shadow:0 0 0 5px rgba(79,182,240,0.10);
+}
+.pipeline-node:nth-child(2) .node-dot{border-color:var(--violet); box-shadow:0 0 0 5px rgba(139,135,240,0.10);}
+.pipeline-node:nth-child(3) .node-dot{border-color:var(--amber); box-shadow:0 0 0 5px rgba(244,185,66,0.10);}
+.pipeline-node:nth-child(4) .node-dot{border-color:var(--teal); box-shadow:0 0 0 5px rgba(31,216,180,0.10);}
+.pipeline-node:nth-child(5) .node-dot{border-color:var(--rose); box-shadow:0 0 0 5px rgba(255,110,130,0.10);}
+.node-label{font-family:'IBM Plex Mono'; font-size:10.5px; text-align:center; color:var(--text-dim); letter-spacing:0.03em; max-width:120px; line-height:1.4;}
+.flow-packet{
+  position:absolute; top:50%; width:6px; height:6px; border-radius:50%;
+  background:var(--sky); transform:translateY(-50%);
+  box-shadow:0 0 8px 2px rgba(79,182,240,0.7);
+  animation:travel 5.5s linear infinite;
+}
+.flow-packet:nth-child(2){animation-delay:1.4s; background:var(--teal); box-shadow:0 0 8px 2px rgba(31,216,180,0.7);}
+.flow-packet:nth-child(3){animation-delay:2.8s; background:var(--amber); box-shadow:0 0 8px 2px rgba(244,185,66,0.7);}
+@keyframes travel{
+  0%{left:5%; opacity:0;}
+  8%{opacity:1;}
+  92%{opacity:1;}
+  100%{left:95%; opacity:0;}
+}
+
+/* ============ STATS STRIP ============ */
+.stats{
+  display:flex; justify-content:center; gap:0; flex-wrap:wrap;
+  max-width:900px; margin:46px auto 0; border:1px solid var(--border-soft); border-radius:14px; overflow:hidden;
+}
+.stat{
+  flex:1; min-width:150px; padding:18px 20px; text-align:center;
+  border-right:1px solid var(--border-soft);
+  background:rgba(255,255,255,0.014);
+}
+.stat:last-child{border-right:none;}
+.stat b{display:block; font-family:'Space Grotesk'; font-size:24px; font-weight:600; color:var(--text);}
+.stat span{font-size:11px; color:var(--text-faint); font-family:'IBM Plex Mono'; letter-spacing:0.03em;}
+
+/* ============ MAIN LAYOUT ============ */
+.stage{
+  max-width:1280px; margin:56px auto 0; padding:0 24px 100px;
+  display:grid; grid-template-columns:280px 1fr; gap:24px;
+  align-items:start;
+}
+@media (max-width:920px){
+  .stage{grid-template-columns:1fr; padding:0 16px 80px;}
+}
+
+/* ---- Sidebar ---- */
+.sidebar{
+  position:sticky; top:74px;
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:16px;
+  padding:6px; max-height:calc(100vh - 100px); overflow-y:auto;
+}
+@media (max-width:920px){ .sidebar{position:static; max-height:none;} }
+.sidebar-head{
+  padding:14px 14px 10px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--text-faint);
+}
+.chapter-item{
+  display:flex; align-items:flex-start; gap:10px;
+  width:100%; text-align:left; background:transparent; border:none; cursor:pointer;
+  padding:10px 12px; border-radius:10px; color:var(--text-dim); transition:background 0.15s, color 0.15s;
+}
+.chapter-item:hover{background:var(--bg-elevated); color:var(--text);}
+.chapter-item.active{background:var(--bg-elevated-2); color:var(--text);}
+.chapter-num{
+  font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-faint);
+  width:22px; flex-shrink:0; padding-top:2px;
+}
+.chapter-item.active .chapter-num{color:var(--sky);}
+.chapter-body{flex:1; min-width:0;}
+.chapter-title{font-size:13px; line-height:1.35; font-weight:500;}
+.chapter-tag{
+  display:inline-block; margin-top:5px; font-family:'IBM Plex Mono'; font-size:9.5px;
+  letter-spacing:0.04em; padding:2px 7px; border-radius:20px; text-transform:uppercase;
+}
+.chapter-check{width:14px; height:14px; flex-shrink:0; margin-top:3px; opacity:0.35;}
+.chapter-item.done .chapter-check{opacity:1;}
+
+/* ---- Player Panel ---- */
+.panel{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:18px;
+  overflow:hidden; box-shadow:var(--shadow);
+}
+.panel-head{
+  padding:22px 26px 18px; border-bottom:1px solid var(--border-soft);
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.panel-head-left .kicker{font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;}
+.panel-head-left h2{font-family:'Space Grotesk'; font-size:21px; margin:0; font-weight:600; line-height:1.3;}
+.progress-mini{display:flex; align-items:center; gap:10px; font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-dim);}
+.progress-track{width:120px; height:5px; border-radius:4px; background:var(--bg-elevated-2); overflow:hidden;}
+.progress-fill{height:100%; background:linear-gradient(90deg, var(--violet), var(--sky)); width:0%; transition:width 0.3s;}
+
+/* ---- Transcript ---- */
+.transcript{
+  padding:26px; display:flex; flex-direction:column; gap:18px;
+  min-height:260px; max-height:56vh; overflow-y:auto;
+  scroll-behavior:smooth;
+}
+.turn{display:flex; gap:14px; opacity:0.4; transition:opacity 0.25s;}
+.turn.past{opacity:0.62;}
+.turn.current{opacity:1;}
+.avatar{
+  width:38px; height:38px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk'; font-weight:700; font-size:13px;
+  border:1px solid var(--border);
+}
+.turn.q .avatar{background:linear-gradient(150deg, rgba(79,182,240,0.18), rgba(79,182,240,0.03)); color:var(--sky); border-color:rgba(79,182,240,0.3);}
+.turn.a .avatar{background:linear-gradient(150deg, rgba(31,216,180,0.18), rgba(31,216,180,0.03)); color:var(--teal); border-color:rgba(31,216,180,0.3);}
+.turn-body{flex:1; min-width:0;}
+.turn-name{font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+.turn.q .turn-name{color:var(--sky);}
+.turn.a .turn-name{color:var(--teal);}
+.speaking-bars{display:inline-flex; align-items:flex-end; gap:2px; height:10px;}
+.speaking-bars i{width:2px; background:currentColor; border-radius:1px; display:inline-block; animation:eq 0.9s ease-in-out infinite;}
+.speaking-bars i:nth-child(1){height:4px; animation-delay:0s;}
+.speaking-bars i:nth-child(2){height:9px; animation-delay:0.15s;}
+.speaking-bars i:nth-child(3){height:6px; animation-delay:0.3s;}
+@keyframes eq{0%,100%{transform:scaleY(0.4);} 50%{transform:scaleY(1);}}
+.turn-text{font-size:15px; line-height:1.68; color:var(--text);}
+.turn-text .sent{transition:color 0.2s, opacity 0.2s; color:var(--text-dim); opacity:0.72;}
+.turn.current .turn-text .sent.said{color:var(--text); opacity:1;}
+.turn.current .turn-text .sent.reading{color:#fff; opacity:1;}
+.turn.past .turn-text .sent{color:var(--text-dim); opacity:0.85;}
+.flow-chip-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+.flow-chip{
+  font-family:'IBM Plex Mono'; font-size:10.5px; padding:4px 9px; border-radius:6px;
+  background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-dim);
+}
+.flow-arrow{color:var(--text-faint); font-size:11px; align-self:center;}
+
+/* ---- Answer step-flow (diagram style for Architect's answers) ---- */
+.answer-flow{display:flex; flex-direction:column; margin-top:2px;}
+.answer-step{display:grid; grid-template-columns:28px 1fr; column-gap:12px; position:relative;}
+.step-rail{position:relative; display:flex; flex-direction:column; align-items:center;}
+.step-badge{
+  width:26px; height:26px; border-radius:50%; flex-shrink:0; z-index:1;
+  background:var(--bg-elevated-2); border:1.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-faint);
+  transition:border-color .2s, color .2s, background .2s;
+}
+.step-line{width:2px; flex:1; min-height:14px; background:var(--border-soft); margin:2px 0;}
+.answer-step:last-child .step-line{display:none;}
+.step-arrow{
+  position:absolute; left:50%; transform:translateX(-50%); bottom:-1px;
+  color:var(--text-faint); font-size:10px; line-height:1; background:var(--bg-panel);
+}
+.step-text{
+  font-size:14.5px; line-height:1.62; padding:0 0 16px 2px; color:var(--text);
+}
+.turn.current .answer-step .step-text .sent{color:var(--text-dim); opacity:0.72; transition:color .2s, opacity .2s;}
+.turn.current .answer-step.said .step-badge{border-color:var(--teal); color:var(--teal); background:rgba(31,216,180,0.1);}
+.turn.current .answer-step.said .step-text .sent{color:var(--text); opacity:1;}
+.turn.current .answer-step.reading .step-badge{border-color:var(--teal); color:#0A0E17; background:var(--teal); box-shadow:0 0 0 4px rgba(31,216,180,0.18);}
+.turn.current .answer-step.reading .step-line{background:linear-gradient(var(--teal), var(--border-soft));}
+.turn.current .answer-step.reading .step-text .sent.reading{color:#fff; opacity:1;}
+.turn.past .answer-step .step-badge{border-color:rgba(31,216,180,0.35); color:var(--text-faint);}
+.turn.past .answer-step .step-text{color:var(--text-dim);}
+
+/* ---- Plain-English takeaway callout ---- */
+.takeaway{
+  display:flex; gap:10px; align-items:flex-start;
+  margin:2px 0 14px; padding:11px 14px;
+  background:rgba(244,185,66,0.08); border:1px solid rgba(244,185,66,0.3); border-radius:11px;
+}
+.takeaway-icon{flex-shrink:0; font-size:15px; line-height:1.4;}
+.takeaway-label{font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--amber); margin-bottom:2px;}
+.takeaway-text{font-size:13.5px; line-height:1.5; color:var(--text);}
+
+/* ---- Keyword highlight inside answer text ---- */
+.kw{color:var(--sky); font-weight:600;}
+
+/* ---- Who's talking / About panel ---- */
+.about-wrap{max-width:1000px; margin:44px auto 0; padding:0 16px;}
+.about-card{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:18px;
+  padding:26px 26px 22px; box-shadow:var(--shadow);
+}
+.about-title{font-family:'Space Grotesk'; font-size:17px; font-weight:600; margin:0 0 4px; display:flex; align-items:center; gap:8px;}
+.about-sub{font-size:12.5px; color:var(--text-faint); font-family:'IBM Plex Mono'; margin-bottom:18px;}
+.persona-row{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center; margin-bottom:22px;}
+@media (max-width:640px){ .persona-row{grid-template-columns:1fr; } .persona-vs{transform:rotate(90deg);} }
+.persona-card{
+  background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:14px; padding:16px 18px;
+  display:flex; gap:12px; align-items:flex-start;
+}
+.persona-avatar{
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk'; font-weight:700; font-size:12px;
+  border:1px solid var(--border);
+}
+.persona-card.q .persona-avatar{background:linear-gradient(150deg, rgba(79,182,240,0.18), rgba(79,182,240,0.03)); color:var(--sky); border-color:rgba(79,182,240,0.3);}
+.persona-card.a .persona-avatar{background:linear-gradient(150deg, rgba(31,216,180,0.18), rgba(31,216,180,0.03)); color:var(--teal); border-color:rgba(31,216,180,0.3);}
+.persona-name{font-family:'Space Grotesk'; font-weight:600; font-size:14px; margin-bottom:2px;}
+.persona-role{font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint); margin-bottom:6px;}
+.persona-desc{font-size:12.5px; color:var(--text-dim); line-height:1.55;}
+.persona-vs{
+  font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint);
+  width:34px; height:34px; border-radius:50%; border:1px dashed var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.benefit-row{display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:12px;}
+.benefit-item{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:12px;}
+.benefit-icon{
+  width:26px; height:26px; border-radius:8px; flex-shrink:0; margin-top:1px;
+  display:flex; align-items:center; justify-content:center; background:rgba(139,135,240,0.12); color:var(--violet);
+}
+.benefit-text b{display:block; font-size:12.5px; color:var(--text); margin-bottom:2px;}
+.benefit-text span{font-size:11.5px; color:var(--text-faint); line-height:1.4;}
+
+/* ---- Controls ---- */
+.controls{
+  padding:18px 26px 24px; border-top:1px solid var(--border-soft);
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:rgba(255,255,255,0.012);
+}
+.transport{display:flex; align-items:center; gap:8px;}
+.btn-icon{
+  width:42px; height:42px; border-radius:50%; border:1px solid var(--border);
+  background:var(--bg-elevated); color:var(--text); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all 0.15s;
+}
+.btn-icon:hover{background:var(--bg-elevated-2); border-color:rgba(148,163,196,0.3);}
+.btn-icon:active{transform:scale(0.94);}
+.btn-play{
+  width:52px; height:52px; background:linear-gradient(135deg, var(--violet), var(--sky));
+  border:none; color:#0A0E17;
+}
+.btn-play:hover{filter:brightness(1.08); background:linear-gradient(135deg, var(--violet), var(--sky));}
+.ctrl-group{display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-dim);}
+.select-min{
+  background:var(--bg-elevated); border:1px solid var(--border); color:var(--text);
+  border-radius:8px; padding:7px 10px; font-family:'IBM Plex Mono'; font-size:11.5px; cursor:pointer;
+}
+.rate-slider{width:80px; accent-color:var(--sky);}
+.spacer{flex:1;}
+.status-pill{
+  font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint);
+  display:flex; align-items:center; gap:7px;
+}
+.status-dot{width:7px; height:7px; border-radius:50%; background:var(--text-faint);}
+.status-pill.speaking .status-dot{background:var(--teal); box-shadow:0 0 0 4px rgba(31,216,180,0.15);}
+.chapter-nav{display:flex; gap:8px;}
+.chapter-nav button{
+  background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-dim);
+  border-radius:9px; padding:9px 14px; font-size:12.5px; cursor:pointer; display:flex; align-items:center; gap:6px;
+}
+.chapter-nav button:hover{color:var(--text); border-color:rgba(148,163,196,0.3);}
+.chapter-nav button:disabled{opacity:0.35; cursor:default;}
+
+/* ---- Notice ---- */
+.notice{
+  max-width:1280px; margin:0 auto; padding:0 24px;
+}
+.notice-inner{
+  border:1px dashed var(--border); border-radius:12px; padding:12px 16px;
+  font-size:12.5px; color:var(--text-faint); display:flex; gap:10px; align-items:flex-start;
+  margin-top:14px;
+}
+
+/* ---- Autoplay prompt ---- */
+.autoplay-prompt{
+  position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+  z-index:60; display:flex; align-items:center; gap:9px;
+  background:var(--bg-elevated-2); border:1px solid rgba(79,182,240,0.4);
+  color:var(--text); font-family:'IBM Plex Mono'; font-size:12.5px;
+  padding:12px 20px; border-radius:999px; box-shadow:var(--shadow);
+  animation:promptPulse 1.8s ease-in-out infinite; cursor:pointer;
+}
+@keyframes promptPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(79,182,240,0.35), var(--shadow);}
+  50%{box-shadow:0 0 0 8px rgba(79,182,240,0), var(--shadow);}
+}
+
+/* ============ EVALUATION MATRIX ============ */
+.section-title{
+  max-width:1280px; margin:90px auto 0; padding:0 24px; display:flex; align-items:center; gap:16px;
+}
+.section-title h3{font-family:'Space Grotesk'; font-size:24px; margin:0; font-weight:600;}
+.section-title .rule{flex:1; height:1px; background:var(--border);}
+.chart-wrap{
+  max-width:1280px; margin:28px auto 0; padding:0 24px;
+  display:grid; grid-template-columns:280px 1fr; gap:24px; align-items:center;
+}
+@media (max-width:760px){ .chart-wrap{grid-template-columns:1fr; justify-items:center; text-align:center;} }
+.chart-card{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:16px;
+  padding:22px; display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.chart-card svg{display:block;}
+.chart-total-label{font-family:'Space Grotesk'; font-size:12px; color:var(--text-faint); text-align:center;}
+.chart-legend{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:16px; padding:18px 20px;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:10px 18px;
+}
+.legend-item{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-dim); padding:6px 0;}
+.legend-swatch{width:10px; height:10px; border-radius:3px; flex-shrink:0;}
+.legend-item b{color:var(--text); font-weight:600;}
+.legend-count{margin-left:auto; font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-faint);}
+.donut-seg{transition:stroke-width .15s, opacity .15s; cursor:pointer;}
+.donut-seg:hover{opacity:0.75;}
+
+.matrix-wrap{max-width:1280px; margin:28px auto 0; padding:0 24px 40px;}
+.matrix{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:16px; padding:8px; overflow:hidden;
+}
+.matrix-row{
+  display:grid; grid-template-columns:1fr 90px 260px; align-items:center; gap:16px;
+  padding:13px 18px; border-radius:10px;
+}
+.matrix-row:hover{background:var(--bg-elevated);}
+.matrix-row.head{color:var(--text-faint); font-family:'IBM Plex Mono'; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em;}
+.matrix-name{font-size:14px;}
+.matrix-weight{font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-dim); text-align:right;}
+.matrix-bar-track{height:7px; border-radius:5px; background:var(--bg-elevated-2); overflow:hidden;}
+.matrix-bar-fill{height:100%; border-radius:5px; background:linear-gradient(90deg, var(--violet), var(--sky));}
+@media (max-width:640px){
+  .matrix-row{grid-template-columns:1fr 60px 90px; gap:10px; padding:12px;}
+}
+.interp{
+  max-width:1280px; margin:18px auto 0; padding:0 24px 90px;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px;
+}
+.interp-card{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:16px 18px;
+}
+.interp-card b{display:block; font-family:'Space Grotesk'; font-size:15px; margin-bottom:4px;}
+.interp-card span{font-size:12.5px; color:var(--text-faint); font-family:'IBM Plex Mono';}
+
+footer{
+  text-align:center; padding:30px 20px 50px; color:var(--text-faint); font-size:11.5px; font-family:'IBM Plex Mono';
+}
+.bisp-outro{
+  max-width:760px; margin:56px auto 0; padding:30px 28px;
+  background:linear-gradient(135deg, rgba(139,135,240,0.08), rgba(31,216,180,0.05));
+  border:1px solid rgba(244,185,66,0.25); border-radius:18px;
+  text-align:center;
+}
+.bisp-outro img{height:40px; background:#fff; padding:6px 10px; border-radius:6px; margin-bottom:14px;}
+.bisp-outro h4{font-family:'Space Grotesk'; font-size:17px; margin:0 0 8px; color:var(--text);}
+.bisp-outro p{font-size:13px; color:var(--text-dim); line-height:1.6; margin:0 0 16px;}
+.bisp-outro-links{display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;}
+.bisp-outro-btn{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:'IBM Plex Mono'; font-size:12px; padding:9px 16px; border-radius:9px;
+  text-decoration:none; border:1px solid var(--border); color:var(--text);
+  background:var(--bg-elevated); transition:transform .15s, border-color .15s;
+}
+.bisp-outro-btn:hover{transform:translateY(-2px); border-color:var(--sky);}
+.bisp-outro-btn.primary{background:linear-gradient(120deg, var(--violet), var(--sky)); color:#0A0E17; border:none; font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="bisp-strip">
+  <div class="bisp-strip-left">
+    <img class="bisp-logo-img" src="data:image/jpeg;base64,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" alt="BISP — Business Intelligence Solution Providers Inc.">
+    <span class="bisp-strip-tag">Oracle EPM Training &amp; Consulting</span>
+  </div>
+  <div class="bisp-strip-right">
+    <a class="bisp-link" href="https://www.bisptrainings.com" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M3 12H21M12 3C14.5 5.7 15.8 8.8 15.8 12C15.8 15.2 14.5 18.3 12 21C9.5 18.3 8.2 15.2 8.2 12C8.2 8.8 9.5 5.7 12 3Z" stroke="currentColor" stroke-width="1.5"/></svg>
+      www.bisptrainings.com
+    </a>
+    <a class="bisp-link bisp-call" href="tel:+917694095404">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8C8 13.6 10.4 16 13.2 17.4L15.4 15.2C15.7 14.9 16.1 14.8 16.5 14.9C17.7 15.3 19 15.5 20.3 15.5C20.9 15.5 21.3 15.9 21.3 16.5V20.3C21.3 20.9 20.9 21.3 20.3 21.3C10.7 21.3 2.7 13.3 2.7 3.7C2.7 3.1 3.1 2.7 3.7 2.7H7.5C8.1 2.7 8.5 3.1 8.5 3.7C8.5 5 8.7 6.3 9.1 7.5C9.2 7.9 9.1 8.3 8.8 8.6L6.6 10.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      +91 769-409-5404
+    </a>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">EA</div>
+    <div>
+      <div class="brand-text">The Architect's Room</div>
+      <div class="brand-sub">Oracle EPM Ecosystem · Voice Simulator</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span><span class="dot-live"></span>25 chapters loaded</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">Senior / Architect-Level Interview Simulator · Presented by BISP Trainings</div>
+  <h1>Planning ↔ FCCS ↔ Data Integration ↔<br><span>REST API ↔ Performance ↔ Architecture</span></h1>
+  <p class="lede">
+    A full-voice, two-persona mock interview for the Senior Oracle EPM Cloud Architect role — 22 architecture
+    scenarios, a rapid-fire round, and a 90-day production turnaround case study. Press play and listen to the
+    Interviewer and the Architect argue through data ownership, dimensional mapping, REST orchestration and
+    performance tuning, line by line.
+  </p>
+
+  <div class="pipeline-wrap">
+    <div class="pipeline">
+      <div class="pipeline-line"></div>
+      <div class="flow-packet"></div>
+      <div class="flow-packet"></div>
+      <div class="flow-packet"></div>
+      <div class="pipeline-node"><div class="node-dot"></div><div class="node-label">Fusion ERP<br>&amp; Sources</div></div>
+      <div class="pipeline-node"><div class="node-dot"></div><div class="node-label">Integration &amp;<br>Orchestration</div></div>
+      <div class="pipeline-node"><div class="node-dot"></div><div class="node-label">Planning<br>↔ FCCS</div></div>
+      <div class="pipeline-node"><div class="node-dot"></div><div class="node-label">Reconciliation<br>&amp; Controls</div></div>
+      <div class="pipeline-node"><div class="node-dot"></div><div class="node-label">Reporting &amp;<br>Narrative</div></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>25</b><span>Chapters</span></div>
+    <div class="stat"><b>60+</b><span>Q&amp;A Exchanges</span></div>
+    <div class="stat"><b>2</b><span>Voice Personas</span></div>
+    <div class="stat"><b>90-Day</b><span>Case Study</span></div>
+  </div>
+</div>
+
+<div class="about-wrap">
+  <div class="about-card">
+    <div class="about-title">🎙️ Who's talking, and why this helps you</div>
+    <div class="about-sub">Read this before you press play</div>
+
+    <div class="persona-row">
+      <div class="persona-card q">
+        <div class="persona-avatar">IN</div>
+        <div>
+          <div class="persona-name">The Interviewer</div>
+          <div class="persona-role">Global Delivery Lead — USA</div>
+          <div class="persona-desc">Asks the same tough, scenario-based questions a real Oracle EPM hiring panel would ask — production incidents, performance regressions, architecture trade-offs.</div>
+        </div>
+      </div>
+      <div class="persona-vs">VS</div>
+      <div class="persona-card a">
+        <div class="persona-avatar">AR</div>
+        <div>
+          <div class="persona-name">The Architect</div>
+          <div class="persona-role">Senior EPM Architect — India</div>
+          <div class="persona-desc">Answers the way a Senior/Enterprise Architect should — structured, step-by-step, showing the reasoning path rather than just a final answer.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-item">
+        <div class="benefit-icon">🎧</div>
+        <div class="benefit-text"><b>Listen, don't just read</b><span>Two distinct voices narrate the full mock interview — practice hands-free, like a podcast.</span></div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-icon">🧭</div>
+        <div class="benefit-text"><b>See the answer structure</b><span>Every answer is broken into arrow-connected steps, so you learn *how* an architect thinks, not just what they say.</span></div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-icon">📊</div>
+        <div class="benefit-text"><b>Know where you stand</b><span>The evaluation matrix and domain chart show exactly which Oracle EPM competencies each chapter builds.</span></div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-icon">🚀</div>
+        <div class="benefit-text"><b>Walk into the real interview ready</b><span>25 chapters covering Planning, FCCS, integration, REST automation and a full 90-day case study.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stage">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar" aria-label="Interview chapters">
+    <div class="sidebar-head">Interview Map</div>
+    <div id="chapterList"></div>
+  </nav>
+
+  <!-- PLAYER PANEL -->
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-head-left">
+        <div class="kicker" id="chapterKicker">Chapter 00 · Architecture</div>
+        <h2 id="chapterTitle">Opening — Ecosystem Architecture</h2>
+      </div>
+      <div class="progress-mini">
+        <span id="progressLabel">0 / 25</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+
+    <div class="transcript" id="transcript" aria-live="polite"></div>
+
+    <div class="controls">
+      <div class="transport">
+        <button class="btn-icon" id="btnPrevChapter" title="Previous chapter" aria-label="Previous chapter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M11 5L4 12L11 19M20 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-icon btn-play" id="btnPlay" title="Play chapter" aria-label="Play">
+          <svg id="iconPlay" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4L20 12L6 20V4Z" fill="currentColor"/></svg>
+          <svg id="iconPause" width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:none"><rect x="5" y="4" width="5" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="btn-icon" id="btnNextChapter" title="Next chapter" aria-label="Next chapter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 5L20 12L13 19M4 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="ctrl-group">
+        <span>Speed</span>
+        <input type="range" class="rate-slider" id="rateSlider" min="0.75" max="1.4" step="0.05" value="1">
+        <span id="rateLabel">1.0×</span>
+      </div>
+
+      <div class="ctrl-group">
+        <label for="voiceInterviewer" style="color:var(--sky)">Interviewer</label>
+        <select class="select-min" id="voiceInterviewer"></select>
+      </div>
+      <div class="ctrl-group">
+        <label for="voiceInterviewee" style="color:var(--teal)">Architect</label>
+        <select class="select-min" id="voiceInterviewee"></select>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="status-pill" id="statusPill"><span class="status-dot"></span><span id="statusText">Ready</span></div>
+    </div>
+  </section>
+</div>
+
+<div class="notice">
+  <div class="notice-inner">
+    <span>ⓘ</span>
+    <span>This simulator autoplays Chapter 00 as soon as the page is ready — if your browser blocks autoplay audio, just tap anywhere on the page once and it will start. Voice playback uses your browser's built-in text-to-speech (Web Speech API) — no audio files are downloaded. Voice choice and quality depend on your device and browser; Chrome and Edge generally offer the widest voice selection. Nothing you say or hear here leaves your browser.</span>
+  </div>
+</div>
+
+<div class="section-title"><h3>Chapter Coverage by Domain</h3><div class="rule"></div></div>
+<div class="chart-wrap">
+  <div class="chart-card">
+    <div id="donutChart"></div>
+    <div class="chart-total-label" id="donutTotal">25 chapters</div>
+  </div>
+  <div class="chart-legend" id="chartLegend"></div>
+</div>
+
+<div class="section-title"><h3>Senior Architect Evaluation Matrix</h3><div class="rule"></div></div>
+<div class="matrix-wrap">
+  <div class="matrix" id="matrixBox"></div>
+</div>
+<div class="interp" id="interpBox"></div>
+
+<div class="bisp-outro">
+  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAQEBAQFBAUGBgUHCAcIBwoKCQkKChALDAsMCxAYDxEPDxEPGBUZFRMVGRUmHhoaHiYsJSMlLDUvLzVDP0NXV3UBBAQEBAUEBQYGBQcIBwgHCgoJCQoKEAsMCwwLEBgPEQ8PEQ8YFRkVExUZFSYeGhoeJiwlIyUsNS8vNUM/Q1dXdf/CABEIAEAAwAMBIgACEQEDEQH/xAAdAAACAgMBAQEAAAAAAAAAAAAABwYIAwQFAgEJ/9oACAEBAAAAAL/ALvn5AOU5QAAAK74AisqPk3bKzgPL92DQ7G2YzIc639sRYPcFmz/AlrArKmb3WM/Rdk1HdRO+EbZWrLze4c2C+xYNvr0kma7uRTyyMSVL479fGhryx7gAJawJ+cz3jsJili5Xv1If6jvTt1edAAYF3YQo52+E8UM89La4EzUlxCC8DBnNfJha26eebv8AnPzNvY1Nsx5Ko9rLj9S6B7XJ7JMYbscGSd/h5+LhncVl3//EABsBAAIDAQEBAAAAAAAAAAAAAAAEAwUGBwIB/9oACAECEAAAALYQmQkt00q/yamqU9WF/pYeU5lCTrdWfXbW2Z5rhY981KCIAB//xAAbAQACAwEBAQAAAAAAAAAAAAAABQMEBgcBCP/aAAgBAxAAAABYamjc8yttg2kMczfx0EGNl7brXcHz0yPKS1VX6p1OfilWMLnoAH//xAA0EAABBAIBAAYIBQUBAAAAAAAEAgMFBgEHAAgSExYXNxARFBU1VVZXICMwNlMiJCYxMlH/2gAIAQEAAQwA/BsuWkI6t/2T2WnmtQ1HqJ7b255zwipn8JfPCKmfwl88IqZ/CXzwipn8JfBIlNSu8KHHlk5A/VsdkuFsuh9Zrh+I4Xwrv33MkOeFd++5khzwrv33MkOW+h2yKjhHzLsWe3nVV++5khzwrv33MkOZ1lshj8wbZJantXXWSnxZICWZw1L8tX7+o3Lbvxmv2OSiVV9x7IfSHMNSrIlJOfwD0k4fJWGj4AwZMJNxc3GMHxxSHxrL0gmYOwycXmvLezrfYaLtHGlpjlC4t+xICs9Vp9S3y87Itqme3RQJHsKdseGsr7omG3RTr3eG6mIE+sFZPEb8ZdWlDdcIUpzfTLK+o9Wyms1LYtdsyltDLW0VqzzB2b+Da2erX43Of9L/AO1enWfmts30WjPq2DRv/dt+ZFl50ZPhtk50ghRWNiOLaxjGejI+Z/kbOcq9l2b5g2jnRlz6q3P8Ysamr0mZMRl7kNPRMyEkmPLbfbt1YsD+youWio5WUb9+DwvKB+9a9zcwQr9JJfW0nLtWLeEskO+1nOF6s8wdm/gl4kGXjyQDGuuO3QJphCW2LzMoa7i2D69mOdxbB9ezHKXXJQ2+3UJixmjPeH9k+vpjleozEXJqky5IyRP235kWXmnZHYwYUx3Zigi27qRYiraW/Z2XmC9NGUddYyNXlu+vZvmBZ+dGf9uTXNo0A6Iky5MRnK44M0wR9L4xDrDlE3GegkcCcyl5rfvwiE5WJMeKsEYc/hWWtg7THskZ7rjgX0Na11xNHTQUkaKsYLVnmDs39DWnmts307b8yLLzoyfDbJzpMtoxM15WMY6+hSyGdjgNtqz1dm+YFn50b8u4qliy2nGVawu05aT5hqSUP2dp0/W5ZDrwSPYSzxHgiiRn09V3bmXc0in5e9fbURCV3OBQvGFIbCDa/qbHaTnkFKh0za9uFmXcCs97ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOFXemisOPvWCOw3ppL0rO3Kz4ZW2H6Nk63vcpep8wOBKeH12xtekinsj0lwnlrp237tYPbTYBbOdS6lzUcvHnvNvSV/1te5C6WEsSAKcH0LW56AgpZmUj3BXJah26t2Z+cq/UdZd2JsjqdhijvpIqOppo6XxK2L1ITuSvzUxFxLUcCshVNoVyCtUKSRCkNs+iRaoFvW7GEuxki74Hat+n+M6X1O/h3sYZtfPA7Vv0/zwO1b9P8APBjU+Scj+5m+38EtW9fqe40dfwm1EER+ZGBpcDaDaFYQKhpLHoWtKG1KVnGExU3CTA7r0dJCloQQMt51lL7eXnDRUrShZDSV8lJmHiWEvyUgMG0GaEYK2QMQ0+zxB4KhfaMFM5Y9AxA76MOsvNup5G1S7tvuoEAlEFzuNiSLJ5bMfYG2y4DYZOZZ3KZZhx2L2Os2x4U9MIWILsPBtXeyDLeq4VywGXhJAiDEByVYvjBuSRRZVa2qvdXeqS4GY6+4XcclKAANkvf8dXryaw2089OthPBbJXGH5wzO4sMBETxFCswciCYY3HRlrR7S5mLmlRUDH3+KkGpUuPlnUgVrZbKH3mhZFEyNA2uQNbabRYxYOXr9tmYfWuHMqaPJodiiFntxpcu80iJvS22Mge+GI9MDc3XmmpICYexCwOziu1Ykn5lPKMHaQrlNpMak1ggVS5sNnLwiTY5TvfwMiYqUBn3Sv//EADoQAAIBBAADBgMEBwkAAAAAAAECAwAEERITFCEFEDFBdLJRcdIVIHLRBiIwMmFikiMkM0JDgZGjs//aAAgBAQANPwD7l1dw2ol84xMcFhWP1pGupMufMnBr1Uleqkr1UleqkrtOO5WS1lkMgR4U3DoT+27OH9+vsZcuemq1+F/rr8D/AF1+B/rp76CJYnVgEdzgSdWPVa/C/wBdfgf66UZQSK+hPwOWNdlT8C7xgB/IOB3b3/8A5VaShDILgLtkA+GtKQGMUpkA/pSs4cq4kKfNSFqUHR1+I8QR5EVaXDw8QXIUNr541qCcQ4Mgk26A5plyttD1br4FvICsZyW64+WtICWtpsZIHjqfOp5WQBXCYwM+YNMcBROCfbXmDKAf+CtBdjbyjDkfFSMgiufT3v8AcHbFkT/VWT38eLuzfH/qrml9grmrf2mpbCB5fx9VpeAw+AlOa+0Zq54ewUnaLSSJ4kqGIwM/AeFEDOp6r/Bh4g1AIGnmyqKxDEN8zrXNyeyuejqCWJo3x1BLhTS3sOMdMgsAa59Pe/3JRhhnBBHUEHyIoDCIdW1XyGa+S18lq0mQS3cYXe5/i9fJK4ZjWe5bPDQ+SAeFc0vsFGaIz8dwpDanGASKcpxUVQpWMDCiME4xUTbXSTgC43b/ADOBX2jLX2gPYKnkMhKjPBdj1DfBaXqHjYqenyqRwiXfg6E9Bv5EVzknsq2uEkcIASQPhTyI0jyY2YKcgBVzVtKso4q6tMynICqfKufT3v8AsONF380vsFc1b+001pOCf4BxU9tcJKB5qEL19oy0L3I+YjqCCLWFI9RlyQ2c5NHJBj/wmP8AMlQSPHIo8mQ4NYj3+fBFNfRggjNfFUA7u1nS4tLmTpGRsTgtXqo/zr1Uf516qP8AOvVR/nXqo/zr1Uf50gy2LhHP+yqSSa7RvQtruMF1QnJ75bkNHKCuGAQVdyI7GSRVKlARWgSJDIixQoPIEtU0egEfVIE8wCfEmp76R4nGmGU096HQPjJXQCpWYvak4/fOWTBwCtMMA6SMoJozmZ7cnZ5nJz+vjooqK5d2CY6ApUN2jSOdcKo74CxaATI8sRU6t+4dlwa9RL9VJIyPrcyNq6nBU4bxFeol+qvUS/VQQOY+Zk2CHoDjasA45iXOP6qjAYpLcv4HOCVZ/wCU0EXhCMAJoR01x0x3qpJJOAAOuTUb6s8EqyqGHkSpODUaqXQMCyb+Gw8s4ouEWPYAsxBbAHxwCe5nCK88qxKWIzgFiOtOMxyRsHRh8QR0PdtoJQ41L76a5+O3T59+7LlGDLsh1YdPMEYPdAf0h0M0VtbwQc4JuDJbTxkSPIWZcbU1xb8taszIX1tArbcGVHi/tfBuoB6kVHa9oz2cUF5oObNwjQ50ID4XIGehFML4l4AWWRHnUwCHecLkJ5IEOMgnNRyBDbm5lEQjFycyu7SlkPD/ANOYPlcKDmpYex4J57eYwsYo7id5k3UhgMMM01nb28s3GeVns7W/nLRnWVGMhiZCMEMRmuRiEckmFlXQX3DU7SSHKCVPEk0yX8KnnVa1AjssxRmLfCujfFRhqEl8yoZ5baVCLUCPLGeWQgy5Iy3jUlqDBcC5VbNYjbIGTTcLxt8+Wd+uauGnW0s7l3tpWgeMKYxJJJO67NnBc0s1kty7QQ2fa00MYkBhzalOJHGShz0JGaa6tOMiuslzLbCG6SNJeo3eMvHvVza2DvPLMHQvFYTwkMSxG6y4ozyERXF66XSsLRgxdw5fQy41Gf3qtpUk7QuJYUuOC5spEcujHBJdsVFYRzJy9wLYT3N1dPJeaRoVQScI4TyFXt7JZiK5uSbizs5eHJzJ3YnKlHC5O2GFc/ayWPCnxbQpF2g0svMqHAOUwRkHpTz2aX7JI8IduZzK8MvGYheHkHhhRisT6XF3M2AeNmNAu7o408HQL06MM1Bx57OKK4McTTydqTzFiithyYSM7dMUzyJdyNOJLSR5LjEb28ZY4VUOSVxha//EADsRAAIBBAADAgoFDQAAAAAAAAECAwAEBRESEzEGIRUiQVFUcZGSk9EHEBRTYSMkMDI0QlVyc4GhsbL/2gAIAQIBAT8AGNiRENxexQuyhghVmIB6b4RX2HH/AMVi+HJ8qGOx0t5Osl/EVRI+EmNyPG3vQ1XgTDeS+tvhP8qucXDbzvFJBHxL5gCCD3gisXj7m6luIbaLi4G3rYGhoeej2ezA3+a7I6gOpPsBq1x17dSyRQwkug8ZSQpHtq/1YNIt0RGUOm2flUeTspJEjEhDN+qGVl36tgVcZfH28xilnCuNbHCT19QqDL46eQRx3Clz0BBU/wCazX7e39KH/gfURLHO7LGXDKvQgEa9dc6f0ZveX51lbi5N0vFZup5EPcXU/uDzGuwyv4QvGYaLx717oq1tHHaS8n5seuWBwBtv0HUVipud2iyT8po/yYHCw0e7Q2a+kaK5OSeaIEiKbib2DRpM5aZBYobpWhYSKwdemx/qs2yrnwxOgGiJ/tqsiwv8zCbQF9BAWA7gQetZeGV7tZFjZkeGIqwBIICAVyJ/un901yJ/un900Le4JAEMhP8AKazPdflfKsUKt+BVACK7JTww305klRAYSNsQPKKjjiXtHLetdW4h13Hmrs+KF6Va5SwmztzIsyKgtlQOxChiG33brtfLOM59ogLSQLIeYsZ3xAqAD3ddVk7O3vp4hY2zq5J5jcBRAPx3WTtLg5uMrDIyAw+MFJHdqgAOgFQ3t5CvDFcyovmVyBXhTJem3HxGrwpkvTbj4jV4UyXps/xGrv2Sf0H/xAA7EQACAQMCBAEIBA8AAAAAAAABAgMABAUREgYTITFRBxUiMkFUkpMQU1XRFBYjJDA0QmFyc5GUobLS/9oACAEDAQE/ADkJHZ+RaSSqrFS4KqCR301Nfhl99myfGn30MzmMfgMc9pbzwvNcXPNMciqx2bAupB7da/HHi0d3yH9wPvq34szk8KyJlbzQ+MjAiuJclFHb4m7u5vyk1qd8hGpdlldQTp3OgoZ3FdPzgAHsSrAf5FXOQtLaJJJZQEf1SASD/SsZDNk2jWyjaYuCVCj2Crjh7LwW8kzQBo4/XMciSbP4ghOlWPDGdvrVbi2sy8Ta6NvQduh7kVe8MZ6ytzPPYuIgNS4KuAPE7SaxH6iv8yX/AHP0Qvj7vF2tvNerbyQSzNq0bMrrJt7bAdCNtebsV9twfJm/4rGYvEC2IGet2HNl68iYftnxWvKFPavYYuCCUypbryzJtKhiWdzoD109Kri5U8P2kPKk1367yui9z2NZOIRYHHpzA/pk6g6jrqa8kFxYC1ktbghWurbYhJ016nVQfE1Nwfk8HJc3eOdLpDBIjQyAhtjd+3rVwjG8nBBRFJZo7kAeJJNYFGwfCd0uUIiLNKVjdhqQygBQPE1ipoktTG0iq6SyBlJ0I1YmufB9anxCufB9anxCjcW4BJmT4hWJ62Yb2NJIw/eGYkGuKIZZbOERxs5EvZRr7DUjyNgIrRbacy6jUctunpa1c469iwsCNE5czl9oGpUEVwNFYSYG5s7nlQ3UkKm3lmG0IysSV1Pqk1w9lb7C2dycxfxPEqjkIJllkY+C7SelcPZOwHCE6vdQRyMl0RGZAGG4sQAKLMx1JJqWztJW3SW8bt4soJrzbj/dIPlrXm3H+6QfLWvN2P8AdIfgFAADQfoP/9k=" alt="BISP Trainings logo">
+  <h4>This simulator was built by BISP Trainings</h4>
+  <p>BISP (Business Intelligence Solution Providers Inc.) delivers Oracle EPM, FCCS, Planning and Data Integration training and consulting. Reach out for guided architect-track mentorship.</p>
+  <div class="bisp-outro-links">
+    <a class="bisp-outro-btn primary" href="https://www.bisptrainings.com" target="_blank" rel="noopener">Visit bisptrainings.com</a>
+    <a class="bisp-outro-btn" href="tel:+917694095404">Call +91 769-409-5404</a>
+  </div>
+</div>
+
+<footer>Built as an interview-prep simulator · Oracle Planning · FCCS · Data Integration · REST API · Performance &amp; Optimization · Enterprise Architecture<br>© <span id="yearNow"></span> BISP Trainings — Business Intelligence Solution Providers Inc.</footer>
+
+<script>
+// ============================================================================
+// Oracle EPM Ecosystem — Senior Architect Interview Simulator
+// Content dataset. Each chapter = one scenario. Each turn = one speaker line.
+// s: 'q' = Interviewer, 'a' = Interviewee (the Architect)
+// flow: optional pipeline chips shown under a turn (not spoken)
+// ============================================================================
+
+const DOMAINS = {
+  architecture:  { label: "Architecture",      color: "#8B87F0" },
+  planningfccs:  { label: "Planning · FCCS",    color: "#F4B942" },
+  integration:   { label: "Data Integration",   color: "#1FD8B4" },
+  performance:   { label: "Performance",        color: "#FF6E82" },
+  restapi:       { label: "REST · Automation",  color: "#4FB6F0" },
+  neutral:       { label: "Rapid Fire",         color: "#7C8AA3" },
+};
+
+const CHAPTERS = [
+{
+  id:0, domain:"architecture", title:"Opening — Ecosystem Architecture",
+  turns:[
+    {s:'q', t:`Start with the architecture. A client has Oracle Fusion ERP, Planning, FCCS and Narrative Reporting. How would you design the complete EPM ecosystem?`},
+    {s:'a', t:`I would avoid designing Planning and FCCS as isolated applications. My logical architecture treats Fusion ERP and external sources as the entry point, flowing through an integration and orchestration layer, then data integration and REST APIs, into Planning and FCCS working together, and finally into reporting and narrative reporting. Before anything else, I define the system of record for every data domain. Actual GL comes from Fusion. Budget, forecast and workforce plans live in Planning. Consolidated actual, ownership, eliminations, adjustments and external consolidated reporting belong to FCCS. Board reporting sits in Narrative Reporting. The most important architecture decision is not the integration technology. It is data ownership. If two applications can independently modify the same financial data, reconciliation problems eventually appear.`, tl:"Design around who owns each type of data — not around which integration tool moves it.",
+      flow:["Fusion ERP / External Sources","Integration & Orchestration Layer","Data Integration / REST APIs / Files","Planning ↔ FCCS","Reporting & Narrative Reporting"]}
+  ]
+},
+{
+  id:1, domain:"planningfccs", title:"Planning & FCCS Integration",
+  turns:[
+    {s:'q', t:`Actual data already exists in Fusion. Would you load Fusion actuals independently into both Planning and FCCS?`},
+    {s:'a', t:`Not automatically. I would first ask what "Actual" means to Planning. Fusion contains ledger actuals, whereas FCCS can contain consolidation adjustments, intercompany eliminations, ownership effects, currency translation, journals, and top-side adjustments. So Fusion Actual is not the same thing as Consolidated Actual. If Planning needs operational ledger actuals for forecasting, Fusion to Planning can be appropriate. If management wants forecasts to start from officially consolidated numbers, I would route Fusion through FCCS, through consolidation, into Planning. That prevents Planning from forecasting against numbers that differ from management's officially closed position.`, tl:"Don't blindly copy ERP actuals into Planning — check whether it needs raw ledger data or officially consolidated numbers.",
+      flow:["Fusion","→ Planning","(operational)"]},
+    {s:'q', t:`Would you always load FCCS consolidated actuals into Planning?`},
+    {s:'a', t:`No. That decision depends on the business requirement. For operational forecasting, Fusion to Planning may be preferable. For management forecasting, Fusion to FCCS to Planning may be preferable. A mature architecture may actually require both, provided the datasets are clearly distinguished — for example, Actual underscore G L versus Actual underscore Consolidated. The critical design principle is to avoid silently mixing them.`, tl:"Different forecasting goals need different data sources — never mix them together silently."}
+  ]
+},
+{
+  id:2, domain:"integration", title:"Dimensional Misalignment",
+  turns:[
+    {s:'q', t:`FCCS has 12 dimensions and Planning has 16. How would you integrate them?`},
+    {s:'a', t:`I would never assume that integration requires identical dimensionality. I would create a canonical mapping model. Account maps to Account. Entity maps to Entity. Scenario transforms. Year and Period stay direct. Movement is aggregated or mapped. Intercompany is ignored or aggregated. Data Source maps directly. Consolidation selects a member. Currency maps. Planning-only dimensions like Product, Department and Channel get defaulted or derived. The architect has to decide, for every single dimension, whether information is mapped, derived, aggregated, defaulted, or intentionally discarded. That mapping should be governed as part of the integration design, rather than hidden inside miscellaneous scripts.`, tl:"Build one clear mapping table for every dimension, instead of hiding the decisions inside scripts."}
+  ]
+},
+{
+  id:3, domain:"performance", title:"FCCS → Planning Performance Regression",
+  turns:[
+    {s:'q', t:`An FCCS-to-Planning integration that previously took 12 minutes now takes 75 minutes. What do you investigate?`},
+    {s:'a', t:`I would divide the runtime into measurable stages rather than immediately blaming the network or Essbase. In extraction, I check POV size, number of entities, account selection, periods, scenario, consolidation member, and unnecessary level-zero extraction. In transformation, I check mapping volume, explicit versus wildcard mappings, multi-dimensional mappings, and unmapped members causing mapping explosion. In import, I check record count, rejected records, staging processing, and duplicate records. In export, I check Planning target dimensionality, invalid intersections, block creation, and data volume. And very often the integration gets blamed when the actual bottleneck is the business rule or aggregation that runs after the load. I capture extract time, transform time, import time, export time and rule time separately. Only after that would I optimize.`, tl:"Break the pipeline into stages and measure each one before blaming any single part.",
+      flow:["Extract","Transform","Import","Export","Post-load Rules"]}
+  ]
+},
+{
+  id:4, domain:"performance", title:"Planning Calculation Performance",
+  turns:[
+    {s:'q', t:`A Planning calculation takes 90 minutes. How do you optimize it?`},
+    {s:'a', t:`I start with calculation scope. The first question is: how many cells is the rule touching, versus how many cells actually require calculation? I review FIX statements, sparse member selection, dense calculations, block creation, dynamic calculations, unnecessary aggregation, cross-dimensional operators, repeated formulas, substitution variables, parallelism, bottom-up calculation opportunities, and data copy patterns. A common bad pattern is effectively calculating the entire cube when the user only changed one entity, one department, one version, and one period. I redesign the rule so execution follows the changed data scope. Conceptually, before, it's entire cube, calculate, aggregate. After, it's changed POV, calculate, targeted aggregate. Performance tuning should reduce computational work, rather than merely attempt to execute inefficient logic faster.`, tl:"Make the calculation touch only the data that actually changed — not the whole cube."}
+  ]
+},
+{
+  id:5, domain:"performance", title:"Dense / Sparse Design",
+  turns:[
+    {s:'q', t:`Can changing dense and sparse settings improve Planning performance?`},
+    {s:'a', t:`Absolutely, but I would not change them casually in production. The decision affects block size, block count, index size, calculation behavior, retrieval, and restructure requirements. A dimension should not be made dense merely because it has relatively few members. I analyze data correlation. If combinations commonly coexist within blocks, dense representation may be efficient. If combinations are highly selective, sparse representation is usually more appropriate. The objective is a healthy balance between block size, block count, and block density.`, tl:"Base dense vs. sparse choices on real data patterns, not just how many members a dimension has."}
+  ]
+},
+{
+  id:6, domain:"planningfccs", title:"FCCS Consolidation Performance",
+  turns:[
+    {s:'q', t:`Consolidation increased from 20 minutes to two hours after a metadata update. What could have happened?`},
+    {s:'a', t:`The timing correlation makes metadata my first investigation point. I would review entity hierarchy changes, shared members, account hierarchy, Dynamic Calc members, custom dimensions, consolidation operators, ownership changes, configurable consolidation rules, unnecessary calculations, and data volume expansion. I would compare before the metadata change against after the metadata change, and determine whether the change increased consolidation scope or computational complexity. I would also check whether the application is now consolidating far more entities or intersections than expected.`, tl:"When a slowdown lines up with a metadata change, that's the first place to investigate."}
+  ]
+},
+{
+  id:7, domain:"restapi", title:"REST API Architecture — Month-End Orchestration",
+  turns:[
+    {s:'q', t:`How would you automate the complete month-end process using REST APIs?`},
+    {s:'a', t:`I would create an orchestration framework, rather than a long sequence of blind REST calls. Conceptually: authenticate, then load actuals, then validate the load, then run FCCS rules, then consolidate, then poll job status, then validate consolidation, then transfer actuals to Planning, then run Planning rules, then refresh reporting, then notify. Every asynchronous job needs polling. Conceptually, a POST job call returns a job I D. Then a GET job status call is repeated until the status is completed, error, or timeout. A production orchestrator should also capture application, job name, job I D, start time, end time, duration, status, error details, and retry count for every single step.`, tl:"Automate month-end as one connected, validated chain of steps — not a pile of isolated API calls.",
+      flow:["Authenticate","Load Actuals","Validate","Run FCCS Rules","Consolidate","Poll Status","Transfer to Planning","Planning Rules","Refresh Reporting","Notify"]}
+  ]
+},
+{
+  id:8, domain:"restapi", title:"REST Failure Handling",
+  turns:[
+    {s:'q', t:`Suppose the load succeeds but consolidation fails. What should your automation do?`},
+    {s:'a', t:`It must stop downstream processing. A dangerous architecture is load, then consolidate, then Planning, then report, regardless of individual job status. Instead: load, then if successful, validate, then if successful, consolidate, then if successful, Planning integration. If consolidation fails: stop, log, notify, and preserve context. The automation should never distribute potentially invalid financial information merely because the technical workflow continued.`, tl:"If one step fails, stop everything downstream — never publish numbers built on a failure."}
+  ]
+},
+{
+  id:9, domain:"restapi", title:"Idempotency & Crash Recovery",
+  turns:[
+    {s:'q', t:`Your REST pipeline crashes after loading data but before recording completion. On restart, how do you prevent duplicate processing?`},
+    {s:'a', t:`I design for idempotency. Every execution should have a unique run identifier, something like E P M underscore 202609 underscore CLOSE underscore 001. I maintain control information for every step and its status: extract complete, load FCCS complete, consolidate failed, Planning load not started. Restart logic resumes from the appropriate safe checkpoint, rather than blindly repeating the entire process. Where reloads are unavoidable, the integration should use deterministic replace, or clear-and-load behavior, appropriate to the data domain.`, tl:"Give every run a unique ID and resume from the last safe checkpoint — don't restart blindly."}
+  ]
+},
+{
+  id:10, domain:"integration", title:"Data Integration Mapping Failure",
+  turns:[
+    {s:'q', t:`500 new accounts were introduced in Fusion and the EPM load failed. How would you architect against this?`},
+    {s:'a', t:`I would establish a metadata governance process. The sequence should ideally be: E R P metadata change, then detect, then validate mapping, then update E P M metadata, then validate, then data load. I would implement pre-load checks for unmapped accounts, invalid entities, missing currencies, invalid periods, and unsupported members. Instead of discovering metadata problems during the financial close, we should discover them before the production load.`, tl:"Catch metadata problems before the load runs, not during the financial close.",
+      flow:["ERP Metadata Change","Detect","Validate Mapping","Update EPM Metadata","Validate","Data Load"]}
+  ]
+},
+{
+  id:11, domain:"integration", title:"Smart Push vs. Data Integration",
+  turns:[
+    {s:'q', t:`When would you use Smart Push instead of Data Integration?`},
+    {s:'a', t:`I use Smart Push when data needs to move efficiently between appropriate cubes within the Planning architecture, and the dimensional relationship is controlled. I use Data Integration when I need capabilities such as source-system integration, mapping, transformation, staging, reconciliation, load governance, and auditability. I would not use Smart Push as a substitute for enterprise integration governance.`, tl:"Use Smart Push for simple cube-to-cube moves; use Data Integration when you need governance and audit trails."}
+  ]
+},
+{
+  id:12, domain:"performance", title:"ASO Reporting Cube",
+  turns:[
+    {s:'q', t:`Why would you introduce an ASO reporting cube?`},
+    {s:'a', t:`To separate calculation-oriented workloads from reporting-oriented workloads. Planning BSO handles write-back, calculations, and business rules. Then BSO to ASO supports large aggregations, dashboards, Smart View analysis, and reporting. This prevents heavy analytical queries from unnecessarily competing with planning calculations.`, tl:"Keep heavy reporting queries separate from planning calculations so neither one slows the other down."}
+  ]
+},
+{
+  id:13, domain:"planningfccs", title:"Reconciliation Across Fusion, FCCS & Planning",
+  turns:[
+    {s:'q', t:`How do you prove that Fusion, FCCS and Planning are synchronized?`},
+    {s:'a', t:`I implement automated reconciliation checkpoints. For example: Fusion Trial Balance versus FCCS Loaded Balance. Then: FCCS Consolidated Actual versus Planning Actual. I calculate variance as source minus target, and define tolerance rules — for example, absolute variance less than or equal to tolerance. Only after reconciliation passes should the pipeline mark the integration successful. A green technical job status does not prove financial correctness.`, tl:"A green job status doesn't prove the numbers are correct — only a passed reconciliation does."}
+  ]
+},
+{
+  id:14, domain:"planningfccs", title:"Currency Architecture",
+  turns:[
+    {s:'q', t:`Planning and FCCS calculate currency differently. What is your strategy?`},
+    {s:'a', t:`I define ownership of currency calculations. FCCS generally owns statutory consolidation currency logic. Planning owns planning-specific currency assumptions where required. I avoid unnecessary repeated translation. If Planning consumes already translated FCCS values, I make sure Planning does not unintentionally translate those values again. This is an example of why architecture needs semantic controls, not just connectivity.`, tl:"Decide clearly who owns currency translation, so a value never gets translated twice by accident."}
+  ]
+},
+{
+  id:15, domain:"restapi", title:"Security Across the Ecosystem",
+  turns:[
+    {s:'q', t:`How would you design security across the ecosystem?`},
+    {s:'a', t:`I think in layers. Identity, then application role, then artifact access, then data access, then integration service account, then A P I permissions. Human administrators and machine integrations should not share credentials. Service accounts should have minimum required permissions. Production automation should also provide sufficient logging to determine who, what, when, which application, which job, and result.`, tl:"Layer security from identity down to API permissions, and never let people and machines share credentials.",
+      flow:["Identity","Application Role","Artifact Access","Data Access","Service Account","API Permissions"]}
+  ]
+},
+{
+  id:16, domain:"integration", title:"Metadata Governance",
+  turns:[
+    {s:'q', t:`Entity exists in FCCS but not Planning. Who owns the hierarchy?`},
+    {s:'a', t:`That is a governance question before it is a technical question. I define an authoritative metadata source. The architecture should ideally be: Authoritative Enterprise Metadata, then FCCS, then Planning — or distributed to both applications according to governed viewpoints. I avoid manually maintaining the same enterprise hierarchy independently across multiple E P M applications.`, tl:"Pick one authoritative source for shared metadata instead of maintaining it separately in every app."}
+  ]
+},
+{
+  id:17, domain:"planningfccs", title:"Production Incident — $18M Variance",
+  turns:[
+    {s:'q', t:`CFO reports that Planning Actual differs from FCCS by 18 million dollars during forecast review. What do you do?`},
+    {s:'a', t:`First, I prevent incorrect conclusions from propagating. Then I reconcile systematically: FCCS by scenario, by period, by entity, by account, by currency, by consolidation member, by data source, against Planning by scenario, by period, by entity, by account, by currency, by version, by source. I progressively narrow the variance. For example: 18 million narrows to one region at 15 million, narrows to one entity at 14 million, narrows to three accounts still at 14 million, and a mapping error is identified. I prefer variance decomposition over visually comparing thousands of records.`, tl:"Narrow a huge variance step by step — region, then entity, then account — instead of comparing everything at once."}
+  ]
+},
+{
+  id:18, domain:"performance", title:"Close Performance — 5 Days to 3",
+  turns:[
+    {s:'q', t:`Management wants the close reduced from five days to three. What can an EPM architect contribute?`},
+    {s:'a', t:`I would analyze the critical path. E R P Close, then extract, then load, then validate, then translate, then consolidate, then eliminate, then adjust, then re-consolidate, then report. Then I measure each stage. Suppose data load takes 30 minutes, validation 20 minutes, consolidation 120 minutes, manual reconciliation 240 minutes, and reporting 30 minutes. The largest opportunity may not be consolidation performance at all. Automating reconciliation could save more elapsed close time than tuning a calculation by 20 percent. An architect optimizes the business critical path, not merely individual jobs.`, tl:"Find the true bottleneck in the close — it's often manual reconciliation, not consolidation speed."}
+  ]
+},
+{
+  id:19, domain:"architecture", title:"Scalability — 30 Acquisitions",
+  turns:[
+    {s:'q', t:`The client acquires 30 companies. What architecture decisions become important?`},
+    {s:'a', t:`I would reassess entity hierarchy scalability, metadata governance, account harmonization, integration throughput, ownership structures, intercompany relationships, security provisioning, mapping strategy, consolidation performance, Planning granularity, and reporting requirements. Acquisition architecture should ideally support: acquire, then map, then validate, then integrate — without redesigning the entire E P M ecosystem every time.`, tl:"Growth needs a repeatable acquire → map → validate → integrate process, not a redesign every time."}
+  ]
+},
+{
+  id:20, domain:"architecture", title:"Architecture Anti-Pattern",
+  turns:[
+    {s:'q', t:`What is the biggest mistake you see in enterprise EPM implementations?`},
+    {s:'a', t:`Treating every E P M application as an independent project. That produces a Planning team, an FCCS team, an integration team, a reporting team — each optimizing its own component. The result may technically work while the overall finance process remains fragmented. I design around source, then metadata, then data, then calculation, then consolidation, then planning, then reporting, then reconciliation, as one governed ecosystem.`, tl:"The biggest mistake is treating every EPM app as its own island instead of one connected system."}
+  ]
+},
+{
+  id:21, domain:"performance", title:"Optimization Challenge — 6 Hours to Under 2",
+  turns:[
+    {s:'q', t:`A nightly EPM pipeline takes six hours. Management wants it below two. Explain your approach.`},
+    {s:'a', t:`First I create a runtime profile. Extract 35 minutes, transform 45 minutes, FCCS load 20 minutes, consolidation 110 minutes, FCCS to Planning 50 minutes, Planning rules 70 minutes, aggregation 25 minutes, reporting 5 minutes — 360 minutes total. Then I construct the dependency graph. Some jobs may be parallelizable. Instead of A then B then C then D then E, the architecture may support A then B, then parallel C1, C2, C3, followed by D then E. I optimize the critical path using smaller extraction POVs, delta processing, efficient mappings, targeted calculations, appropriate parallel execution, reduced unnecessary aggregation, optimized cube design, and removal of duplicate processing. My target is not "make every job faster." My target is: reduce end-to-end elapsed time, while preserving financial controls.`, tl:"A developer knows how to build it; an architect knows what to build, where, and why.",
+      flow:["A","B","‖ C1 · C2 · C3","D","E"]}
+  ]
+},
+{
+  id:22, domain:"architecture", title:"Developer vs. Architect",
+  turns:[
+    {s:'q', t:`What distinguishes a Senior Oracle EPM Developer from a Senior Oracle EPM Architect?`},
+    {s:'a', t:`A strong developer knows how to configure and build. An architect must know what should be built, where it should be built, why it belongs there, how it interacts with everything else, and what happens when it fails. For example, the architect should be able to decide whether a requirement belongs in Fusion ERP, Data Integration, Planning, FCCS, Essbase calculation, REST orchestration, metadata governance, reporting, or an external integration platform. The architect must understand the consequences for performance, maintainability, auditability, scalability, security, user experience, and financial control.`}
+  ]
+},
+{
+  id:23, domain:"neutral", title:"Rapid-Fire Architect Round",
+  turns:[
+    {s:'q', t:`Technical job completed successfully. Is the integration successful?`},
+    {s:'a', t:`Not necessarily. Financial reconciliation must also pass.`},
+    {s:'q', t:`Would you automatically retry every failed consolidation?`},
+    {s:'a', t:`No. Retry only when the failure category is safely retryable.`},
+    {s:'q', t:`Can REST automation replace architecture?`},
+    {s:'a', t:`No. REST automates a process. It does not make a poorly designed process correct.`},
+    {s:'q', t:`Most important integration artifact?`},
+    {s:'a', t:`The governed source-to-target data contract and mapping model.`},
+    {s:'q', t:`Most important performance metric?`},
+    {s:'a', t:`End-to-end business elapsed time, supported by component-level metrics.`},
+    {s:'q', t:`Biggest automation risk?`},
+    {s:'a', t:`Automating incorrect data faster.`},
+    {s:'q', t:`Biggest reconciliation mistake?`},
+    {s:'a', t:`Treating technical job success as proof of financial integrity.`},
+    {s:'q', t:`Biggest EPM design principle?`},
+    {s:'a', t:`Every critical data element and calculation should have a clearly defined owner.`}
+  ]
+},
+{
+  id:24, domain:"architecture", title:"Final Case Study — The 90-Day Turnaround",
+  turns:[
+    {s:'q', t:`You inherit this environment: Fusion ERP, HCM, FCCS, Planning, Workforce, CapEx, FreeForm, and Narrative Reporting. Month-end close takes seven hours. Forecast refresh takes five hours. Twenty-five percent of integration jobs occasionally fail. Planning and FCCS actual variance occurs frequently. Business rules take sixty to ninety minutes. Metadata is maintained manually. REST scripts have no centralized logging. Users complain Smart View is slow. Management wants near-touchless processing. You have 90 days. What do you do?`},
+    {s:'a', t:`I would divide the program into four phases. Days one through fifteen: observe and baseline. I build an application inventory, a dependency map, data lineage, job runtime baselines, and a failure matrix. No major tuning without measurement.`, tl:"Days 1–15: just measure everything, fix nothing yet — decisions should follow data, not guesses."},
+    {s:'a', t:`Days sixteen through thirty-five: stabilize. I implement controlled mappings, metadata validation, an integration error framework, REST job monitoring, reconciliation checkpoints, retry policies, and dependency controls. The objective is reliability before speed.`, tl:"Days 16–35: fix reliability first — error handling, checkpoints, monitoring — before chasing speed."},
+    {s:'a', t:`Days thirty-six through sixty-five: optimize. I focus on calculation scope, block behavior, integration POV, mapping efficiency, aggregation, consolidation rules, Smart View retrieval design, and unnecessary sequential dependencies. Objective: seven hours down to under three hours, then continue optimizing the true critical path.`, tl:"Days 36–65: now speed up the real bottlenecks in calculation and consolidation logic."},
+    {s:'a', t:`Days sixty-six through ninety: automate and govern. I create the full orchestration model — pre-check, then metadata validation, then data integration, then FCCS validation, then consolidation, then financial reconciliation, then Planning synchronization, then Planning rules, then reporting refresh, then post-validation, then notification. Every stage produces telemetry. The final architecture should be able to answer five questions at any moment: what is running, what completed, what failed, why did it fail, and can Finance trust the resulting numbers. That last question is ultimately the most important responsibility of the Oracle EPM Architect.`, tl:"Days 66–90: connect every step into one governed pipeline that can always explain what happened and why.",
+      flow:["Days 1–15: Observe & Baseline","Days 16–35: Stabilize","Days 36–65: Optimize","Days 66–90: Automate & Govern"]}
+  ]
+}
+];
+
+const MATRIX = [
+  { name:"Enterprise EPM Architecture", weight:20 },
+  { name:"Planning Architecture", weight:12 },
+  { name:"FCCS / Consolidation", weight:12 },
+  { name:"Data Integration", weight:12 },
+  { name:"REST & Automation", weight:12 },
+  { name:"Essbase / Performance", weight:12 },
+  { name:"Troubleshooting", weight:8 },
+  { name:"Security / Governance", weight:5 },
+  { name:"Financial Reconciliation", weight:5 },
+  { name:"Communication / Judgment", weight:2 },
+];
+
+const INTERPRETATION = [
+  { range:"90–100", label:"Enterprise EPM Architect" },
+  { range:"80–89", label:"Senior Solution Architect" },
+  { range:"70–79", label:"Strong Technical / Functional Lead" },
+  { range:"60–69", label:"Senior Consultant — needs broader architecture exposure" },
+  { range:"< 60", label:"Significant gaps for an ecosystem-level architect role" },
+];
+
+</script>
+<script>
+(function(){
+"use strict";
+
+// ---------- State ----------
+let chapterIndex = 0;
+let cursor = 0;              // flat sentence index within current chapter
+let flat = [];               // flattened {turnIdx, sentIdx, speaker, text}
+let isPlaying = false;
+let rateMultiplier = 1.0;
+let completedChapters = new Set();
+let voices = [];
+let voiceInterviewerName = null;
+let voiceIntervieweeName = null;
+
+const els = {
+  chapterList: document.getElementById('chapterList'),
+  transcript: document.getElementById('transcript'),
+  chapterKicker: document.getElementById('chapterKicker'),
+  chapterTitle: document.getElementById('chapterTitle'),
+  progressLabel: document.getElementById('progressLabel'),
+  progressFill: document.getElementById('progressFill'),
+  btnPlay: document.getElementById('btnPlay'),
+  iconPlay: document.getElementById('iconPlay'),
+  iconPause: document.getElementById('iconPause'),
+  btnPrevChapter: document.getElementById('btnPrevChapter'),
+  btnNextChapter: document.getElementById('btnNextChapter'),
+  rateSlider: document.getElementById('rateSlider'),
+  rateLabel: document.getElementById('rateLabel'),
+  voiceInterviewer: document.getElementById('voiceInterviewer'),
+  voiceInterviewee: document.getElementById('voiceInterviewee'),
+  statusPill: document.getElementById('statusPill'),
+  statusText: document.getElementById('statusText'),
+  matrixBox: document.getElementById('matrixBox'),
+  interpBox: document.getElementById('interpBox'),
+  donutChart: document.getElementById('donutChart'),
+  donutTotal: document.getElementById('donutTotal'),
+  chartLegend: document.getElementById('chartLegend'),
+};
+
+const supportsTTS = 'speechSynthesis' in window;
+
+// ---------- Helpers ----------
+function splitSentences(text){
+  try{
+    const parts = text.split(/(?<=[.!?])\s+(?=[A-Z0-9"“])/);
+    if(parts && parts.length) return parts.map(s=>s.trim()).filter(Boolean);
+  }catch(e){ /* lookbehind unsupported — fall through */ }
+  // Fallback: naive split on ". "
+  return text.split(/(?<=[.!?]) /).filter(Boolean).length
+    ? text.split(/(?<=[.!?]) /).filter(Boolean)
+    : [text];
+}
+
+// Highlight the Oracle EPM domain terms inside an answer sentence so key
+// nouns are scannable at a glance, without breaking the TTS sentence span.
+const KEYWORDS = [
+  "Fusion ERP","Fusion","Planning","FCCS","Essbase","REST API","REST",
+  "Smart View","Narrative Reporting","Data Integration","Smart Push",
+  "ASO","BSO","metadata","consolidation","reconciliation","integration",
+  "orchestration","dimension","dimensions","hierarchy","hierarchies",
+  "POV","currency","variance","forecast","actuals","Actual","calculation",
+  "governance","security","automation","idempotency","checkpoint","checkpoints"
+];
+const KEYWORD_RE = new RegExp('\\b(' + KEYWORDS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')\\b', 'g');
+function escapeHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlightKeywords(text){
+  return escapeHtml(text).replace(KEYWORD_RE, '<span class="kw">$1</span>');
+}
+
+function buildFlat(chapter){
+  const out = [];
+  chapter.turns.forEach((turn, ti)=>{
+    const sentences = splitSentences(turn.t);
+    sentences.forEach((s, si)=>{
+      out.push({turnIdx:ti, sentIdx:si, speaker:turn.s, text:s});
+    });
+  });
+  return out;
+}
+
+function domainOf(key){ return DOMAINS[key] || DOMAINS.neutral; }
+
+// ---------- Sidebar ----------
+function renderSidebar(){
+  els.chapterList.innerHTML = '';
+  CHAPTERS.forEach((ch, i)=>{
+    const d = domainOf(ch.domain);
+    const btn = document.createElement('button');
+    btn.className = 'chapter-item' + (i===chapterIndex ? ' active' : '') + (completedChapters.has(i) ? ' done' : '');
+    btn.setAttribute('data-idx', i);
+    btn.innerHTML = `
+      <span class="chapter-num mono">${String(i).padStart(2,'0')}</span>
+      <span class="chapter-body">
+        <span class="chapter-title">${ch.title}</span>
+        <span class="chapter-tag" style="background:${d.color}1F; color:${d.color}; border:1px solid ${d.color}40;">${d.label}</span>
+      </span>
+      <svg class="chapter-check" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="${d.color}" stroke-width="1.4"/><path d="M6 10.2L8.6 12.8L14 7" stroke="${d.color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    `;
+    btn.addEventListener('click', ()=> goToChapter(i));
+    els.chapterList.appendChild(btn);
+  });
+}
+
+function updateSidebarActive(){
+  [...els.chapterList.children].forEach((el, i)=>{
+    el.classList.toggle('active', i===chapterIndex);
+    el.classList.toggle('done', completedChapters.has(i));
+  });
+}
+
+// ---------- Transcript ----------
+function renderTranscript(){
+  const ch = CHAPTERS[chapterIndex];
+  const d = domainOf(ch.domain);
+  els.chapterKicker.textContent = `Chapter ${String(chapterIndex).padStart(2,'0')} · ${d.label}`;
+  els.chapterTitle.textContent = ch.title;
+
+  els.transcript.innerHTML = '';
+  ch.turns.forEach((turn, ti)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'turn ' + turn.s;
+    wrap.setAttribute('data-turn', ti);
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = turn.s === 'q' ? 'IN' : 'AR';
+
+    const body = document.createElement('div');
+    body.className = 'turn-body';
+
+    const name = document.createElement('div');
+    name.className = 'turn-name';
+    name.innerHTML = turn.s === 'q'
+      ? `Interviewer <span style="color:var(--text-faint); font-weight:400;">— Global Delivery, USA</span> <span class="speaking-bars" style="display:none"><i></i><i></i><i></i></span>`
+      : `The Architect <span style="color:var(--text-faint); font-weight:400;">— Senior EPM Architect, India</span> <span class="speaking-bars" style="display:none"><i></i><i></i><i></i></span>`;
+
+    const sentences = splitSentences(turn.t);
+    body.appendChild(name);
+
+    if(turn.s === 'a'){
+      // Plain-English takeaway first, so anyone gets the point before the detail
+      if(turn.tl){
+        const tk = document.createElement('div');
+        tk.className = 'takeaway';
+        tk.innerHTML = `<span class="takeaway-icon">💡</span><div><div class="takeaway-label">In simple words</div><div class="takeaway-text"></div></div>`;
+        tk.querySelector('.takeaway-text').textContent = turn.tl;
+        body.appendChild(tk);
+      }
+
+      // Architect answers render as an arrow-connected step diagram
+      const flowEl = document.createElement('div');
+      flowEl.className = 'answer-flow';
+      sentences.forEach((s, si)=>{
+        const step = document.createElement('div');
+        step.className = 'answer-step';
+        step.setAttribute('data-turn', ti);
+        step.setAttribute('data-sent', si);
+
+        const rail = document.createElement('div');
+        rail.className = 'step-rail';
+        const badge = document.createElement('div');
+        badge.className = 'step-badge mono';
+        badge.textContent = si + 1;
+        rail.appendChild(badge);
+        if(si < sentences.length - 1){
+          const line = document.createElement('div');
+          line.className = 'step-line';
+          const arrow = document.createElement('div');
+          arrow.className = 'step-arrow';
+          arrow.textContent = '▾';
+          line.appendChild(arrow);
+          rail.appendChild(line);
+        }
+
+        const stextWrap = document.createElement('div');
+        stextWrap.className = 'step-text';
+        const span = document.createElement('span');
+        span.className = 'sent';
+        span.setAttribute('data-turn', ti);
+        span.setAttribute('data-sent', si);
+        span.innerHTML = highlightKeywords(s);
+        stextWrap.appendChild(span);
+
+        step.appendChild(rail);
+        step.appendChild(stextWrap);
+        flowEl.appendChild(step);
+      });
+      body.appendChild(flowEl);
+    }else{
+      // Interviewer questions stay as a simple bubble
+      const textEl = document.createElement('div');
+      textEl.className = 'turn-text';
+      sentences.forEach((s, si)=>{
+        const span = document.createElement('span');
+        span.className = 'sent';
+        span.setAttribute('data-turn', ti);
+        span.setAttribute('data-sent', si);
+        span.textContent = s + ' ';
+        textEl.appendChild(span);
+      });
+      body.appendChild(textEl);
+    }
+
+    if(turn.flow && turn.flow.length){
+      const row = document.createElement('div');
+      row.className = 'flow-chip-row';
+      turn.flow.forEach((step, idx)=>{
+        if(idx>0){
+          const arrow = document.createElement('span');
+          arrow.className = 'flow-arrow';
+          arrow.textContent = '→';
+          row.appendChild(arrow);
+        }
+        const chip = document.createElement('span');
+        chip.className = 'flow-chip';
+        chip.textContent = step;
+        row.appendChild(chip);
+      });
+      body.appendChild(row);
+    }
+
+    wrap.appendChild(avatar);
+    wrap.appendChild(body);
+    els.transcript.appendChild(wrap);
+  });
+
+  flat = buildFlat(ch);
+  cursor = 0;
+  updateProgress();
+}
+
+function updateProgress(){
+  els.progressLabel.textContent = `${completedChapters.size} / ${CHAPTERS.length}`;
+  els.progressFill.style.width = `${(completedChapters.size / CHAPTERS.length) * 100}%`;
+}
+
+function setActiveVisual(turnIdx, sentIdx, speaking){
+  // reset all turns to past/idle relative to progress
+  [...els.transcript.children].forEach((el, i)=>{
+    el.classList.remove('current');
+    if(i < turnIdx) el.classList.add('past');
+    else el.classList.remove('past');
+    const bars = el.querySelector('.speaking-bars');
+    if(bars) bars.style.display = 'none';
+  });
+  const currentTurnEl = els.transcript.querySelector(`.turn[data-turn="${turnIdx}"]`);
+  if(currentTurnEl){
+    currentTurnEl.classList.add('current');
+    currentTurnEl.classList.remove('past');
+    const bars = currentTurnEl.querySelector('.speaking-bars');
+    if(bars) bars.style.display = speaking ? 'inline-flex' : 'none';
+    currentTurnEl.scrollIntoView({block:'nearest', behavior:'smooth'});
+  }
+  // mark sentence states within this turn
+  const spans = els.transcript.querySelectorAll(`.sent[data-turn="${turnIdx}"]`);
+  spans.forEach(sp=>{
+    const si = parseInt(sp.getAttribute('data-sent'),10);
+    sp.classList.remove('reading','said');
+    if(si < sentIdx) sp.classList.add('said');
+    if(si === sentIdx) sp.classList.add(speaking ? 'reading' : 'said');
+  });
+
+  // mark answer-step diagram states (Architect turns) to match
+  const steps = els.transcript.querySelectorAll(`.answer-step[data-turn="${turnIdx}"]`);
+  steps.forEach(st=>{
+    const si = parseInt(st.getAttribute('data-sent'),10);
+    st.classList.remove('reading','said');
+    if(si < sentIdx) st.classList.add('said');
+    if(si === sentIdx) st.classList.add(speaking ? 'reading' : 'said');
+  });
+}
+
+// ---------- Voices ----------
+function populateVoices(){
+  if(!supportsTTS) return;
+  voices = speechSynthesis.getVoices();
+  if(!voices.length) return;
+
+  const fill = (select, filterFn, preferredNames)=>{
+    select.innerHTML = '';
+    voices.forEach((v, i)=>{
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      select.appendChild(opt);
+    });
+    let pick = voices.find(v => preferredNames.some(n => v.name.toLowerCase().includes(n)));
+    if(!pick) pick = voices.find(filterFn);
+    if(!pick) pick = voices[0];
+    select.value = pick.name;
+    return pick.name;
+  };
+
+  voiceInterviewerName = fill(
+    els.voiceInterviewer,
+    v => /en[-_]US/i.test(v.lang),
+    ['google us english','david','guy','mark','alex','daniel','fred']
+  );
+  voiceIntervieweeName = fill(
+    els.voiceInterviewee,
+    v => /en[-_](IN|GB)/i.test(v.lang),
+    ['google uk english female','rishi','veena','india','kalpana','samantha','zira']
+  );
+
+  els.voiceInterviewer.addEventListener('change', ()=> voiceInterviewerName = els.voiceInterviewer.value);
+  els.voiceInterviewee.addEventListener('change', ()=> voiceIntervieweeName = els.voiceInterviewee.value);
+}
+
+function pickVoiceObj(name){
+  return voices.find(v=>v.name===name) || null;
+}
+
+// ---------- Playback ----------
+function speakCurrent(){
+  if(!supportsTTS){
+    els.statusText.textContent = 'Speech not supported in this browser';
+    return;
+  }
+  if(cursor >= flat.length){
+    finishChapter();
+    return;
+  }
+  const item = flat[cursor];
+  setActiveVisual(item.turnIdx, item.sentIdx, true);
+
+  const utter = new SpeechSynthesisUtterance(item.text);
+  const isQ = item.speaker === 'q';
+  const v = pickVoiceObj(isQ ? voiceInterviewerName : voiceIntervieweeName);
+  if(v) utter.voice = v;
+  utter.pitch = isQ ? 0.92 : 1.1;
+  utter.rate = (isQ ? 0.98 : 1.02) * rateMultiplier;
+  utter.volume = 1;
+
+  let advanced = false;
+  const advance = ()=>{
+    if(advanced) return;
+    advanced = true;
+    if(!isPlaying) return; // paused/stopped mid-flight
+    setActiveVisual(item.turnIdx, item.sentIdx, false);
+    cursor++;
+    speakCurrent();
+  };
+
+  let started = false;
+  utter.onstart = ()=>{ started = true; };
+  utter.onend = advance;
+  utter.onerror = advance;
+
+  speechSynthesis.speak(utter);
+  setStatus('speaking');
+
+  // Watchdog: rarely, Chrome silently drops an utterance (no onstart, no
+  // onend, no onerror ever fires) and playback would hang forever. If
+  // nothing has happened after a few seconds, force it forward.
+  const watchdogMs = Math.max(3000, item.text.length * 90);
+  setTimeout(()=>{
+    if(advanced || !isPlaying) return;
+    if(!started && !speechSynthesis.speaking){
+      speechSynthesis.cancel();
+      advance();
+    }
+  }, watchdogMs);
+}
+
+function play(){
+  if(!supportsTTS){
+    els.statusText.textContent = 'Speech not supported — try Chrome or Edge';
+    return;
+  }
+  if(speechSynthesis.paused && speechSynthesis.speaking){
+    speechSynthesis.resume();
+    isPlaying = true;
+    setPlayIcon(true);
+    setStatus('speaking');
+    startKeepAlive();
+    return;
+  }
+  if(cursor >= flat.length) cursor = 0;
+  isPlaying = true;
+  setPlayIcon(true);
+  startKeepAlive();
+  speakCurrent();
+}
+
+// Chrome has a long-standing bug where speechSynthesis silently stops after
+// ~15s unless nudged. Pausing/resuming periodically keeps it alive.
+let keepAliveTimer = null;
+function startKeepAlive(){
+  stopKeepAlive();
+  keepAliveTimer = setInterval(()=>{
+    if(speechSynthesis.speaking && !speechSynthesis.paused){
+      speechSynthesis.pause();
+      speechSynthesis.resume();
+    }
+  }, 12000);
+}
+function stopKeepAlive(){
+  if(keepAliveTimer){ clearInterval(keepAliveTimer); keepAliveTimer = null; }
+}
+
+function pause(){
+  if(!supportsTTS) return;
+  isPlaying = false;
+  setPlayIcon(false);
+  if(speechSynthesis.speaking) speechSynthesis.pause();
+  setStatus('idle');
+  stopKeepAlive();
+}
+
+function stopAll(){
+  isPlaying = false;
+  if(supportsTTS) speechSynthesis.cancel();
+  setPlayIcon(false);
+  setStatus('idle');
+  stopKeepAlive();
+}
+
+function finishChapter(){
+  isPlaying = false;
+  setPlayIcon(false);
+  completedChapters.add(chapterIndex);
+  updateSidebarActive();
+  updateProgress();
+  setStatus('idle');
+  stopKeepAlive();
+}
+
+function setPlayIcon(playing){
+  els.iconPlay.style.display = playing ? 'none' : 'block';
+  els.iconPause.style.display = playing ? 'block' : 'none';
+  els.btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+}
+
+function setStatus(mode){
+  els.statusPill.classList.toggle('speaking', mode==='speaking');
+  els.statusText.textContent = mode==='speaking' ? 'Speaking…' : (supportsTTS ? 'Ready' : 'Speech unavailable');
+}
+
+// ---------- Navigation ----------
+function goToChapter(i){
+  if(i < 0 || i >= CHAPTERS.length) return;
+  stopAll();
+  chapterIndex = i;
+  renderTranscript();
+  updateSidebarActive();
+  els.btnPrevChapter.disabled = chapterIndex===0;
+  els.btnNextChapter.disabled = chapterIndex===CHAPTERS.length-1;
+}
+
+// ---------- Matrix ----------
+function renderMatrix(){
+  const maxW = Math.max(...MATRIX.map(m=>m.weight));
+  els.matrixBox.innerHTML = `
+    <div class="matrix-row head">
+      <div>Competency</div><div style="text-align:right">Weight</div><div>Relative Weight</div>
+    </div>
+    ${MATRIX.map(m=>`
+      <div class="matrix-row">
+        <div class="matrix-name">${m.name}</div>
+        <div class="matrix-weight">${m.weight}%</div>
+        <div class="matrix-bar-track"><div class="matrix-bar-fill" style="width:${(m.weight/maxW*100).toFixed(0)}%"></div></div>
+      </div>
+    `).join('')}
+  `;
+  els.interpBox.innerHTML = INTERPRETATION.map(x=>`
+    <div class="interp-card">
+      <b class="mono">${x.range}</b>
+      <span>${x.label}</span>
+    </div>
+  `).join('');
+}
+
+// ---------- Domain distribution donut chart ----------
+function renderDomainChart(){
+  const counts = {};
+  CHAPTERS.forEach(ch=>{ counts[ch.domain] = (counts[ch.domain]||0) + 1; });
+  const keys = Object.keys(counts);
+  const total = CHAPTERS.length;
+
+  const size = 200, stroke = 26, r = (size - stroke) / 2, c = size/2;
+  const circumference = 2 * Math.PI * r;
+  let offset = 0;
+  const segs = keys.map(k=>{
+    const d = domainOf(k);
+    const frac = counts[k] / total;
+    const len = frac * circumference;
+    const seg = `<circle class="donut-seg" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${d.color}" stroke-width="${stroke}"
+      stroke-dasharray="${len.toFixed(2)} ${(circumference-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}"
+      transform="rotate(-90 ${c} ${c})"><title>${d.label}: ${counts[k]} chapters</title></circle>`;
+    offset += len;
+    return seg;
+  }).join('');
+
+  els.donutChart.innerHTML = `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--bg-elevated-2)" stroke-width="${stroke}"/>
+      ${segs}
+      <text x="${c}" y="${c-4}" text-anchor="middle" fill="var(--text)" font-family="Space Grotesk" font-weight="700" font-size="30">${total}</text>
+      <text x="${c}" y="${c+18}" text-anchor="middle" fill="var(--text-faint)" font-family="IBM Plex Mono" font-size="10.5">CHAPTERS</text>
+    </svg>`;
+  els.donutTotal.textContent = `${total} chapters · ${keys.length} competency domains`;
+
+  els.chartLegend.innerHTML = keys.map(k=>{
+    const d = domainOf(k);
+    return `<div class="legend-item"><span class="legend-swatch" style="background:${d.color}"></span><b>${d.label}</b><span class="legend-count">${counts[k]} ch · ${Math.round(counts[k]/total*100)}%</span></div>`;
+  }).join('');
+}
+
+// ---------- Wire up controls ----------
+els.btnPlay.addEventListener('click', ()=>{
+  if(isPlaying) pause(); else play();
+});
+els.btnPrevChapter.addEventListener('click', ()=> goToChapter(chapterIndex-1));
+els.btnNextChapter.addEventListener('click', ()=> goToChapter(chapterIndex+1));
+els.rateSlider.addEventListener('input', ()=>{
+  rateMultiplier = parseFloat(els.rateSlider.value);
+  els.rateLabel.textContent = rateMultiplier.toFixed(2) + '×';
+});
+
+document.addEventListener('keydown', (e)=>{
+  if(e.target.tagName==='SELECT' || e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ e.preventDefault(); isPlaying ? pause() : play(); }
+  if(e.code==='ArrowRight'){ goToChapter(chapterIndex+1); }
+  if(e.code==='ArrowLeft'){ goToChapter(chapterIndex-1); }
+});
+
+// ---------- Init ----------
+function init(){
+  renderSidebar();
+  renderTranscript();
+  renderMatrix();
+  renderDomainChart();
+  els.btnPrevChapter.disabled = true;
+  els.btnNextChapter.disabled = CHAPTERS.length<=1;
+  setStatus('idle');
+  const yearEl = document.getElementById('yearNow');
+  if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+  if(supportsTTS){
+    populateVoices();
+    speechSynthesis.onvoiceschanged = populateVoices;
+    attemptAutoplay();
+  }else{
+    els.statusText.textContent = 'Speech not supported — try Chrome or Edge';
+    [els.voiceInterviewer, els.voiceInterviewee].forEach(s=>{ s.innerHTML = '<option>Unavailable</option>'; s.disabled = true; });
+  }
+}
+
+// ---------- Autoplay ----------
+// Browsers (Chrome, Edge, Safari, and virtually all mobile browsers) block
+// speech audio until the page has received a real user gesture. Silently
+// calling play() on a timer can leave isPlaying stuck "true" with no sound
+// and no way to recover. So: show a clear one-time prompt, and start on the
+// very first genuine tap/click/keypress anywhere on the page.
+function attemptAutoplay(){
+  let started = false;
+  showAutoplayPrompt();
+
+  const tryStart = ()=>{
+    if(started || isPlaying) return;
+    started = true;
+    hideAutoplayPrompt();
+    voices = speechSynthesis.getVoices();
+    if(voices.length && (!voiceInterviewerName || !voiceIntervieweeName)) populateVoices();
+    play();
+  };
+
+  const gestureStart = ()=>{
+    tryStart();
+    ['click','keydown','touchstart'].forEach(evt=>document.removeEventListener(evt, gestureStart));
+  };
+  ['click','keydown','touchstart'].forEach(evt=>document.addEventListener(evt, gestureStart, {once:false}));
+
+  // Some desktop browsers (mainly Chrome after the tab itself was opened
+  // via a link/typed URL) allow speech without an extra gesture. Try once,
+  // but verify real audio actually began — if not, quietly fall back to
+  // waiting for the gesture instead of leaving the UI stuck.
+  setTimeout(()=>{
+    if(started || isPlaying) return;
+    const probe = new SpeechSynthesisUtterance(' ');
+    probe.volume = 0;
+    let confirmed = false;
+    probe.onstart = ()=>{ confirmed = true; tryStart(); };
+    try{ speechSynthesis.speak(probe); }catch(e){ /* ignore */ }
+    setTimeout(()=>{
+      if(!confirmed) speechSynthesis.cancel(); // probe never started — leave it to the gesture listener
+    }, 800);
+  }, 500);
+}
+
+function showAutoplayPrompt(){
+  if(document.getElementById('autoplayPrompt')) return;
+  const el = document.createElement('div');
+  el.id = 'autoplayPrompt';
+  el.className = 'autoplay-prompt';
+  el.innerHTML = `<span>🔊</span> Tap anywhere to start the interview audio`;
+  document.body.appendChild(el);
+}
+function hideAutoplayPrompt(){
+  const el = document.getElementById('autoplayPrompt');
+  if(el) el.remove();
+}
+
+init();
+})();
+
+</script>
+</body>
+</html>
