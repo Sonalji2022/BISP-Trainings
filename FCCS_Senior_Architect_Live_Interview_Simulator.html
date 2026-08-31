@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCCS Enterprise Architect — Live Interview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1116;
+  --panel:#161b22;
+  --panel-2:#1c222b;
+  --panel-3:#20272f;
+  --line:#2a323d;
+  --line-soft:#232a33;
+  --ink:#e7e9ec;
+  --ink-dim:#a7afba;
+  --ink-faint:#6d7684;
+  --gold:#c6a15b;
+  --gold-dim:#8f7847;
+  --teal:#4a95a3;
+  --teal-dim:#2e5a63;
+  --good:#4f9d74;
+  --warn:#d3a14a;
+  --bad:#c25b52;
+  --serif:'Source Serif 4', Georgia, serif;
+  --sans:'IBM Plex Sans', system-ui, sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 700px at 15% -10%, rgba(198,161,91,0.06), transparent 60%),
+    radial-gradient(900px 600px at 100% 10%, rgba(74,149,163,0.06), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(198,161,91,0.35);}
+.app{max-width:1400px;margin:0 auto;padding:22px 22px 60px;}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 4px 18px;border-bottom:1px solid var(--line-soft);margin-bottom:20px;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand img{height:30px;filter:saturate(0.9) brightness(1.05);}
+.brand-txt{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-faint);line-height:1.4;}
+.brand-txt b{color:var(--ink-dim);font-weight:600;}
+.session-meta{display:flex;align-items:center;gap:18px;font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
+.session-meta .dot{width:7px;height:7px;border-radius:50%;background:var(--bad);display:inline-block;margin-right:6px;animation:pulse 1.8s infinite ease-in-out;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+/* ---------- Hero / intro ---------- */
+.hero{
+  display:grid;grid-template-columns:1.3fr 1fr;gap:36px;align-items:center;
+  padding:40px 6px 52px;
+}
+.hero h1{
+  font-family:var(--serif);font-weight:600;font-size:44px;line-height:1.12;
+  margin:0 0 18px;color:#f2eee2;
+}
+.hero h1 em{font-style:normal;color:var(--gold);}
+.hero p{color:var(--ink-dim);font-size:16px;line-height:1.65;max-width:56ch;margin:0 0 14px;}
+.hero .fine{color:var(--ink-faint);font-size:13px;margin-top:22px;}
+.hero-card{
+  background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  border:1px solid var(--line);border-radius:4px;padding:26px 26px 22px;
+}
+.hero-card .role{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.06em;margin-bottom:6px;}
+.hero-card h3{font-family:var(--serif);font-size:22px;margin:0 0 4px;color:var(--ink);}
+.hero-card .sub{color:var(--ink-faint);font-size:13px;margin-bottom:18px;}
+.hero-card ul{margin:0;padding:0;list-style:none;}
+.hero-card li{
+  display:flex;justify-content:space-between;font-size:13px;color:var(--ink-dim);
+  padding:9px 0;border-top:1px solid var(--line-soft);
+}
+.hero-card li span:last-child{font-family:var(--mono);color:var(--ink-faint);}
+.start-btn{
+  margin-top:24px;width:100%;padding:14px 18px;border:1px solid var(--gold-dim);
+  background:linear-gradient(180deg, rgba(198,161,91,0.16), rgba(198,161,91,0.05));
+  color:#f3e6c8;font-family:var(--sans);font-weight:600;font-size:14.5px;
+  border-radius:3px;cursor:pointer;letter-spacing:.01em;transition:.15s;
+}
+.start-btn:hover{background:linear-gradient(180deg, rgba(198,161,91,0.26), rgba(198,161,91,0.08));border-color:var(--gold);}
+
+/* ---------- Main interview layout ---------- */
+.stage{display:none;}
+.stage.active{display:block;}
+
+.roundbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:4px;
+  padding:14px 20px;margin-bottom:18px;flex-wrap:wrap;gap:10px;
+}
+.roundbar .r-left{display:flex;align-items:center;gap:14px;}
+.roundbar .r-tag{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.05em;border:1px solid var(--gold-dim);padding:3px 9px;border-radius:2px;}
+.roundbar .r-title{font-family:var(--serif);font-size:19px;color:var(--ink);}
+.roundbar .r-level{font-family:var(--mono);font-size:11px;color:var(--ink-faint);}
+.timer{font-family:var(--mono);font-size:18px;color:var(--ink-dim);border:1px solid var(--line);padding:6px 14px;border-radius:3px;background:var(--panel-3);}
+.timer.low{color:var(--bad);border-color:var(--bad);}
+
+.interview-grid{
+  display:grid;grid-template-columns:1fr 1.15fr;gap:18px;align-items:start;
+}
+@media (max-width:980px){.interview-grid{grid-template-columns:1fr;}}
+
+/* -- Interviewer panel -- */
+.interviewer-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:20px;min-height:520px;display:flex;flex-direction:column;
+}
+.interviewer-id{display:flex;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line-soft);margin-bottom:16px;}
+.avatar{
+  width:46px;height:46px;border-radius:50%;flex:none;
+  background:linear-gradient(145deg,#2a323d,#161b22);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);color:var(--gold);font-size:18px;
+}
+.interviewer-id .who b{display:block;font-family:var(--sans);font-weight:600;font-size:14.5px;color:var(--ink);}
+.interviewer-id .who span{font-family:var(--mono);font-size:11px;color:var(--ink-faint);}
+
+.transcript{
+  flex:1;overflow-y:auto;max-height:430px;padding-right:4px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.transcript::-webkit-scrollbar{width:6px;}
+.transcript::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+
+.msg{max-width:94%;font-size:14px;line-height:1.55;}
+.msg.interviewer{align-self:flex-start;}
+.msg.candidate{align-self:flex-end;text-align:right;}
+.msg .bubble{
+  display:inline-block;padding:11px 14px;border-radius:3px;text-align:left;
+}
+.msg.interviewer .bubble{background:var(--panel-2);border:1px solid var(--line-soft);border-left:2px solid var(--gold-dim);color:var(--ink);}
+.msg.candidate .bubble{background:rgba(74,149,163,0.10);border:1px solid var(--teal-dim);border-right:2px solid var(--teal);color:var(--ink);}
+.msg .tag{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:4px;text-transform:uppercase;}
+.msg.event .bubble{background:rgba(211,161,74,0.08);border:1px dashed var(--warn);color:#e9d3a3;font-family:var(--mono);font-size:12px;}
+
+.interact{border-top:1px solid var(--line-soft);padding-top:14px;margin-top:14px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.chip{
+  background:var(--panel-3);border:1px solid var(--line);color:var(--ink-dim);
+  font-size:13px;padding:9px 13px;border-radius:3px;cursor:pointer;line-height:1.4;
+  transition:.12s;text-align:left;
+}
+.chip:hover{border-color:var(--teal);color:var(--ink);background:var(--panel-2);}
+.chip.disabled{opacity:.35;pointer-events:none;}
+.chip small{display:block;color:var(--ink-faint);font-family:var(--mono);font-size:10px;margin-top:3px;}
+
+.freeform{display:flex;gap:8px;}
+.freeform textarea{
+  flex:1;resize:none;background:var(--panel-3);border:1px solid var(--line);
+  color:var(--ink);font-family:var(--sans);font-size:13.5px;padding:10px 12px;
+  border-radius:3px;min-height:44px;
+}
+.freeform textarea:focus{outline:none;border-color:var(--teal);}
+.freeform button{
+  background:var(--teal-dim);border:1px solid var(--teal);color:#dff1f4;
+  padding:0 18px;border-radius:3px;cursor:pointer;font-weight:600;font-size:13px;
+}
+.freeform button:hover{background:var(--teal);}
+.hint{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px;}
+
+/* -- Laptop panel -- */
+.laptop-shell{
+  background:linear-gradient(180deg,#1a1f27,#12161c);
+  border:1px solid var(--line);border-radius:6px;padding:10px;
+}
+.laptop-topline{display:flex;align-items:center;gap:6px;padding:4px 6px 10px;}
+.laptop-topline .dot{width:8px;height:8px;border-radius:50%;background:#3a4552;}
+.laptop-topline .label{margin-left:8px;font-family:var(--mono);font-size:11px;color:var(--ink-faint);}
+.laptop-screen{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:4px;
+  min-height:480px;display:flex;flex-direction:column;
+}
+.console-header{
+  padding:12px 16px;border-bottom:1px solid var(--line-soft);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.console-header .ch-title{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.05em;}
+.console-header .ch-env{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+.console-body{display:grid;grid-template-columns:150px 1fr;flex:1;min-height:0;}
+.console-nav{border-right:1px solid var(--line-soft);padding:10px 0;overflow-y:auto;}
+.nav-item{
+  padding:9px 16px;font-size:12.5px;color:var(--ink-faint);cursor:pointer;
+  border-left:2px solid transparent;font-family:var(--sans);
+}
+.nav-item:hover{color:var(--ink-dim);background:rgba(255,255,255,0.02);}
+.nav-item.active{color:var(--ink);border-left-color:var(--teal);background:rgba(74,149,163,0.07);}
+.nav-item.flagged::after{content:'●';color:var(--warn);margin-left:6px;font-size:9px;}
+.nav-item.cleared::after{content:'✓';color:var(--good);margin-left:6px;font-size:11px;}
+
+.console-content{padding:18px 20px;overflow-y:auto;max-height:430px;}
+.console-content h4{font-family:var(--sans);font-size:14px;color:var(--ink);margin:0 0 4px;}
+.console-content .desc{color:var(--ink-faint);font-size:12.5px;margin-bottom:14px;line-height:1.5;}
+.datatable{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px;}
+.datatable th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);
+  text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--line);
+}
+.datatable td{padding:7px 8px;border-bottom:1px solid var(--line-soft);color:var(--ink-dim);}
+.datatable tr.hi td{color:var(--warn);}
+.datatable tr.bad td{color:var(--bad);}
+.datatable tr.good td{color:var(--good);}
+.kpi-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.kpi{background:var(--panel-3);border:1px solid var(--line-soft);border-radius:3px;padding:10px 14px;min-width:110px;}
+.kpi .v{font-family:var(--mono);font-size:18px;color:var(--ink);}
+.kpi .l{font-size:10.5px;color:var(--ink-faint);margin-top:2px;}
+.kpi.warn .v{color:var(--warn);}
+.kpi.bad .v{color:var(--bad);}
+.note{
+  background:rgba(74,149,163,0.06);border:1px solid var(--teal-dim);border-radius:3px;
+  padding:10px 12px;font-size:12.5px;color:var(--ink-dim);margin-top:6px;
+}
+.evidence-btn{
+  margin-top:10px;background:var(--panel-2);border:1px solid var(--gold-dim);color:var(--gold);
+  font-size:12px;padding:8px 13px;border-radius:3px;cursor:pointer;font-family:var(--sans);font-weight:600;
+}
+.evidence-btn:hover{background:rgba(198,161,91,0.1);}
+.evidence-btn.done{border-color:var(--good);color:var(--good);pointer-events:none;}
+
+/* -- Scoreboard strip -- */
+.scoreboard{
+  display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;padding:14px 16px;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:4px;
+}
+.sb-item{flex:1;min-width:88px;}
+.sb-item .l{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;}
+.sb-bar{height:4px;background:var(--panel-3);border-radius:2px;overflow:hidden;}
+.sb-fill{height:100%;background:linear-gradient(90deg,var(--teal-dim),var(--gold));transition:width .4s ease;}
+
+/* -- Decision panel modal -- */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(6,8,11,0.72);
+  z-index:50;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;
+}
+.modal-overlay.active{display:flex;}
+.modal{
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  max-width:640px;width:100%;padding:26px 28px 24px;margin-top:20px;
+}
+.modal h3{font-family:var(--serif);font-size:22px;margin:0 0 4px;color:var(--gold);}
+.modal .sub{color:var(--ink-faint);font-size:12.5px;margin-bottom:20px;font-family:var(--mono);}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:12.5px;color:var(--ink-dim);font-weight:600;margin-bottom:8px;}
+.opt-list{display:flex;flex-direction:column;gap:7px;}
+.opt{
+  border:1px solid var(--line);background:var(--panel-3);border-radius:3px;
+  padding:10px 12px;font-size:13px;color:var(--ink-dim);cursor:pointer;
+}
+.opt:hover{border-color:var(--teal);}
+.opt.selected{border-color:var(--gold);background:rgba(198,161,91,0.08);color:var(--ink);}
+.modal-submit{
+  width:100%;margin-top:6px;padding:13px;background:var(--gold-dim);border:1px solid var(--gold);
+  color:#1a1108;font-weight:700;font-size:14px;border-radius:3px;cursor:pointer;
+}
+.modal-submit:disabled{opacity:.35;cursor:not-allowed;}
+
+/* -- Verdict / final report -- */
+.verdict-card{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:22px 24px;margin-top:18px;
+}
+.verdict-card h4{font-family:var(--serif);color:var(--gold);font-size:18px;margin:0 0 12px;}
+.verdict-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.verdict-grid .col b{display:block;font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono);margin-bottom:6px;}
+.verdict-grid .col ul{margin:0;padding-left:18px;color:var(--ink-dim);font-size:13px;line-height:1.7;}
+.level-pill{display:inline-block;margin-top:14px;padding:6px 14px;border-radius:20px;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);font-size:12px;}
+.next-btn{
+  margin-top:20px;padding:12px 22px;background:transparent;border:1px solid var(--teal);
+  color:var(--teal);font-weight:600;border-radius:3px;cursor:pointer;font-size:13.5px;
+}
+.next-btn:hover{background:rgba(74,149,163,0.1);}
+
+.final-wrap{padding:20px 4px 60px;}
+.final-wrap h1{font-family:var(--serif);font-size:38px;color:#f2eee2;margin:0 0 6px;}
+.final-wrap .score-hero{display:flex;align-items:baseline;gap:16px;margin:18px 0 26px;}
+.final-wrap .score-hero .big{font-family:var(--serif);font-size:64px;color:var(--gold);}
+.final-wrap .score-hero .of{font-family:var(--mono);color:var(--ink-faint);font-size:16px;}
+.final-wrap .assessment{font-family:var(--mono);font-size:14px;color:var(--teal);letter-spacing:.03em;}
+.final-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;margin-top:10px;}
+@media (max-width:900px){.final-grid{grid-template-columns:1fr;}}
+.cat-list{display:flex;flex-direction:column;gap:12px;}
+.cat-row{display:grid;grid-template-columns:150px 1fr 40px;align-items:center;gap:12px;}
+.cat-row .name{font-size:12.5px;color:var(--ink-dim);}
+.cat-row .bar{height:6px;background:var(--panel-3);border-radius:3px;overflow:hidden;border:1px solid var(--line-soft);}
+.cat-row .fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));}
+.cat-row .num{font-family:var(--mono);font-size:12px;color:var(--ink-faint);text-align:right;}
+.report-col{background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:20px 22px;}
+.report-col h4{font-family:var(--serif);color:var(--ink);font-size:16px;margin:0 0 10px;}
+.report-col ul{margin:0 0 18px;padding-left:18px;color:var(--ink-dim);font-size:13px;line-height:1.7;}
+.restart-btn{
+  margin-top:8px;padding:13px 20px;background:linear-gradient(180deg, rgba(198,161,91,0.16), rgba(198,161,91,0.05));
+  border:1px solid var(--gold-dim);color:#f3e6c8;font-weight:600;border-radius:3px;cursor:pointer;font-size:13.5px;
+}
+
+.footer-credit{text-align:center;color:var(--ink-faint);font-family:var(--mono);font-size:11px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line-soft);}
+.footer-credit img{height:16px;vertical-align:middle;margin-right:6px;opacity:.7;}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .console-body{grid-template-columns:110px 1fr;}
+  .verdict-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="data:image/jpeg;base64,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" alt="BISP">
+      <div class="brand-txt"><b>FCCS ARCHITECT INTERVIEW SIMULATOR</b><br>Oracle Financial Consolidation &amp; Close — Enterprise Track</div>
+    </div>
+    <div class="session-meta"><span class="dot"></span>LIVE SESSION</div>
+  </div>
+
+  <!-- ================= INTRO / HOME STAGE ================= -->
+  <div class="stage active" id="stage-home">
+    <div class="hero">
+      <div>
+        <h1>You're not here to define terms.<br>You're here to <em>prove</em> the solution.</h1>
+        <p>A 25-year Oracle FCCS enterprise architect is on the other side of the table. The consolidation runs successfully. That's not the same as being right. Every claim you make, you'll be asked to show — on the laptop, with evidence, under time pressure.</p>
+        <p class="fine">Six rounds. No multiple choice. One transcript that follows you to the final assessment.</p>
+      </div>
+      <div class="hero-card">
+        <div class="role">INTERVIEWER PROFILE</div>
+        <h3>Enterprise FCCS Solution Architect</h3>
+        <div class="sub">25+ years — consolidation, close architecture, EPM programs</div>
+        <ul>
+          <li><span>Rounds</span><span>6</span></li>
+          <li><span>Format</span><span>Scenario · Evidence · Defense</span></li>
+          <li><span>Scope</span><span>FCCS only</span></li>
+          <li><span>Tolerance for assumptions</span><span>None</span></li>
+        </ul>
+        <button class="start-btn" onclick="startInterview()">Enter the interview room →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ROUND STAGE ================= -->
+  <div class="stage" id="stage-round">
+    <div class="roundbar">
+      <div class="r-left">
+        <span class="r-tag" id="r-tag">ROUND 1</span>
+        <span class="r-title" id="r-title">Architecture Thinking</span>
+        <span class="r-level" id="r-level">LEVEL — SOLUTION ARCHITECT</span>
+      </div>
+      <div class="timer" id="r-timer">15:00</div>
+    </div>
+
+    <div class="interview-grid">
+      <!-- Interviewer -->
+      <div class="interviewer-panel">
+        <div class="interviewer-id">
+          <div class="avatar">FA</div>
+          <div class="who">
+            <b>Senior FCCS Architect</b>
+            <span>Enterprise Solution Architect · 25+ yrs</span>
+          </div>
+        </div>
+        <div class="transcript" id="transcript"></div>
+        <div class="interact">
+          <div class="chips" id="chips"></div>
+          <div class="freeform" id="freeformWrap">
+            <textarea id="freeInput" placeholder="Respond to the interviewer — be specific, cite what you found..."></textarea>
+            <button onclick="submitFree()">Send</button>
+          </div>
+          <div class="hint" id="hint">Open the laptop and gather evidence before you commit to a conclusion.</div>
+        </div>
+      </div>
+
+      <!-- Laptop -->
+      <div>
+        <div class="laptop-shell">
+          <div class="laptop-topline"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">CANDIDATE LAPTOP — FCCS ENTERPRISE CONSOLE</span></div>
+          <div class="laptop-screen">
+            <div class="console-header">
+              <span class="ch-title" id="ch-title">HOME</span>
+              <span class="ch-env">ENV: BISP-PROD-CONS · FY26-P06</span>
+            </div>
+            <div class="console-body">
+              <div class="console-nav" id="console-nav"></div>
+              <div class="console-content" id="console-content"></div>
+            </div>
+          </div>
+        </div>
+        <div class="scoreboard" id="scoreboard"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FINAL REPORT STAGE ================= -->
+  <div class="stage" id="stage-final">
+    <div class="final-wrap" id="final-wrap"></div>
+  </div>
+
+  <div class="footer-credit">
+    <img src="data:image/jpeg;base64,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" alt="BISP">Business Intelligence Solution Providers Inc. · www.bisptrainings.com · +91 769-409-5404
+  </div>
+</div>
+
+<!-- ================= DECISION PANEL MODAL ================= -->
+<div class="modal-overlay" id="decisionModal">
+  <div class="modal">
+    <h3>Architect Decision</h3>
+    <div class="sub" id="decisionSub">COMMIT YOUR POSITION — YOU WILL BE ASKED TO DEFEND EVERY FIELD</div>
+    <div id="decisionFields"></div>
+    <button class="modal-submit" id="decisionSubmitBtn" onclick="submitDecision()" disabled>Submit decision to interviewer</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   FCCS ENTERPRISE ARCHITECT — LIVE INTERVIEW SIMULATOR
+   Engine + scenario data. Single-file, no backend.
+   ============================================================ */
+
+const CATS = [
+  {key:'req',  name:'Requirement Understanding'},
+  {key:'diag', name:'Diagnostic Logic'},
+  {key:'fccs', name:'FCCS Knowledge'},
+  {key:'evid', name:'Evidence-Based Thinking'},
+  {key:'fin',  name:'Financial Understanding'},
+  {key:'troubleshoot', name:'Troubleshooting'},
+  {key:'arch', name:'Architecture'},
+  {key:'perf', name:'Performance Thinking'},
+  {key:'decision', name:'Decision Quality'},
+  {key:'comm', name:'Communication'}
+];
+
+const ADVICE = {
+  req: "Slow down before reacting — restate what the interviewer is actually testing before you touch the laptop.",
+  diag: "Build a habit of ruling things out with evidence, in order, rather than jumping to the first plausible cause.",
+  fccs: "Go deeper on how ownership, method, and elimination configuration interact — that's where senior questions live.",
+  evid: "Never commit to a conclusion before you've opened the screen that proves it.",
+  fin: "Tie every technical finding back to a P&L, Balance Sheet, or EBITDA impact — that's what a CFO actually hears.",
+  troubleshoot: "Practice separating a symptom (the number that's wrong) from the mechanism (why it's wrong).",
+  arch: "Push past the immediate fix — ask what control would have prevented this from happening at all.",
+  perf: "When runtime changes, compare stage-by-stage, not just the final number.",
+  decision: "State the trade-off explicitly, especially timing decisions during a live close.",
+  comm: "Be specific and quantified — 'probably' and 'I think' cost you credibility in front of a CFO."
+};
+
+const NAV_ITEMS = [
+  {id:'home', label:'Home'},
+  {id:'dataload', label:'Data Load'},
+  {id:'validation', label:'Data Validation'},
+  {id:'entity', label:'Entity Structure'},
+  {id:'currency', label:'Currency Translation'},
+  {id:'intercompany', label:'Intercompany'},
+  {id:'journals', label:'Journals'},
+  {id:'consolidation', label:'Consolidation'},
+  {id:'financials', label:'Financial Statements'},
+  {id:'exceptions', label:'Exceptions'},
+  {id:'performance', label:'Performance'},
+  {id:'diagnostics', label:'Diagnostics'},
+  {id:'architecture', label:'Architecture View'}
+];
+
+const FIELD_LABELS = {
+  rootCause:'Root Cause', immediateAction:'Immediate Action',
+  correctiveAction:'Corrective Action', longTerm:'Long-Term Architecture',
+  businessRisk:'Business Risk', recoveryPlan:'Recovery Plan'
+};
+const FIELD_CATS = {
+  rootCause:['diag','fccs','evid'], immediateAction:['decision','troubleshoot'],
+  correctiveAction:['decision','arch'], longTerm:['arch','perf'],
+  businessRisk:['fin','comm'], recoveryPlan:['decision','troubleshoot']
+};
+
+/* ============================================================
+   SCENARIO DATA
+   ============================================================ */
+const ROUNDS = [
+
+/* ---------------- ROUND 1 ---------------- */
+{
+  tag:'ROUND 1', title:"The CFO Says It's Wrong", level:'LEVEL 3 — SOLUTION ARCHITECT', timer:900,
+  requiredEvidence:2,
+  opening:[
+    "Let's start. The CFO says the consolidated numbers are wrong.",
+    "The consolidation itself is completing successfully — green tick, zero errors.",
+    "You have fifteen minutes. Show me where you'd start. Not what consolidation means — where you'd actually start."
+  ],
+  home:{title:'FY26-P06 CLOSE — OVERVIEW', desc:'Current period snapshot.', kpis:[
+    {l:'Consolidation Status', v:'SUCCESS', c:''}, {l:'Runtime', v:'14m 02s', c:''},
+    {l:'Errors', v:'0', c:''}, {l:'CFO Escalation', v:'OPEN', c:'bad'}
+  ], note:'A clean run status is on record. The CFO\'s complaint is not reflected anywhere in this dashboard yet.'},
+  tabs:{
+    consolidation:{title:'CONSOLIDATION — JOB LOG', desc:'Latest consolidation execution for FY26-P06.',
+      table:{head:['Stage','Status','Duration'], rows:[
+        ['Data Validation','PASSED','00:41'],['Currency Translation','COMPLETE','01:12'],
+        ['Elimination','COMPLETE','02:03'],['Consolidation','SUCCESS','09:58'],['Reporting Refresh','COMPLETE','00:08']
+      ]}, note:'Every stage reports success. This tells you the process executed — it does not tell you the configuration behind it was correct.'},
+    entity:{title:'ENTITY STRUCTURE', desc:'Entity hierarchy, ownership %, and consolidation method.', isKey:true,
+      table:{head:['Entity','Ownership','Method','Last Changed'], rows:[
+        ['UK Trading Ltd','100%','Full','—'],
+        ['Germany Manufacturing GmbH','100%','Full','—'],
+        ['APAC Holdings Pte Ltd','55%','Full','14-Aug-26 (JV restructure)']
+      ], flagRow:2},
+      note:'APAC Holdings dropped from 100% to 55% ownership last month after a JV restructuring. Its consolidation method is still set to Full.',
+      reaction:"Interesting. You found something. Keep going before you say anything about it — is that actually connected to what the CFO is seeing?"},
+    financials:{title:'FINANCIAL STATEMENTS — CONSOLIDATED P&L', desc:'Movement vs prior period.', isKey:true,
+      kpis:[{l:'Share of Subsidiary Income', v:'+$3.1M', c:'warn'}, {l:'vs Expected Movement', v:'Unexplained', c:'bad'}],
+      note:'The unexplained movement sits almost entirely in "Share of Subsidiary Income" — the line most sensitive to consolidation method.',
+      reaction:"There's your symptom. Now connect it to what you found in Entity Structure."},
+    architecture:{title:'ARCHITECTURE VIEW', desc:'Data flow for this environment.',
+      note:'Source → Load → Validate → Translate → Consolidate → Eliminate → Report. There is no automated control linking an ownership-percentage change to a consolidation-method review.'},
+    validation:{title:'DATA VALIDATION', desc:'Rule-based checks executed pre-consolidation.',
+      kpis:[{l:'Rules Executed', v:'118'}, {l:'Failures', v:'0'}],
+      note:'Validation rules check completeness and mapping — not whether the consolidation method still matches current ownership.'}
+  },
+  findings:[
+    {label:"Technical execution succeeded, but that doesn't validate financial correctness — ownership on APAC Holdings dropped to 55% while the consolidation method is still set to Full. I want to quantify that before concluding anything else.",
+     quality:'strong', cats:['diag','fccs','evid'],
+     reaction:"Good. That's the right instinct — a clean job log tells you the process ran, not that it ran on correct configuration."},
+    {label:"The consolidation job shows zero errors, so the issue is most likely how Finance is calculating their own numbers outside the system.",
+     quality:'wrong', cats:['evid','req'],
+     reaction:"You haven't opened a single screen and you're already blaming Finance. That's the fastest way to lose the CFO's trust. Look at the system first."},
+    {label:"It's likely a currency translation issue — that's the most common cause of consolidated variances.",
+     quality:'weak', cats:['evid'],
+     reaction:"Why FX specifically? You haven't opened Currency Translation. That's a guess, not a diagnosis."}
+  ],
+  evidencePushback:"You haven't looked at enough of the environment to say that yet. Go check before you commit to a position.",
+  decision:{fields:[
+    {key:'rootCause', options:[
+      {label:"APAC Holdings' ownership dropped to 55% after a JV restructuring, but the consolidation method was never changed from Full to Proportionate/Equity — the entity is being fully consolidated when it shouldn't be.", quality:'strong'},
+      {label:"Consolidation is technically fine; the CFO's expectation is simply out of date.", quality:'weak'},
+      {label:"A rounding difference in the currency rate table.", quality:'wrong'}
+    ]},
+    {key:'immediateAction', options:[
+      {label:"Flag the entity for method correction and quantify the P&L / NCI impact before changing anything.", quality:'strong'},
+      {label:"Rerun the full consolidation immediately to see if it resolves.", quality:'weak'},
+      {label:"Tell the CFO the system is correct and the variance is expected.", quality:'wrong'}
+    ]},
+    {key:'longTerm', options:[
+      {label:"Add a control that flags any ownership % change against the entity's consolidation method, tied to the entity attribute change workflow.", quality:'strong'},
+      {label:"Ask Finance to manually double-check ownership every close.", quality:'weak'},
+      {label:"No change needed — this was a one-off.", quality:'wrong'}
+    ]},
+    {key:'businessRisk', options:[
+      {label:"Overstated consolidated income and understated NCI until corrected — audit and external-filing exposure if not caught in time.", quality:'strong'},
+      {label:"Minimal — it will average out over time.", quality:'weak'},
+      {label:"None, since the job completed successfully.", quality:'wrong'}
+    ]}
+  ]},
+  consequences:{
+    strong:"You quantify the impact and bring the CFO a number, not a guess. The method correction goes through change control before period-end. Clean.",
+    mixed:"You get partway there, but the rerun without root-cause correction just reproduces the same wrong number, thirty seconds slower.",
+    poor:"The CFO signs off on financials that are still wrong. This surfaces again at year-end audit — with your name on the close sheet."
+  },
+  followups:[
+    {q:"So you're saying the job log lied to you?",
+     options:[
+       {label:"No — the job log was accurate about execution. It just doesn't test configuration correctness. Those are different things.", quality:'strong', reaction:"Correct. Don't confuse the two again in this interview.", cats:['comm','fccs']},
+       {label:"Kind of, yes — it should have flagged this.", quality:'weak', reaction:"It's not lying if it was never designed to check that. Precision matters here.", cats:['comm']}
+     ]},
+    {q:"Ownership dropped from 100% to 55%. Why does that specific number matter architecturally?",
+     options:[
+       {label:"Because it crosses a control threshold — a JV restructuring landing at 55% often signals shared control, which should trigger proportionate or equity method, not full consolidation.", quality:'strong', reaction:"That's the answer I was looking for.", cats:['fccs','arch']},
+       {label:"Because it's now technically a minority stake.", quality:'weak', reaction:"55% isn't a minority stake — it's still majority. Think about control, not just the percentage.", cats:['fccs']}
+     ]},
+    {q:"Would you make this correction during the live close, right now, with the CFO waiting?",
+     options:[
+       {label:"I'd quantify the impact and get sign-off before changing the method mid-close — an unagreed method change mid-close creates its own audit trail problem.", quality:'strong', reaction:"That's a senior answer. Speed isn't the only thing that matters here.", cats:['decision']},
+       {label:"Yes, fix it immediately — the CFO wants it resolved today.", quality:'weak', reaction:"The CFO wants it resolved correctly. Those aren't always the same instruction.", cats:['decision']}
+     ]}
+  ]
+},
+
+/* ---------------- ROUND 2 ---------------- */
+{
+  tag:'ROUND 2', title:'21 Minutes to 61', level:'LEVEL 4 — SENIOR SOLUTION ARCHITECT', timer:720,
+  requiredEvidence:2,
+  opening:[
+    "New scenario. Yesterday the close took 21 minutes.",
+    "Today it took 61. Nothing obviously failed.",
+    "Find out why — and don't just tell me. Prove it."
+  ],
+  home:{title:'RUNTIME ALERT', desc:'Automated monitoring flagged a runtime deviation.', kpis:[
+    {l:'Yesterday', v:'21m 04s'}, {l:'Today', v:'61m 47s', c:'bad'}, {l:'Deviation', v:'+194%', c:'bad'}
+  ], note:'No job failures. No infrastructure alerts. The close still completed.'},
+  tabs:{
+    performance:{title:'PERFORMANCE — RUNTIME DASHBOARD', desc:'Stage-by-stage duration comparison.', isKey:true,
+      table:{head:['Stage','Yesterday','Today'], rows:[
+        ['Data Load','3m 10s','3m 22s'],['Validation','1m 40s','1m 55s'],
+        ['Currency Translation','2m 05s','2m 12s'],['Journal Posting & Validation','2m 00s','38m 40s'],
+        ['Consolidation','8m 40s','9m 05s'],['Elimination','3m 29s','6m 33s']
+      ], flagRow:3},
+      note:'One stage explains almost the entire increase: Journal Posting & Validation went from 2 minutes to nearly 39.',
+      reaction:"There's your delta. Now go find out why that specific stage exploded."},
+    dataload:{title:'DATA LOAD — VOLUME', desc:'Rows loaded into the environment.',
+      kpis:[{l:'Yesterday', v:'412,000 rows'}, {l:'Today', v:'418,500 rows'}, {l:'Change', v:'+1.6%'}],
+      note:'Data volume is essentially flat. This does not explain a 3x runtime increase.'},
+    intercompany:{title:'INTERCOMPANY — TRANSACTION VOLUME', desc:'IC transaction counts.',
+      kpis:[{l:'Yesterday', v:'12,300'}, {l:'Today', v:'13,100'}, {l:'Change', v:'+6.5%', c:'warn'}],
+      note:'A modest increase. Worth noting, unlikely to be the primary driver of a 3x runtime blowout on its own.'},
+    journals:{title:'JOURNALS', desc:'Manual and system-posted journal entries this period.', isKey:true,
+      table:{head:['Batch','Entries','Posted By','Approval'], rows:[
+        ['Standard manual entries','640','Close team','Approved'],
+        ['JRNL-BATCH-0091','8,420','INTEG_SVC (service account)','Bypassed approval queue']
+      ], flagRow:1},
+      note:'A bulk import of 8,420 entries landed via a service account at 06:12 today, outside the normal approval workflow.',
+      reaction:"That's a very different number than 640. Go check what that did to the stage that processes journals."},
+    consolidation:{title:'CONSOLIDATION — STAGE LOG', desc:'Detailed processing log for Journal Posting & Validation.',
+      note:'Validation queue depth peaked at 9,060 entries today versus 640 yesterday — directly correlated with the bulk batch.'},
+    diagnostics:{title:'DIAGNOSTICS', desc:'Infrastructure health.', kpis:[{l:'CPU', v:'Nominal'}, {l:'Memory', v:'Nominal'}, {l:'Queue Errors', v:'0'}],
+      note:'No infrastructure degradation. This is a data-volume-in-one-stage problem, not a system problem.'}
+  },
+  findings:[
+    {label:"Data and IC volume are basically flat. The Journal Posting & Validation stage exploded, and Journals shows an 8,420-entry bulk import via a service account that bypassed the normal approval workflow — that's the bottleneck.",
+     quality:'strong', cats:['diag','troubleshoot','perf'],
+     reaction:"That matches what actually happened. Now — is high journal volume automatically the root cause, or could it be a symptom of something else?"},
+    {label:"Data volume is up, so I'd reduce the load footprint or archive old data to bring runtime back down.",
+     quality:'weak', cats:['evid','perf'],
+     reaction:"Why are you assuming data volume is the problem? You just told me it barely moved. Look again."},
+    {label:"IC volume is up 6.5% — that's clearly driving it. I'd recommend redesigning the IC matching architecture.",
+     quality:'wrong', cats:['evid','arch'],
+     reaction:"A 6.5% increase doesn't produce a 3x runtime jump. Don't reach for a redesign before you've proven the driver."}
+  ],
+  evidencePushback:"You're diagnosing a stage you haven't opened yet. Go look at the actual runtime breakdown first.",
+  decision:{fields:[
+    {key:'rootCause', options:[
+      {label:"An unapproved bulk journal import (8,420 entries via a service account) overwhelmed the journal validation stage, which normally handles a few hundred entries.", quality:'strong'},
+      {label:"General data growth across the environment.", quality:'weak'},
+      {label:"A degraded server resource.", quality:'wrong'}
+    ]},
+    {key:'immediateAction', options:[
+      {label:"Isolate the bulk batch, confirm its business intent, then re-run only the affected stage rather than the full close.", quality:'strong'},
+      {label:"Rerun the full consolidation from scratch immediately.", quality:'weak'},
+      {label:"Increase server capacity to handle the load.", quality:'wrong'}
+    ]},
+    {key:'correctiveAction', options:[
+      {label:"Route the integration service account through the same approval and staging checks as manual entries, with a volume-threshold alert.", quality:'strong'},
+      {label:"Ask the team informally to be careful with bulk uploads next time.", quality:'weak'},
+      {label:"No corrective action needed — this was a one-off.", quality:'wrong'}
+    ]},
+    {key:'recoveryPlan', options:[
+      {label:"Confirm the batch's business intent with the source system owner before deciding whether to keep or reverse it.", quality:'strong'},
+      {label:"Just delete the batch — it clearly wasn't supposed to be there.", quality:'weak'},
+      {label:"Leave it as-is since consolidation completed successfully.", quality:'wrong'}
+    ]}
+  ]},
+  consequences:{
+    strong:"You isolate the batch, confirm it was a legitimate month-end true-up from the new integration, and re-run only the validation stage. Close finishes on time tomorrow with a proper control in place.",
+    mixed:"You rerun the whole close. It finishes, eventually, but nobody knows why it was slow or whether it'll happen again next month.",
+    poor:"You delete 8,420 entries without checking. Half of them were legitimate. Now you have a data integrity problem on top of a performance problem."
+  },
+  followups:[
+    {q:"So IC is up 6.5% too. Is that automatically ruled out?",
+     options:[
+       {label:"No — I checked it, but a 6.5% increase can't produce a 3x runtime jump on its own. I'm ruling it out as the primary driver, not ignoring it.", quality:'strong', reaction:"That distinction matters. Good.", cats:['evid','comm']},
+       {label:"Yes, IC is fine, only journals matter.", quality:'weak', reaction:"'Fine' and 'not the primary driver' aren't the same statement. Be precise.", cats:['comm']}
+     ]},
+    {q:"You want to touch this batch. How do you know you won't create another problem?",
+     options:[
+       {label:"I wouldn't reverse it blind. I'd confirm with the source system owner whether those 8,420 entries were legitimate before removing anything mid-close.", quality:'strong', reaction:"That's exactly the discipline I want to see.", cats:['decision','troubleshoot']},
+       {label:"It's a bulk import from a service account — it's safe to just delete it.", quality:'weak', reaction:"You don't know that. You're assuming, again.", cats:['evid']}
+     ]},
+    {q:"Would you make this fix during month-end close?",
+     options:[
+       {label:"The isolation and targeted re-run, yes — that's low risk. The permanent approval-workflow fix goes through change control after close.", quality:'strong', reaction:"Correct sequencing.", cats:['decision','arch']},
+       {label:"I'd redesign the whole integration approval process right now.", quality:'weak', reaction:"During a live close? That's how you create a second incident.", cats:['decision']}
+     ]}
+  ]
+},
+
+/* ---------------- ROUND 3 ---------------- */
+{
+  tag:'ROUND 3', title:"The Balance Sheet Doesn't Balance", level:'LEVEL 4 — SENIOR SOLUTION ARCHITECT', timer:900,
+  requiredEvidence:2,
+  opening:[
+    "The Balance Sheet doesn't reconcile after consolidation.",
+    "Don't tell me possible causes. Show me how you'd investigate it."
+  ],
+  home:{title:'CONSOLIDATED BALANCE SHEET', desc:'FY26-P06', kpis:[
+    {l:'Total Assets', v:'$482.6M'}, {l:'Total Liab. + Equity', v:'$480.3M'}, {l:'Variance', v:'$2.3M', c:'bad'}
+  ], note:'A consolidated Balance Sheet should always tie to zero variance. It doesn\'t.'},
+  tabs:{
+    financials:{title:'FINANCIAL STATEMENTS — BALANCE SHEET', desc:'Consolidated position.', isKey:true,
+      kpis:[{l:'Total Assets', v:'$482.6M'}, {l:'Total Liab. + Equity', v:'$480.3M'}, {l:'Variance', v:'$2.3M', c:'bad'}],
+      note:'The gap is exactly $2.3M. That figure should show up somewhere specific once you trace it.'},
+    intercompany:{title:'INTERCOMPANY — ELIMINATION SUMMARY', desc:'IC receivable/payable elimination status.',
+      table:{head:['Entity Pair','IC Receivable','IC Payable','Net'], rows:[
+        ['UK ↔ Germany','$18.4M','$18.4M','$0'],['France ↔ HQ','$6.1M','$6.1M','$0']
+      ]}, note:'Standard IC eliminations all tie to zero. This is clean — worth ruling out, not the answer.'},
+    journals:{title:'JOURNALS — ELIMINATION ENTRIES', desc:'Manual elimination journals posted this period.', isKey:true,
+      table:{head:['Journal','Entity','Debit Account','Credit Account','Amount'], rows:[
+        ['EJ-1187','France Holdings','Investment in Subsidiary','— (unposted)','$2.3M']
+      ], flagRow:0},
+      note:'EJ-1187 posted a $2.3M debit to Investment in Subsidiary with no offsetting credit to the paired Intercompany elimination account. One-sided entry.',
+      reaction:"There's a one-sided journal sitting right there. Keep tracing before you conclude anything."},
+    entity:{title:'ENTITY STRUCTURE', desc:'Ownership and consolidation confirmation.',
+      note:'France Holdings — 100% ownership, Full consolidation, correctly mapped. Not an ownership issue.'},
+    consolidation:{title:'CONSOLIDATION — STAGE LOG', desc:'Job execution log.', note:'All stages report success. No errors logged.'},
+    exceptions:{title:'EXCEPTIONS', desc:'Open exception queue.', kpis:[{l:'Open Exceptions', v:'0'}],
+      note:'Zero open exceptions. Validation ran before EJ-1187 was posted — this journal was never checked.'}
+  },
+  findings:[
+    {label:"IC eliminations tie out to zero, so it's not a standard elimination timing issue. Journal EJ-1187 posted a $2.3M one-sided entry — it debited Investment in Subsidiary for France Holdings without the offsetting Intercompany credit. That explains the exact $2.3M gap.",
+     quality:'strong', cats:['diag','fin','evid'],
+     reaction:"Now tell me — is a one-sided manual journal a cause, or a symptom of a broader control gap in how elimination journals get posted?"},
+    {label:"IC elimination shows everything ties to zero, so it's probably a translation rounding difference.",
+     quality:'weak', cats:['evid'],
+     reaction:"You checked IC and it's clean, then jumped straight to translation without opening Journals. Where's the evidence for translation?"},
+    {label:"Exceptions shows zero open items, so the system would have caught a real problem — this is most likely a reporting/formatting issue, not a data issue.",
+     quality:'wrong', cats:['evid','fccs'],
+     reaction:"Zero open exceptions doesn't mean zero problems — it means validation didn't catch this one. That's exactly the gap you should be worried about."}
+  ],
+  evidencePushback:"You're theorizing about the Balance Sheet without having opened Journals or Intercompany yet. Go trace it.",
+  decision:{fields:[
+    {key:'rootCause', options:[
+      {label:"A manually posted elimination journal (EJ-1187) was one-sided — it hit Investment in Subsidiary without the offsetting Intercompany entry for France Holdings, and validation didn't catch it because it posted after validation ran.", quality:'strong'},
+      {label:"A currency translation rounding difference.", quality:'weak'},
+      {label:"A formatting issue in the reporting layer.", quality:'wrong'}
+    ]},
+    {key:'correctiveAction', options:[
+      {label:"Reverse and correctly repost the elimination journal with both sides mapped to the right accounts, then re-run validation and consolidation for the affected entity.", quality:'strong'},
+      {label:"Manually adjust the Balance Sheet total in the reporting layer to force it to tie out.", quality:'wrong'},
+      {label:"Leave it — a $2.3M variance is immaterial at this scale.", quality:'weak'}
+    ]},
+    {key:'longTerm', options:[
+      {label:"Add a post-journal, pre-report validation checkpoint specifically for manual elimination journals, and restrict elimination-account postings to system-generated entries where possible.", quality:'strong'},
+      {label:"Ask preparers to double-check their journals more carefully.", quality:'weak'},
+      {label:"No architectural change needed — this was human error, not a system gap.", quality:'wrong'}
+    ]},
+    {key:'businessRisk', options:[
+      {label:"Overstated assets relative to liabilities and equity in a Balance Sheet likely already routed for review — audit finding risk if discovered externally first.", quality:'strong'},
+      {label:"Low — Balance Sheet variances are usually immaterial.", quality:'weak'},
+      {label:"None, it will self-correct next period.", quality:'wrong'}
+    ]}
+  ]},
+  consequences:{
+    strong:"You catch it before it leaves the building. The reposted journal ties the Balance Sheet to zero, and you've flagged the validation timing gap for the architecture backlog.",
+    mixed:"Forcing the reporting layer to tie out papers over the problem. It'll surface again — probably at a worse time, in front of auditors.",
+    poor:"'$2.3M is immaterial' is not a sentence a CFO wants to hear about an unreconciled Balance Sheet. This escalates."
+  },
+  followups:[
+    {q:"You said validation didn't catch it. Whose fault is that — the system's or the process's?",
+     options:[
+       {label:"Both, in different ways — the system did what it was configured to do, but the configuration has a timing gap. That's a design issue, not a system failure.", quality:'strong', reaction:"That's the right way to frame it to a CFO, too.", cats:['comm','arch']},
+       {label:"The system's — it should have caught any imbalance automatically.", quality:'weak', reaction:"The system checked exactly what it was told to check. Don't blame the tool for a design gap.", cats:['arch']}
+     ]},
+    {q:"If I told you Exceptions showed zero, would you have trusted that and stopped looking?",
+     options:[
+       {label:"No — zero exceptions tells me what the current rules check for, not that the data is correct. I'd still trace the Balance Sheet variance to source.", quality:'strong', reaction:"That's the instinct that separates senior from junior here.", cats:['evid','diag']},
+       {label:"If exceptions are clean, that's usually a good enough signal to move on.", quality:'wrong', reaction:"You just found a real $2.3M problem sitting behind a clean exceptions screen. Rethink that answer.", cats:['evid']}
+     ]},
+    {q:"The CFO wants to know if this is a pattern or a one-off. What do you tell them?",
+     options:[
+       {label:"I'd check whether other manual elimination journals this period show the same one-sided pattern before calling it a one-off — I don't have that evidence yet.", quality:'strong', reaction:"Good. Don't promise a conclusion you haven't earned.", cats:['comm','evid']},
+       {label:"I'd tell them it's a one-off since we only found one instance.", quality:'weak', reaction:"You found one instance because you stopped looking after one instance. That's not the same as proof.", cats:['evid']}
+     ]}
+  ]
+},
+
+/* ---------------- ROUND 4 ---------------- */
+{
+  tag:'ROUND 4', title:'$4.8M and Rising', level:'LEVEL 5 — ENTERPRISE FCCS ARCHITECT', timer:900,
+  requiredEvidence:3,
+  initState:{icEscalated:false, eventFired:false},
+  opening:[
+    "The group has a $4.8M intercompany difference.",
+    "Consolidation completed successfully. The CFO wants the close finished today.",
+    "Show me what you'd do."
+  ],
+  home:{title:'IC RECONCILIATION ALERT', desc:'FY26-P06 close in progress.', kpis:[
+    {l:'Open IC Difference', v:'$4.8M', c:'bad'}, {l:'Close Deadline', v:'Today, 18:00', c:'warn'}
+  ], note:'The close is otherwise ready to finalize.'},
+  tabs:{
+    intercompany:{title:'INTERCOMPANY — MISMATCH REPORT', isKey:true,
+      dynamic:(ctx)=>{
+        if(!ctx.eventFired){ ctx.eventFired = true; setTimeout(()=>{ ctx.icEscalated = true; fireEvent("Update: Finance just told me the difference increased from $4.8M to $7.1M. Continue."); }, 1400); }
+        const amt = ctx.icEscalated ? '$7.1M' : '$4.8M';
+        return {desc:'Entity pair with unmatched intercompany balance.',
+          kpis:[{l:'Entity Pair', v:'UK Trading Ltd ↔ Germany Mfg GmbH'}, {l:'Account', v:'IC — Inventory Transfers'}, {l:'Difference', v:amt, c:'bad'}],
+          note:'UK holds the payable side, Germany holds the receivable side. The imbalance sits entirely in this one pair.',
+          reaction:"Keep digging. That number is not the whole story."};
+      }},
+    journals:{title:'JOURNALS — TRANSACTION TIMING', desc:'How each side booked the underlying transfer.', isKey:true,
+      table:{head:['Entity','Posting Basis','Date','Rate Used'], rows:[
+        ['UK Trading Ltd','Spot rate at shipment','12-Aug-26','1.0710'],
+        ['Germany Mfg GmbH','Month-end close rate','31-Aug-26','1.0680']
+      ], flagRow:1},
+      note:'The two sides never used the same rate convention or posting date for the same transfer.',
+      reaction:"So they're not even using the same convention. Keep going — that's not the only issue."},
+    dataload:{title:'DATA LOAD — IN-TRANSIT SHIPMENTS', desc:'Inventory movements not yet fully booked by both sides.', isKey:true,
+      table:{head:['Shipment','Shipped','Value','UK Status','Germany Status'], rows:[
+        ['SHP-88213','28-Aug-26','$2.3M','Booked','Not yet received/booked']
+      ], flagRow:0},
+      note:'A $2.3M shipment is in transit. UK recorded it; Germany hasn\'t received or booked it yet as of period close.'},
+    currency:{title:'CURRENCY TRANSLATION — RATE TABLE', desc:'Reference rates for FY26-P06.',
+      table:{head:['Rate Type','Value'], rows:[['Spot (12-Aug)','1.0710'],['Average (P06)','1.0680'],['Closing (31-Aug)','1.0715']]},
+      note:'No rate table errors here — the rates themselves are correct. It\'s which rate each side applied that\'s the issue.'},
+    entity:{title:'ENTITY STRUCTURE', desc:'Confirm mapping for both entities.', note:'Both entities correctly mapped, ownership 100% each, no configuration issue.'},
+    exceptions:{title:'EXCEPTIONS', desc:'Open exception queue.', note:'IC mismatch flagged as "Open — Timing", not "Open — Data Error". The system already suspects a timing cause.'}
+  },
+  findings:[
+    {label:"This isn't one root cause — it's two layered issues. UK booked the inventory transfer at spot rate on the shipment date while Germany books IC transactions at month-end close rate, creating a timing/rate mismatch. On top of that, there's a $2.3M shipment still in transit that UK has recorded but Germany hasn't booked yet. Together, those explain the bulk of the $7.1M.",
+     quality:'strong', cats:['diag','fin','evid'],
+     reaction:"That's closer. Now — with the CFO wanting the close done today, do you fix both, or close with a disclosed variance?"},
+    {label:"It's an FX issue — I'd recommend re-running currency translation for both entities.",
+     quality:'weak', cats:['evid'],
+     reaction:"Re-running translation won't fix a booking-date mismatch between two entities. You haven't looked at when each side actually posted."},
+    {label:"Exceptions already flagged this as 'Open — Timing', so it will resolve itself next period — I'd let the close proceed with a note.",
+     quality:'wrong', cats:['evid','decision'],
+     reaction:"'It'll resolve itself' is not something the CFO can take to the audit committee today. What are you actually recommending?"}
+  ],
+  evidencePushback:"You haven't traced enough of this yet — the number just changed on you. Keep investigating before you commit.",
+  decision:{fields:[
+    {key:'rootCause', options:[
+      {label:"A rate/timing mismatch between UK (spot rate at shipment) and Germany (month-end close rate), combined with a $2.3M in-transit shipment Germany hasn't yet booked.", quality:'strong'},
+      {label:"A single currency translation error.", quality:'weak'},
+      {label:"An IC elimination rule misconfiguration.", quality:'wrong'}
+    ]},
+    {key:'immediateAction', options:[
+      {label:"Quantify how much of the $7.1M is the in-transit item (expected to self-resolve on receipt) versus the true rate/timing gap needing correction, and disclose both to the CFO with numbers.", quality:'strong'},
+      {label:"Force-eliminate the full $7.1M against a suspense account to let the close proceed.", quality:'wrong'},
+      {label:"Ask UK to change their entry to match Germany's number so it ties out.", quality:'wrong'}
+    ]},
+    {key:'recoveryPlan', options:[
+      {label:"Close this period with the in-transit portion disclosed as a standard reconciling item, and correct the rate/timing gap through a formal IC adjustment journal before finalizing.", quality:'strong'},
+      {label:"Delay the entire close until every dollar ties to zero.", quality:'weak'},
+      {label:"Report the consolidated numbers as-is without disclosure since the job completed.", quality:'wrong'}
+    ]},
+    {key:'businessRisk', options:[
+      {label:"An undisclosed IC variance of this size is a material misstatement risk and an audit red flag if not called out explicitly before filing.", quality:'strong'},
+      {label:"Low risk — IC differences are common and usually immaterial.", quality:'weak'},
+      {label:"No risk — the consolidation engine already eliminated it in the background.", quality:'wrong'}
+    ]}
+  ]},
+  consequences:{
+    strong:"You give the CFO two numbers instead of one mystery: a self-resolving $2.3M in-transit item, and a genuine $4.8M timing gap you're correcting now. The close finishes today, disclosed and defensible.",
+    mixed:"You hold the close waiting for a perfect zero. The deadline slips, and you still haven't fixed the underlying rate-convention gap.",
+    poor:"Forcing a suspense entry hides the mismatch instead of explaining it. It reappears next quarter, larger, and now nobody remembers why."
+  },
+  followups:[
+    {q:"I think this is an intercompany issue. Do you agree?",
+     options:[
+       {label:"I wouldn't just agree — it presents as IC, but the underlying cause is a rate-timing convention gap plus an unbooked in-transit shipment, which is more specific than 'an IC issue.'", quality:'strong', reaction:"Don't just agree with me because I'm the interviewer. Good.", cats:['comm','evid']},
+       {label:"Yes, I agree, it's an intercompany matching problem.", quality:'weak', reaction:"That's a label, not a diagnosis. What's actually causing it?", cats:['comm']}
+     ]},
+    {q:"The difference just grew by $2.3M. Does that change your root cause?",
+     options:[
+       {label:"It confirms it — that's almost exactly the in-transit shipment value I found in Data Load, which supports the hypothesis rather than contradicting it.", quality:'strong', reaction:"Exactly. New information should test your hypothesis, not derail it.", cats:['evid','diag']},
+       {label:"Not really, I'll stick with FX translation as the cause.", quality:'weak', reaction:"You dismissed new evidence instead of testing it against your theory. That's a bad habit under pressure.", cats:['evid']}
+     ]},
+    {q:"The CFO wants this closed today. Would you hold the close for this?",
+     options:[
+       {label:"No — I'd close with the in-transit portion disclosed as a standard reconciling item, and correct the genuine rate/timing gap via adjustment journal rather than holding the whole close.", quality:'strong', reaction:"That's the balance a real close deadline requires.", cats:['decision','comm']},
+       {label:"Yes, I'd hold the entire close until the full $7.1M is resolved.", quality:'weak', reaction:"Every close has legitimate in-transit timing differences. Holding for that isn't realistic.", cats:['decision']}
+     ]},
+    {q:"Why not just make UK match Germany's number?",
+     options:[
+       {label:"Because that would falsify the transaction record to force a tie-out instead of fixing the actual convention mismatch — it hides the problem rather than solving it.", quality:'strong', reaction:"Good. That's a control integrity question, not just an accounting one.", cats:['arch','fin']},
+       {label:"That would work and it's the fastest way to get to zero.", quality:'wrong', reaction:"That's the kind of shortcut that ends careers in an audit. Reconsider that answer.", cats:['fin']}
+     ]}
+  ]
+},
+
+/* ---------------- ROUND 5 ---------------- */
+{
+  tag:'ROUND 5', title:"Germany's Books Are Correct — So What Changed?", level:'LEVEL 5 — ENTERPRISE FCCS ARCHITECT', timer:780,
+  requiredEvidence:2,
+  opening:[
+    "Germany's local books are correct.",
+    "But the USD consolidated result suddenly shows a large variance.",
+    "Don't explain FX theory to me. Use the laptop and show me where you'd investigate."
+  ],
+  home:{title:'TRANSLATION VARIANCE ALERT', desc:'Germany Manufacturing GmbH', kpis:[
+    {l:'Local Books (EUR)', v:'Confirmed correct'}, {l:'Consolidated USD Variance', v:'+$6.2M', c:'bad'}
+  ], note:'A discrepancy exists purely at the translation layer.'},
+  tabs:{
+    currency:{title:'CURRENCY TRANSLATION — RATE TABLE', desc:'Rates applied for FY26-P06.', isKey:true,
+      table:{head:['Entity','Rate Source','Rate Applied','Expected Rate'], rows:[
+        ['Germany Mfg GmbH','Manual override — "Q1 Average Rate"','1.0920','1.0680 (P06 average)']
+      ], flagRow:0},
+      note:'Germany has a manual rate override still pointing at the Q1 average rate — three periods stale.',
+      reaction:"There it is. Now find out why that override was still active in P06."},
+    dataload:{title:'DATA LOAD — RATE TABLE LOAD LOG', desc:'How period rates get loaded and applied.', isKey:true,
+      note:'P06 rates loaded 30-Aug 22:14. Germany\'s entity had a manual rate override flag set back in P01 — the load process does not automatically clear manual overrides on rollover.',
+      reaction:"So it's not a one-time mistake — it's a gap in the load process itself."},
+    financials:{title:'FINANCIAL STATEMENTS — CTA / EQUITY MOVEMENT', desc:'Where the variance surfaced.',
+      kpis:[{l:'Germany USD Equity Movement', v:'+$6.2M vs expected', c:'bad'}], note:'The variance traces cleanly to Germany\'s translated equity / CTA line.'},
+    entity:{title:'ENTITY STRUCTURE', desc:'Germany Manufacturing GmbH configuration.', note:'Functional currency EUR, reporting currency USD — both correctly configured. Not an entity setup issue.'},
+    consolidation:{title:'CONSOLIDATION', desc:'Stage log.', note:'All stages report success — translation ran using whatever rate it was given.'},
+    exceptions:{title:'EXCEPTIONS', desc:'Open exception queue.', note:'Zero flagged. Manual rate overrides are not validated against the current period by default.'}
+  },
+  findings:[
+    {label:"Germany's entity has a manual rate override still pointing to the Q1 average rate (1.0920) instead of the current P06 rate (1.0680). The rate load process doesn't automatically clear manual overrides on rollover, so it silently carried forward — that's inflating the translated USD result by roughly $6.2M.",
+     quality:'strong', cats:['diag','fccs','evid'],
+     reaction:"Good — you found the override and the process gap behind it. Now, is that a data entry mistake, or an architecture problem?"},
+    {label:"The variance is in the equity/CTA line, so I'd just re-run translation and consolidation again to refresh the numbers.",
+     quality:'weak', cats:['evid'],
+     reaction:"Re-running translation with the same broken override gives you the same wrong answer. What did you actually check?"},
+    {label:"Exceptions shows nothing flagged, so the rate table itself must be correct — the variance is likely a manual journal entered directly in USD.",
+     quality:'wrong', cats:['evid','fccs'],
+     reaction:"You're guessing about a USD journal you haven't looked at. Go check the rate table before you theorize about journals."}
+  ],
+  evidencePushback:"You're speculating about USD-level entries without having opened Currency Translation. Go look there first.",
+  decision:{fields:[
+    {key:'rootCause', options:[
+      {label:"A manual currency rate override on the Germany entity was left pointing to the Q1 average rate and never cleared at P06 rollover, because the rate load process doesn't automatically clear manual overrides.", quality:'strong'},
+      {label:"A one-time data entry mistake by the close preparer.", quality:'weak'},
+      {label:"A system defect in the translation engine.", quality:'wrong'}
+    ]},
+    {key:'correctiveAction', options:[
+      {label:"Clear the stale override so the entity uses the current period's system rate, then re-run translation and consolidation for Germany and validate the CTA movement.", quality:'strong'},
+      {label:"Manually adjust the consolidated equity balance to the expected figure.", quality:'wrong'},
+      {label:"Leave the override in place since local books are correct.", quality:'wrong'}
+    ]},
+    {key:'longTerm', options:[
+      {label:"Build a control that flags or auto-clears manual rate overrides at period rollover, or at minimum surfaces them in validation/exceptions every period.", quality:'strong'},
+      {label:"Add a reminder to the close checklist to manually check for overrides.", quality:'weak'},
+      {label:"No change needed — this is a rare, isolated event.", quality:'wrong'}
+    ]},
+    {key:'businessRisk', options:[
+      {label:"A $6.2M translation overstatement in reported equity is exactly the kind of variance that draws audit and CFO-level scrutiny, especially if it recurs silently every quarter.", quality:'strong'},
+      {label:"Minor — translation variances fluctuate and usually normalize.", quality:'weak'},
+      {label:"None, since Germany's local books are confirmed correct.", quality:'wrong'}
+    ]}
+  ]},
+  consequences:{
+    strong:"You clear the override, re-run, and the CTA movement lines up with expectation to the dollar. The rollover-control gap goes into next quarter's architecture backlog before it can repeat.",
+    mixed:"Adjusting the equity balance manually gets the number to look right for this quarter — and buries the same stale override to resurface silently next period.",
+    poor:"Leaving the override in place because 'local books are correct' misses the entire point of consolidation. This restates next audit cycle."
+  },
+  followups:[
+    {q:"Local books are correct. So why does USD look wrong?",
+     options:[
+       {label:"Because local-currency correctness and translation correctness are separate concerns — the local ledger has nothing to do with which FX rate gets applied at consolidation.", quality:'strong', reaction:"That's a distinction a lot of candidates never quite land. Good.", cats:['fccs','comm']},
+       {label:"It shouldn't look wrong if the local books are right — something in the system must be broken.", quality:'weak', reaction:"Nothing is 'broken' — a rate override did exactly what it was set to do. Wrongly.", cats:['fccs']}
+     ]},
+    {q:"Why didn't Exceptions flag a stale rate override?",
+     options:[
+       {label:"Because the default validation rules check things like balance completeness and IC matching, not whether a manual rate override is still valid for the current period — that's a gap worth closing.", quality:'strong', reaction:"That's the architecture recommendation I wanted to hear.", cats:['arch','fccs']},
+       {label:"It probably did flag it and someone dismissed it.", quality:'weak', reaction:"You checked Exceptions — it showed zero. Don't invent evidence that isn't there.", cats:['evid']}
+     ]},
+    {q:"Would you redesign the rate-override process, or just fix this instance?",
+     options:[
+       {label:"Both — fix this instance immediately for the close, but flag the override-clearing gap as a required architecture change so it doesn't recur next quarter.", quality:'strong', reaction:"That's the senior-versus-lead distinction, right there.", cats:['arch','decision']},
+       {label:"Just fix this one instance — it's not worth redesigning the process for a single override.", quality:'weak', reaction:"A process gap that silently overstated equity by $6.2M is exactly worth redesigning for.", cats:['arch']}
+     ]}
+  ]
+},
+
+/* ---------------- ROUND 6 ---------------- */
+{
+  tag:'ROUND 6 — EXTREME', title:'Nobody Agrees, and the CFO Wants an Answer', level:'LEVEL 6 — EXTREME', timer:1200,
+  requiredEvidence:3,
+  opening:[
+    "Last round. The CFO says the consolidated P&L is wrong.",
+    "The finance team says their source numbers are correct.",
+    "The technical team says the consolidation completed successfully.",
+    "Who do you believe?"
+  ],
+  preChallenge:{
+    options:[
+      {label:"None of them, initially — I'd establish evidence independently by tracing the number from source through load, validation, translation, consolidation, and elimination before trusting any single team's claim.", quality:'strong', cats:['evid','req'],
+       reaction:"Good. Hold onto that instinct. Here's what's actually happening."},
+      {label:"The technical team, since the job completed successfully with no errors.", quality:'wrong', cats:['evid'],
+       reaction:"A clean job log is not proof of correctness — you told me that yourself two rounds ago. Try that answer again in your head."},
+      {label:"The finance team, since they own the source numbers and are closest to the business.", quality:'weak', cats:['evid'],
+       reaction:"Source numbers can be correct and still get misrepresented downstream. Don't anchor on one team's word."}
+    ]
+  },
+  opening2:[
+    "We're closing the quarter. Consolidation completes successfully.",
+    "The CFO's consolidated EBITDA is approximately $8M lower than expected.",
+    "Source systems are reporting correct numbers. There are no obvious validation failures.",
+    "You have twenty minutes. Don't explain the theory. Show me how you'd investigate this."
+  ],
+  home:{title:'EBITDA VARIANCE ALERT', desc:'FY26-P06', kpis:[
+    {l:'Expected EBITDA', v:'$142.0M'}, {l:'Actual EBITDA', v:'$134.0M', c:'bad'}, {l:'Variance', v:'-$8.0M', c:'bad'}
+  ], note:'Source systems report correct figures. No obvious validation failures. A new JV entity, LatAm Ventures, was onboarded this period.'},
+  tabs:{
+    financials:{title:'FINANCIAL STATEMENTS — P&L DRILL', desc:'Line-level movement vs expectation.', isKey:true,
+      table:{head:['Line Item','Expected','Actual','Variance'], rows:[
+        ['Share of JV Income','$12.3M','$7.2M','-$5.1M'],
+        ['Corporate Overhead Allocation','($9.4M)','($12.3M)','-$2.9M']
+      ], flagRow:0},
+      note:'Two lines account for almost the entire $8M gap: Share of JV Income (-$5.1M) and Corporate Overhead Allocation (-$2.9M). -$5.1M and -$2.9M together is -$8.0M.',
+      reaction:"Two separate lines, both off. That's unusual. Keep tracing both."},
+    journals:{title:'JOURNALS — OVERHEAD ALLOCATION', desc:'Recurring allocation entries this period.', isKey:true,
+      table:{head:['Journal','Description','Amount','Status'], rows:[
+        ['JRNL-4402','Corporate Overhead Allocation','$2.9M','Posted 29-Aug'],
+        ['JRNL-4402-B','Corporate Overhead Allocation','$2.9M','Posted 29-Aug (duplicate)']
+      ], flagRow:1},
+      note:'The recurring overhead allocation journal was posted twice this period — JRNL-4402 and JRNL-4402-B.',
+      reaction:"A duplicate posting. That accounts for one of the two lines. What about the other?"},
+    dataload:{title:'DATA LOAD — JV ENTITY MAPPING', desc:'LatAm Ventures JV, onboarded this period.', isKey:true,
+      note:'LatAm Ventures JV income of $5.1M loaded correctly at source, but the data load rule still points to the prior chart-of-accounts mapping — the entity was never remapped on onboarding, so this $5.1M landed in a suspense account instead of "Share of JV Income".',
+      reaction:"That's the second line. Now you have both halves of the $8M."},
+    entity:{title:'ENTITY STRUCTURE', desc:'LatAm Ventures JV configuration.', note:'40% ownership, Equity method — correctly configured. Ownership and method are not the issue here.'},
+    currency:{title:'CURRENCY TRANSLATION', desc:'Rate table for this period.', note:'No overrides, no anomalies. Rates are clean for this period — ruled out.'},
+    intercompany:{title:'INTERCOMPANY', desc:'IC elimination summary.', note:'All pairs tie to zero. Ruled out.'},
+    exceptions:{title:'EXCEPTIONS', desc:'Open exception queue.', note:'Zero flagged. Neither the duplicate journal nor the suspense-account mapping triggered a rule.'},
+    consolidation:{title:'CONSOLIDATION', desc:'Stage log.', note:'All stages report success — both issues are upstream of anything consolidation itself checks.'}
+  },
+  findings:[
+    {label:"Two separate issues stack up to the $8M gap. First, the Corporate Overhead Allocation journal was posted twice this period (JRNL-4402 and JRNL-4402-B), adding an extra $2.9M of expense. Second, the new LatAm Ventures JV's income wasn't mapped — the data load rule still points to the old chart of accounts, so $5.1M of legitimate JV income landed in suspense instead of Share of JV Income. $2.9M plus $5.1M is $8.0M.",
+     quality:'strong', cats:['diag','fin','evid','fccs'],
+     reaction:"That's a real investigation, not a guess. Now defend it — walk me through why you ruled out FX and IC before landing here."},
+    {label:"It's most likely the new LatAm Ventures JV — new entities are the most common source of EBITDA surprises, so I'd start unwinding that entity's consolidation.",
+     quality:'weak', cats:['evid','req'],
+     reaction:"You're pattern-matching to 'new entity equals problem' without checking a single number for that entity. Its source data loaded exactly as expected. Look again."},
+    {label:"Exceptions are clean and the job completed, so the $8M gap is probably just a timing difference that will reverse next period.",
+     quality:'wrong', cats:['evid','decision'],
+     reaction:"'It'll reverse next period' is what people say when they haven't traced the number. Prove it or retract it."}
+  ],
+  evidencePushback:"An $8M gap on a live P&L, and you haven't opened the line-level drill yet. Go trace it before you speak.",
+  decision:{fields:[
+    {key:'rootCause', options:[
+      {label:"A duplicated overhead allocation journal (+$2.9M expense) combined with a chart-of-accounts mapping gap that routed the new JV's $5.1M income into suspense instead of Share of JV Income — together explaining the ~$8M EBITDA shortfall.", quality:'strong'},
+      {label:"The new JV entity is generally underperforming versus expectation.", quality:'weak'},
+      {label:"A timing difference that will self-correct.", quality:'wrong'}
+    ]},
+    {key:'immediateAction', options:[
+      {label:"Reverse the duplicate overhead journal and remap the suspense-account balance to Share of JV Income, then re-run consolidation and validate EBITDA ties to the $142M expectation.", quality:'strong'},
+      {label:"Post a manual top-side adjustment of $8M directly to EBITDA to match expectation.", quality:'wrong'},
+      {label:"Tell the CFO the number is correct as reported and expectations should be revised instead.", quality:'wrong'}
+    ]},
+    {key:'longTerm', options:[
+      {label:"Add duplicate-journal detection for recurring allocation entries, and require chart-of-accounts mapping validation as a mandatory step whenever a new entity is onboarded.", quality:'strong'},
+      {label:"Manually review all journals and mappings each period going forward.", quality:'weak'},
+      {label:"No change — both issues were one-off human errors.", quality:'wrong'}
+    ]},
+    {key:'businessRisk', options:[
+      {label:"An $8M EBITDA miss reaching the CFO before being traced to root cause creates real credibility and disclosure risk — especially since two independent errors landed in the same period.", quality:'strong'},
+      {label:"Low — EBITDA fluctuates and $8M isn't material at this scale.", quality:'weak'},
+      {label:"None, since the underlying source data was all correct.", quality:'wrong'}
+    ]}
+  ]},
+  consequences:{
+    strong:"You reverse the duplicate, remap the suspense balance, and EBITDA lands on $142.0M to the dollar. The CFO gets a traced explanation instead of a shrug — and two new controls go into next quarter's close checklist.",
+    mixed:"A top-side adjustment gets EBITDA to the right number on paper without fixing either underlying cause. Both errors are still live for next quarter.",
+    poor:"Telling the CFO to revise their expectations instead of tracing the number is the fastest way to not be invited back for the follow-up interview."
+  },
+  followups:[
+    {q:"You ruled out currency and intercompany fairly quickly. Justify that.",
+     options:[
+       {label:"The rate table showed no overrides or anomalies for this period, and IC eliminations tied to zero cleanly — I didn't skip them, I checked and found nothing, so I moved on to where the evidence actually pointed.", quality:'strong', reaction:"Checked-and-clean is a valid answer. Good that you can show your work.", cats:['evid','comm']},
+       {label:"They're usually not the cause for EBITDA-level issues, so I didn't spend much time there.", quality:'weak', reaction:"'Usually' isn't evidence. Did you check, or did you assume?", cats:['evid']}
+     ]},
+    {q:"Two unrelated errors landing in the same period, on the same $8M gap — coincidence, or something else?",
+     options:[
+       {label:"It's plausible coincidence, but I'd flag it for review — both relate to change and process around this close (a new entity onboarding and a recurring journal), so there may be a common process gap worth investigating, not just two isolated accidents.", quality:'strong', reaction:"That's exactly the kind of pattern-sense a CFO needs from an architect.", cats:['arch','diag']},
+       {label:"Definitely a coincidence, no further investigation needed.", quality:'weak', reaction:"'Definitely' is a strong word for something you haven't investigated.", cats:['diag']}
+     ]},
+    {q:"Defend your architecture. What happens if your assumption about the mapping is wrong?",
+     options:[
+       {label:"If the mapping isn't the cause, the suspense account balance won't match the $5.1M gap after I remap it — that's a testable check, and I'd validate before declaring it fixed.", quality:'strong', reaction:"That's what defending an answer actually looks like. Good.", cats:['evid','decision']},
+       {label:"I'm confident enough in the finding that I wouldn't need to re-validate it.", quality:'wrong', reaction:"Confidence is not validation. This is the exact overconfidence I've been probing for all interview.", cats:['evid']}
+     ]},
+    {q:"How would you prevent recurrence?",
+     options:[
+       {label:"Mandatory mapping validation on entity onboarding, plus a duplicate-posting check on recurring allocation journals — both as system controls, not manual reminders.", quality:'strong', reaction:"That's a complete answer. This is what I was looking for from the start of the interview.", cats:['arch','decision']},
+       {label:"Send a reminder email to the close team about double-checking their work.", quality:'weak', reaction:"A reminder email did not stop the first duplicate posting. It won't stop the second.", cats:['arch']}
+     ]}
+  ]
+}
+
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const STATE = {
+  scores:{}, roundIndex:-1, currentRound:null, openedKey:new Set(),
+  currentTab:'home', timerInt:null, timeLeft:0, findingsLocked:false,
+  log:[], modalSelections:{}, awaitingChip:false
+};
+CATS.forEach(c => STATE.scores[c.key] = 55);
+
+function startInterview(){
+  document.getElementById('stage-home').classList.remove('active');
+  document.getElementById('stage-round').classList.add('active');
+  loadRound(0);
+}
+
+function fireEvent(text){
+  const el = document.getElementById('transcript');
+  const div = document.createElement('div');
+  div.className = 'msg event';
+  div.innerHTML = `<div class="bubble">${text}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function pushMsg(who, text){
+  const el = document.getElementById('transcript');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (who === 'interviewer' ? 'interviewer' : 'candidate');
+  const tag = who === 'interviewer' ? 'Interviewer' : 'You';
+  div.innerHTML = `<span class="tag">${tag}</span><div class="bubble">${text}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function pushSequential(lines, who, delay, cb){
+  let i = 0;
+  function step(){
+    if(i >= lines.length){ if(cb) cb(); return; }
+    pushMsg(who, lines[i]); i++;
+    setTimeout(step, delay);
+  }
+  step();
+}
+
+function setChips(items){
+  STATE.awaitingChip = true;
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  items.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'chip';
+    d.innerHTML = it.text + (it.sub ? `<small>${it.sub}</small>` : '');
+    d.onclick = () => { if(!STATE.awaitingChip) return; it.onClick(); };
+    box.appendChild(d);
+  });
+}
+function clearChips(){ document.getElementById('chips').innerHTML = ''; STATE.awaitingChip = false; }
+function lockChips(){
+  document.querySelectorAll('#chips .chip').forEach(c => c.classList.add('disabled'));
+  STATE.awaitingChip = false;
+}
+
+function addScore(cats, quality){
+  const val = quality === 'strong' ? 4 : quality === 'weak' ? 1 : -3;
+  (cats || []).forEach(k => {
+    STATE.scores[k] = Math.max(0, Math.min(100, STATE.scores[k] + val));
+  });
+  renderScoreboard();
+}
+function logPick(kind, quality, label, cats){
+  STATE.log.push({round: STATE.roundIndex, kind, quality, label, cats: cats||[]});
+}
+
+function renderScoreboard(){
+  const box = document.getElementById('scoreboard');
+  box.innerHTML = '';
+  CATS.forEach(c => {
+    const v = STATE.scores[c.key];
+    const item = document.createElement('div');
+    item.className = 'sb-item';
+    item.innerHTML = `<div class="l">${c.key}</div><div class="sb-bar"><div class="sb-fill" style="width:${v}%"></div></div>`;
+    box.appendChild(item);
+  });
+}
+
+/* ---------- Laptop / console ---------- */
+function renderNav(){
+  const nav = document.getElementById('console-nav');
+  nav.innerHTML = '';
+  NAV_ITEMS.forEach(item => {
+    const hasData = STATE.currentRound.tabs && STATE.currentRound.tabs[item.id];
+    const el = document.createElement('div');
+    el.className = 'nav-item' + (item.id === STATE.currentTab ? ' active' : '');
+    if(hasData && hasData.isKey && STATE.openedKey.has(item.id)) el.classList.add('cleared');
+    else if(hasData && hasData.isKey) el.classList.add('flagged');
+    el.textContent = item.label;
+    el.onclick = () => selectTab(item.id);
+    nav.appendChild(el);
+  });
+}
+
+function renderTabContent(def){
+  const box = document.getElementById('console-content');
+  document.getElementById('ch-title').textContent = def.title || 'FCCS CONSOLE';
+  let html = '';
+  if(def.desc) html += `<div class="desc">${def.desc}</div>`;
+  if(def.kpis){
+    html += '<div class="kpi-row">';
+    def.kpis.forEach(k => html += `<div class="kpi ${k.c||''}"><div class="v">${k.v}</div><div class="l">${k.l}</div></div>`);
+    html += '</div>';
+  }
+  if(def.table){
+    html += '<table class="datatable"><thead><tr>';
+    def.table.head.forEach(h => html += `<th>${h}</th>`);
+    html += '</tr></thead><tbody>';
+    def.table.rows.forEach((r,i) => {
+      const cls = (def.table.flagRow === i) ? 'hi' : '';
+      html += `<tr class="${cls}">` + r.map(c => `<td>${c}</td>`).join('') + '</tr>';
+    });
+    html += '</tbody></table>';
+  }
+  if(def.note) html += `<div class="note">${def.note}</div>`;
+  box.innerHTML = html;
+}
+
+function selectTab(id){
+  STATE.currentTab = id;
+  renderNav();
+  const round = STATE.currentRound;
+  let def = round.tabs && round.tabs[id];
+  if(def && def.dynamic){ def = { ...def.dynamic(round._state), isKey: def.isKey, reaction: def.reaction }; }
+  if(!def){
+    if(id === 'home' && round.home){ def = round.home; }
+    else {
+      const label = NAV_ITEMS.find(n => n.id === id).label;
+      def = { title: label.toUpperCase(), desc:'No significant findings surfaced here for this scenario.',
+              note:'Checked and clear — ruling a layer out with evidence is exactly the right move.' };
+    }
+  }
+  renderTabContent(def);
+  const rawDef = round.tabs && round.tabs[id];
+  if(rawDef && rawDef.isKey && !STATE.openedKey.has(id)){
+    STATE.openedKey.add(id);
+    renderNav();
+    if(rawDef.reaction){ setTimeout(() => pushMsg('interviewer', rawDef.reaction), 500); }
+  }
+}
+
+/* ---------- Round flow ---------- */
+function loadRound(i){
+  STATE.roundIndex = i;
+  STATE.currentRound = ROUNDS[i];
+  STATE.currentRound._state = STATE.currentRound.initState ? JSON.parse(JSON.stringify(STATE.currentRound.initState)) : {};
+  STATE.openedKey = new Set();
+  STATE.currentTab = 'home';
+  STATE.findingsLocked = false;
+
+  document.getElementById('r-tag').textContent = STATE.currentRound.tag;
+  document.getElementById('r-title').textContent = STATE.currentRound.title;
+  document.getElementById('r-level').textContent = STATE.currentRound.level;
+  document.getElementById('transcript').innerHTML = '';
+  clearChips();
+  document.getElementById('freeformWrap').style.display = 'flex';
+  document.getElementById('hint').textContent = 'Open the laptop and gather evidence before you commit to a conclusion.';
+
+  renderNav();
+  selectTab('home');
+  renderScoreboard();
+  startTimer(STATE.currentRound.timer);
+
+  pushSequential(STATE.currentRound.opening, 'interviewer', 650, () => {
+    if(STATE.currentRound.preChallenge){
+      runPreChallenge();
+    } else {
+      renderFindingChips();
+    }
+  });
+}
+
+function runPreChallenge(){
+  const pc = STATE.currentRound.preChallenge;
+  setChips(pc.options.map(opt => ({
+    text: opt.label,
+    onClick: () => {
+      lockChips();
+      pushMsg('candidate', opt.label);
+      addScore(opt.cats, opt.quality);
+      logPick('trust', opt.quality, opt.label, opt.cats);
+      setTimeout(() => {
+        pushMsg('interviewer', opt.reaction);
+        setTimeout(() => {
+          clearChips();
+          pushSequential(STATE.currentRound.opening2, 'interviewer', 650, renderFindingChips);
+        }, 700);
+      }, 500);
+    }
+  })));
+}
+
+function renderFindingChips(){
+  document.getElementById('hint').textContent = 'State your position when you have evidence — not before.';
+  setChips(STATE.currentRound.findings.map((f, idx) => ({
+    text: f.label,
+    onClick: () => pickFinding(idx)
+  })));
+}
+
+function pickFinding(idx){
+  const round = STATE.currentRound;
+  const f = round.findings[idx];
+  if(STATE.openedKey.size < round.requiredEvidence){
+    pushMsg('candidate', f.label);
+    setTimeout(() => {
+      pushMsg('interviewer', round.evidencePushback);
+      addScore(['evid'], 'wrong');
+    }, 450);
+    return;
+  }
+  lockChips();
+  pushMsg('candidate', f.label);
+  addScore(f.cats, f.quality);
+  logPick('finding', f.quality, f.label, f.cats);
+  setTimeout(() => {
+    pushMsg('interviewer', f.reaction);
+    setTimeout(showContinueToDecision, 650);
+  }, 500);
+}
+
+function showContinueToDecision(){
+  clearChips();
+  document.getElementById('hint').textContent = 'Time to formalize this into an architect decision.';
+  setChips([{ text:'Proceed to Architect Decision Panel →', onClick: openDecisionModal }]);
+}
+
+function openDecisionModal(){
+  clearChips();
+  STATE.modalSelections = {};
+  const round = STATE.currentRound;
+  const wrap = document.getElementById('decisionFields');
+  wrap.innerHTML = '';
+  round.decision.fields.forEach(f => {
+    const fieldDiv = document.createElement('div');
+    fieldDiv.className = 'field';
+    fieldDiv.innerHTML = `<label>${FIELD_LABELS[f.key]}</label>`;
+    const optList = document.createElement('div');
+    optList.className = 'opt-list';
+    f.options.forEach((opt, oi) => {
+      const o = document.createElement('div');
+      o.className = 'opt';
+      o.textContent = opt.label;
+      o.onclick = () => {
+        optList.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'));
+        o.classList.add('selected');
+        STATE.modalSelections[f.key] = opt;
+        checkDecisionComplete();
+      };
+      optList.appendChild(o);
+    });
+    fieldDiv.appendChild(optList);
+    wrap.appendChild(fieldDiv);
+  });
+  document.getElementById('decisionSubmitBtn').disabled = true;
+  document.getElementById('decisionModal').classList.add('active');
+}
+
+function checkDecisionComplete(){
+  const round = STATE.currentRound;
+  const complete = round.decision.fields.every(f => STATE.modalSelections[f.key]);
+  document.getElementById('decisionSubmitBtn').disabled = !complete;
+}
+
+function submitDecision(){
+  const round = STATE.currentRound;
+  document.getElementById('decisionModal').classList.remove('active');
+  let summary = '<strong>Architect Decision</strong><br>';
+  let totalVal = 0, n = 0;
+  round.decision.fields.forEach(f => {
+    const opt = STATE.modalSelections[f.key];
+    summary += `<br><em>${FIELD_LABELS[f.key]}:</em> ${opt.label}`;
+    addScore(FIELD_CATS[f.key], opt.quality);
+    logPick('decision', opt.quality, opt.label, FIELD_CATS[f.key]);
+    totalVal += (opt.quality === 'strong' ? 1 : opt.quality === 'weak' ? 0 : -1);
+    n++;
+  });
+  pushMsg('candidate', summary);
+  const avg = totalVal / n;
+  const tier = avg > 0.4 ? 'strong' : avg > -0.2 ? 'mixed' : 'poor';
+  setTimeout(() => {
+    fireEvent(round.consequences[tier]);
+    setTimeout(() => runFollowup(0), 900);
+  }, 600);
+}
+
+function runFollowup(i){
+  const round = STATE.currentRound;
+  if(i >= round.followups.length){ finishRound(); return; }
+  clearChips();
+  pushMsg('interviewer', round.followups[i].q);
+  setTimeout(() => {
+    setChips(round.followups[i].options.map(opt => ({
+      text: opt.label,
+      onClick: () => {
+        lockChips();
+        pushMsg('candidate', opt.label);
+        addScore(opt.cats, opt.quality);
+        logPick('followup', opt.quality, opt.label, opt.cats);
+        setTimeout(() => {
+          pushMsg('interviewer', opt.reaction);
+          setTimeout(() => runFollowup(i + 1), 750);
+        }, 500);
+      }
+    })));
+  }, 500);
+}
+
+function finishRound(){
+  clearInterval(STATE.timerInt);
+  clearChips();
+  const roundLog = STATE.log.filter(e => e.round === STATE.roundIndex);
+  const well = roundLog.filter(e => e.quality === 'strong').map(e => shorten(e.label));
+  const gaps = roundLog.filter(e => e.quality !== 'strong').map(e => shorten(e.label));
+  const strongCount = roundLog.filter(e => e.quality === 'strong').length;
+  const ratio = strongCount / Math.max(1, roundLog.length);
+  const tierLabel = ratio >= 0.75 ? 'Strong Senior Architect'
+    : ratio >= 0.5 ? 'Solid — Approaching Enterprise Level'
+    : ratio >= 0.3 ? 'Lead Consultant — Needs More Architecture Depth'
+    : 'Foundational — Continue Building FCCS Depth';
+
+  let html = `<strong>Interviewer verdict — ${STATE.currentRound.title}</strong><br><br>`;
+  html += `<em>What you did well:</em> ${well.length ? well.slice(0,2).join(' · ') : 'Limited evidence-based reasoning shown this round.'}<br>`;
+  html += `<em>Where you made assumptions or missed something:</em> ${gaps.length ? gaps.slice(0,2).join(' · ') : 'None significant.'}<br><br>`;
+  html += `<em>Seniority assessment:</em> ${tierLabel}`;
+  fireEvent(html);
+
+  const isLast = STATE.roundIndex === ROUNDS.length - 1;
+  setTimeout(() => {
+    setChips([{ text: isLast ? 'View Final Interview Report →' : `Continue to Round ${STATE.roundIndex + 2} →`,
+      onClick: () => { isLast ? showFinal() : loadRound(STATE.roundIndex + 1); } }]);
+  }, 500);
+}
+
+function shorten(s){
+  s = s.replace(/<[^>]*>/g,'');
+  return s.length > 88 ? s.slice(0,85) + '...' : s;
+}
+
+/* ---------- Timer ---------- */
+function startTimer(seconds){
+  clearInterval(STATE.timerInt);
+  STATE.timeLeft = seconds;
+  const el = document.getElementById('r-timer');
+  el.classList.remove('low');
+  updateTimerText();
+  let timeUpFired = false;
+  STATE.timerInt = setInterval(() => {
+    STATE.timeLeft--;
+    updateTimerText();
+    if(STATE.timeLeft <= 60) el.classList.add('low');
+    if(STATE.timeLeft <= 0){
+      clearInterval(STATE.timerInt);
+      if(!timeUpFired){
+        timeUpFired = true;
+        fireEvent("TIME'S UP — Interviewer: \"We'll keep going, but in a live close, this costs you.\"");
+        addScore(['decision'], 'weak');
+      }
+    }
+  }, 1000);
+}
+function updateTimerText(){
+  const m = Math.max(0, Math.floor(STATE.timeLeft / 60));
+  const s = Math.max(0, STATE.timeLeft % 60);
+  document.getElementById('r-timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+/* ---------- Free text ---------- */
+function submitFree(){
+  const ta = document.getElementById('freeInput');
+  const text = ta.value.trim();
+  if(!text) return;
+  pushMsg('candidate', text);
+  ta.value = '';
+  const specific = text.length > 40 && /(\$|%|\d|entity|journal|rate|elimination|IC|FX|translation|consolidation|balance|account)/i.test(text);
+  const quality = specific ? 'strong' : 'weak';
+  addScore(['comm'], quality);
+  logPick('freeform', quality, text, ['comm']);
+  setTimeout(() => {
+    pushMsg('interviewer', specific
+      ? "Specific and grounded. Keep working the laptop."
+      : "That's vague — give me something concrete when you're ready to commit.");
+  }, 500);
+}
+document.getElementById('freeInput')?.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submitFree(); }
+});
+
+/* ---------- Final report ---------- */
+function showFinal(){
+  document.getElementById('stage-round').classList.remove('active');
+  document.getElementById('stage-final').classList.add('active');
+
+  const overall = Math.round(CATS.reduce((s,c) => s + STATE.scores[c.key], 0) / CATS.length);
+  const assessment = overall >= 85 ? 'ENTERPRISE FCCS ARCHITECT'
+    : overall >= 70 ? 'STRONG SENIOR ARCHITECT'
+    : overall >= 55 ? 'SOLUTION ARCHITECT — SOLID FOUNDATION'
+    : overall >= 40 ? 'LEAD CONSULTANT — NEEDS MORE ARCHITECTURE DEPTH'
+    : 'SENIOR CONSULTANT — CONTINUE BUILDING FCCS DEPTH';
+
+  const sorted = [...CATS].sort((a,b) => STATE.scores[b.key] - STATE.scores[a.key]);
+  const strengths = sorted.slice(0,3);
+  const weaknesses = sorted.slice(-3).reverse();
+
+  const wrongPicks = STATE.log.filter(e => e.quality !== 'strong' && (e.kind === 'finding' || e.kind === 'decision' || e.kind === 'trust'));
+  const bestDecisions = STATE.log.filter(e => e.quality === 'strong' && e.kind === 'decision');
+
+  let catRows = '';
+  CATS.forEach(c => {
+    catRows += `<div class="cat-row"><div class="name">${c.name}</div><div class="bar"><div class="fill" style="width:${STATE.scores[c.key]}%"></div></div><div class="num">${STATE.scores[c.key]}</div></div>`;
+  });
+
+  let strengthsHtml = strengths.map(c => `<li>${c.name}</li>`).join('');
+  let weaknessHtml = weaknesses.map(c => `<li>${c.name} — ${ADVICE[c.key]}</li>`).join('');
+  let wrongHtml = wrongPicks.slice(0,5).map(e => `<li>Round ${e.round+1}: ${shorten(e.label)}</li>`).join('') || '<li>None significant — consistently evidence-led.</li>';
+  let bestHtml = bestDecisions.slice(0,5).map(e => `<li>Round ${e.round+1}: ${shorten(e.label)}</li>`).join('') || '<li>No standout architect decisions logged.</li>';
+
+  document.getElementById('final-wrap').innerHTML = `
+    <h1>FCCS Architect Interview Report</h1>
+    <div class="score-hero"><span class="big">${overall}</span><span class="of">/ 100</span></div>
+    <div class="assessment">FINAL ASSESSMENT — ${assessment}</div>
+    <div class="final-grid">
+      <div>
+        <div class="report-col">
+          <h4>Category Performance</h4>
+          <div class="cat-list">${catRows}</div>
+        </div>
+      </div>
+      <div>
+        <div class="report-col">
+          <h4>Top Strengths</h4>
+          <ul>${strengthsHtml}</ul>
+          <h4>Recommended Improvement Areas</h4>
+          <ul>${weaknessHtml}</ul>
+        </div>
+      </div>
+    </div>
+    <div class="final-grid" style="margin-top:22px;">
+      <div class="report-col">
+        <h4>Where You Made Assumptions</h4>
+        <ul>${wrongHtml}</ul>
+      </div>
+      <div class="report-col">
+        <h4>Best Architectural Decisions</h4>
+        <ul>${bestHtml}</ul>
+      </div>
+    </div>
+    <button class="restart-btn" onclick="location.reload()">Restart the interview</button>
+  `;
+}
+
+</script>
+</body>
+</html>
