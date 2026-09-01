@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Oracle TRCS Architect — Live Interview Simulator | BISP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1420;
+    --navy:#152A44;
+    --navy-2:#1E3E63;
+    --paper:#F4F6F9;
+    --panel:#FFFFFF;
+    --line:#DEE3EA;
+    --gold:#C4933A;
+    --gold-2:#E0AC4E;
+    --gold-soft:#F5E9CE;
+    --green:#1F8A5F;
+    --green-soft:#E3F3EB;
+    --red:#C0392B;
+    --red-soft:#FBEAE8;
+    --amber:#B9860A;
+    --amber-soft:#FBF1DC;
+    --muted:#5B6672;
+    --text:#152233;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse 1200px 500px at 15% -10%, rgba(196,147,58,.10), transparent 60%),
+      radial-gradient(ellipse 1000px 600px at 100% 0%, rgba(30,62,99,.16), transparent 55%),
+      var(--paper);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  h1,h2,h3,h4,.display{font-family:'Sora',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  #app{display:flex;flex-direction:column;min-height:100vh;}
+
+  /* ---------- Top brand bar ---------- */
+  .brandbar{
+    background:var(--ink);
+    color:#C9D3DE;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 24px;
+    font-size:12.5px;
+    border-bottom:1px solid #223447;
+  }
+  .brandbar .left{display:flex;align-items:center;gap:10px;}
+  .brandbar img{height:26px;display:block;background:#fff;padding:2px 6px;border-radius:5px;}
+  .brandbar .contact{display:flex;gap:20px;color:#9FB0C2;align-items:center;}
+  .brandbar .contact a{color:var(--gold-2);text-decoration:none;font-weight:600;}
+  .brandbar .contact a:hover{text-decoration:underline;}
+
+  /* ---------- Header ---------- */
+  header{
+    background:linear-gradient(120deg,var(--navy) 0%, #0F2036 100%);
+    color:#fff;
+    padding:26px 30px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;
+    background:radial-gradient(circle,rgba(196,147,58,.25),transparent 70%);
+  }
+  header .eyebrow{
+    color:var(--gold-2);
+    font-size:12.5px;
+    letter-spacing:.02em;
+    margin-bottom:7px;
+    font-weight:700;
+    display:flex;align-items:center;gap:8px;
+  }
+  .live-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    background:rgba(192,57,43,.16);color:#FF8A7A;border:1px solid rgba(255,138,122,.35);
+    padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.03em;
+  }
+  .live-badge .dotpulse{width:6px;height:6px;border-radius:50%;background:#FF5A45;animation:pulse 1.1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.5);}}
+  header h1{
+    margin:0 0 5px;
+    font-size:27px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    position:relative;
+  }
+  header p{
+    margin:0;
+    color:#AFC0D2;
+    font-size:14px;
+    max-width:640px;
+    line-height:1.55;
+    position:relative;
+  }
+  .round-track{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 28px;
+    background:#0E1F35;
+    border-top:1px solid #1E3450;
+    border-bottom:1px solid #1E3450;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .round-label{color:#fff;font-weight:600;font-size:14.5px;}
+  .round-label span{color:var(--gold-2);}
+  .dots{display:flex;gap:6px;flex-wrap:wrap;}
+  .dot{
+    width:22px;height:22px;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10.5px;font-weight:600;
+    background:#1A3350;color:#8CA0B8;
+    border:1px solid #2A4665;
+    transition:all .25s ease;
+  }
+  .dot.done{background:var(--green);color:#fff;border-color:var(--green);}
+  .dot.active{background:var(--gold);color:#1A1204;border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,147,58,.25);}
+
+  /* ---------- Cover / hero (pre-start) ---------- */
+  .cover{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:60px 24px;gap:18px;
+  }
+  .cover .cover-icon{
+    width:74px;height:74px;border-radius:18px;background:linear-gradient(135deg,var(--navy),var(--gold));
+    display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;
+    box-shadow:0 14px 30px -10px rgba(21,42,68,.45);
+  }
+  .cover h2{font-size:23px;margin:4px 0 2px;color:var(--ink);}
+  .cover p{max-width:480px;color:var(--muted);font-size:14.5px;line-height:1.6;margin:0;}
+  .cover .kick{
+    display:inline-flex;gap:7px;align-items:center;background:var(--gold-soft);color:#7A5A17;
+    padding:5px 13px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.02em;
+  }
+  .cover .voicehint{font-size:12px;color:var(--muted);margin-top:6px;}
+
+  /* ---------- Floating start / control button ---------- */
+  .float-start{
+    position:fixed;right:28px;bottom:28px;z-index:60;
+    width:76px;height:76px;border-radius:50%;
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));
+    border:none;color:#20150A;font-size:26px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 16px 32px -10px rgba(196,147,58,.55),0 0 0 6px rgba(196,147,58,.14);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .float-start:hover{transform:scale(1.06);}
+  .float-start:active{transform:scale(.96);}
+  .float-start.playing{
+    background:linear-gradient(135deg,#20344E,#152A44);color:#fff;width:58px;height:58px;font-size:19px;
+    box-shadow:0 10px 24px -8px rgba(10,20,32,.5);
+  }
+  .float-caption{
+    position:fixed;right:28px;bottom:112px;z-index:60;
+    font-size:11px;color:var(--muted);background:#fff;border:1px solid var(--line);
+    padding:4px 10px;border-radius:20px;box-shadow:0 4px 10px rgba(0,0,0,.06);
+  }
+
+  /* ---------- Main 3-panel grid ---------- */
+  .stage{
+    display:grid;
+    grid-template-columns:1.1fr 1.5fr 1fr;
+    gap:16px;
+    padding:18px;
+    align-items:start;
+    flex:1;
+    animation:fadein .5s ease;
+  }
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  @media (max-width:1050px){
+    .stage{grid-template-columns:1fr;}
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 1px 2px rgba(16,30,48,.04);
+    transition:box-shadow .3s ease, border-color .3s ease;
+  }
+  .panel.speaking-interviewer{border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(30,62,99,.14);}
+  .panel.speaking-candidate{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,147,58,.18);}
+  .panel-head{
+    padding:12px 16px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#FBFBFC;
+  }
+  .panel-head .tag{
+    width:8px;height:8px;border-radius:50%;
+  }
+  .panel-head h3{
+    margin:0;font-size:12.5px;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--muted);font-weight:700;
+  }
+  .panel-body{padding:16px;overflow-y:auto;}
+
+  /* Interview panel */
+  #interviewPanel .panel-body{max-height:620px;}
+  .bubble{margin-bottom:14px;display:flex;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease;}
+  .bubble.show{opacity:1;transform:translateY(0);}
+  .avatar{
+    width:32px;height:32px;border-radius:9px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;
+    margin-top:2px;
+  }
+  .avatar.gtd{background:linear-gradient(135deg,var(--navy-2),var(--navy));}
+  .avatar.cand{background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#20150A;}
+  .bubble-col{flex:1;min-width:0;}
+  .bubble .who{font-size:11.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+  .bubble.interviewer .who{color:var(--navy-2);}
+  .bubble.candidate .who{color:var(--gold);}
+  .livedot{width:7px;height:7px;border-radius:50%;background:var(--red);display:none;animation:pulse 1s infinite;}
+  .bubble.talking .livedot{display:inline-block;}
+  .bubble .msg{
+    font-size:14px;line-height:1.55;
+    padding:10px 13px;border-radius:10px;
+    border:1px solid var(--line);
+  }
+  .bubble.interviewer .msg{background:#EEF3F8;border-color:#DCE6F0;}
+  .bubble.candidate .msg{background:#FBF7EE;border-color:var(--gold-soft);}
+  .bubble.thinking .msg{
+    background:transparent;border:1px dashed #C7CDD5;
+    font-style:italic;color:var(--muted);font-size:13.5px;
+  }
+  .bubble.attack .msg{background:var(--red-soft);border-color:#F0CAC5;color:#7A241A;}
+  .bubble.defense .msg{background:var(--green-soft);border-color:#BFE3D2;color:#155538;}
+
+  /* Workspace panel */
+  #workPanel .panel-head{background:var(--ink);border-bottom:none;}
+  #workPanel .panel-head h3{color:#B9C4D1;}
+  #workPanel{background:#0E1A2B;}
+  .ws-inner{
+    background:var(--paper);
+    border-radius:8px;
+    margin:0;
+  }
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px;}
+  .kpi{
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+  }
+  .kpi .k-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;}
+  .kpi .k-val{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;color:var(--ink);}
+  .kpi .k-val.pos{color:var(--red);}
+  .kpi .k-val.neg{color:var(--green);}
+
+  .field-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .field{flex:1;min-width:130px;}
+  .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .field input{
+    width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;
+    font-family:'IBM Plex Mono',monospace;font-size:13.5px;background:#fff;
+  }
+  .field input:focus{outline:2px solid var(--gold);outline-offset:0;border-color:var(--gold);}
+
+  table.wtable{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
+  table.wtable th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);
+  }
+  table.wtable td{padding:7px 8px;border-bottom:1px solid #EEF0F3;font-family:'IBM Plex Mono',monospace;}
+  table.wtable td.txt{font-family:'Inter',sans-serif;}
+  table.wtable tr:last-child td{font-weight:700;border-top:1px solid var(--line);border-bottom:none;background:#FAFAFB;}
+
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;transition:all .3s ease;}
+  .badge.red{background:var(--red-soft);color:var(--red);}
+  .badge.green{background:var(--green-soft);color:var(--green);}
+  .badge.amber{background:var(--amber-soft);color:var(--amber);}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--navy);color:#fff;border:none;border-radius:7px;
+    padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .btn.gold{background:var(--gold);color:#20150A;}
+  .btn.outline{background:transparent;color:var(--navy);border:1px solid var(--line);}
+
+  .note{font-size:12.5px;color:var(--muted);line-height:1.5;margin:8px 0;}
+  .arch-box{
+    border:1px solid var(--line);background:#fff;border-radius:8px;
+    padding:10px 12px;text-align:center;font-size:12.5px;font-weight:600;color:var(--navy);
+  }
+  .arch-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .arch-flow .arrow{color:var(--muted);font-size:14px;}
+
+  .chip-flow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .chip{
+    background:#fff;border:1px solid var(--line);border-radius:16px;padding:5px 11px;
+    font-size:12px;font-weight:600;color:var(--navy);
+  }
+
+  .waterfall{display:flex;align-items:flex-end;gap:8px;height:150px;margin:14px 0 6px;}
+  .wf-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .wf-fill{width:100%;border-radius:4px 4px 0 0;transition:height .5s ease;}
+  .wf-val{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-bottom:4px;color:var(--ink);}
+  .wf-label{font-size:10px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.3;}
+
+  .checklist{list-style:none;margin:0;padding:0;}
+  .checklist li{
+    display:flex;align-items:flex-start;gap:8px;font-size:13px;
+    padding:6px 0;border-bottom:1px solid #F0F1F3;color:var(--text);
+    transition:color .3s ease;
+  }
+  .checklist li.done{color:var(--muted);text-decoration:line-through;}
+  .checklist li .cbox{
+    width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line);flex-shrink:0;margin-top:1px;
+    display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .3s ease;
+  }
+  .checklist li.done .cbox{background:var(--green);border-color:var(--green);color:#fff;}
+  .checklist li.active .cbox{border-color:var(--gold);background:var(--gold-soft);}
+
+  .hyp-box{
+    background:var(--gold-soft);border:1px solid #E7D2A0;border-radius:10px;padding:12px;margin-top:14px;
+  }
+  .hyp-box .h-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:#8A6415;font-weight:700;margin-bottom:4px;}
+  .hyp-box .h-text{font-size:13.5px;font-weight:600;color:#4A3510;margin-bottom:10px;}
+  .conf-bar{height:7px;background:#EAD9AE;border-radius:4px;overflow:hidden;margin-bottom:4px;}
+  .conf-fill{height:100%;background:var(--gold);transition:width .6s ease;}
+  .conf-pct{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#6B4D0F;}
+  .next-action{
+    margin-top:12px;padding-top:12px;border-top:1px dashed #E7D2A0;
+    font-size:12.5px;color:#4A3510;
+  }
+  .next-action b{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:#8A6415;margin-bottom:3px;}
+
+  /* Scorecard */
+  .scorecard-wrap{padding:32px 28px 60px;max-width:900px;margin:0 auto;flex:1;animation:fadein .6s ease;}
+  .scorecard-wrap h2{font-size:25px;margin-bottom:4px;}
+  .scorecard-wrap .sub{color:var(--muted);font-size:14px;margin-bottom:22px;}
+  .score-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px;
+  }
+  .score-row{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+  .score-row .comp{font-size:13.5px;color:var(--text);}
+  .score-row .val{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--navy);}
+  .classify{
+    display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,var(--navy),#0F2036);color:#fff;border-radius:12px;
+    padding:20px 22px;margin-bottom:26px;
+  }
+  .classify .cbadge{
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#20150A;font-weight:700;font-size:13px;
+    padding:7px 13px;border-radius:7px;white-space:nowrap;
+  }
+  .classify .ctext{font-size:14px;color:#CFDBE8;line-height:1.5;}
+
+  /* BISP promo */
+  .promo{
+    background:linear-gradient(135deg,var(--ink) 0%, #1B3352 100%);
+    color:#fff;border-radius:14px;padding:28px 28px;margin-top:8px;
+    display:flex;gap:22px;align-items:center;flex-wrap:wrap;
+    box-shadow:0 20px 40px -18px rgba(10,20,32,.5);
+  }
+  .promo img{height:48px;background:#fff;padding:7px 11px;border-radius:7px;flex-shrink:0;}
+  .promo .ptext{flex:1;min-width:240px;}
+  .promo .ptext h4{margin:0 0 4px;font-size:18px;font-family:'Sora',sans-serif;}
+  .promo .ptext p{margin:0 0 10px;font-size:13.5px;color:#B9C7D6;line-height:1.55;}
+  .promo .pcontact{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;}
+  .promo .pcontact a{color:var(--gold-2);text-decoration:none;font-weight:600;}
+  .promo .pcontact a:hover{text-decoration:underline;}
+  .promo .cta{
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#20150A;font-weight:700;font-size:13.5px;
+    padding:11px 19px;border-radius:8px;white-space:nowrap;text-decoration:none;
+  }
+
+  .footerbar{
+    text-align:center;padding:14px;font-size:11.5px;color:var(--muted);
+    border-top:1px solid var(--line);
+  }
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div class="brandbar">
+  <div class="left">
+    <img src="data:image/jpeg;base64,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" alt="BISP">
+    <span>Business Intelligence Solution Providers Inc.</span>
+  </div>
+  <div class="contact">
+    <span>Enterprise Oracle EPM &amp; Tax Technology Training</span>
+    <a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a>
+    <a href="tel:+917694095404">Call Us: +91 769-409-5404</a>
+  </div>
+</div>
+
+<header>
+  <div class="eyebrow">Live Enterprise Simulation · Oracle Tax Reporting Cloud Service <span class="live-badge" id="liveBadge" style="display:none;"><span class="dotpulse"></span>LIVE</span></div>
+  <h1>Oracle TRCS Senior Architect — Live Interview Simulator</h1>
+  <p>A 12-round, hands-on assessment. The Global Tax Technology Director asks; the candidate investigates, calculates, and defends every decision inside a live TRCS-style workspace — fully narrated, hands-free.</p>
+</header>
+
+<div class="round-track" id="roundTrack" style="display:none;">
+  <div class="round-label">Round <span id="roundNum">1</span> of 12 — <span id="roundTitle">Enterprise Architecture Defense</span></div>
+  <div class="dots" id="dotsWrap"></div>
+</div>
+
+<div class="cover" id="coverStage">
+  <div class="kick">🎧 Voice-narrated · Fully automatic</div>
+  <div class="cover-icon">▶</div>
+  <h2>Press play to begin the live interview</h2>
+  <p>Twelve rounds run end to end on their own — the Director's questions and the candidate's confident, Indian-English responses are narrated aloud, the workspace investigates itself, and the final BISP scorecard closes the show.</p>
+  <div class="voicehint">Turn your sound on for the full experience.</div>
+</div>
+
+<div id="stageWrap"></div>
+
+<div class="footerbar">Oracle TRCS Architect Live Interview Simulator — an original training simulation built by BISP. Not affiliated with or endorsed by Oracle Corporation.</div>
+
+</div>
+
+<button class="float-start" id="floatStart" onclick="handleFloatClick()" aria-label="Start simulation">▶</button>
+
+<script>
+/* ============== ROUND DATA ============== */
+const ROUNDS = [
+{
+  title:"Enterprise Architecture Defense",
+  interviewer:"You're the Lead TRCS Architect for a group with 500 plus legal entities across 40 plus countries, running both quarterly and annual provision. Design the application from zero — entity structure, jurisdictions, periods, scenarios, reporting.",
+  thinking:"Before I design anything I need to fix the dimensions that will carry the most metadata churn: Entity and Jurisdiction. If I get those wrong, every future rate change or restructuring becomes a metadata project instead of a data entry.",
+  response:"I would build a Legal Entity hierarchy separate from the Reporting and Consolidation hierarchy, with a Jurisdiction attribute tagging each entity to its tax regime. Tax rates live at the jurisdiction level, inherited by every entity in it, so a rate change is one metadata update, not five hundred. Period and Scenario follow a standard Actual, Forecast, Quarter, Annual pattern with a locked as-filed snapshot after each close.",
+  action:"Open Entity &amp; Jurisdiction Designer",
+  workspace:{type:"arch"},
+  checklist:["Confirm entity count and consolidation hierarchy","Separate jurisdiction as an attribute, not a hierarchy","Define period/scenario strategy","Design metadata governance and change control","Stress-test against a rate change"],
+  activeIdx:2,
+  hypothesis:"Architecture should decouple 'jurisdiction' from 'entity hierarchy' so rate changes scale independently of the org chart.",
+  confidence:78,
+  nextAction:"Simulate a mid-quarter German rate change against this structure.",
+  attack:"Germany changes its rate mid-quarter, India has late adjustments, and the US is sitting on significant losses — all in the same close. Does your design survive that, or did you just design for the happy path?",
+  defense:"Because rate lives at the jurisdiction level, Germany's change touches one attribute and cascades to every German entity automatically. India's late adjustment is isolated to its own entity node and does not restate anyone else. The US losses sit on a separate Tax Attribute cube, so that judgment call never touches current tax elsewhere. The design isolates blast radius by dimension — that is the whole point of separating jurisdiction from entity."
+},
+{
+  title:"Current Tax — Live Calculation",
+  interviewer:"Book income is eighty million dollars, permanent differences twelve million, temporary differences eighteen million, tax credits three million, statutory rate twenty five percent. Don't explain it — use the workspace and calculate the current tax provision.",
+  thinking:"Permanent differences move taxable income and never reverse — they belong in the current tax calc. Temporary differences also move taxable income today, but they reverse later, so they simultaneously seed a deferred tax balance. I need to keep those two effects visibly separate.",
+  response:"I'll build taxable income as book income plus permanent differences plus temporary differences, apply the statutory rate, then net off the credit. The temporary difference line is also what feeds the deferred tax roll-forward this quarter — same eighteen million, two destinations.",
+  action:"Open Current Tax Analysis workspace",
+  workspace:{type:"currenttax"},
+  checklist:["Separate book income from tax adjustments","Classify permanent vs temporary differences","Compute taxable income","Apply statutory rate and net credits","Validate against prior period roll-forward"],
+  activeIdx:3,
+  hypothesis:"Current tax equals Book Income plus Permanent plus Temporary Difference, times rate, minus credits.",
+  confidence:85,
+  nextAction:"Run the duplicate-adjustment check to confirm the eighteen million temporary difference wasn't double posted.",
+  attack:"What if one of those adjustments was posted twice by the local preparer before you saw this?",
+  defense:"That is exactly why I run the duplicate-adjustment check before I sign off — it flags any adjustment ID posted more than once in the period and holds the provision until it is resolved. Watch the workspace: flagging it, and resolving it, changes the number immediately."
+},
+{
+  title:"Deferred Tax War Room",
+  interviewer:"Production incident: Deferred Tax Liability increased by twelve million dollars during the quarterly close and nobody can explain it. You have limited information. Investigate live.",
+  thinking:"A DTL movement this size is almost always a mix of causes, not one. I need to bridge opening to closing balance and attribute every dollar to a named driver before I say anything to the Director.",
+  response:"I'll open the deferred tax variance analysis, bridge opening to closing balance, and split the movement across rate changes, temporary difference movements, entity level changes, and late adjustments — then chase whatever is left.",
+  action:"Open Deferred Tax Variance Analysis",
+  workspace:{type:"dtvariance"},
+  checklist:["Pull opening vs closing DTL balance","Isolate tax rate change impact","Isolate temporary difference movement","Isolate late adjustments","Reconcile the unexplained residual"],
+  activeIdx:4,
+  hypothesis:"Primary driver is a tax rate remeasurement, with a residual still unexplained.",
+  confidence:72,
+  nextAction:"Review tax rate history for the affected jurisdictions.",
+  attack:"You've explained seven point two million of the twelve million. Where's the other four point eight million — and don't tell me it's rounding.",
+  defense:"Three point one million is a temporary difference movement in ordinary operations, and one point seven million is a late adjustment posted after the first close pass — that accounts for the full twelve million. I am flagging the late adjustment process separately, because a number that size landing after close is a control gap, not just a reconciling item."
+},
+{
+  title:"Tax Rate Change Simulation",
+  interviewer:"The statutory rate drops from thirty percent to twenty five percent, affecting a one hundred forty four million dollar temporary difference. Run the remeasurement live.",
+  thinking:"Remeasurement is mechanical — old rate versus new rate against the same balance — but the risk is scope, not math. If this only applies to certain entities and I remeasure the whole jurisdiction, I've created a new variance I'll be defending next quarter.",
+  response:"I'll remeasure the one hundred forty four million dollar temporary difference at both rates side by side, show the deferred tax expense delta, then scope the change to only the entities the rate actually applies to.",
+  action:"Open Tax Rate Management workspace",
+  workspace:{type:"ratechange"},
+  checklist:["Identify affected temporary difference balance","Remeasure at old and new rate","Quantify deferred tax expense impact","Scope the change to affected entities only","Log the change for audit"],
+  activeIdx:3,
+  hypothesis:"Remeasurement releases deferred tax expense equal to the balance times the rate delta.",
+  confidence:90,
+  nextAction:"Restrict the rate change to the entities actually in that jurisdiction before posting.",
+  attack:"How do you make sure this rate change doesn't accidentally bleed into jurisdictions where the rate never moved?",
+  defense:"The rate change is applied as a jurisdiction-scoped metadata update, not a global constant, so only entities tagged to that jurisdiction inherit it. Watch the scope toggle — restricting it to the actual affected entities changes the remeasured balance immediately, and any mismatch would block the close."
+},
+{
+  title:"Effective Tax Rate Deep Dive",
+  interviewer:"The CFO says the effective tax rate increased by four point eight percent versus last quarter. Explain it in three minutes, with evidence.",
+  thinking:"ETR moves for a small set of reasons — statutory rate, permanent differences, foreign rate differentials, credits, and one-off adjustments. I need the waterfall, not a paragraph.",
+  response:"I'll build the ETR waterfall from statutory rate down through permanent differences, foreign rate differences, credits, and other adjustments to the final rate, and read off which bar moved most since last quarter.",
+  action:"Open ETR Waterfall Analysis",
+  workspace:{type:"etr"},
+  checklist:["Start from statutory rate","Add permanent difference impact","Add foreign rate differential","Net tax credits","Isolate one-off adjustments","Attribute the 4.8pt movement"],
+  activeIdx:2,
+  hypothesis:"Most of the movement is a foreign rate differential, not a one-off item.",
+  confidence:68,
+  nextAction:"Compare the foreign rate differential bar quarter over quarter.",
+  attack:"That answer works for explaining last quarter. What's your process for catching this before the CFO has to ask?",
+  defense:"I don't wait for a CFO question — the waterfall is a standing report reviewed every close, with a threshold alert if any single driver moves more than one point quarter over quarter. This variance would have triggered that alert during review, before the number ever reached the CFO."
+},
+{
+  title:"Tax Losses &amp; Credits",
+  interviewer:"Why are you recognizing a deferred tax asset on an entity that has reported losses for three consecutive years?",
+  thinking:"Three years of losses is a real red flag for realizability, but it is not automatically disqualifying — I need to look at whether there is a specific, identifiable reason the losses will stop.",
+  response:"I'll open the tax loss workbench, check expiration dates and jurisdiction restrictions per entity, and separate losses I can utilize against known forecast income from losses that need a valuation allowance — recognition follows evidence, not a blanket rule either way.",
+  action:"Open Tax Loss Workbench",
+  workspace:{type:"losses"},
+  checklist:["Pull opening loss balance by jurisdiction","Identify expiring vs usable losses","Check jurisdiction utilization restrictions","Assess valuation allowance evidence","Confirm DTA recognition entity by entity"],
+  activeIdx:3,
+  hypothesis:"Only losses with concrete forecast utilization support DTA recognition; the rest need a valuation allowance.",
+  confidence:75,
+  nextAction:"Pull the forecast income supporting utilization for the flagged entity.",
+  attack:"Concrete forecast utilization is exactly what every over-optimistic finance team says right before the loss expires unused. Prove it.",
+  defense:"I don't take the forecast at face value — I cross-check it against signed contracts or committed order backlog, not a budget target, and I require the same forecast to have been directionally accurate in the prior two cycles. If it doesn't clear both tests, that entity moves to a valuation allowance regardless of what the forecast says."
+},
+{
+  title:"Data Quality &amp; Validation Crisis",
+  interviewer:"The tax provision does not reconcile. Work through the validation center and fix it — I am not going to tell you the answer.",
+  thinking:"Five different error types means I shouldn't fix them in the order they appear on screen — I should fix in the order that unblocks the most downstream calculations.",
+  response:"I'll prioritize missing entity data first since nothing downstream is trustworthy without it, then the duplicate adjustment, then the rate mismatch and invalid temporary difference, and re-validate after each fix rather than batching them.",
+  action:"Open Validation Center",
+  workspace:{type:"validation"},
+  checklist:["Resolve missing entity data","Remove duplicate adjustment","Correct tax rate mismatch","Fix invalid temporary difference","Re-run validation and confirm reconciliation"],
+  activeIdx:0,
+  hypothesis:"The reconciliation break is driven by more than one error compounding together.",
+  confidence:60,
+  nextAction:"Resolve each flagged item in the validation center on the left.",
+  attack:"You just fixed five separate errors in one sitting. What stops the same five from coming back next quarter?",
+  defense:"Each of these maps to a control gap, not just a data fix — missing entity data means a submission-completeness check needs to run before close opens, and the duplicate adjustment means adjustment IDs need to be system-generated instead of manually keyed. I'll take those two as process changes, not just this quarter's cleanup."
+},
+{
+  title:"Automation &amp; REST API Design",
+  interviewer:"The quarterly provision process is highly manual. Design an automated pipeline with monitoring and exception handling — then tell me what happens when the data load fails at two AM.",
+  thinking:"Automation isn't just chaining jobs — the design only matters at the point of failure. I need to know how a failed step is detected, stopped safely, and restarted without double processing.",
+  response:"Source data feeds a validation step, then load, calculation, a second validation pass, tax review, ETR analysis, and final reporting — each step orchestrated through the TRCS REST API with a job-status poll after every call, not a fire-and-forget trigger.",
+  action:"Open Automation &amp; Job Orchestration workspace",
+  workspace:{type:"automation"},
+  checklist:["Map the end-to-end pipeline sequence","Define REST API call and status-poll pattern","Design failure detection","Design safe stop and idempotent retry","Define monitoring and audit logging"],
+  activeIdx:3,
+  hypothesis:"A failed load should halt the pipeline and require an idempotent retry, never an automatic re-trigger.",
+  confidence:80,
+  nextAction:"Confirm the retry job checks a load-status flag before resubmitting.",
+  attack:"It is two AM, the load just failed, and nobody's awake. What actually happens in the next five minutes?",
+  defense:"The orchestration job polls load status via the REST API; a failure sets the job to a halted state and fires an alert to the on-call channel — it does not retry automatically. When someone picks it up, the retry job checks a load-status flag first, so it cannot resubmit data that already landed."
+},
+{
+  title:"Performance Tuning Under Pressure",
+  interviewer:"The close used to take ten minutes. It is now forty five. Diagnose it live.",
+  thinking:"A four-times slowdown is rarely one cause — it is usually data volume growth compounding with a calculation or workflow inefficiency that was always there but didn't matter at a smaller scale.",
+  response:"I'll open the performance command center, compare data volume and calculation duration against the historical baseline, then check for unnecessary full-cube recalculations and workflow dependencies that are serializing steps that could run in parallel.",
+  action:"Open Performance Command Center",
+  workspace:{type:"performance"},
+  checklist:["Compare current vs historical processing time","Check data volume growth","Identify full vs incremental calculation usage","Review workflow dependency serialization","Draft immediate, short-term, and long-term fixes"],
+  activeIdx:2,
+  hypothesis:"An unscoped full calculation is running where an incremental calc would suffice, amplified by data growth.",
+  confidence:82,
+  nextAction:"Confirm whether the calculation script is scoped to changed entities or the entire cube.",
+  attack:"Your immediate fix buys you a quarter. What's the actual architecture problem underneath it?",
+  defense:"The immediate fix is scoping the calculation to changed entities, which recovers most of the time this quarter. The underlying problem is that data volume outgrew a design that assumed full recalculation was cheap — the long-term fix is an incremental-by-design calculation plus a data archival policy."
+},
+{
+  title:"Security &amp; Governance Defense",
+  interviewer:"Design role-based security for tax preparer, tax reviewer, country tax manager, global tax director, system administrator, and internal auditor. Can the same person prepare and approve a critical adjustment?",
+  thinking:"Segregation of duties is the whole point of this question — if I design roles by convenience instead of by conflict, I will have technically satisfied access while leaving a control hole an auditor finds in five minutes.",
+  response:"Preparer can enter but not approve; reviewer can approve but not enter their own submissions; country manager approves at the entity level; global director has cross-entity visibility but not transactional entry; admin manages configuration, not tax data; auditor gets read-only access to everything, including the audit trail.",
+  action:"Open Role &amp; Segregation of Duties Matrix",
+  workspace:{type:"security"},
+  checklist:["Define each role's access boundary","Enforce preparer/approver segregation","Restrict admin to configuration, not data entry","Grant auditor read-only, full-scope access","Confirm no role can self-approve"],
+  activeIdx:1,
+  hypothesis:"The only real risk is a preparer also holding reviewer rights on their own entity.",
+  confidence:88,
+  nextAction:"Run the self-approval conflict check across all active users.",
+  attack:"No — can the same person prepare and approve a critical adjustment in your design?",
+  defense:"No. The system enforces it structurally, not by policy memo — a submission and its approval cannot share the same user ID, checked at the workflow-transition level, so even a system administrator cannot grant themselves both roles without that action itself being logged and flagged to the auditor role."
+},
+{
+  title:"Global Tax Close Disaster",
+  interviewer:"Quarter-end, five things are on fire at once: Germany's rate changed, the US has an unexpected loss movement, India's adjustment was loaded twice, UK deferred tax doesn't reconcile, and several entities are still pending review. You have thirty minutes to stabilize the close.",
+  thinking:"Under real time pressure I cannot investigate everything with equal depth — I need to triage by what's blocking the close versus what's explainable variance, and delegate what doesn't require me personally.",
+  response:"I'll remove the India duplicate first since it is mechanical and fast, hand pending reviews to the country managers in parallel, personally take the UK reconciliation and Germany rate scope since those need architect judgment, and treat the US loss movement as a note for next quarter unless it blocks reconciliation today.",
+  action:"Open Close Control Center",
+  workspace:{type:"closecontrol"},
+  checklist:["Remove India duplicate adjustment","Delegate pending country reviews","Reconcile UK deferred tax","Confirm Germany rate change scope","Report closing status to Global Tax Director"],
+  activeIdx:0,
+  hypothesis:"The India duplicate and pending reviews are quick wins; UK and Germany need direct architect attention.",
+  confidence:70,
+  nextAction:"Resolve every critical item on the close control board.",
+  attack:"Your first hypothesis on the UK break was wrong. What do you do now, with the clock still running?",
+  defense:"I don't defend a wrong hypothesis under time pressure — I state it was wrong, say what the evidence actually shows, and move immediately to the next most likely driver. The UK break turned out to be a late adjustment, not a rate issue, so I redirect straight to the adjustment log. Watch the board — every item turns stable."
+},
+{
+  title:"The Final Enterprise Architect Challenge",
+  interviewer:"Rate changes, deferred tax, ETR variance, tax losses, data errors, late adjustments, performance problems, an automation failure, and a security gap — all at once, information arriving gradually. Adapt as I give you more.",
+  thinking:"This is a stress test of process, not knowledge — the only way through nine simultaneous issues is to keep re-prioritizing as each new fact arrives, instead of committing early to one root cause and defending it out of stubbornness.",
+  response:"I'll keep a single live priority list, re-rank it every time new information arrives, and explicitly say when a new fact changes my read of an earlier issue rather than quietly abandoning it.",
+  action:"Open Enterprise Command Center",
+  workspace:{type:"final"},
+  checklist:["Maintain a single live priority list","Re-rank on every new fact","Explicitly retire disproven hypotheses","Separate architect-only issues from delegable ones","Deliver a stabilized, explainable close"],
+  activeIdx:1,
+  hypothesis:"No single root cause explains all nine issues — they need independent tracks that share a priority queue.",
+  confidence:65,
+  nextAction:"Review the combined issue board and re-sequence as each new fact lands.",
+  attack:"A true architect doesn't just have answers — they know when they were wrong. Where were you wrong today, and how did you know?",
+  defense:"I was wrong that the UK break and the German rate change were related — I initially assumed one rate error explained both. The evidence stopped supporting that the moment the UK adjustment log showed a late entry with no rate component. I dropped the shared-cause hypothesis the moment the data contradicted it, rather than stretching the explanation to fit. That is the discipline this role actually requires."
+}
+];
+
+/* ============== STATE ============== */
+let current = 0;
+let isPlaying = false;
+let hasStarted = false;
+let voicesReady = [];
+
+function money(n){
+  const sign = n<0 ? "-" : "";
+  return sign + "$" + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:1});
+}
+function decodeHtml(html){
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.textContent || d.innerText || '';
+}
+
+/* ============== VOICE ENGINE ============== */
+function loadVoices(){ voicesReady = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+if(window.speechSynthesis){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+function pickVoice(kind){
+  if(!voicesReady.length) loadVoices();
+  const list = voicesReady;
+  if(kind==='candidate'){
+    return list.find(v=>v.lang && v.lang.toLowerCase()==='en-in')
+        || list.find(v=>/india/i.test(v.name))
+        || list.find(v=>v.lang && v.lang.toLowerCase().startsWith('en'))
+        || list[0];
+  }
+  return list.find(v=>v.lang && v.lang.toLowerCase()==='en-gb' && !/india/i.test(v.name))
+      || list.find(v=>v.lang && v.lang.toLowerCase().startsWith('en') && !/india/i.test(v.name))
+      || list[0];
+}
+function speak(rawText, kind, onDone){
+  if(!window.speechSynthesis){ if(onDone) onDone(); return; }
+  const text = decodeHtml(rawText);
+  const u = new SpeechSynthesisUtterance(text);
+  const v = pickVoice(kind);
+  if(v) u.voice = v;
+  u.lang = kind==='candidate' ? 'en-IN' : (v && v.lang ? v.lang : 'en-GB');
+  u.rate = kind==='candidate' ? 1.03 : 0.97;
+  u.pitch = kind==='candidate' ? 1.08 : 0.92;
+  u.onend = ()=>{ if(onDone) onDone(); };
+  u.onerror = ()=>{ if(onDone) onDone(); };
+  window.speechSynthesis.speak(u);
+}
+function stopSpeaking(){ if(window.speechSynthesis) window.speechSynthesis.cancel(); }
+
+/* ============== RENDER HELPERS ============== */
+function renderDots(){
+  const wrap = document.getElementById('dotsWrap');
+  wrap.innerHTML = '';
+  ROUNDS.forEach((r,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i<current?' done':'') + (i===current?' active':'');
+    d.textContent = i+1;
+    wrap.appendChild(d);
+  });
+}
+
+function panelShell(id,label,color,bodyHtml){
+  return `<div class="panel" id="${id}">
+    <div class="panel-head"><span class="tag" style="background:${color}"></span><h3>${label}</h3></div>
+    <div class="panel-body">${bodyHtml}</div>
+  </div>`;
+}
+
+function renderInterview(r){
+  return `
+    <div class="bubble interviewer show" id="bub-interviewer">
+      <div class="avatar gtd">GTD</div>
+      <div class="bubble-col"><div class="who">Global Tax Technology Director <span class="livedot"></span></div><div class="msg">${r.interviewer}</div></div>
+    </div>
+    <div class="bubble thinking" id="bub-thinking">
+      <div class="avatar cand" style="opacity:.5;">CA</div>
+      <div class="bubble-col"><div class="who" style="color:var(--muted)">Architect — thinking</div><div class="msg">${r.thinking}</div></div>
+    </div>
+    <div class="bubble candidate" id="bub-candidate">
+      <div class="avatar cand">CA</div>
+      <div class="bubble-col"><div class="who">Candidate <span class="livedot"></span></div><div class="msg">${r.response}</div></div>
+    </div>
+    <div class="bubble attack" id="bub-attack">
+      <div class="avatar gtd">GTD</div>
+      <div class="bubble-col"><div class="who" style="color:var(--red)">Follow-up attack <span class="livedot"></span></div><div class="msg">${r.attack}</div></div>
+    </div>
+    <div class="bubble defense" id="bub-defense">
+      <div class="avatar cand">CA</div>
+      <div class="bubble-col"><div class="who" style="color:var(--green)">Architect — final defense <span class="livedot"></span></div><div class="msg">${r.defense}</div></div>
+    </div>
+  `;
+}
+
+function renderThinking(r){
+  const items = r.checklist.map((c,i)=>{
+    const cls = i < r.activeIdx ? 'done' : (i===r.activeIdx ? 'active' : '');
+    const mark = i < r.activeIdx ? '✓' : '';
+    return `<li class="${cls}" data-idx="${i}"><span class="cbox">${mark}</span>${c}</li>`;
+  }).join('');
+  return `
+    <ul class="checklist" id="thinkChecklist">${items}</ul>
+    <div class="hyp-box">
+      <div class="h-label">Current hypothesis</div>
+      <div class="h-text">${r.hypothesis}</div>
+      <div class="h-label" style="margin-bottom:5px;">Confidence</div>
+      <div class="conf-bar"><div class="conf-fill" id="confFill" style="width:${r.confidence}%"></div></div>
+      <div class="conf-pct" id="confPct">${r.confidence}%</div>
+      <div class="next-action"><b>Next best action</b>${r.nextAction}</div>
+    </div>
+  `;
+}
+
+/* ---------- Workspace builders per round type ---------- */
+function wsArch(){
+  return `<div class="ws-inner">
+    <div class="note">Metadata hierarchy — jurisdiction sits as an attribute, independent of the consolidation roll-up.</div>
+    <div class="arch-flow">
+      <div class="arch-box">Global Consolidation</div><span class="arrow">→</span>
+      <div class="arch-box">Region</div><span class="arrow">→</span>
+      <div class="arch-box">Country / Jurisdiction</div><span class="arrow">→</span>
+      <div class="arch-box">Legal Entity</div>
+    </div>
+    <table class="wtable">
+      <tr><th>Dimension</th><th>Design Choice</th><th>Why</th></tr>
+      <tr><td class="txt">Entity</td><td class="txt">Consolidation hierarchy</td><td class="txt">Mirrors legal ownership, not tax</td></tr>
+      <tr><td class="txt">Jurisdiction</td><td class="txt">Attribute on entity</td><td class="txt">Rate change = 1 update, not 500</td></tr>
+      <tr><td class="txt">Period/Scenario</td><td class="txt">Actual/Forecast × Qtr/Annual</td><td class="txt">Locked snapshot after each close</td></tr>
+    </table>
+    <div id="archComplication" style="display:none;margin-top:10px;" class="note">
+      <b style="color:var(--red)">Germany</b> rate changes mid-quarter → jurisdiction attribute update cascades automatically.
+      <b style="color:var(--red)">India</b> late adjustment → isolated to its entity node, no restatement elsewhere.
+      <b style="color:var(--red)">US</b> large losses → tracked on a separate Tax Attribute cube, untouched by the above.
+    </div>
+  </div>`;
+}
+function demoArchAttack(){
+  const el = document.getElementById('archComplication');
+  if(el) el.style.display='block';
+}
+
+function wsCurrentTax(){
+  return `<div class="ws-inner">
+    <div class="field-row">
+      <div class="field"><label>Book Income ($M)</label><input type="number" id="ct_book" value="80" oninput="calcCurrentTax()"></div>
+      <div class="field"><label>Permanent Diff ($M)</label><input type="number" id="ct_perm" value="12" oninput="calcCurrentTax()"></div>
+      <div class="field"><label>Temporary Diff ($M)</label><input type="number" id="ct_temp" value="18" oninput="calcCurrentTax()"></div>
+      <div class="field"><label>Tax Credits ($M)</label><input type="number" id="ct_credit" value="3" oninput="calcCurrentTax()"></div>
+      <div class="field"><label>Tax Rate (%)</label><input type="number" id="ct_rate" value="25" oninput="calcCurrentTax()"></div>
+    </div>
+    <label style="font-size:12.5px;display:flex;gap:6px;align-items:center;margin-bottom:10px;">
+      <input type="checkbox" id="ct_dup" onchange="calcCurrentTax()"> Flag: temporary difference posted twice
+    </label>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-label">Taxable Income</div><div class="k-val" id="ct_taxable">—</div></div>
+      <div class="kpi"><div class="k-label">Current Tax</div><div class="k-val" id="ct_tax">—</div></div>
+      <div class="kpi"><div class="k-label">Validation</div><div class="k-val" id="ct_status">—</div></div>
+    </div>
+  </div>`;
+}
+function calcCurrentTax(){
+  const bookEl = document.getElementById('ct_book'); if(!bookEl) return;
+  const book = parseFloat(bookEl.value)||0;
+  const perm = parseFloat(document.getElementById('ct_perm').value)||0;
+  let temp = parseFloat(document.getElementById('ct_temp').value)||0;
+  const credit = parseFloat(document.getElementById('ct_credit').value)||0;
+  const rate = parseFloat(document.getElementById('ct_rate').value)||0;
+  const dup = document.getElementById('ct_dup').checked;
+  if(dup) temp = temp*2;
+  const taxable = book+perm+temp;
+  const tax = taxable*(rate/100)-credit;
+  document.getElementById('ct_taxable').textContent = money(taxable)+"M";
+  document.getElementById('ct_tax').textContent = money(tax)+"M";
+  const statusEl = document.getElementById('ct_status');
+  statusEl.innerHTML = dup ? '<span class="badge red">Duplicate detected</span>' : '<span class="badge green">Reconciles</span>';
+}
+function demoCurrentTaxAttack(){
+  const cb = document.getElementById('ct_dup');
+  if(cb){ cb.checked = true; calcCurrentTax(); }
+}
+function demoCurrentTaxDefense(){
+  setTimeout(()=>{
+    const cb = document.getElementById('ct_dup');
+    if(cb){ cb.checked = false; calcCurrentTax(); }
+  }, 1600);
+}
+
+function wsDtVariance(){
+  return `<div class="ws-inner">
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-label">Opening DTL</div><div class="k-val">$46.0M</div></div>
+      <div class="kpi"><div class="k-label">Closing DTL</div><div class="k-val">$58.0M</div></div>
+      <div class="kpi"><div class="k-label">Movement</div><div class="k-val pos">+$12.0M</div></div>
+    </div>
+    <table class="wtable">
+      <tr><th>Driver</th><th>Impact</th><th>Status</th></tr>
+      <tr><td class="txt">Tax Rate Change</td><td>$7.2M</td><td class="txt"><span class="badge green">Explained</span></td></tr>
+      <tr><td class="txt">Temporary Difference Movement</td><td>$3.1M</td><td class="txt"><span class="badge green">Explained</span></td></tr>
+      <tr><td class="txt">Late Adjustment</td><td>$1.7M</td><td class="txt"><span class="badge green">Explained</span></td></tr>
+      <tr><td class="txt">Total Explained</td><td>$12.0M</td><td class="txt">Reconciled</td></tr>
+    </table>
+  </div>`;
+}
+
+function wsRateChange(){
+  return `<div class="ws-inner">
+    <div class="field-row">
+      <div class="field"><label>Temporary Difference ($M)</label><input type="number" id="rc_bal" value="144" oninput="calcRate()"></div>
+      <div class="field"><label>Old Rate (%)</label><input type="number" id="rc_old" value="30" oninput="calcRate()"></div>
+      <div class="field"><label>New Rate (%)</label><input type="number" id="rc_new" value="25" oninput="calcRate()"></div>
+    </div>
+    <label style="font-size:12.5px;display:flex;gap:6px;align-items:center;margin-bottom:10px;">
+      <input type="checkbox" id="rc_scope" onchange="calcRate()"> Scope to 3 entities only (60% of balance)
+    </label>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-label">Old DTL</div><div class="k-val" id="rc_dtlold">—</div></div>
+      <div class="kpi"><div class="k-label">New DTL</div><div class="k-val" id="rc_dtlnew">—</div></div>
+      <div class="kpi"><div class="k-label">Deferred Tax Expense Impact</div><div class="k-val neg" id="rc_delta">—</div></div>
+    </div>
+  </div>`;
+}
+function calcRate(){
+  const balEl = document.getElementById('rc_bal'); if(!balEl) return;
+  let bal = parseFloat(balEl.value)||0;
+  const oldr = parseFloat(document.getElementById('rc_old').value)||0;
+  const newr = parseFloat(document.getElementById('rc_new').value)||0;
+  const scoped = document.getElementById('rc_scope').checked;
+  if(scoped) bal = bal*0.6;
+  const oldDtl = bal*(oldr/100);
+  const newDtl = bal*(newr/100);
+  document.getElementById('rc_dtlold').textContent = money(oldDtl)+"M";
+  document.getElementById('rc_dtlnew').textContent = money(newDtl)+"M";
+  document.getElementById('rc_delta').textContent = money(newDtl-oldDtl)+"M";
+}
+function demoRateChangeAttack(){
+  const cb = document.getElementById('rc_scope');
+  if(cb){ cb.checked = true; calcRate(); }
+}
+
+function wsEtr(){
+  const bars = [
+    {label:"Statutory Rate",val:25,color:"#8AA3BE"},
+    {label:"Permanent Diff",val:3.1,color:"#B8862E"},
+    {label:"Foreign Rate Diff",val:4.2,color:"#C0392B"},
+    {label:"Tax Credits",val:-2.5,color:"#1F8A5F"},
+    {label:"Other Adj.",val:1.0,color:"#B9860A"},
+  ];
+  const finalRate = bars.reduce((s,b)=>s+b.val,0);
+  const max = 30;
+  const barsHtml = bars.map(b=>{
+    const h = Math.max(4,(Math.abs(b.val)/max)*130);
+    return `<div class="wf-bar"><div class="wf-val">${b.val>0?'+':''}${b.val}%</div><div class="wf-fill" style="height:${h}px;background:${b.color}"></div><div class="wf-label">${b.label}</div></div>`;
+  }).join('');
+  return `<div class="ws-inner">
+    <div class="waterfall">${barsHtml}
+      <div class="wf-bar"><div class="wf-val" style="font-weight:700">${finalRate.toFixed(1)}%</div><div class="wf-fill" style="height:${(finalRate/max)*130}px;background:var(--ink)"></div><div class="wf-label">Final ETR</div></div>
+    </div>
+    <div class="note">Last quarter's ETR was 25.9%. The foreign rate differential moved from +1.3% to +4.2% — that 2.9pt swing is the largest single driver of the 4.8pt CFO-flagged increase.</div>
+  </div>`;
+}
+
+function wsLosses(){
+  return `<div class="ws-inner">
+    <table class="wtable">
+      <tr><th>Jurisdiction</th><th>Opening Loss</th><th>Utilized</th><th>Expiring</th><th>Remaining</th><th>DTA View</th></tr>
+      <tr><td class="txt">Germany</td><td>$40M</td><td>$12M</td><td>$0M</td><td>$28M</td><td class="txt"><span class="badge green">Recognized</span></td></tr>
+      <tr><td class="txt">Brazil</td><td>$65M</td><td>$5M</td><td>$15M</td><td>$45M</td><td class="txt"><span class="badge amber">Partial allowance</span></td></tr>
+      <tr><td class="txt">US Entity (3yr loss)</td><td>$90M</td><td>$0M</td><td>$0M</td><td>$90M</td><td class="txt"><span class="badge red">Valuation allowance</span></td></tr>
+    </table>
+    <div class="note">The US entity's remaining $90M requires concrete, evidence-backed forecast utilization before any DTA is recognized.</div>
+  </div>`;
+}
+
+function wsValidation(){
+  const errors = ["Missing Entity Data","Duplicate Adjustment","Tax Rate Mismatch","Invalid Temporary Difference","Opening Balance Mismatch"];
+  const rows = errors.map((e,i)=>`
+    <li class="v-item" data-i="${i}" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0F1F3;font-size:13px;">
+      <span id="verr-${i}">❌ ${e}</span>
+    </li>`).join('');
+  return `<div class="ws-inner">
+    <ul style="list-style:none;padding:0;margin:0 0 12px;" id="valList">${rows}</ul>
+    <div id="valResult"></div>
+  </div>`;
+}
+function demoValidationSequence(){
+  for(let i=0;i<5;i++){
+    setTimeout(()=>{
+      const span = document.getElementById('verr-'+i);
+      if(span) span.innerHTML = '✅ ' + span.textContent.replace('❌ ','');
+      if(i===4){
+        setTimeout(()=>{
+          const el = document.getElementById('valResult');
+          if(el) el.innerHTML = '<span class="badge green">Tax provision reconciles</span>';
+        }, 500);
+      }
+    }, i*650);
+  }
+}
+
+function wsAutomation(){
+  const steps = ["Source Data","Validation","Data Load","Calculation","Validation","Tax Review","ETR Analysis","Final Reporting"];
+  const chips = steps.map(s=>`<div class="chip">${s}</div>`).join('<span class="arrow">→</span>');
+  return `<div class="ws-inner">
+    <div class="chip-flow">${chips}</div>
+    <div id="autoResult"></div>
+  </div>`;
+}
+function demoAutomationAttack(){
+  const el = document.getElementById('autoResult');
+  if(!el) return;
+  el.innerHTML = '<div class="note">⚠️ Simulating: data load fails at 2:00 AM…</div>';
+  setTimeout(()=>{
+    el.innerHTML = `
+      <table class="wtable">
+        <tr><th>Step</th><th>Action</th></tr>
+        <tr><td class="txt">Detect</td><td class="txt">REST API job-status poll returns FAILED; pipeline halts</td></tr>
+        <tr><td class="txt">Alert</td><td class="txt">On-call channel notified, no auto-retry fired</td></tr>
+        <tr><td class="txt">Recover</td><td class="txt">Retry checks load-status flag before resubmitting — prevents duplicate load</td></tr>
+      </table>`;
+  }, 900);
+}
+
+function wsPerformance(){
+  return `<div class="ws-inner">
+    <div class="waterfall" style="height:110px;">
+      <div class="wf-bar"><div class="wf-val">10 min</div><div class="wf-fill" style="height:24px;background:var(--green)"></div><div class="wf-label">Baseline</div></div>
+      <div class="wf-bar"><div class="wf-val">45 min</div><div class="wf-fill" style="height:110px;background:var(--red)"></div><div class="wf-label">Current</div></div>
+    </div>
+    <table class="wtable">
+      <tr><th>Phase</th><th>Fix</th></tr>
+      <tr><td class="txt">Immediate</td><td class="txt">Scope calculation to changed entities, not full cube</td></tr>
+      <tr><td class="txt">Short-term</td><td class="txt">Parallelize independent workflow steps</td></tr>
+      <tr><td class="txt">Long-term</td><td class="txt">Incremental-by-design calc logic + data archival policy</td></tr>
+    </table>
+  </div>`;
+}
+
+function wsSecurity(){
+  const roles = ["Tax Preparer","Tax Reviewer","Country Tax Manager","Global Tax Director","System Administrator","Internal Auditor"];
+  const perms = ["Enter Data","Approve Adjustment","Cross-Entity View","Config Access","Read-Only Audit Trail"];
+  const grants = [
+    [1,0,0,0,0],[0,1,0,0,1],[0,1,1,0,1],[0,0,1,0,1],[0,0,0,1,0],[0,0,1,0,1]
+  ];
+  let head = "<tr><th>Role</th>"+perms.map(p=>`<th>${p}</th>`).join('')+"</tr>";
+  let rows = roles.map((r,i)=>"<tr><td class='txt'>"+r+"</td>"+grants[i].map(g=>`<td style="text-align:center;">${g? '<span class="badge green">✓</span>':'—'}</td>`).join('')+"</tr>").join('');
+  return `<div class="ws-inner"><table class="wtable">${head}${rows}</table>
+  <div class="note">No role holds both "Enter Data" and "Approve Adjustment" on the same entity — segregation is enforced at the workflow-transition level.</div></div>`;
+}
+
+function wsCloseControl(){
+  const items = [
+    {name:"India — duplicate adjustment",status:"red"},
+    {name:"Pending country reviews (4 entities)",status:"amber"},
+    {name:"UK — deferred tax reconciliation",status:"red"},
+    {name:"Germany — rate change scope",status:"amber"},
+    {name:"US — loss movement (informational)",status:"green"},
+  ];
+  const rows = items.map((it,i)=>`
+    <li data-i="${i}" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0F1F3;font-size:13px;">
+      <span>${it.name}</span>
+      <span class="badge ${it.status}" id="cc_status_${i}">${it.status==='red'?'Critical':it.status==='amber'?'In Progress':'Stable'}</span>
+    </li>`).join('');
+  return `<div class="ws-inner">
+    <ul style="list-style:none;padding:0;margin:0 0 12px;">${rows}</ul>
+    <div id="closeResult"></div>
+  </div>`;
+}
+function demoCloseControlDefense(){
+  [0,1,2,3].forEach(i=>{
+    const el = document.getElementById('cc_status_'+i);
+    if(el){ el.className='badge green'; el.textContent='Stable'; }
+  });
+  const res = document.getElementById('closeResult');
+  if(res) res.innerHTML = '<span class="badge green">Close stabilized — all items resolved within the window</span>';
+}
+
+function wsFinal(){
+  return `<div class="ws-inner">
+    <table class="wtable">
+      <tr><th>Issue</th><th>Track Owner</th><th>Status</th></tr>
+      <tr><td class="txt">Rate changes</td><td class="txt">Architect</td><td class="txt"><span class="badge green">Resolved</span></td></tr>
+      <tr><td class="txt">Deferred tax / ETR variance</td><td class="txt">Architect</td><td class="txt"><span class="badge green">Resolved</span></td></tr>
+      <tr><td class="txt">Tax losses</td><td class="txt">Country Manager</td><td class="txt"><span class="badge amber">In review</span></td></tr>
+      <tr><td class="txt">Data errors / late adjustments</td><td class="txt">Reviewer</td><td class="txt"><span class="badge green">Resolved</span></td></tr>
+      <tr><td class="txt">Performance / automation</td><td class="txt">Architect</td><td class="txt"><span class="badge green">Resolved</span></td></tr>
+      <tr><td class="txt">Security gap</td><td class="txt">Admin</td><td class="txt"><span class="badge green">Resolved</span></td></tr>
+    </table>
+    <div class="note">Nine issues, three independent tracks, one shared priority queue — re-ranked as each new fact arrived rather than forced into a single root cause.</div>
+  </div>`;
+}
+
+function buildWorkspace(type){
+  switch(type){
+    case 'arch': return wsArch();
+    case 'currenttax': return wsCurrentTax();
+    case 'dtvariance': return wsDtVariance();
+    case 'ratechange': return wsRateChange();
+    case 'etr': return wsEtr();
+    case 'losses': return wsLosses();
+    case 'validation': return wsValidation();
+    case 'automation': return wsAutomation();
+    case 'performance': return wsPerformance();
+    case 'security': return wsSecurity();
+    case 'closecontrol': return wsCloseControl();
+    case 'final': return wsFinal();
+    default: return '<div class="note">Workspace unavailable.</div>';
+  }
+}
+
+/* attach demo hooks by round index */
+const ROUND_DEMOS = {
+  0:{ afterAttack: demoArchAttack },
+  1:{ afterAttack: demoCurrentTaxAttack, afterDefense: demoCurrentTaxDefense },
+  3:{ afterAttack: demoRateChangeAttack },
+  6:{ afterResponse: demoValidationSequence },
+  7:{ afterAttack: demoAutomationAttack },
+  10:{ afterDefense: demoCloseControlDefense }
+};
+
+/* ============== RENDER STAGE ============== */
+function renderStage(){
+  const r = ROUNDS[current];
+  const html = `
+    <div class="stage">
+      ${panelShell('interviewPanel','Live Interview','var(--navy-2)', renderInterview(r))}
+      ${panelShell('workPanel','Live TRCS Workspace — '+r.action,'var(--gold)', buildWorkspace(r.workspace.type))}
+      ${panelShell('thinkPanel','Architect Thinking Board','#1F8A5F', renderThinking(r))}
+    </div>
+  `;
+  document.getElementById('stageWrap').innerHTML = html;
+  if(r.workspace.type==='currenttax') calcCurrentTax();
+  if(r.workspace.type==='ratechange') calcRate();
+  document.getElementById('roundNum').textContent = current+1;
+  document.getElementById('roundTitle').textContent = r.title;
+  renderDots();
+}
+
+function revealBubble(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.add('show');
+}
+function setTalking(id, on){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('talking', on);
+}
+function setPanelSpeaking(kind){
+  const p = document.getElementById('interviewPanel');
+  if(!p) return;
+  p.classList.remove('speaking-interviewer','speaking-candidate');
+  if(kind==='interviewer') p.classList.add('speaking-interviewer');
+  if(kind==='candidate') p.classList.add('speaking-candidate');
+}
+
+/* ============== AUTOPLAY SEQUENCE ============== */
+function playSequence(){
+  if(!isPlaying) return;
+  const r = ROUNDS[current];
+  const demo = ROUND_DEMOS[current] || {};
+
+  setTalking('bub-interviewer', true);
+  setPanelSpeaking('interviewer');
+  speak(r.interviewer, 'interviewer', ()=>{
+    setTalking('bub-interviewer', false);
+    setPanelSpeaking(null);
+    if(!isPlaying) return;
+    revealBubble('bub-thinking');
+    setTimeout(()=>{
+      if(!isPlaying) return;
+      revealBubble('bub-candidate');
+      setTalking('bub-candidate', true);
+      setPanelSpeaking('candidate');
+      speak(r.response, 'candidate', ()=>{
+        setTalking('bub-candidate', false);
+        setPanelSpeaking(null);
+        if(!isPlaying) return;
+        if(demo.afterResponse) demo.afterResponse();
+        setTimeout(()=>{
+          if(!isPlaying) return;
+          revealBubble('bub-attack');
+          setTalking('bub-attack', true);
+          setPanelSpeaking('interviewer');
+          speak(r.attack, 'interviewer', ()=>{
+            setTalking('bub-attack', false);
+            setPanelSpeaking(null);
+            if(!isPlaying) return;
+            if(demo.afterAttack) demo.afterAttack();
+            setTimeout(()=>{
+              if(!isPlaying) return;
+              revealBubble('bub-defense');
+              setTalking('bub-defense', true);
+              setPanelSpeaking('candidate');
+              speak(r.defense, 'candidate', ()=>{
+                setTalking('bub-defense', false);
+                setPanelSpeaking(null);
+                if(demo.afterDefense) demo.afterDefense();
+                if(!isPlaying) return;
+                setTimeout(()=>{
+                  if(!isPlaying) return;
+                  advanceRound();
+                }, 1900);
+              });
+            }, 1000);
+          });
+        }, 1000);
+      });
+    }, 1500);
+  });
+}
+
+function advanceRound(){
+  if(current < ROUNDS.length-1){
+    current++;
+    renderStage();
+    setTimeout(playSequence, 500);
+  } else {
+    finishShow();
+  }
+}
+
+function finishShow(){
+  renderScorecard();
+  document.getElementById('liveBadge').style.display = 'none';
+  document.getElementById('roundTrack').style.display = 'none';
+  speak("That concludes all twelve rounds. Overall, a strong, evidence-driven performance — classified as Senior Oracle TRCS Architect.", 'interviewer', ()=>{
+    setTimeout(()=>{
+      speak("This simulation was brought to you by BISP — Business Intelligence Solution Providers. For live, hands-on Oracle EPM and Tax Reporting Cloud Service training, visit www dot bisp trainings dot com, or call plus 9 1, 7 6 9, 4 0 9, 5 4 0 4.", 'candidate', ()=>{
+        isPlaying = false;
+        const btn = document.getElementById('floatStart');
+        btn.classList.remove('playing');
+        btn.innerHTML = '↺';
+        btn.setAttribute('aria-label','Restart simulation');
+      });
+    }, 500);
+  });
+}
+
+/* ============== SCORECARD ============== */
+function renderScorecard(){
+  const comps = [
+    ["TRCS Enterprise Architecture",9],["Tax Provision Expertise",9],["Current Tax",9],
+    ["Deferred Tax",8],["Effective Tax Rate",8],["Tax Losses &amp; Credits",8],
+    ["Data Validation",9],["Automation",8],["REST API Understanding",8],
+    ["Performance Optimization",8],["Troubleshooting",9],["Security &amp; Governance",9]
+  ];
+  const rows = comps.map(c=>`<div class="score-row"><span class="comp">${c[0]}</span><span class="val">${c[1]}/10</span></div>`).join('');
+  document.getElementById('stageWrap').innerHTML = `
+    <div class="scorecard-wrap">
+      <h2>Oracle TRCS Architect Scorecard</h2>
+      <div class="sub">Aggregated across all 12 rounds of the live simulation.</div>
+      <div class="score-grid">${rows}</div>
+      <div class="classify">
+        <div class="cbadge">SENIOR ORACLE TRCS ARCHITECT</div>
+        <div class="ctext">Consistently moved from theory to live investigation, quantified every variance before explaining it, and adapted architecture decisions under direct challenge without losing the thread of the original problem.</div>
+      </div>
+      <div class="promo">
+        <img src="data:image/jpeg;base64,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" alt="BISP">
+        <div class="ptext">
+          <h4>Want to train like this for real?</h4>
+          <p>BISP runs enterprise Oracle EPM and Tax Reporting Cloud Service training for consultants and architects — live projects, real client scenarios, and career mentoring from practicing implementers.</p>
+          <div class="pcontact">
+            <a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a>
+            <a href="tel:+917694095404">Call Us: +91 769-409-5404</a>
+          </div>
+        </div>
+        <a class="cta" href="https://www.bisptrainings.com" target="_blank">Explore BISP Training →</a>
+      </div>
+    </div>
+  `;
+}
+
+/* ============== START / CONTROL ============== */
+function requestFullscreenSafe(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if(req){ try{ req.call(el); }catch(e){} }
+}
+
+function handleFloatClick(){
+  const btn = document.getElementById('floatStart');
+  if(!hasStarted){
+    hasStarted = true;
+    isPlaying = true;
+    requestFullscreenSafe();
+    document.getElementById('coverStage').classList.add('hidden');
+    document.getElementById('roundTrack').style.display = 'flex';
+    document.getElementById('liveBadge').style.display = 'inline-flex';
+    btn.classList.add('playing');
+    btn.innerHTML = '⏸';
+    btn.setAttribute('aria-label','Pause simulation');
+    current = 0;
+    renderStage();
+    setTimeout(playSequence, 400);
+    return;
+  }
+  if(isPlaying){
+    isPlaying = false;
+    stopSpeaking();
+    btn.classList.remove('playing');
+    btn.innerHTML = '▶';
+    btn.setAttribute('aria-label','Resume simulation');
+  } else {
+    // resume or restart from scorecard
+    isPlaying = true;
+    btn.classList.add('playing');
+    btn.innerHTML = '⏸';
+    btn.setAttribute('aria-label','Pause simulation');
+    if(current >= ROUNDS.length){
+      current = 0;
+    }
+    renderStage();
+    setTimeout(playSequence, 400);
+  }
+}
+</script>
+</body>
+</html>
