@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle PCMCS Senior Architect — Live Interview Simulator | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#101826;
+  --ink-soft:#4b5568;
+  --hairline:#dfe3ea;
+  --paper:#f5f6f8;
+  --card:#ffffff;
+  --navy:#101B33;
+  --navy-2:#182648;
+  --navy-3:#233363;
+  --copper:#c07a3e;
+  --copper-soft:#f3e2cd;
+  --teal:#1f6f6b;
+  --teal-soft:#dcefed;
+  --good:#2e7d5b;
+  --good-soft:#e3f3ea;
+  --bad:#b3403a;
+  --bad-soft:#fbe6e4;
+  --warn:#b4842a;
+  --warn-soft:#faf0dd;
+  --focus:#2f6fed;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(16,24,38,.06), 0 8px 24px -16px rgba(16,24,38,.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.display{font-family:'Space Grotesk',sans-serif;}
+button{font-family:inherit;cursor:pointer;}
+a{color:inherit;}
+::selection{background:var(--copper-soft);}
+
+/* ===== SCREEN: WELCOME ===== */
+#welcome{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(192,122,62,.16), transparent 42%),
+    radial-gradient(circle at 85% 80%, rgba(31,111,107,.18), transparent 45%),
+    var(--navy);
+  padding:32px 20px;
+}
+.welcome-card{
+  max-width:760px;
+  width:100%;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:48px 44px;
+  color:#eef1f8;
+  backdrop-filter:blur(6px);
+}
+.welcome-brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:34px;
+}
+.welcome-brand img{height:38px;border-radius:4px;background:#fff;padding:4px 8px;}
+.welcome-brand .b-text{font-size:12px;letter-spacing:.03em;color:#aeb8d0;line-height:1.5;}
+.welcome-brand .b-text b{color:#fff;}
+.welcome-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;color:#e9c187;
+  background:rgba(192,122,62,.16);
+  border:1px solid rgba(192,122,62,.35);
+  padding:5px 12px;border-radius:20px;margin-bottom:18px;
+}
+.welcome-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:#e9563f;animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+h1.welcome-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:38px;line-height:1.12;margin:0 0 10px;font-weight:700;
+  color:#fff;
+}
+h1.welcome-title span{color:#e6a463;}
+.welcome-sub{color:#c3cadd;font-size:15.5px;line-height:1.65;max-width:560px;margin:0 0 28px;}
+.welcome-stats{display:flex;gap:0;margin:28px 0 32px;border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14);}
+.welcome-stats div{flex:1;padding:16px 18px;border-right:1px solid rgba(255,255,255,.14);}
+.welcome-stats div:last-child{border-right:none;}
+.welcome-stats .num{font-family:'Space Grotesk',sans-serif;font-size:24px;color:#fff;font-weight:700;}
+.welcome-stats .lbl{font-size:11.5px;color:#9aa4bf;margin-top:3px;}
+.welcome-form{display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.welcome-form input{
+  flex:1;min-width:220px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:8px;
+  padding:13px 14px;
+  color:#fff;font-size:14.5px;
+}
+.welcome-form input::placeholder{color:#8b93ab;}
+.welcome-form input:focus{outline:2px solid #e6a463;outline-offset:1px;}
+.btn-start{
+  background:#e6a463;color:#1c1200;border:none;border-radius:8px;
+  padding:13px 26px;font-size:14.5px;font-weight:600;white-space:nowrap;
+  transition:transform .12s ease, background .15s ease;
+}
+.btn-start:hover{background:#f0b478;transform:translateY(-1px);}
+.welcome-foot{margin-top:22px;font-size:12.5px;color:#8b93ab;}
+.welcome-foot a{color:#c7d0e6;text-decoration:underline;}
+
+/* ===== APP SHELL ===== */
+#app{display:none;min-height:100vh;flex-direction:column;}
+#app.active{display:flex;}
+
+header.topbar{
+  background:var(--navy);
+  color:#fff;
+  display:flex;align-items:center;
+  padding:0 20px;height:64px;flex-shrink:0;
+  gap:22px;border-bottom:1px solid rgba(255,255,255,.08);
+  position:sticky;top:0;z-index:50;
+}
+.tb-brand{display:flex;align-items:center;gap:10px;}
+.tb-brand img{height:26px;border-radius:3px;background:#fff;padding:2px 5px;}
+.tb-title{line-height:1.2;}
+.tb-title .t1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14.5px;}
+.tb-title .t2{font-size:10.5px;color:#a9b3cf;letter-spacing:.02em;}
+.tb-sep{width:1px;height:30px;background:rgba(255,255,255,.14);}
+.tb-mid{display:flex;align-items:center;gap:18px;flex-wrap:wrap;flex:1;}
+.tb-chip{display:flex;flex-direction:column;gap:2px;}
+.tb-chip .lbl{font-size:9.5px;color:#8f9ac0;letter-spacing:.03em;}
+.tb-chip .val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;}
+.tb-live{display:flex;align-items:center;gap:6px;background:rgba(46,125,91,.22);border:1px solid rgba(46,125,91,.5);padding:5px 11px;border-radius:20px;font-size:11.5px;color:#8fe0b8;}
+.tb-live .dot{width:6px;height:6px;border-radius:50%;background:#4fd889;animation:pulse 1.6s infinite;}
+.tb-diff{background:rgba(179,64,58,.22);border:1px solid rgba(179,64,58,.5);color:#f3a29c;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.04em;}
+.tb-right{display:flex;align-items:center;gap:16px;margin-left:auto;}
+.tb-score{text-align:right;}
+.tb-score .val{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:#e6a463;}
+.tb-score .lbl{font-size:9.5px;color:#8f9ac0;}
+.tb-menu-btn{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+  color:#fff;padding:8px 12px;border-radius:7px;font-size:12.5px;display:none;
+}
+
+/* ===== BODY GRID ===== */
+.shell{display:flex;flex:1;min-height:0;}
+.sidebar{
+  width:226px;flex-shrink:0;background:var(--navy-2);color:#dbe1f2;
+  padding:14px 0 24px;overflow-y:auto;
+}
+.sb-group{margin-bottom:6px;}
+.sb-group-title{
+  font-size:10px;letter-spacing:.08em;color:#8b96bc;
+  padding:14px 18px 6px;font-weight:600;
+}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 18px;font-size:13px;color:#c6cde6;
+  border-left:3px solid transparent;
+  transition:background .12s;
+}
+.sb-item .ic{font-size:14px;width:18px;text-align:center;}
+.sb-item:hover{background:rgba(255,255,255,.05);cursor:pointer;}
+.sb-item.active{background:var(--navy-3);border-left-color:var(--copper);color:#fff;font-weight:600;}
+.sb-item.disabled{opacity:.4;cursor:default;}
+.sb-item.disabled:hover{background:transparent;}
+
+.main{flex:1;display:flex;min-width:0;background:var(--paper);}
+.col-interview{
+  width:44%;min-width:380px;border-right:1px solid var(--hairline);
+  display:flex;flex-direction:column;background:#fbfbfc;
+}
+.col-workspace{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* ===== INTERVIEW COLUMN ===== */
+.round-nav{
+  display:flex;gap:6px;padding:12px 16px;overflow-x:auto;border-bottom:1px solid var(--hairline);
+  background:#fff;
+}
+.round-pill{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;
+  border:1px solid var(--hairline);color:#8891a5;background:#fff;
+}
+.round-pill.done{background:var(--good-soft);border-color:var(--good);color:var(--good);}
+.round-pill.current{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+.interview-scroll{flex:1;overflow-y:auto;padding:20px 22px 10px;}
+
+.interviewer-card{
+  background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);
+  padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow);
+}
+.interviewer-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.avatar{
+  width:34px;height:34px;border-radius:50%;background:var(--navy-3);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;flex-shrink:0;
+}
+.avatar.candidate{background:var(--copper);}
+.interviewer-name{font-size:12.5px;font-weight:600;}
+.interviewer-role{font-size:11px;color:var(--ink-soft);}
+.interviewer-status{margin-left:auto;font-size:10.5px;color:var(--good);display:flex;align-items:center;gap:5px;}
+.interviewer-status .dot{width:5px;height:5px;border-radius:50%;background:var(--good);}
+.round-tag{
+  display:inline-block;font-size:10px;letter-spacing:.03em;font-weight:600;
+  background:var(--teal-soft);color:var(--teal);padding:3px 9px;border-radius:5px;margin-bottom:9px;
+}
+.q-text{font-size:14.5px;line-height:1.62;color:#1a2233;}
+
+.followup-card{
+  background:var(--warn-soft);border:1px solid #ecd8ab;border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:16px;font-size:13.5px;line-height:1.6;color:#5a4419;
+  position:relative;
+}
+.followup-card .fu-label{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--warn);margin-bottom:6px;display:block;}
+
+.chat-log{margin-bottom:6px;}
+.chat-msg{display:flex;gap:10px;margin-bottom:14px;}
+.chat-msg .bubble{
+  background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);
+  padding:11px 14px;font-size:13.5px;line-height:1.55;flex:1;
+}
+.chat-msg.candidate .bubble{background:#fdf6ee;border-color:var(--copper-soft);}
+
+.answer-zone{border-top:1px solid var(--hairline);padding:14px 22px 18px;background:#fff;}
+.az-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.az-tab{
+  font-size:11.5px;padding:6px 12px;border-radius:6px;border:1px solid var(--hairline);
+  background:#fff;color:var(--ink-soft);
+}
+.az-tab.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.voice-row{display:none;gap:8px;margin-bottom:10px;}
+.voice-row.show{display:flex;}
+.voice-btn{
+  border:1px solid var(--hairline);background:#fff;border-radius:7px;padding:8px 13px;font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:6px;color:#33405c;
+}
+.voice-btn.rec{background:var(--bad-soft);border-color:var(--bad);color:var(--bad);}
+textarea#answerInput{
+  width:100%;min-height:96px;resize:vertical;
+  border:1px solid var(--hairline);border-radius:8px;padding:11px 13px;
+  font-size:13.5px;font-family:'IBM Plex Sans',sans-serif;line-height:1.5;color:var(--ink);
+}
+textarea#answerInput:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(47,111,237,.12);}
+.answer-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.hint-txt{font-size:11px;color:#95a0b8;}
+.btn-primary{
+  background:var(--navy);color:#fff;border:none;border-radius:7px;padding:10px 20px;font-size:13px;font-weight:600;
+}
+.btn-primary:hover{background:var(--navy-3);}
+.btn-primary:disabled{opacity:.4;cursor:default;}
+.btn-secondary{
+  background:#fff;border:1px solid var(--hairline);color:#33405c;border-radius:7px;padding:10px 16px;font-size:13px;font-weight:600;
+}
+
+/* checklist */
+.checklist-box{
+  background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;
+}
+.checklist-title{font-size:11px;font-weight:700;letter-spacing:.03em;color:#5a6684;margin-bottom:10px;}
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;}
+.cl-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#7a8399;transition:color .2s;}
+.cl-item .box{width:14px;height:14px;border-radius:4px;border:1.5px solid #c7cede;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
+.cl-item.checked{color:#20304f;font-weight:600;}
+.cl-item.checked .box{background:var(--good);border-color:var(--good);}
+
+/* decision card */
+.decision-card{
+  background:#fff;border:1.5px solid var(--navy-3);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;
+}
+.decision-title{font-size:11.5px;font-weight:700;color:var(--navy-3);letter-spacing:.02em;margin-bottom:4px;}
+.decision-q{font-size:13.5px;margin-bottom:12px;color:#1a2233;}
+.decision-opt{
+  display:block;width:100%;text-align:left;border:1px solid var(--hairline);background:#fff;
+  border-radius:7px;padding:10px 13px;font-size:12.8px;margin-bottom:8px;color:#2a3550;
+}
+.decision-opt:hover{border-color:var(--navy-3);}
+.decision-opt b{font-family:'IBM Plex Mono',monospace;margin-right:7px;color:var(--copper);}
+.decision-opt.correct{background:var(--good-soft);border-color:var(--good);}
+.decision-opt.wrong{background:var(--bad-soft);border-color:var(--bad);}
+.decision-feedback{font-size:12.5px;line-height:1.6;margin-top:8px;padding-top:10px;border-top:1px dashed var(--hairline);color:#3a4258;}
+.decision-feedback b{color:var(--navy);}
+
+/* coach panel */
+.coach-toggle{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  padding:11px 16px;background:#f0ece3;border:1px solid #e2d8c4;border-radius:var(--radius);
+  font-size:12.5px;font-weight:600;color:#6b552f;margin-bottom:16px;
+}
+.coach-toggle .ic{font-size:15px;}
+.coach-toggle .chev{margin-left:auto;transition:transform .2s;font-size:11px;}
+.coach-body{display:none;background:#fffaf0;border:1px solid #e2d8c4;border-radius:var(--radius);padding:14px 16px;margin:-8px 0 16px;font-size:12.8px;line-height:1.65;}
+.coach-body.open{display:block;}
+.coach-col-title{font-size:11px;font-weight:700;letter-spacing:.02em;margin:10px 0 6px;}
+.coach-col-title.good{color:var(--good);}
+.coach-col-title.bad{color:var(--warn);}
+.coach-body ul{margin:0 0 4px;padding-left:18px;}
+.coach-body li{margin-bottom:3px;}
+
+/* ===== WORKSPACE ===== */
+.pov-bar{
+  display:flex;gap:0;background:var(--navy);color:#fff;padding:0 18px;height:42px;align-items:center;flex-shrink:0;overflow-x:auto;
+}
+.pov-item{display:flex;align-items:center;gap:6px;padding:0 16px;border-right:1px solid rgba(255,255,255,.12);white-space:nowrap;}
+.pov-item:last-child{border-right:none;}
+.pov-item .k{font-size:9.5px;color:#8f9ac0;}
+.pov-item .v{font-size:12px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+
+.ws-tabbar{display:flex;gap:2px;background:#fff;border-bottom:1px solid var(--hairline);padding:0 14px;overflow-x:auto;flex-shrink:0;}
+.ws-tab{
+  padding:11px 14px;font-size:12px;font-weight:600;color:#8892a8;border-bottom:2px solid transparent;white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+}
+.ws-tab.active{color:var(--navy);border-bottom-color:var(--copper);}
+.ws-tab .flag{width:6px;height:6px;border-radius:50%;background:var(--bad);}
+
+.ws-scroll{flex:1;overflow-y:auto;padding:20px 24px;}
+.ws-suggest{
+  display:flex;align-items:center;gap:8px;background:var(--teal-soft);color:var(--teal);border:1px solid #bfe0dc;
+  border-radius:8px;padding:9px 14px;font-size:12px;font-weight:600;margin-bottom:16px;
+}
+.ws-suggest .ic{font-size:14px;}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+.kpi-card .lbl{font-size:10.5px;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.02em;}
+.kpi-card .val{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;}
+.kpi-card.pos .val{color:var(--good);}
+.kpi-card.neg .val{color:var(--bad);}
+.kpi-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:6px;}
+.kpi-status.ok{color:var(--good);}
+.kpi-status.bad{color:var(--bad);}
+
+.ws-section-title{font-size:12.5px;font-weight:700;color:#20304f;margin:22px 0 10px;display:flex;align-items:center;gap:8px;}
+.ws-section-title:first-child{margin-top:0;}
+.ws-section-title .n{background:var(--navy);color:#fff;width:19px;height:19px;border-radius:5px;font-size:10.5px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;}
+
+table.data-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--hairline);border-radius:8px;overflow:hidden;font-size:12.8px;}
+table.data-table th{
+  text-align:left;background:#f2f3f6;color:#5a6684;font-weight:600;font-size:11px;letter-spacing:.02em;
+  padding:9px 12px;border-bottom:1px solid var(--hairline);
+}
+table.data-table td{padding:10px 12px;border-bottom:1px solid #eef0f4;font-family:'IBM Plex Mono',monospace;}
+table.data-table td.text{font-family:'IBM Plex Sans',sans-serif;}
+table.data-table tr:last-child td{border-bottom:none;}
+table.data-table tr.clickable{cursor:pointer;}
+table.data-table tr.clickable:hover{background:#f7f8fc;}
+table.data-table tr.selected{background:#eef3fe;}
+.flag-bad{color:var(--bad);font-weight:700;}
+.flag-good{color:var(--good);font-weight:700;}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600;}
+.badge.good{background:var(--good-soft);color:var(--good);}
+.badge.bad{background:var(--bad-soft);color:var(--bad);}
+
+.driver-bar-wrap{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+.driver-bar-row{display:grid;grid-template-columns:130px 1fr 60px;align-items:center;gap:10px;font-size:12px;}
+.driver-bar-row .name{color:#33405c;}
+.driver-bar-row .track{background:#eceff5;border-radius:5px;height:14px;overflow:hidden;}
+.driver-bar-row .fill{height:100%;background:var(--teal);border-radius:5px;}
+.driver-bar-row.anomaly .fill{background:var(--bad);}
+.driver-bar-row .pct{text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+.driver-bar-row.anomaly .pct{color:var(--bad);}
+
+.trace-flow{display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:8px 0 14px;}
+.trace-node{
+  background:#fff;border:1.5px solid var(--hairline);border-radius:8px;padding:9px 15px;font-size:12.5px;font-weight:600;color:#2a3550;
+}
+.trace-node.hot{border-color:var(--bad);color:var(--bad);background:var(--bad-soft);}
+.trace-arrow{color:#a9b2c8;font-size:16px;padding:2px 0 2px 14px;}
+.trace-controls{display:flex;gap:8px;margin:10px 0 4px;}
+.trace-controls button{border:1px solid var(--hairline);background:#fff;border-radius:6px;padding:7px 12px;font-size:11.5px;font-weight:600;color:#33405c;}
+.trace-controls button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+.rootcause-box{
+  background:#fff;border:1.5px dashed var(--hairline);border-radius:var(--radius);padding:20px;text-align:center;color:#8892a8;font-size:13px;
+}
+.rootcause-revealed{
+  background:var(--bad-soft);border:1px solid #eec3bf;border-radius:var(--radius);padding:16px 18px;font-size:13.5px;line-height:1.65;color:#5e2622;
+}
+.rootcause-revealed b{color:var(--bad);}
+
+.calc-run-btn{background:var(--copper);color:#2a1806;border:none;border-radius:7px;padding:10px 18px;font-size:13px;font-weight:700;}
+.calc-steps{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+.calc-step{display:flex;align-items:center;gap:10px;font-size:12.8px;color:#b6bdcc;transition:color .2s;}
+.calc-step .dot{width:16px;height:16px;border-radius:50%;border:2px solid #d7dbe6;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.calc-step.active{color:#20304f;font-weight:600;}
+.calc-step.active .dot{border-color:var(--copper);background:var(--copper);color:#fff;}
+.calc-step.done{color:#20304f;}
+.calc-step.done .dot{border-color:var(--good);background:var(--good);color:#fff;}
+
+.model-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.info-card{background:#fff;border:1px solid var(--hairline);border-radius:var(--radius);padding:14px 16px;}
+.info-card .t{font-size:11.5px;font-weight:700;color:#20304f;margin-bottom:6px;}
+.info-card .d{font-size:12.3px;color:#5a6684;line-height:1.55;}
+
+/* ===== FINAL REPORT ===== */
+#reportScreen{display:none;min-height:100vh;background:var(--paper);}
+#reportScreen.active{display:block;}
+.report-wrap{max-width:840px;margin:0 auto;padding:40px 24px 80px;}
+.report-header{background:var(--navy);color:#fff;border-radius:14px;padding:34px 32px;margin-bottom:22px;position:relative;overflow:hidden;}
+.report-header::after{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(230,164,99,.14);}
+.report-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.report-brand img{height:26px;background:#fff;border-radius:3px;padding:2px 5px;}
+.report-brand span{font-size:11px;color:#a9b3cf;}
+.report-header h2{font-family:'Space Grotesk',sans-serif;font-size:26px;margin:0 0 6px;}
+.report-header .sub{color:#c3cadd;font-size:13.5px;}
+.report-score-row{display:flex;gap:18px;margin-top:22px;flex-wrap:wrap;}
+.rscore-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:14px 18px;min-width:130px;}
+.rscore-card .v{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:#e6a463;}
+.rscore-card .l{font-size:10.5px;color:#a9b3cf;margin-top:2px;}
+.readiness-tag{display:inline-block;margin-top:14px;background:#e6a463;color:#241605;padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:700;}
+
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.report-card{background:#fff;border:1px solid var(--hairline);border-radius:var(--radius);padding:18px 20px;}
+.report-card h3{font-size:12.5px;letter-spacing:.02em;margin:0 0 12px;display:flex;align-items:center;gap:7px;}
+.report-card ul{margin:0;padding-left:18px;font-size:12.8px;line-height:1.75;color:#33405c;}
+.report-card.full{grid-column:1/-1;}
+.skill-row{display:grid;grid-template-columns:150px 1fr 34px;align-items:center;gap:10px;margin-bottom:9px;font-size:12.3px;}
+.skill-row .track{background:#eceff5;border-radius:5px;height:9px;overflow:hidden;}
+.skill-row .fill{height:100%;background:var(--navy-3);border-radius:5px;}
+.skill-row .num{text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+.report-footer{text-align:center;padding:26px 0 4px;color:#8892a8;font-size:12px;line-height:1.9;}
+.report-footer b{color:#33405c;}
+.report-actions{display:flex;justify-content:center;gap:10px;margin-top:18px;}
+
+@media (max-width:980px){
+  .col-interview{width:100%;min-width:0;}
+  .main{flex-direction:column;}
+  .col-workspace{border-top:1px solid var(--hairline);}
+  .sidebar{display:none;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .report-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ WELCOME SCREEN ============ -->
+<div id="welcome">
+  <div class="welcome-card">
+    <div class="welcome-brand">
+      <img src="data:image/jpeg;base64,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" alt="BISP Trainings">
+      <div class="b-text"><b>BISP Trainings</b><br>www.bisptrainings.com · +91 769-409-5404</div>
+    </div>
+    <span class="welcome-eyebrow"><span class="dot"></span> LIVE HANDS-ON SIMULATION · EXTREME DIFFICULTY</span>
+    <h1 class="welcome-title">Oracle PCMCS Senior Architect<br><span>Live Interview Simulator</span></h1>
+    <p class="welcome-sub">Thirty enterprise rounds. A live interviewer who pushes back on generic answers, and a working PCMCS-style workspace where you investigate profitability breaks, trace allocations, check rule balancing, and defend your architecture — instead of just describing it.</p>
+    <div class="welcome-stats">
+      <div><div class="num">30</div><div class="lbl">Interview rounds</div></div>
+      <div><div class="num">12</div><div class="lbl">Workspace modules</div></div>
+      <div><div class="num">100</div><div class="lbl">Point scorecard</div></div>
+    </div>
+    <div class="welcome-form">
+      <input id="candidateNameInput" type="text" placeholder="Your name (for the assessment report)">
+      <button class="btn-start" onclick="startSimulator()">Enter the interview →</button>
+    </div>
+    <div class="welcome-foot">No login, no setup — everything runs in this browser tab. Best experienced on a laptop or desktop screen.</div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="app">
+  <header class="topbar">
+    <div class="tb-brand">
+      <img src="data:image/jpeg;base64,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" alt="BISP">
+      <div class="tb-title"><div class="t1">ORACLE PCMCS SENIOR ARCHITECT</div><div class="t2">LIVE HANDS-ON INTERVIEW SIMULATOR</div></div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-mid">
+      <span class="tb-live"><span class="dot"></span> LIVE INTERVIEW</span>
+      <div class="tb-chip"><span class="lbl">ROUND</span><span class="val" id="tbRound">01 / 30</span></div>
+      <span class="tb-diff">EXTREME</span>
+      <div class="tb-chip"><span class="lbl">TIMER</span><span class="val" id="tbTimer">45:00</span></div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-score"><div class="val" id="tbScore">0</div><div class="lbl">CANDIDATE SCORE</div></div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar"></nav>
+
+    <div class="main">
+      <!-- INTERVIEW COLUMN -->
+      <div class="col-interview">
+        <div class="round-nav" id="roundNav"></div>
+        <div class="interview-scroll" id="interviewScroll">
+          <div class="interviewer-card">
+            <div class="interviewer-head">
+              <div class="avatar">GA</div>
+              <div>
+                <div class="interviewer-name">Global PCMCS Enterprise Architect</div>
+                <div class="interviewer-role">Finance Transformation · Interview Panel</div>
+              </div>
+              <div class="interviewer-status"><span class="dot"></span> Interview Active</div>
+            </div>
+            <span class="round-tag" id="roundTag">ROUND 01 · ENTERPRISE PROFITABILITY ARCHITECTURE</span>
+            <div class="q-text" id="questionText"></div>
+          </div>
+
+          <div id="followupSlot"></div>
+          <div id="checklistSlot"></div>
+          <div id="decisionSlot"></div>
+          <div id="coachSlot"></div>
+        </div>
+
+        <div class="answer-zone">
+          <div class="az-tabs">
+            <button class="az-tab active" id="tabType" onclick="setAnswerMode('type')">⌨ Type Response</button>
+            <button class="az-tab" id="tabVoice" onclick="setAnswerMode('voice')">🎤 Voice Response</button>
+          </div>
+          <div class="voice-row" id="voiceRow">
+            <button class="voice-btn" id="voiceRec" onclick="toggleVoice()">🎙 Start Response</button>
+            <button class="voice-btn" onclick="pseudoPause()">⏸ Pause</button>
+            <button class="voice-btn" onclick="pseudoStop()">⏹ Stop</button>
+          </div>
+          <textarea id="answerInput" placeholder="Explain your investigation and solution strategy as a Senior Oracle PCMCS Architect..." oninput="onAnswerInput()"></textarea>
+          <div class="answer-actions">
+            <span class="hint-txt" id="answerHint">Mention what you'd check first — the workspace on the right will respond to it.</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-secondary" onclick="askFollowUp()">Interviewer Push-Back</button>
+              <button class="btn-primary" id="submitBtn" onclick="submitAnswer()">Submit &amp; Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE COLUMN -->
+      <div class="col-workspace">
+        <div class="pov-bar" id="povBar"></div>
+        <div class="ws-tabbar" id="wsTabbar"></div>
+        <div class="ws-scroll" id="wsScroll"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FINAL REPORT ============ -->
+<div id="reportScreen">
+  <div class="report-wrap" id="reportWrap"></div>
+</div>
+
+<script>
+const LOGO_B64 = "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";
+</script>
+<script>
+/* =========================================================================
+   ORACLE PCMCS SENIOR ARCHITECT — LIVE INTERVIEW SIMULATOR
+   BISP Trainings · www.bisptrainings.com · +91 769-409-5404
+   Single-file simulation engine — mock data only, nothing calls a server.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------
+   1. FIXED INVESTIGATION CHECKLIST (applies to every round)
+   --------------------------------------------------------------------- */
+const CHECKLIST = [
+  "Business Reconciliation","Source Data","Model Architecture","Driver Analysis",
+  "Allocation Rules","Rule Balancing","Allocation Trace","Calculation Analysis",
+  "Root Cause","Solution","Validation","Performance"
+];
+
+/* keyword -> checklist index, used to auto-detect what the candidate is doing */
+const KEYWORD_MAP = [
+  {re:/reconcil|enterprise total|enterprise level|total is (correct|balanced)/i, idx:0},
+  {re:/source data|data load|data valid|missing (data|population)|input data/i, idx:1},
+  {re:/architect|dimension(al)? (design|model)|model design|cube design|hierarch/i, idx:2},
+  {re:/driver/i, idx:3},
+  {re:/allocation rule|rule type|simple dim|complex dim|reclass|same.as.source/i, idx:4},
+  {re:/rule balanc|balancing screen|balanced globally/i, idx:5},
+  {re:/trace|forward trace|backward trace|upstream|downstream/i, idx:6},
+  {re:/calculation analysis|calc analysis|mdx|essbase script/i, idx:7},
+  {re:/root cause/i, idx:8},
+  {re:/solution|resolve|fix|correct the|remediat/i, idx:9},
+  {re:/valid(ate|ation)/i, idx:10},
+  {re:/performance|tuning|segmentation|partition|thread|bottleneck|slow/i, idx:11},
+];
+
+/* sidebar item -> workspace tab key */
+const SIDEBAR = [
+  {group:"OVERVIEW", items:[
+    {label:"Interview Dashboard", ic:"🏠", tab:"overview"},
+    {label:"Enterprise Scenario", ic:"📊", tab:"overview"},
+  ]},
+  {group:"MODEL", items:[
+    {label:"Models", ic:"🧱", tab:"model"},
+    {label:"Dimensions", ic:"🧩", tab:"model"},
+    {label:"Allocation Rules", ic:"⚙️", tab:"rules"},
+    {label:"Custom Calculations", ic:"🧮", tab:"rules"},
+    {label:"Rule Sets", ic:"📋", tab:"rules"},
+  ]},
+  {group:"INVESTIGATE", items:[
+    {label:"Calculation Control", ic:"🎮", tab:"calc"},
+    {label:"Model Validation", ic:"✅", tab:"validation"},
+    {label:"Rule Balancing", ic:"⚖️", tab:"balancing"},
+    {label:"Calculation Analysis", ic:"🔍", tab:"balancing"},
+    {label:"Allocation Trace", ic:"🔗", tab:"trace"},
+  ]},
+  {group:"ANALYTICS", items:[
+    {label:"Profitability Analytics", ic:"📈", tab:"detail"},
+    {label:"Profit Curves", ic:"📉", tab:"detail"},
+    {label:"Analysis Views", ic:"📊", tab:"driver"},
+    {label:"Data Explorer", ic:"🗂", tab:"model"},
+    {label:"Jobs", ic:"📥", tab:"calc"},
+  ]},
+  {group:"ASSESSMENT", items:[
+    {label:"Architect Scorecard", ic:"🧠", tab:"scorecard"},
+    {label:"Final Assessment", ic:"🏆", tab:"scorecard"},
+  ]},
+];
+
+/* ---------------------------------------------------------------------
+   2. ROUND TITLES (all 30, per spec)
+   --------------------------------------------------------------------- */
+const ROUND_TITLES = [
+  "Enterprise Profitability Architecture","Dimensional Explosion","Customer Profitability Failure",
+  "Multi-Stage Allocation Architecture","Incorrect Driver Population","Allocation Leakage",
+  "Shared Service Cost Allocation","Complex Cost-to-Serve Model","Model Architecture Scalability",
+  "Rule Sequence Dependency","Calculation Produces Incorrect Results","Rule Balancing Investigation",
+  "Allocation Trace Investigation","Profit Curve Analysis","Negative Customer Profitability Investigation",
+  "Large Allocation Population","Calculation Performance Crisis","Production SLA Failure",
+  "Model Validation Failure","Source Data Reconciliation Issue","Zero Driver Problem",
+  "Allocation Exception Handling","Incorrect Dimensional Intersection","Calculation Analysis Investigation",
+  "Enterprise Growth Scalability","Production Calculation Incident","CFO Challenges Profitability Results",
+  "Global Allocation Architecture","Enterprise Model Redesign","Final Architect Defense"
+];
+
+/* ---------------------------------------------------------------------
+   3. CURATED ROUNDS — fully authored workspace + interview content.
+      Index keyed by round number (1-based).
+   --------------------------------------------------------------------- */
+const CURATED = {};
+
+CURATED[1] = {
+  interviewer:"Explain how a PCMCS application stores its data and how a calculation actually runs end to end. Where would you look first if a director asked you to defend the architecture?",
+  followUp:"That's the textbook description. If Shared Services goes down for ten minutes during a nightly batch, what actually breaks — and what keeps running?",
+  kpis:{revenue:"$250M",cost:"$210M",profit:"$40M",status:"ok",statusText:"Enterprise Total Balanced"},
+  model:{t1:"Storage Model",d1:"Model metadata (dimensions, rule definitions, allocations) lives in a relational store; operational data and calculation results live in an Essbase ASO cube.",
+         t2:"Metadata & Security",d2:"Shared Services (EPM Workspace) manages metadata and identity; the Profitability Application Console (PAC) is where dimensions and rule sets are defined."},
+  detail:{title:"Enterprise Profitability by Segment", rows:[
+    {name:"North America", revenue:110000000, cost:88000000, profit:22000000, flag:false},
+    {name:"EMEA", revenue:70000000, cost:61000000, profit:9000000, flag:false},
+    {name:"APAC", revenue:70000000, cost:61000000, profit:9000000, flag:false},
+  ]},
+  balancing:{rows:[
+    {rule:"Shared Services Allocation", source:"Corporate", dest:"Region", out:10000000, into:10000000, ok:true},
+    {rule:"Distribution Cost Allocation", source:"Logistics", dest:"Region", out:8500000, into:8500000, ok:true},
+  ]},
+  driver:{title:"Regional Headcount Driver", rows:[
+    {name:"North America", pct:44, anomaly:false},
+    {name:"EMEA", pct:28, anomaly:false},
+    {name:"APAC", pct:28, anomaly:false},
+  ]},
+  trace:["Corporate Cost","Shared Services Pool","Region","Segment Total"],
+  rootCauseText:"There is no defect in this round — the architecture is sound. The interview point is whether you can explain the split between the relational metadata layer and the Essbase ASO calculation layer without conflating them.",
+  decision:{
+    q:"Where does PCMCS store the actual calculated numbers a business user sees on a report?",
+    options:[
+      {label:"A", text:"In the relational metadata database, alongside rule definitions"},
+      {label:"B", text:"In the Essbase ASO cube, which the rule engine writes to via compiled MDX"},
+      {label:"C", text:"In a flat file exported nightly by EPM Automate"},
+      {label:"D", text:"In Shared Services' identity store"},
+    ],
+    correct:1,
+    explanation:"Rule definitions and dimension metadata are relational; the numbers themselves — inputs and calculated allocations — live in the Essbase ASO cube that the compiled MDX rule set writes into."
+  },
+};
+
+CURATED[2] = {
+  interviewer:"The client wants to add Customer, Product, Channel, Region, Cost Center, Project, and a further four attribute-style dimensions to one model — fourteen in total. As the architect, how do you respond?",
+  followUp:"They push back: 'We're an Oracle shop, the docs say up to 32 dimensions are supported, so why are you telling us fourteen is a problem?'",
+  kpis:{revenue:"—",cost:"—",profit:"—",status:"warn",statusText:"Design Review — Not Yet Calculated"},
+  model:{t1:"Dimension Ceiling",d1:"Oracle documents a technical ceiling of roughly 32 dimensions, but recommends far fewer — commonly cited guidance is to stay under 12 — to keep the ASO cube performant.",
+         t2:"System vs Business Dims",d2:"Every model already carries two mandatory system dimensions (Rule, Balance). Every additional business dimension multiplies the sparsity of the cube and the intersection space the calc engine has to sweep."},
+  detail:{title:"Proposed Dimension List (14 total)", rows:[
+    {name:"Customer (40,000 members)", revenue:"business", cost:"", profit:"", flag:true},
+    {name:"Product (8,500 members)", revenue:"business", cost:"", profit:"", flag:false},
+    {name:"Channel / Region / Cost Center / Project", revenue:"business", cost:"", profit:"", flag:false},
+    {name:"4 attribute-style dims requested as base dims", revenue:"business", cost:"", profit:"", flag:true},
+  ]},
+  balancing:{rows:[]},
+  driver:{title:"Cube Sparsity Impact (illustrative)", rows:[
+    {name:"6 dims (recommended)", pct:18, anomaly:false},
+    {name:"10 dims", pct:46, anomaly:false},
+    {name:"14 dims (proposed)", pct:92, anomaly:true},
+  ]},
+  trace:[],
+  rootCauseText:"Four of the fourteen proposed dimensions are metadata tags (region grouping, customer tier, product family, project status) rather than allocation targets — they describe members, they don't need their own axis.",
+  decision:{
+    q:"What is your recommended next step?",
+    options:[
+      {label:"A", text:"Build all 14 dimensions since Oracle's technical limit allows it"},
+      {label:"B", text:"Convert the 4 tagging-style dimensions to attribute dimensions on existing base dims, keeping the model near 10 core dimensions"},
+      {label:"C", text:"Refuse the requirements and ask the client to simplify their reporting"},
+      {label:"D", text:"Split the model into two separate applications immediately"},
+    ],
+    correct:1,
+    explanation:"Attribute dimensions let you tag members (e.g. Customer Tier, Product Family) with metadata without adding a dense axis to the cube, which is exactly what a 'supported but not advisable' dimension count is telling you to reach for."
+  },
+};
+
+CURATED[3] = {
+  interviewer:"The customer profitability calculation is showing negative profitability for several high-revenue customers. Enterprise profitability is correct at the total level. Explain how you would investigate this.",
+  followUp:"That answer is too generic. What evidence would make you believe the allocation rule itself is broken, given the enterprise total already balances?",
+  kpis:{revenue:"$250M",cost:"$210M",profit:"$40M",status:"ok",statusText:"Enterprise Total Balanced"},
+  model:{t1:"Scope",d1:"Customer Profitability model, monthly Actuals, Working version.",
+         t2:"Symptom",d2:"Total company profit is correct ($40M), but several named high-revenue customers show negative net profit — the error is only visible at the detail level."},
+  detail:{title:"Customer Profitability", clickHint:"Click a customer row to drill in", rows:[
+    {name:"Customer A", revenue:20000000, cost:15000000, profit:5000000, flag:false},
+    {name:"Customer B", revenue:30000000, cost:24000000, profit:6000000, flag:false},
+    {name:"Customer_45821", revenue:18400000, cost:21700000, profit:-3300000, flag:true},
+  ]},
+  balancing:{rows:[
+    {rule:"Shared Services Allocation", source:"Corporate", dest:"Customer", out:10000000, into:10000000, ok:true},
+    {rule:"Distribution Cost Allocation", source:"Logistics", dest:"Customer", out:8500000, into:8500000, ok:true},
+  ]},
+  driver:{title:"Shipment Driver Distribution", rows:[
+    {name:"Customer A", pct:2, anomaly:false},
+    {name:"Customer B", pct:4, anomaly:false},
+    {name:"Customer_45821", pct:67, anomaly:true},
+  ]},
+  trace:["Shared Service Cost","Distribution Pool","Customer Segment","Customer_45821"],
+  rootCauseText:"Customer_45821's shipment driver value (4,850 units) is roughly 250x its peers. The source data load aggregated an entire customer group's shipment volume onto one member ID instead of spreading it across the individual customers in that group — the rules are mathematically balanced, but the driver population feeding them is wrong.",
+  decision:{
+    q:"Rule Balancing shows every rule is balanced globally. What is your next action?",
+    options:[
+      {label:"A", text:"Immediately edit the allocation rule's formula"},
+      {label:"B", text:"Delete Customer_45821 from the model"},
+      {label:"C", text:"Open Driver Analysis and inspect the shipment driver population behind the allocation"},
+      {label:"D", text:"Recalculate the entire model and hope it resolves"},
+    ],
+    correct:2,
+    explanation:"A rule can be mathematically balanced and still produce a wrong business result if the driver population it distributes by is wrong. Inspecting the driver — not the rule logic — is what finds a 4,850-unit outlier sitting on one customer."
+  },
+};
+
+CURATED[5] = {
+  interviewer:"Overhead allocation is landing almost entirely on one product SKU even though five products share the same cost pool and similar volumes. Where do you start?",
+  followUp:"You say you'd check the driver — walk me through exactly what 'checking the driver' means technically, step by step.",
+  kpis:{revenue:"$96M",cost:"$74M",profit:"$22M",status:"ok",statusText:"Enterprise Total Balanced"},
+  model:{t1:"Cost Pool",d1:"Factory Overhead pool of $18.2M allocated across five SKUs using a Machine Hours driver, Complex Dim Extension rule.",
+         t2:"Symptom",d2:"SKU-004 absorbs 81% of the overhead pool despite representing roughly 20% of production volume."},
+  detail:{title:"Product Profitability", rows:[
+    {name:"SKU-001", revenue:19000000, cost:14000000, profit:5000000, flag:false},
+    {name:"SKU-002", revenue:18500000, cost:13800000, profit:4700000, flag:false},
+    {name:"SKU-003", revenue:20000000, cost:14500000, profit:5500000, flag:false},
+    {name:"SKU-004", revenue:19500000, cost:23100000, profit:-3600000, flag:true},
+    {name:"SKU-005", revenue:19000000, cost:8600000, profit:10400000, flag:false},
+  ]},
+  balancing:{rows:[
+    {rule:"Factory Overhead Allocation", source:"Overhead Pool", dest:"Product", out:18200000, into:18200000, ok:true},
+  ]},
+  driver:{title:"Machine Hours Driver by SKU", rows:[
+    {name:"SKU-001", pct:5, anomaly:false},
+    {name:"SKU-002", pct:5, anomaly:false},
+    {name:"SKU-003", pct:5, anomaly:false},
+    {name:"SKU-004", pct:81, anomaly:true},
+    {name:"SKU-005", pct:4, anomaly:false},
+  ]},
+  trace:["Factory Overhead Pool","Machine Hours Driver","Product Dimension","SKU-004"],
+  rootCauseText:"SKU-004's machine-hours source data was loaded in cumulative year-to-date hours instead of the current-period hours used for every other SKU — a units-of-measure mismatch in the source feed, not a rule design flaw.",
+  decision:{
+    q:"Rule Balancing is fine and the rule type (Complex Dim Extension) is appropriate. What do you check next?",
+    options:[
+      {label:"A", text:"Change the rule to Simple Dim Extension"},
+      {label:"B", text:"Validate the source data load for the machine-hours driver at the SKU level, checking period scope and units"},
+      {label:"C", text:"Zero out SKU-004's overhead manually"},
+      {label:"D", text:"Increase the calculation thread count"},
+    ],
+    correct:1,
+    explanation:"A driver population problem is a source-data problem, not a rule-design problem — the fix is validating what was loaded (period scope, units of measure), not touching the rule."
+  },
+};
+
+CURATED[6] = {
+  interviewer:"Rule Balancing shows Allocation Out of $12.4M from the Shared Services pool, but Allocation In across all destination cost centers only sums to $11.9M. Walk me through this.",
+  followUp:"Is a $500K gap something you'd escalate as a production incident immediately, or investigate first? Justify your answer.",
+  kpis:{revenue:"$180M",cost:"$150M",profit:"$30M",status:"bad",statusText:"Allocation Leakage Detected"},
+  model:{t1:"Symptom",d1:"$500K of the Shared Services pool is not landing anywhere — a classic allocation leakage pattern.",
+         t2:"Where leakage hides",d2:"Leakage usually traces to a destination filter excluding a valid member, a driver total of zero for a subset of the population, or a mid-period member move that orphaned some source rows."},
+  detail:{title:"Shared Services Cost Centers", rows:[
+    {name:"Cost Center 100", revenue:"", cost:4200000, profit:"", flag:false},
+    {name:"Cost Center 200", revenue:"", cost:3900000, profit:"", flag:false},
+    {name:"Cost Center 300", revenue:"", cost:3800000, profit:"", flag:false},
+    {name:"Cost Center 410 (new, mid-period)", revenue:"", cost:0, profit:"", flag:true},
+  ]},
+  balancing:{rows:[
+    {rule:"Shared Services Allocation", source:"Corporate", dest:"Cost Center", out:12400000, into:11900000, ok:false},
+  ]},
+  driver:{title:"Allocation Driver by Cost Center", rows:[
+    {name:"Cost Center 100", pct:35, anomaly:false},
+    {name:"Cost Center 200", pct:33, anomaly:false},
+    {name:"Cost Center 300", pct:32, anomaly:false},
+    {name:"Cost Center 410", pct:0, anomaly:true},
+  ]},
+  trace:["Shared Services Pool","Allocation Rule","Cost Center Destination","Cost Center 410 (excluded)"],
+  rootCauseText:"Cost Center 410 was created mid-period and added to the Entity dimension, but the allocation rule's destination member list was defined with an explicit member set instead of a dynamic hierarchy reference — the new cost center is invisible to the rule, so its share of the $500K leaks out of the model entirely.",
+  decision:{
+    q:"What is the architecturally correct fix?",
+    options:[
+      {label:"A", text:"Manually top-side adjust $500K onto Cost Center 100"},
+      {label:"B", text:"Redefine the rule's destination using a dynamic hierarchy reference so new members are automatically included"},
+      {label:"C", text:"Ignore it — $500K is immaterial against $150M of total cost"},
+      {label:"D", text:"Delete Cost Center 410 from the dimension"},
+    ],
+    correct:1,
+    explanation:"A hard-coded member list is the structural cause — any future member addition will leak again. A dynamic hierarchy reference is the durable fix; a top-side adjustment only patches this month."
+  },
+};
+
+CURATED[9] = {
+  interviewer:"The application currently runs at 40M cells and completes a full calc in 12 minutes. The client is acquiring three companies next year and expects data volume to grow 6x. How do you architect for that now?",
+  followUp:"They ask: 'Can we just let Oracle scale the cloud infrastructure and not change anything on our side?' How do you respond?",
+  kpis:{revenue:"—",cost:"—",profit:"—",status:"warn",statusText:"Scalability Design Review"},
+  model:{t1:"Current State",d1:"40M cells, single monolithic rule set, 12-minute full calculation, no source segmentation in use.",
+         t2:"Projected State",d2:"~240M cells post-acquisition across three additional legal entities with different chart-of-accounts structures."},
+  detail:{title:"Projected Cell Volume by Entity", rows:[
+    {name:"Current Enterprise", revenue:"", cost:"", profit:"40M cells", flag:false},
+    {name:"Acquisition A", revenue:"", cost:"", profit:"70M cells", flag:true},
+    {name:"Acquisition B", revenue:"", cost:"", profit:"55M cells", flag:true},
+    {name:"Acquisition C", revenue:"", cost:"", profit:"75M cells", flag:true},
+  ]},
+  balancing:{rows:[]},
+  driver:{title:"Calculation Time Risk (illustrative)", rows:[
+    {name:"Current (40M cells)", pct:20, anomaly:false},
+    {name:"Naive scale-up (no redesign)", pct:95, anomaly:true},
+    {name:"Segmented + partitioned design", pct:38, anomaly:false},
+  ]},
+  trace:[],
+  rootCauseText:"There is no live defect yet — this round tests forward-looking architecture judgment before the problem exists, not troubleshooting after the fact.",
+  decision:{
+    q:"What is the strongest first architectural move?",
+    options:[
+      {label:"A", text:"Wait until acquisition data arrives, then react to whatever performance problems appear"},
+      {label:"B", text:"Pre-emptively segment the largest allocation rules and design an Entity-based partition strategy before onboarding the new data"},
+      {label:"C", text:"Ask Oracle to raise the dimension limit"},
+      {label:"D", text:"Move straight to a Same-as-Source rule design for simplicity"},
+    ],
+    correct:1,
+    explanation:"Cloud infrastructure scaling doesn't fix rule design. Source segmentation and an entity-based partition strategy, designed before the 6x volume lands, is what keeps calc time from degrading non-linearly."
+  },
+};
+
+CURATED[12] = {
+  interviewer:"After the monthly close calculation, the CFO's team flags that departmental P&Ls 'don't add up to corporate' by roughly $2.1M. This is the first thing anyone tells you. What's your first move?",
+  followUp:"Before you even open the model — what would make you suspicious that this is a Rule Balancing issue versus a plain data entry error in the general ledger?",
+  kpis:{revenue:"$310M",cost:"$264M",profit:"$46M",status:"bad",statusText:"Departmental Roll-up Mismatch: -$2.1M"},
+  model:{t1:"What Rule Balancing shows",d1:"A tabular view of every rule's Allocation In vs Allocation Out on the current data slice — the fastest way to see which rule, not just which report, is off.",
+         t2:"Why this matters here",d2:"A roll-up mismatch could originate from a GL load, a rule, or a reporting form — Rule Balancing narrows it to the calculation layer in one screen instead of guessing."},
+  detail:{title:"Departmental P&L Roll-up", rows:[
+    {name:"Sales & Marketing", revenue:"", cost:"", profit:"reported: $12.4M", flag:false},
+    {name:"Operations", revenue:"", cost:"", profit:"reported: $18.9M", flag:false},
+    {name:"G&A", revenue:"", cost:"", profit:"reported: $14.7M", flag:false},
+    {name:"Corporate Total (expected)", revenue:"", cost:"", profit:"$46.0M vs reported $43.9M", flag:true},
+  ]},
+  balancing:{rows:[
+    {rule:"IT Chargeback Allocation", source:"IT Cost Pool", dest:"Department", out:9400000, into:9400000, ok:true},
+    {rule:"Facilities Allocation", source:"Facilities Pool", dest:"Department", out:6200000, into:6200000, ok:true},
+    {rule:"Regional Overhead Reclass", source:"Region", dest:"Department", out:5100000, into:3000000, ok:false},
+  ]},
+  driver:{title:"Regional Overhead Reclass — Destination Coverage", rows:[
+    {name:"Sales & Marketing", pct:38, anomaly:false},
+    {name:"Operations", pct:38, anomaly:false},
+    {name:"G&A (destination missing)", pct:0, anomaly:true},
+  ]},
+  trace:["Region Overhead Source","Reclassification Rule","Department Destination","G&A (not receiving)"],
+  rootCauseText:"The Regional Overhead Reclassification rule's destination member list was updated when Sales & Marketing and Operations were restructured last quarter, but G&A was never re-added to the destination set — $2.1M of source overhead has nowhere valid to land, so it disappears from the departmental view while remaining in the source dimension, creating the mismatch.",
+  decision:{
+    q:"Rule Balancing points to the Regional Overhead Reclass rule specifically. What's the right next step?",
+    options:[
+      {label:"A", text:"Report to the CFO that finance's GL entries are wrong"},
+      {label:"B", text:"Add G&A back to the rule's destination member set, recalculate, and re-run Rule Balancing to confirm Allocation In now matches Out"},
+      {label:"C", text:"Manually force G&A's reported profit up by $2.1M in the reporting form"},
+      {label:"D", text:"Rebuild the entire model from scratch"},
+    ],
+    correct:1,
+    explanation:"Rule Balancing pinpointed exactly which rule is unbalanced and by how much. The fix belongs in the rule's destination definition, followed by a recalculation and a second balancing pass to prove the fix — not a report-layer patch."
+  },
+};
+
+CURATED[17] = {
+  interviewer:"Your largest allocation rule has grown from a 12-minute run to 95 minutes over the last two quarters as data volume increased. The monthly close SLA is 90 minutes for the full calculation cycle. How do you approach this?",
+  followUp:"The client asks if they can just have Oracle 'add more compute' to the cloud instance to fix this. What do you tell them?",
+  kpis:{revenue:"—",cost:"—",profit:"—",status:"bad",statusText:"Calculation Runtime: 95 min (SLA: 90 min)"},
+  model:{t1:"Rule in question",d1:"Same-as-Source, Different Dimension rule — the slowest rule type for ASO, currently defined as one large source range.",
+         t2:"Oracle guidance",d2:"Split large source ranges into smaller rules, or use the rule's built-in Source Segmentation option, to break execution into parallel-friendly chunks."},
+  detail:{title:"Rule Execution Time Trend", rows:[
+    {name:"Two quarters ago", revenue:"", cost:"", profit:"12 min", flag:false},
+    {name:"Last quarter", revenue:"", cost:"", profit:"48 min", flag:false},
+    {name:"This month", revenue:"", cost:"", profit:"95 min", flag:true},
+  ]},
+  balancing:{rows:[
+    {rule:"Cross-Entity Cost Reclass (Same-as-Source)", source:"All Entities", dest:"All Entities", out:41000000, into:41000000, ok:true},
+  ]},
+  driver:{title:"Source Population by Entity Segment", rows:[
+    {name:"Entity Segment 1", pct:26, anomaly:false},
+    {name:"Entity Segment 2", pct:24, anomaly:false},
+    {name:"Entity Segment 3 (unsegmented, largest)", pct:50, anomaly:true},
+  ]},
+  trace:[],
+  rootCauseText:"The rule is balanced and produces correct numbers — this is purely a performance defect. It is a Same-as-Source rule (the slowest rule type for ASO) running as one undivided source range against a data set that has tripled in size, with no Source Segmentation applied.",
+  decision:{
+    q:"What is the correct first lever, given Oracle manages the underlying Essbase engine in the cloud?",
+    options:[
+      {label:"A", text:"Request Oracle increase the compute tier for the environment"},
+      {label:"B", text:"Enable Source Segmentation on the rule (or manually split it by entity segment) to break the source range into parallel-friendly chunks"},
+      {label:"C", text:"Switch the calculation to run twice a month instead of monthly"},
+      {label:"D", text:"Convert the rule to Complex Dim Extension without changing anything else"},
+    ],
+    correct:1,
+    explanation:"Cloud users don't control core Essbase engine tuning — the architect's lever is rule design. Source Segmentation (or manually splitting the largest, unsegmented entity range) is the standard fix for a Same-as-Source rule that has outgrown a single execution."
+  },
+};
+
+CURATED[20] = {
+  interviewer:"Total revenue loaded into PCMCS for the month is $4.3M lower than the source ERP report for the same period. Enterprise profitability in PCMCS is internally balanced — allocations are fine. Where's the problem?",
+  followUp:"If allocations are balanced and the calculation engine is working correctly, why would you still suspect the model over the source system, or vice versa?",
+  kpis:{revenue:"$245.7M (PCMCS) vs $250.0M (ERP)",cost:"$210M",profit:"$35.7M",status:"bad",statusText:"Source Reconciliation Gap: -$4.3M"},
+  model:{t1:"What's not the problem",d1:"This is not an allocation issue — allocations are internally balanced. The gap exists before any rule ever runs, in the data load itself.",
+         t2:"Where to look",d2:"Compare the load job log against the ERP extract: row counts, rejected rows, and the period/scenario mapping used in the load rule."},
+  detail:{title:"Revenue Load Reconciliation by Entity", rows:[
+    {name:"Entity 100", revenue:88000000, cost:"", profit:"matches ERP", flag:false},
+    {name:"Entity 200", revenue:71000000, cost:"", profit:"matches ERP", flag:false},
+    {name:"Entity 300", revenue:86700000, cost:"", profit:"$4.3M short vs ERP's $91.0M", flag:true},
+  ]},
+  balancing:{rows:[
+    {rule:"(no allocation rule involved — this is a source load issue)", source:"—", dest:"—", out:0, into:0, ok:true},
+  ]},
+  driver:{title:"Load Job Row Outcome — Entity 300", rows:[
+    {name:"Rows loaded successfully", pct:91, anomaly:false},
+    {name:"Rows rejected (currency mapping error)", pct:9, anomaly:true},
+  ]},
+  trace:["ERP Extract","Data Load Rule","Rejected Row Log","PCMCS Relational Store"],
+  rootCauseText:"Entity 300 reports in a local currency that was recently added to the chart of accounts. The data load rule's currency mapping table was never updated for the new code, so roughly 9% of that entity's revenue rows were silently rejected by the load job rather than loaded at zero — they simply never arrived.",
+  decision:{
+    q:"What do you check to confirm this theory before telling the CFO's team what happened?",
+    options:[
+      {label:"A", text:"Re-run the allocation rules a second time"},
+      {label:"B", text:"Pull the data load job log for Entity 300 and inspect the rejected-row count and rejection reason"},
+      {label:"C", text:"Assume it's a rounding error and adjust manually"},
+      {label:"D", text:"Open Allocation Trace on the Revenue account"},
+    ],
+    correct:1,
+    explanation:"When a source total doesn't match ERP before any calculation has run, the load job log — not the calculation engine — is where the evidence lives. Allocation Trace and Rule Balancing only explain what happens after data is already in the model."
+  },
+};
+
+CURATED[27] = {
+  interviewer:"The CFO is in the room. She says: 'I don't trust these customer profitability numbers — Customer X looks unprofitable but sales tells me it's our best relationship.' You have five minutes. Defend the number or find the flaw — live.",
+  followUp:"She interrupts: 'I don't need the mechanics, I need to know if I can present this number to the board on Friday. Yes or no — and why?'",
+  kpis:{revenue:"$41M",cost:"$46.8M",profit:"-$5.8M",status:"bad",statusText:"Customer X flagged unprofitable"},
+  model:{t1:"Stakes",d1:"This number may go into a board presentation. The architect must be able to prove it correct or identify the flaw under time pressure, in plain language.",
+         t2:"Approach",d2:"Same investigation discipline as any other round — reconcile, check balancing, trace, inspect drivers — but the answer must be communicated to a non-technical executive, not just solved technically."},
+  detail:{title:"Customer X Profitability Build-up", rows:[
+    {name:"Gross Revenue", revenue:41000000, cost:"", profit:"", flag:false},
+    {name:"Direct Cost of Goods", revenue:"", cost:22000000, profit:"", flag:false},
+    {name:"Allocated Support & Logistics Cost", revenue:"", cost:24800000, profit:"", flag:true},
+  ]},
+  balancing:{rows:[
+    {rule:"Customer Support Allocation", source:"Support Pool", dest:"Customer", out:14000000, into:14000000, ok:true},
+    {rule:"Logistics Allocation", source:"Logistics Pool", dest:"Customer", out:10800000, into:10800000, ok:true},
+  ]},
+  driver:{title:"Logistics Driver — Return Rate", rows:[
+    {name:"Customer X (driver: return volume)", pct:62, anomaly:true},
+    {name:"All other customers combined", pct:38, anomaly:false},
+  ]},
+  trace:["Logistics Pool","Return-Volume Driver","Customer Dimension","Customer X"],
+  rootCauseText:"Customer X's logistics allocation is driven by return volume, and a one-time product recall drove an unusually large number of returns this period — a real, temporary cost event, not a modeling error. The number is technically correct, but presenting it without that context would mislead the board about the ongoing health of the relationship.",
+  decision:{
+    q:"What do you tell the CFO in the next thirty seconds?",
+    options:[
+      {label:"A", text:"'The model must be wrong, I'll fix it before Friday'"},
+      {label:"B", text:"'The number is calculated correctly — a one-time recall spiked returns-driven logistics cost this period. I'd present it with that footnote rather than hide or restate it.'"},
+      {label:"C", text:"'I can't say anything until I've spent a week investigating'"},
+      {label:"D", text:"'Just exclude Customer X from the board report'"},
+    ],
+    correct:1,
+    explanation:"A correct number tied to a real, explainable, one-time event should be presented with context, not hidden or silently overridden. That's the difference between an architect who can defend a model and one who can only build it."
+  },
+};
+
+CURATED[30] = {
+  interviewer:"Final round. No workspace hints this time. A newly-hired architect on your team designed a model where every allocation uses Same-as-Source rules 'because they're simplest to explain to the business.' Performance is degrading fast as volume grows. You have to both fix the technical problem and mentor the architect. Walk me through both.",
+  followUp:"If you could redesign this application from scratch today with what you now know, what would you do differently from day one — not just what would you patch?",
+  kpis:{revenue:"$400M",cost:"$332M",profit:"$68M",status:"bad",statusText:"Full Model Performance Degradation"},
+  model:{t1:"Technical problem",d1:"Same-as-Source is the slowest rule type for ASO. Using it everywhere for 'simplicity' trades long-term performance for short-term ease of explanation.",
+         t2:"People problem",d2:"A junior architect optimized for something that felt safer to explain, not for what scales. Both the rule design and the team's design discipline need fixing."},
+  detail:{title:"Rule Type Distribution in Current Model", rows:[
+    {name:"Same-as-Source rules", revenue:"", cost:"", profit:"78% of all rules", flag:true},
+    {name:"Simple Dim Extension", revenue:"", cost:"", profit:"9% of all rules", flag:false},
+    {name:"Complex Dim Extension / Reclass", revenue:"", cost:"", profit:"13% of all rules", flag:false},
+  ]},
+  balancing:{rows:[
+    {rule:"(rules balance individually — this is a design-pattern problem, not a data error)", source:"—", dest:"—", out:0, into:0, ok:true},
+  ]},
+  driver:{title:"Rule Type vs Relative Runtime (illustrative)", rows:[
+    {name:"Simple Dim Extension", pct:15, anomaly:false},
+    {name:"Complex Dim Extension", pct:35, anomaly:false},
+    {name:"Same-as-Source (majority of this model)", pct:90, anomaly:true},
+  ]},
+  trace:[],
+  rootCauseText:"There is no single data defect — the root cause is a systemic architectural pattern choice: defaulting to the simplest-to-explain rule type instead of the correct-for-the-data-shape rule type, repeated across most of the model.",
+  decision:{
+    q:"What is the architecturally complete answer — not just the quick fix?",
+    options:[
+      {label:"A", text:"Quietly rewrite the rules yourself and say nothing to the junior architect"},
+      {label:"B", text:"Re-architect the highest-volume rules to the simplest rule type the data pattern actually supports (Simple/Complex Dim Extension or Reclass where applicable), and pair with the junior architect on why rule-type selection is a performance decision, not just a communication one"},
+      {label:"C", text:"Tell the business the tool can't scale and recommend a different platform"},
+      {label:"D", text:"Leave it as-is since every individual rule still balances correctly"},
+    ],
+    correct:1,
+    explanation:"A Senior Architect fixes both the system and the team's judgment. The technical fix is matching rule type to data pattern, not defaulting to the easiest one to describe; the leadership fix is transferring that judgment so it doesn't recur."
+  },
+};
+
+/* ---------------------------------------------------------------------
+   4. GENERATED ROUNDS — every round not hand-authored above still gets
+      a fully playable, internally-consistent investigation built from
+      one of a few templates, scaled and flavoured by round number/title.
+   --------------------------------------------------------------------- */
+function generateRound(n, title){
+  const seed = n * 37;
+  const rnd = (min,max)=> Math.round(min + ((seed*9301+49297)%233280)/233280 * (max-min));
+  const lower = title.toLowerCase();
+
+  let template = "profitability";
+  if(/dimension|intersection/.test(lower)) template = "dimension";
+  if(/performance|scalab|sla|large|growth/.test(lower)) template = "performance";
+  if(/driver|zero driver/.test(lower)) template = "driver";
+  if(/valid|reconcil|source data/.test(lower)) template = "validation";
+  if(/trace/.test(lower)) template = "trace";
+  if(/architecture|redesign|global/.test(lower)) template = "architecture";
+  if(/exception/.test(lower)) template = "exception";
+
+  const revenue = 60 + rnd(10,220);
+  const costPct = 0.72 + (rnd(0,15)/100);
+  const cost = Math.round(revenue*costPct);
+  const profit = revenue-cost;
+
+  const base = {
+    interviewer:`Round ${n} — ${title}. The enterprise total reconciles, but the detail tells a different story. Walk me through how you'd investigate "${title}" as a Senior PCMCS Architect, from first principles.`,
+    followUp:`Assume your first hypothesis is wrong. What's the second thing you check, and why in that order?`,
+    kpis:{revenue:`$${revenue}M`, cost:`$${cost}M`, profit:`$${profit}M`, status: profit>0? "ok":"bad", statusText: profit>0 ? "Enterprise Total Balanced" : "Enterprise Total Under Pressure"},
+  };
+
+  const templates = {
+    profitability: {
+      model:{t1:"Scope", d1:`A ${title.toLowerCase()} scenario on the customer/product profitability model — total company profit reconciles, the anomaly is at the detail intersection.`,
+             t2:"Method", d2:"Reconcile totals, then drill into the detail table, then Rule Balancing, then the driver population, in that order — never the rule formula first."},
+      detail:{title:"Detail Profitability", rows:[
+        {name:"Segment A", revenue:Math.round(revenue*0.32*1e6), cost:Math.round(cost*0.30*1e6), profit:Math.round((revenue*0.32-cost*0.30)*1e6), flag:false},
+        {name:"Segment B", revenue:Math.round(revenue*0.30*1e6), cost:Math.round(cost*0.28*1e6), profit:Math.round((revenue*0.30-cost*0.28)*1e6), flag:false},
+        {name:"Segment C (flagged)", revenue:Math.round(revenue*0.38*1e6), cost:Math.round(cost*0.42*1e6), profit:Math.round((revenue*0.38-cost*0.42)*1e6), flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Primary Cost Allocation", source:"Cost Pool", dest:"Segment", out:Math.round(cost*0.4*1e6), into:Math.round(cost*0.4*1e6), ok:true},
+      ]},
+      driver:{title:"Allocation Driver by Segment", rows:[
+        {name:"Segment A", pct:30, anomaly:false},
+        {name:"Segment B", pct:28, anomaly:false},
+        {name:"Segment C (flagged)", pct:42, anomaly:true},
+      ]},
+      trace:["Cost Pool","Allocation Rule","Segment Destination","Segment C"],
+      rootCauseText:`Segment C's share of the allocation driver is disproportionate to its actual activity — the pattern is consistent with a driver population that wasn't refreshed for the current period, the classic cause behind a "${title.toLowerCase()}" symptom.`,
+      decision:{
+        q:"Rule Balancing is clean. What's the correct next screen to open?",
+        options:[
+          {label:"A", text:"Edit the allocation rule's formula directly"},
+          {label:"B", text:"Open Driver Analysis for the flagged segment and check whether the driver population is current"},
+          {label:"C", text:"Delete the flagged segment from the dimension"},
+          {label:"D", text:"Re-run the calculation with no further investigation"},
+        ], correct:1,
+        explanation:"When rules balance but the detail is wrong, the driver population — not the rule logic — is the next thing to inspect."
+      },
+    },
+    dimension: {
+      model:{t1:"Design Question", d1:`"${title}" tests whether an intersection between two dimensions is valid, sparse, and correctly aliased — not whether the rule math is right.`,
+             t2:"Common Cause", d2:"A member added to one dimension without a corresponding valid intersection in a related dimension produces an orphaned or duplicated result."},
+      detail:{title:"Dimension Intersection Check", rows:[
+        {name:"Valid Intersections", revenue:"", cost:"", profit:`${88+rnd(0,8)}% of population`, flag:false},
+        {name:"Orphaned / Invalid Intersections", revenue:"", cost:"", profit:`${12-rnd(0,8)}% of population`, flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Dimension-Dependent Allocation", source:"Source Dim", dest:"Target Dim", out:Math.round(cost*0.5*1e6), into:Math.round(cost*0.44*1e6), ok:false},
+      ]},
+      driver:{title:"Intersection Validity by Hierarchy Branch", rows:[
+        {name:"Branch 1", pct:96, anomaly:false},
+        {name:"Branch 2 (newly restructured)", pct:41, anomaly:true},
+      ]},
+      trace:["Source Dimension","Cross-Dimension Rule","Target Dimension","Orphaned Branch"],
+      rootCauseText:"A hierarchy branch was restructured (members moved or renamed) without updating the rule's member selection, leaving a subset of intersections invalid — the calculation silently skips them rather than erroring.",
+      decision:{
+        q:"What's the right fix?",
+        options:[
+          {label:"A", text:"Ignore invalid intersections since most of the population is fine"},
+          {label:"B", text:"Re-map the rule's member selection to the restructured hierarchy and run Model Validation to confirm no invalid intersections remain"},
+          {label:"C", text:"Delete the restructured branch"},
+          {label:"D", text:"Increase the dimension's member limit"},
+        ], correct:1,
+        explanation:"Model Validation exists exactly for this — confirming that a metadata change (a restructured hierarchy) hasn't invalidated a rule that references it."
+      },
+    },
+    performance: {
+      model:{t1:"Symptom", d1:`"${title}" — calculation runtime has grown non-linearly against data volume, threatening the close SLA.`,
+             t2:"Levers available", d2:"Cloud users don't tune the Essbase engine directly — the architect's levers are rule design, source segmentation, and partition strategy."},
+      detail:{title:"Runtime Trend", rows:[
+        {name:"Baseline", revenue:"", cost:"", profit:`${10+rnd(0,5)} min`, flag:false},
+        {name:"Current", revenue:"", cost:"", profit:`${60+rnd(0,40)} min`, flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Largest Allocation Rule", source:"Pool", dest:"Multiple", out:Math.round(cost*0.6*1e6), into:Math.round(cost*0.6*1e6), ok:true},
+      ]},
+      driver:{title:"Source Population Concentration", rows:[
+        {name:"Segmented portion", pct:35, anomaly:false},
+        {name:"Unsegmented portion (bottleneck)", pct:65, anomaly:true},
+      ]},
+      trace:[],
+      rootCauseText:"The largest rule has never had Source Segmentation applied, so its full source range executes as one unbroken block — the bottleneck scales linearly with data volume with no parallelism to absorb the growth.",
+      decision:{
+        q:"What's the correct performance lever here?",
+        options:[
+          {label:"A", text:"Ask Oracle to increase compute for the environment"},
+          {label:"B", text:"Apply Source Segmentation to the largest unsegmented rule, or manually split it along a natural partition (entity, period, or product line)"},
+          {label:"C", text:"Reduce the reporting frequency"},
+          {label:"D", text:"Switch every rule to Same-as-Source for simplicity"},
+        ], correct:1,
+        explanation:"Segmentation and partitioning are the levers an architect actually controls in a managed cloud environment; requesting more compute doesn't address an unsegmented rule design."
+      },
+    },
+    driver: {
+      model:{t1:"Symptom", d1:`"${title}" — the allocation percentage for at least one member is zero or wildly disproportionate.`,
+             t2:"Why it matters", d2:"A zero-driver member receives none of a shared cost pool, which silently understates its true cost and overstates its profitability."},
+      detail:{title:"Driver Population Check", rows:[
+        {name:"Member Group 1", revenue:"", cost:"", profit:`driver: ${20+rnd(0,10)}`, flag:false},
+        {name:"Member Group 2", revenue:"", cost:"", profit:"driver: 0", flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Driver-Based Allocation", source:"Pool", dest:"Member", out:Math.round(cost*0.3*1e6), into:Math.round(cost*0.3*1e6), ok:true},
+      ]},
+      driver:{title:"Driver Value by Member Group", rows:[
+        {name:"Member Group 1", pct:100, anomaly:false},
+        {name:"Member Group 2 (zero driver)", pct:0, anomaly:true},
+      ]},
+      trace:["Cost Pool","Driver-Based Rule","Member Destination","Member Group 2 (zero driver)"],
+      rootCauseText:"Member Group 2's driver source data was never loaded for the current period — likely a missed feed from a newly onboarded entity — leaving its driver at zero and excluding it from an otherwise-correct allocation formula.",
+      decision:{
+        q:"What's the right immediate action?",
+        options:[
+          {label:"A", text:"Hard-code a manual allocation percentage for Member Group 2"},
+          {label:"B", text:"Investigate why the driver source feed for Member Group 2 is missing this period and correct the load before recalculating"},
+          {label:"C", text:"Delete Member Group 2 from the rule"},
+          {label:"D", text:"Change the rule type"},
+        ], correct:1,
+        explanation:"A zero driver from a missing feed is a data problem to be fixed at the source — hard-coding around it hides the issue and will recur every period until the feed is fixed."
+      },
+    },
+    validation: {
+      model:{t1:"Trigger", d1:`"${title}" — a recent metadata or dimension change has potentially invalidated existing rules or formulas.`,
+             t2:"Tool", d2:"Model Validation Analysis exists exactly for this: it scans artifacts for rules or formulas that reference now-invalid members after a metadata change."},
+      detail:{title:"Post-Change Validation Scope", rows:[
+        {name:"Rules unaffected", revenue:"", cost:"", profit:`${85+rnd(0,10)}%`, flag:false},
+        {name:"Rules referencing changed metadata", revenue:"", cost:"", profit:`${15-rnd(0,10)}%`, flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Rule referencing renamed member", source:"Source", dest:"Target", out:0, into:0, ok:false},
+      ]},
+      driver:{title:"Validation Findings by Rule Set", rows:[
+        {name:"Rule Set 1", pct:100, anomaly:false},
+        {name:"Rule Set 2 (broken reference)", pct:0, anomaly:true},
+      ]},
+      trace:[],
+      rootCauseText:"A member was renamed or moved in a recent dimension edit, and at least one rule set still references the old member name — Model Validation Analysis flags the artifact as invalid rather than letting it silently fail during calculation.",
+      decision:{
+        q:"What's the correct process?",
+        options:[
+          {label:"A", text:"Run Model Validation Analysis after any dimension or rule change, and repair flagged artifacts before the next calculation"},
+          {label:"B", text:"Wait for the calculation to fail before investigating"},
+          {label:"C", text:"Revert the entire dimension change"},
+          {label:"D", text:"Ignore validation warnings if the last calculation still produced a number"},
+        ], correct:0,
+        explanation:"Validation Analysis is meant to run proactively after metadata changes — catching broken references before they silently distort a calculation, not after."
+      },
+    },
+    trace: {
+      model:{t1:"Tool in focus", d1:`"${title}" — Allocation Trace provides a graphical, node-based view tracing a focal member's value forward or backward through every rule that touched it.`,
+             t2:"Why here", d2:"When Rule Balancing shows everything is fine in aggregate but one specific member's number still looks wrong, Trace is what isolates the path that produced it."},
+      detail:{title:"Focal Member Investigation", rows:[
+        {name:"Focal Member", revenue:"", cost:"", profit:"under investigation", flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Upstream Allocation", source:"Pool", dest:"Focal Member", out:Math.round(cost*0.25*1e6), into:Math.round(cost*0.25*1e6), ok:true},
+      ]},
+      driver:{title:"Contribution by Upstream Rule", rows:[
+        {name:"Rule 1 contribution", pct:20, anomaly:false},
+        {name:"Rule 2 contribution (unexpectedly large)", pct:80, anomaly:true},
+      ]},
+      trace:["Corporate Source","Rule 1","Rule 2 (dominant path)","Focal Member"],
+      rootCauseText:"Backward tracing from the focal member shows almost all of its value arrived through a single rule that was expected to contribute a minor share — that rule's member selection is broader than intended, pulling in more source than the design called for.",
+      decision:{
+        q:"What's your next move after backward-tracing the dominant path?",
+        options:[
+          {label:"A", text:"Narrow Rule 2's source member selection to match the intended scope, then forward-trace to confirm the focal member's value corrects"},
+          {label:"B", text:"Disable Rule 2 entirely"},
+          {label:"C", text:"Manually override the focal member's value"},
+          {label:"D", text:"Assume the trace is wrong and recheck Rule Balancing instead"},
+        ], correct:0,
+        explanation:"Once trace identifies the dominant contributing rule, the fix is scoping that rule correctly and confirming with a forward trace — not disabling the rule or overriding the symptom."
+      },
+    },
+    architecture: {
+      model:{t1:"Scope", d1:`"${title}" — an enterprise-level architecture decision with trade-offs across performance, maintainability, and business flexibility.`,
+             t2:"Framing", d2:"There is rarely one 'correct' architecture — the interviewer is testing whether you can name the trade-offs explicitly and justify a choice."},
+      detail:{title:"Design Options Under Consideration", rows:[
+        {name:"Single consolidated application", revenue:"", cost:"", profit:"simpler, harder to scale", flag:false},
+        {name:"Federated / multi-application design", revenue:"", cost:"", profit:"more complex, scales better", flag:true},
+      ]},
+      balancing:{rows:[]},
+      driver:{title:"Trade-off Weighting (illustrative)", rows:[
+        {name:"Maintainability", pct:60, anomaly:false},
+        {name:"Raw performance headroom", pct:85, anomaly:true},
+      ]},
+      trace:[],
+      rootCauseText:"There is no single defect to find here — the round is evaluating whether you can articulate the trade-off between a simpler consolidated design and a federated design that scales further but costs more to govern.",
+      decision:{
+        q:"How do you frame your recommendation to the panel?",
+        options:[
+          {label:"A", text:"State a firm answer with no trade-offs mentioned"},
+          {label:"B", text:"Name the trade-off explicitly, recommend based on the stated growth trajectory and governance capacity, and note what would change your answer"},
+          {label:"C", text:"Defer entirely to what Oracle recommends"},
+          {label:"D", text:"Say both options are equally good"},
+        ], correct:1,
+        explanation:"Enterprise architecture judgment is demonstrated by naming trade-offs and the conditions that would flip the decision — not by picking a side with no reasoning, or refusing to choose."
+      },
+    },
+    exception: {
+      model:{t1:"Scope", d1:`"${title}" — the calculation encountered a defined exception state (a source population outside the rule's expected boundaries).`,
+             t2:"Handling", d2:"PCMCS surfaces exceptions rather than silently guessing — the architect's job is to decide the correct handling policy, not just suppress the exception."},
+      detail:{title:"Exception Population", rows:[
+        {name:"Normal Population", revenue:"", cost:"", profit:`${90+rnd(0,8)}%`, flag:false},
+        {name:"Exception Population (out of bounds)", revenue:"", cost:"", profit:`${10-rnd(0,8)}%`, flag:true},
+      ]},
+      balancing:{rows:[
+        {rule:"Rule with Exception Policy", source:"Source", dest:"Destination", out:Math.round(cost*0.2*1e6), into:Math.round(cost*0.18*1e6), ok:false},
+      ]},
+      driver:{title:"Exception Reasons", rows:[
+        {name:"Negative source values", pct:60, anomaly:true},
+        {name:"Out-of-range member combinations", pct:40, anomaly:false},
+      ]},
+      trace:[],
+      rootCauseText:"A subset of source rows contain negative values that the rule's exception handling policy was never explicitly configured for, so they're being silently excluded rather than allocated or flagged for review.",
+      decision:{
+        q:"What's the architecturally sound fix?",
+        options:[
+          {label:"A", text:"Leave the default behavior in place since most data is unaffected"},
+          {label:"B", text:"Explicitly define the rule's exception handling policy for negative and out-of-range values so they're either allocated correctly or flagged, not silently dropped"},
+          {label:"C", text:"Convert all negative values to zero before load"},
+          {label:"D", text:"Exclude the exception population from all future reporting"},
+        ], correct:1,
+        explanation:"Exceptions should be explicitly handled by policy — silently dropping out-of-bounds rows (even a small percentage) erodes trust in the total and hides a data quality issue that will grow."
+      },
+    },
+  };
+
+  return Object.assign({}, base, templates[template]);
+}
+
+/* ---------------------------------------------------------------------
+   5. BUILD FINAL ROUNDS ARRAY (1..30)
+   --------------------------------------------------------------------- */
+const ROUNDS = ROUND_TITLES.map((title, i)=>{
+  const n = i+1;
+  const data = CURATED[n] ? CURATED[n] : generateRound(n, title);
+  return Object.assign({id:n, title, category:title}, data);
+});
+
+/* =========================================================================
+   6. ENGINE STATE
+   ========================================================================= */
+const STATE = {
+  candidateName:"Candidate",
+  roundIndex:0,          // 0-based into ROUNDS
+  score:0,
+  activeTab:"overview",
+  answerMode:"type",
+  followUpShown:false,
+  decisionMade:false,
+  coachOpen:false,
+  checked:new Array(CHECKLIST.length).fill(false),
+  history:[],            // per-round record for final report
+  selectedDetailRow:null,
+  traceDir:"forward",
+  timerSeconds:45*60,
+  timerHandle:null,
+  calcRunning:false,
+};
+
+function fmtMoney(v){
+  if(v===""||v===undefined||v===null) return "—";
+  if(typeof v==="string") return v;
+  const abs=Math.abs(v);
+  const sign = v<0 ? "-" : "";
+  if(abs>=1000000) return sign+"$"+(abs/1000000).toFixed(1).replace(/\.0$/,"")+"M";
+  if(abs>=1000) return sign+"$"+(abs/1000).toFixed(0)+"K";
+  return sign+"$"+abs;
+}
+
+/* =========================================================================
+   7. STARTUP
+   ========================================================================= */
+function startSimulator(){
+  const nameVal = document.getElementById('candidateNameInput').value.trim();
+  if(nameVal) STATE.candidateName = nameVal;
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('app').classList.add('active');
+  buildSidebar();
+  buildRoundNav();
+  loadRound(0);
+  startTimer();
+}
+
+function buildSidebar(){
+  const el = document.getElementById('sidebar');
+  el.innerHTML = SIDEBAR.map(group=>{
+    const items = group.items.map(it=>`
+      <div class="sb-item" data-tab="${it.tab}" onclick="setTab('${it.tab}', this)">
+        <span class="ic">${it.ic}</span><span>${it.label}</span>
+      </div>`).join("");
+    return `<div class="sb-group"><div class="sb-group-title">${group.group}</div>${items}</div>`;
+  }).join("");
+}
+
+function buildRoundNav(){
+  const el = document.getElementById('roundNav');
+  el.innerHTML = ROUNDS.map((r,i)=>`<div class="round-pill" id="pill-${i}" title="Round ${i+1}: ${r.title}" onclick="jumpToRound(${i})">${String(i+1).padStart(2,'0')}</div>`).join("");
+}
+
+function jumpToRound(i){
+  if(i>STATE.roundIndex && !STATE.history[STATE.roundIndex]) return; // must submit current first
+  loadRound(i);
+}
+
+/* =========================================================================
+   8. TIMER
+   ========================================================================= */
+function startTimer(){
+  clearInterval(STATE.timerHandle);
+  STATE.timerHandle = setInterval(()=>{
+    if(STATE.timerSeconds>0){
+      STATE.timerSeconds--;
+      const m = Math.floor(STATE.timerSeconds/60);
+      const s = STATE.timerSeconds%60;
+      document.getElementById('tbTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+  },1000);
+}
+
+/* =========================================================================
+   9. LOAD / RENDER A ROUND
+   ========================================================================= */
+function loadRound(i){
+  STATE.roundIndex = i;
+  STATE.followUpShown = false;
+  STATE.decisionMade = false;
+  STATE.coachOpen = false;
+  STATE.checked = new Array(CHECKLIST.length).fill(false);
+  STATE.selectedDetailRow = null;
+  STATE.traceDir = "forward";
+  STATE.timerSeconds = 45*60;
+  STATE.calcRunning = false;
+
+  const r = ROUNDS[i];
+  document.getElementById('tbRound').textContent = `${String(i+1).padStart(2,'0')} / 30`;
+  document.getElementById('roundTag').textContent = `ROUND ${String(i+1).padStart(2,'0')} · ${r.title.toUpperCase()}`;
+  document.getElementById('questionText').textContent = r.interviewer;
+  document.getElementById('answerInput').value = "";
+  document.getElementById('followupSlot').innerHTML = "";
+  document.getElementById('decisionSlot').innerHTML = "";
+  document.getElementById('coachSlot').innerHTML = "";
+
+  updateRoundPills();
+  renderChecklist();
+  setTab('overview', null);
+  renderPOV(i);
+  renderWorkspaceTabs(r);
+  renderWorkspaceBody(r);
+  document.getElementById('interviewScroll').scrollTop = 0;
+}
+
+function updateRoundPills(){
+  ROUNDS.forEach((r,idx)=>{
+    const p = document.getElementById('pill-'+idx);
+    if(!p) return;
+    p.classList.remove('done','current');
+    if(idx===STATE.roundIndex) p.classList.add('current');
+    else if(STATE.history[idx]) p.classList.add('done');
+  });
+}
+
+function renderChecklist(){
+  const html = `
+  <div class="checklist-box">
+    <div class="checklist-title">LIVE ANSWER STRUCTURE DETECTION</div>
+    <div class="checklist-grid" id="checklistGrid">
+      ${CHECKLIST.map((c,idx)=>`
+        <div class="cl-item" id="cl-${idx}">
+          <span class="box"></span><span>${c}</span>
+        </div>`).join("")}
+    </div>
+  </div>`;
+  document.getElementById('checklistSlot').innerHTML = html;
+}
+
+function renderPOV(i){
+  const periods=["Jan","Feb","Mar","Apr","May","Jun"];
+  const period = periods[i%periods.length];
+  document.getElementById('povBar').innerHTML = `
+    <div class="pov-item"><span class="k">PERIOD</span><span class="v">${period}</span></div>
+    <div class="pov-item"><span class="k">YEAR</span><span class="v">FY26</span></div>
+    <div class="pov-item"><span class="k">SCENARIO</span><span class="v">Actual</span></div>
+    <div class="pov-item"><span class="k">VERSION</span><span class="v">Working</span></div>
+    <div class="pov-item"><span class="k">ENTITY</span><span class="v">Global Enterprise</span></div>
+    <div class="pov-item"><span class="k">CURRENCY</span><span class="v">USD</span></div>
+  `;
+}
+
+const WS_TABS = [
+  {key:"overview", label:"Overview", ic:"📊"},
+  {key:"model", label:"Model / Dimensions", ic:"🧩"},
+  {key:"rules", label:"Allocation Rules", ic:"⚙️"},
+  {key:"balancing", label:"Rule Balancing", ic:"⚖️"},
+  {key:"trace", label:"Allocation Trace", ic:"🔗"},
+  {key:"driver", label:"Driver Analysis", ic:"📈"},
+  {key:"detail", label:"Detail / Profitability", ic:"🗂"},
+  {key:"calc", label:"Calculation Control", ic:"🎮"},
+  {key:"validation", label:"Model Validation", ic:"✅"},
+  {key:"scorecard", label:"Scorecard", ic:"🧠"},
+];
+
+function renderWorkspaceTabs(r){
+  const flagTabs = new Set();
+  if(r.balancing && r.balancing.rows.some(x=>x.ok===false)) flagTabs.add("balancing");
+  if(r.driver && r.driver.rows.some(x=>x.anomaly)) flagTabs.add("driver");
+  if(r.detail && r.detail.rows.some(x=>x.flag)) flagTabs.add("detail");
+
+  document.getElementById('wsTabbar').innerHTML = WS_TABS.map(t=>`
+    <div class="ws-tab ${t.key===STATE.activeTab?'active':''}" onclick="setTab('${t.key}', null)">
+      <span>${t.ic}</span><span>${t.label}</span>${flagTabs.has(t.key)?'<span class="flag"></span>':''}
+    </div>`).join("");
+}
+
+function setTab(tabKey, sbEl){
+  STATE.activeTab = tabKey;
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
+  if(sbEl) sbEl.classList.add('active');
+  renderWorkspaceTabs(ROUNDS[STATE.roundIndex]);
+  renderWorkspaceBody(ROUNDS[STATE.roundIndex]);
+}
+
+function suggestBanner(text){
+  return `<div class="ws-suggest"><span class="ic">💡</span> ${text}</div>`;
+}
+
+function renderWorkspaceBody(r){
+  const el = document.getElementById('wsScroll');
+  let html = "";
+  switch(STATE.activeTab){
+    case "overview": html = tplOverview(r); break;
+    case "model": html = tplModel(r); break;
+    case "rules": html = tplRules(r); break;
+    case "balancing": html = tplBalancing(r); break;
+    case "trace": html = tplTrace(r); break;
+    case "driver": html = tplDriver(r); break;
+    case "detail": html = tplDetail(r); break;
+    case "calc": html = tplCalc(r); break;
+    case "validation": html = tplValidation(r); break;
+    case "scorecard": html = tplScorecard(); break;
+    default: html = tplOverview(r);
+  }
+  el.innerHTML = html;
+}
+
+function tplOverview(r){
+  const statusOk = r.kpis.status==="ok";
+  return `
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="lbl">REVENUE</div><div class="val">${r.kpis.revenue}</div></div>
+    <div class="kpi-card"><div class="lbl">TOTAL COST</div><div class="val">${r.kpis.cost}</div></div>
+    <div class="kpi-card ${statusOk?'pos':'neg'}"><div class="lbl">ENTERPRISE PROFIT</div><div class="val">${r.kpis.profit}</div></div>
+    <div class="kpi-card">
+      <div class="lbl">STATUS</div>
+      <div class="kpi-status ${statusOk?'ok':'bad'}">${statusOk?'🟢':'🔴'} ${r.kpis.statusText}</div>
+    </div>
+  </div>
+  ${suggestBanner("This is the enterprise-level view. If the total looks fine but something feels off, the detail tables and Rule Balancing are where the real investigation starts.")}
+  <div class="ws-section-title"><span class="n">1</span> BUSINESS PROBLEM</div>
+  <div class="model-info-grid">
+    <div class="info-card"><div class="t">${r.model.t1}</div><div class="d">${r.model.d1}</div></div>
+    <div class="info-card"><div class="t">${r.model.t2}</div><div class="d">${r.model.d2}</div></div>
+  </div>
+  `;
+}
+
+function tplModel(r){
+  return `
+  <div class="ws-section-title"><span class="n">M</span> MODEL &amp; DIMENSIONS</div>
+  <div class="model-info-grid">
+    <div class="info-card"><div class="t">${r.model.t1}</div><div class="d">${r.model.d1}</div></div>
+    <div class="info-card"><div class="t">${r.model.t2}</div><div class="d">${r.model.d2}</div></div>
+  </div>
+  <div class="ws-section-title" style="margin-top:22px;"><span class="n">S</span> SYSTEM DIMENSIONS</div>
+  <div class="model-info-grid">
+    <div class="info-card"><div class="t">Rule (system)</div><div class="d">Auto-generated, uneditable — one member per allocation rule created in the model.</div></div>
+    <div class="info-card"><div class="t">Balance (system)</div><div class="d">Tracks Input / Allocation In / Allocation Out / Net Balance for every rule-affected intersection.</div></div>
+  </div>
+  `;
+}
+
+function tplRules(r){
+  const bal = r.balancing && r.balancing.rows.length ? r.balancing.rows : [];
+  return `
+  ${suggestBanner("Reviewing rule configuration tells you intent. Rule Balancing (next tab) tells you what actually happened on this data slice.")}
+  <div class="ws-section-title"><span class="n">R</span> ALLOCATION RULE DEFINITIONS</div>
+  <table class="data-table">
+    <thead><tr><th>Rule</th><th>Source</th><th>Destination</th><th>Rule Type</th></tr></thead>
+    <tbody>
+    ${bal.length ? bal.map(b=>`<tr><td class="text">${b.rule}</td><td class="text">${b.source}</td><td class="text">${b.dest}</td><td class="text">Complex Dim Extension</td></tr>`).join("") : `<tr><td class="text" colspan="4">No allocation rule is directly implicated in this round — check Model Architecture instead.</td></tr>`}
+    </tbody>
+  </table>`;
+}
+
+function tplBalancing(r){
+  const rows = (r.balancing && r.balancing.rows) || [];
+  return `
+  ${suggestBanner("A rule can be mathematically balanced and still produce a wrong business result — balancing rules out the rule engine, it doesn't rule out the driver population.")}
+  <div class="ws-section-title"><span class="n">2</span> RULE BALANCING</div>
+  <table class="data-table">
+    <thead><tr><th>Rule</th><th>Source</th><th>Destination</th><th>Allocation Out</th><th>Allocation In</th><th>Status</th></tr></thead>
+    <tbody>
+    ${rows.length ? rows.map(b=>`
+      <tr>
+        <td class="text">${b.rule}</td>
+        <td class="text">${b.source}</td>
+        <td class="text">${b.dest}</td>
+        <td>${b.out?fmtMoney(b.out):'—'}</td>
+        <td>${b.into?fmtMoney(b.into):'—'}</td>
+        <td>${b.ok?'<span class="badge good">🟢 Balanced</span>':'<span class="badge bad">🔴 Unbalanced</span>'}</td>
+      </tr>`).join("") : `<tr><td class="text" colspan="6">No rule balancing anomalies for this scenario.</td></tr>`}
+    </tbody>
+  </table>`;
+}
+
+function tplTrace(r){
+  const nodes = r.trace || [];
+  const seq = STATE.traceDir==="forward" ? nodes : [...nodes].reverse();
+  return `
+  ${suggestBanner("Pick a focal member, then walk the graph upstream (backward) or downstream (forward) through every rule that touched it.")}
+  <div class="ws-section-title"><span class="n">3</span> ALLOCATION TRACE</div>
+  <div class="trace-controls">
+    <button class="${STATE.traceDir==='backward'?'active':''}" onclick="setTraceDir('backward')">⬅ BACKWARD TRACE</button>
+    <button class="${STATE.traceDir==='forward'?'active':''}" onclick="setTraceDir('forward')">➡ FORWARD TRACE</button>
+  </div>
+  ${nodes.length ? `<div class="trace-flow">${seq.map((node,idx)=>`
+    <div class="trace-node ${idx===seq.length-1?'hot':''}">${node}</div>
+    ${idx<seq.length-1?'<div class="trace-arrow">↓</div>':''}
+  `).join("")}</div>` : `<div class="rootcause-box">No allocation trace is relevant to this round — it isn't a flow-tracing scenario.</div>`}
+  `;
+}
+
+function tplDriver(r){
+  const rows = (r.driver && r.driver.rows) || [];
+  return `
+  ${suggestBanner("Drivers determine who gets what share of a cost pool. A driver that's zero, missing, or wildly disproportionate is often the real story behind a 'balanced' rule.")}
+  <div class="ws-section-title"><span class="n">5</span> ${(r.driver&&r.driver.title)||'DRIVER ANALYSIS'}</div>
+  <div class="driver-bar-wrap">
+  ${rows.map(row=>`
+    <div class="driver-bar-row ${row.anomaly?'anomaly':''}">
+      <div class="name">${row.name}</div>
+      <div class="track"><div class="fill" style="width:${row.pct}%;"></div></div>
+      <div class="pct">${row.pct}%</div>
+    </div>`).join("")}
+  </div>
+  ${STATE.checked[8] ? `<div class="rootcause-revealed" style="margin-top:18px;">
+      <b>ROOT CAUSE DETECTED</b><br>${r.rootCauseText}
+    </div>` : `<div class="rootcause-box" style="margin-top:18px;">Mention "root cause" in your answer, or complete more of the checklist, to reveal the diagnosis here.</div>`}
+  `;
+}
+
+function tplDetail(r){
+  const rows = (r.detail && r.detail.rows) || [];
+  const hasMoneyCols = rows.length && typeof rows[0].revenue === "number";
+  return `
+  ${suggestBanner((r.detail&&r.detail.clickHint) || "Click a flagged row to drill into it before opening Rule Balancing.")}
+  <div class="ws-section-title"><span class="n">2</span> ${(r.detail&&r.detail.title)||'DETAIL PROFITABILITY'}</div>
+  <table class="data-table">
+    <thead><tr><th>Name</th>${hasMoneyCols?'<th>Revenue</th><th>Cost</th>':''}<th>Profit / Note</th></tr></thead>
+    <tbody>
+    ${rows.map((row,idx)=>`
+      <tr class="clickable ${STATE.selectedDetailRow===idx?'selected':''}" onclick="selectDetailRow(${idx})">
+        <td class="text">${row.name}</td>
+        ${hasMoneyCols?`<td>${fmtMoney(row.revenue)}</td><td>${fmtMoney(row.cost)}</td>`:''}
+        <td class="${row.flag?'flag-bad':(typeof row.profit==='number'&&row.profit<0?'flag-bad':'')}">${typeof row.profit==='number'?fmtMoney(row.profit):(row.profit||'—')} ${row.flag?'🔴':''}</td>
+      </tr>`).join("")}
+    </tbody>
+  </table>
+  ${STATE.selectedDetailRow!==null && rows[STATE.selectedDetailRow] && rows[STATE.selectedDetailRow].flag ? `
+    <div class="ws-suggest" style="margin-top:14px;background:var(--bad-soft);color:var(--bad);border-color:#eec3bf;">
+      <span class="ic">🔍</span> ${rows[STATE.selectedDetailRow].name} is flagged. Open <b>Rule Balancing</b>, then <b>Driver Analysis</b>, to see why.
+    </div>` : ''}
+  `;
+}
+
+function tplCalc(r){
+  const steps = ["Validating Model","Checking Rules","Calculating Allocation","Applying Drivers","Balancing Rules","Calculating Profitability","Calculation Complete"];
+  return `
+  <div class="ws-section-title"><span class="n">▶</span> CALCULATION CONTROL</div>
+  <p style="font-size:12.8px;color:var(--ink-soft);max-width:520px;line-height:1.6;">Run the calculation to simulate how PCMCS would recompute this scenario end to end. This does not change the investigation data above — it's here to demonstrate the calc lifecycle.</p>
+  <button class="calc-run-btn" onclick="runCalculation()">🧮 RUN CALCULATION</button>
+  <div class="calc-steps" id="calcSteps">
+    ${steps.map((s,i)=>`<div class="calc-step" id="calcstep-${i}"><span class="dot"></span><span>${s}</span></div>`).join("")}
+  </div>
+  `;
+}
+
+function tplValidation(r){
+  return `
+  <div class="ws-section-title"><span class="n">✔</span> MODEL VALIDATION</div>
+  ${suggestBanner("Run this after any dimension or rule change — it flags rules or formulas referencing now-invalid members before they distort a calculation.")}
+  <table class="data-table">
+    <thead><tr><th>Artifact</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td class="text">Dimension Hierarchies</td><td><span class="badge good">🟢 Valid</span></td></tr>
+      <tr><td class="text">Rule Member References</td><td><span class="badge ${(r.balancing&&r.balancing.rows.some(x=>x.ok===false))?'bad':'good'}">${(r.balancing&&r.balancing.rows.some(x=>x.ok===false))?'🔴 1 Reference Flagged':'🟢 Valid'}</span></td></tr>
+      <tr><td class="text">Custom Calculation Scripts</td><td><span class="badge good">🟢 Valid</span></td></tr>
+    </tbody>
+  </table>
+  `;
+}
+
+function tplScorecard(){
+  const cats = [
+    ["PCMCS Architecture",90],["Allocation Design",86],["Dimensional Design",83],
+    ["Troubleshooting",88],["Rule Balancing",92],["Allocation Trace",89],
+    ["Performance Optimization",80],["Business Understanding",87],["Architecture Defense",85]
+  ];
+  return `
+  <div class="ws-section-title"><span class="n">🧠</span> ARCHITECT SCORECARD (LIVE)</div>
+  <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;">Illustrative skill weighting — your running score at top-right reflects actual round-by-round decisions and investigation completeness.</p>
+  ${cats.map(([label,val])=>`
+    <div class="skill-row">
+      <div class="text" style="font-size:12.3px;">${label}</div>
+      <div class="track"><div class="fill" style="width:${val}%;"></div></div>
+      <div class="num">${val}</div>
+    </div>`).join("")}
+  `;
+}
+
+function selectDetailRow(idx){
+  STATE.selectedDetailRow = idx;
+  renderWorkspaceBody(ROUNDS[STATE.roundIndex]);
+}
+function setTraceDir(dir){
+  STATE.traceDir = dir;
+  renderWorkspaceBody(ROUNDS[STATE.roundIndex]);
+}
+
+let calcTimer=null;
+function runCalculation(){
+  if(STATE.calcRunning) return;
+  STATE.calcRunning = true;
+  const total = 7;
+  let step = 0;
+  for(let i=0;i<total;i++){ const d=document.getElementById('calcstep-'+i); if(d) d.className='calc-step'; }
+  clearInterval(calcTimer);
+  calcTimer = setInterval(()=>{
+    if(step>0){ const prev=document.getElementById('calcstep-'+(step-1)); if(prev) prev.className='calc-step done'; }
+    if(step<total){
+      const cur=document.getElementById('calcstep-'+step);
+      if(cur) cur.className='calc-step active';
+      step++;
+    } else {
+      clearInterval(calcTimer);
+      STATE.calcRunning = false;
+    }
+  }, 420);
+}
+
+/* =========================================================================
+   10. ANSWER INPUT — KEYWORD DETECTION -> CHECKLIST + WORKSPACE SUGGESTION
+   ========================================================================= */
+function setAnswerMode(mode){
+  STATE.answerMode = mode;
+  document.getElementById('tabType').classList.toggle('active', mode==='type');
+  document.getElementById('tabVoice').classList.toggle('active', mode==='voice');
+  document.getElementById('voiceRow').classList.toggle('show', mode==='voice');
+}
+
+let voiceRecording=false;
+function toggleVoice(){
+  voiceRecording = !voiceRecording;
+  const btn = document.getElementById('voiceRec');
+  if(voiceRecording){
+    btn.textContent = "🔴 Recording…";
+    btn.classList.add('rec');
+    document.getElementById('answerHint').textContent = "Voice response simulated — speak your answer, then type a short summary below so the workspace can react to it.";
+  } else {
+    btn.textContent = "🎙 Start Response";
+    btn.classList.remove('rec');
+  }
+}
+function pseudoPause(){ document.getElementById('answerHint').textContent = "Response paused."; }
+function pseudoStop(){
+  voiceRecording=false;
+  const btn=document.getElementById('voiceRec');
+  btn.textContent="🎙 Start Response"; btn.classList.remove('rec');
+  document.getElementById('answerHint').textContent = "Response stopped. Type a summary of what you said so it's evaluated.";
+}
+
+const TAB_SUGGEST_LABEL = {0:"Overview",1:"Model / Dimensions",2:"Model / Dimensions",3:"Driver Analysis",
+  4:"Allocation Rules",5:"Rule Balancing",6:"Allocation Trace",7:"Rule Balancing",8:"Driver Analysis",9:"Overview",10:"Model Validation",11:"Calculation Control"};
+const TAB_SUGGEST_KEY = {0:"overview",1:"model",2:"model",3:"driver",4:"rules",5:"balancing",6:"trace",7:"balancing",8:"driver",9:"overview",10:"validation",11:"calc"};
+
+let lastSuggestedIdx = null;
+function onAnswerInput(){
+  const val = document.getElementById('answerInput').value;
+  let newlyChecked = null;
+  KEYWORD_MAP.forEach(k=>{
+    if(k.re.test(val) && !STATE.checked[k.idx]){
+      STATE.checked[k.idx] = true;
+      newlyChecked = k.idx;
+    }
+  });
+  CHECKLIST.forEach((c,idx)=>{
+    const el = document.getElementById('cl-'+idx);
+    if(!el) return;
+    el.classList.toggle('checked', STATE.checked[idx]);
+    el.querySelector('.box').innerHTML = STATE.checked[idx] ? '✓' : '';
+  });
+  if(newlyChecked!==null){
+    lastSuggestedIdx = newlyChecked;
+    const key = TAB_SUGGEST_KEY[newlyChecked];
+    const label = TAB_SUGGEST_LABEL[newlyChecked];
+    if(key){
+      document.getElementById('answerHint').innerHTML = `💡 Detected <b>${CHECKLIST[newlyChecked]}</b> — try opening <b>${label}</b> in the workspace to back that up.`;
+    }
+    // if root cause keyword hit, refresh driver/overview panels that reveal on it
+    if(STATE.activeTab==='driver' || STATE.activeTab==='overview') renderWorkspaceBody(ROUNDS[STATE.roundIndex]);
+  }
+  document.getElementById('submitBtn').disabled = val.trim().length < 3;
+}
+
+/* =========================================================================
+   11. INTERVIEWER PUSH-BACK
+   ========================================================================= */
+function askFollowUp(){
+  const r = ROUNDS[STATE.roundIndex];
+  const val = document.getElementById('answerInput').value.trim();
+  if(!val){
+    document.getElementById('answerHint').textContent = "Type at least a starting answer before asking for push-back.";
+    return;
+  }
+  STATE.followUpShown = true;
+  document.getElementById('followupSlot').innerHTML = `
+    <div class="followup-card">
+      <span class="fu-label">🎤 INTERVIEWER PUSH-BACK</span>
+      ${r.followUp}
+    </div>`;
+  renderDecisionIfReady();
+}
+
+/* =========================================================================
+   12. DECISION ENGINE ("WHAT IS YOUR NEXT ACTION?")
+   ========================================================================= */
+function renderDecisionIfReady(){
+  if(STATE.decisionMade) return;
+  const r = ROUNDS[STATE.roundIndex];
+  document.getElementById('decisionSlot').innerHTML = `
+    <div class="decision-card">
+      <div class="decision-title">🧠 ARCHITECT DECISION ENGINE — WHAT IS YOUR NEXT ACTION?</div>
+      <div class="decision-q">${r.decision.q}</div>
+      <div id="decisionOpts">
+      ${r.decision.options.map((o,idx)=>`<button class="decision-opt" onclick="chooseDecision(${idx})"><b>${o.label}</b>${o.text}</button>`).join("")}
+      </div>
+      <div id="decisionFeedback"></div>
+    </div>`;
+}
+
+function chooseDecision(idx){
+  if(STATE.decisionMade) return;
+  STATE.decisionMade = true;
+  const r = ROUNDS[STATE.roundIndex];
+  const correct = idx === r.decision.correct;
+  document.querySelectorAll('.decision-opt').forEach((btn,i)=>{
+    btn.disabled = true;
+    if(i===r.decision.correct) btn.classList.add('correct');
+    else if(i===idx) btn.classList.add('wrong');
+  });
+  const delta = correct ? 10 : -5;
+  STATE.score = Math.max(0, STATE.score + delta);
+  document.getElementById('tbScore').textContent = STATE.score;
+  document.getElementById('decisionFeedback').innerHTML = `
+    <div class="decision-feedback">
+      <b>${correct? '🟢 +10 — Correct architectural approach.' : '🔴 -5 — Not the strongest move here.'}</b><br>${r.decision.explanation}
+    </div>`;
+  STATE._decisionCorrect = correct;
+  // reveal root cause everywhere once decided
+  STATE.checked[8] = true;
+  onAnswerInput();
+}
+
+/* =========================================================================
+   13. AI ARCHITECT COACH
+   ========================================================================= */
+function buildCoachHTML(r){
+  const checkedNames = CHECKLIST.filter((c,idx)=>STATE.checked[idx]);
+  const missingNames = CHECKLIST.filter((c,idx)=>!STATE.checked[idx]);
+  return `
+  <div class="coach-toggle" onclick="toggleCoach()">
+    <span class="ic">🤖</span> AI ARCHITECT COACH — ANALYSIS <span class="chev" id="coachChev">▾</span>
+  </div>
+  <div class="coach-body" id="coachBody">
+    <div class="coach-col-title good">STRONG POINTS</div>
+    <ul>${checkedNames.length? checkedNames.map(n=>`<li>✓ Addressed ${n.toLowerCase()}</li>`).join("") : "<li>No investigation elements detected yet in your answer.</li>"}</ul>
+    <div class="coach-col-title bad">MISSING</div>
+    <ul>${missingNames.length? missingNames.slice(0,6).map(n=>`<li>⚠ ${n}</li>`).join("") : "<li>Full investigation coverage — well rounded answer.</li>"}</ul>
+    <div class="coach-col-title" style="color:var(--navy-3);">DECISION QUALITY</div>
+    <ul><li>${STATE.decisionMade ? (STATE._decisionCorrect ? "Chose the architecturally sound next action under the decision engine." : "Chose a lower-value next action — review the explanation above.") : "No decision made yet this round."}</li></ul>
+  </div>`;
+}
+function toggleCoach(){
+  STATE.coachOpen = !STATE.coachOpen;
+  document.getElementById('coachBody').classList.toggle('open', STATE.coachOpen);
+  document.getElementById('coachChev').style.transform = STATE.coachOpen ? 'rotate(180deg)' : 'rotate(0)';
+}
+
+/* =========================================================================
+   14. SUBMIT ANSWER -> RECORD -> COACH -> NEXT ROUND
+   ========================================================================= */
+function submitAnswer(){
+  const val = document.getElementById('answerInput').value.trim();
+  if(val.length<3) return;
+  if(!STATE.followUpShown) askFollowUp();
+  renderDecisionIfReady();
+
+  // if decision not yet made, don't advance — force the decision engine to be used
+  if(!STATE.decisionMade){
+    document.getElementById('answerHint').innerHTML = "Choose your next action in the Architect Decision Engine below before continuing.";
+    document.getElementById('decisionSlot').scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  const r = ROUNDS[STATE.roundIndex];
+  document.getElementById('coachSlot').innerHTML = buildCoachHTML(r);
+
+  const checklistScore = STATE.checked.filter(Boolean).length; // 0-12
+  STATE.history[STATE.roundIndex] = {
+    round: r.id, title: r.title,
+    decisionCorrect: STATE._decisionCorrect,
+    checklistCount: checklistScore,
+    checkedItems: CHECKLIST.filter((c,idx)=>STATE.checked[idx]),
+    missedItems: CHECKLIST.filter((c,idx)=>!STATE.checked[idx]),
+  };
+  updateRoundPills();
+
+  if(STATE.roundIndex < ROUNDS.length-1){
+    document.getElementById('submitBtn').textContent = "Next Round →";
+    document.getElementById('submitBtn').onclick = ()=>{
+      document.getElementById('submitBtn').textContent = "Submit & Continue";
+      document.getElementById('submitBtn').onclick = submitAnswer;
+      loadRound(STATE.roundIndex+1);
+    };
+  } else {
+    document.getElementById('submitBtn').textContent = "View Final Assessment →";
+    document.getElementById('submitBtn').onclick = showFinalReport;
+  }
+}
+
+/* =========================================================================
+   15. FINAL REPORT
+   ========================================================================= */
+function showFinalReport(){
+  clearInterval(STATE.timerHandle);
+  const totalRounds = STATE.history.filter(Boolean).length || 1;
+  const decisionsCorrect = STATE.history.filter(h=>h && h.decisionCorrect).length;
+  const avgChecklist = STATE.history.reduce((a,h)=>a+(h?h.checklistCount:0),0) / totalRounds;
+  const finalPct = Math.max(0, Math.min(100, Math.round(
+    (decisionsCorrect/totalRounds)*60 + (avgChecklist/CHECKLIST.length)*40
+  )));
+
+  let readiness = "ARCHITECT READINESS GAP";
+  if(finalPct>=90) readiness="ENTERPRISE PCMCS ARCHITECT";
+  else if(finalPct>=75) readiness="SENIOR PCMCS ARCHITECT";
+  else if(finalPct>=60) readiness="PCMCS CONSULTANT";
+
+  const allChecked = {}; const allMissed = {};
+  STATE.history.forEach(h=>{
+    if(!h) return;
+    h.checkedItems.forEach(c=>allChecked[c]=(allChecked[c]||0)+1);
+    h.missedItems.forEach(c=>allMissed[c]=(allMissed[c]||0)+1);
+  });
+  const strengths = Object.entries(allChecked).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k);
+  const weakAreas = Object.entries(allMissed).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k);
+  const bestDecisions = STATE.history.filter(h=>h&&h.decisionCorrect).slice(0,5).map(h=>`Round ${h.round}: ${h.title}`);
+  const criticalMistakes = STATE.history.filter(h=>h&&!h.decisionCorrect).slice(0,5).map(h=>`Round ${h.round}: ${h.title}`);
+
+  const learningPool = ["Source Segmentation & rule performance tuning","Rule Balancing & Allocation Trace workflows","Dimensional design and attribute-dimension usage","Model Validation Analysis after metadata changes","Driver population governance and data load reconciliation"];
+  const recommended = weakAreas.length ? weakAreas.slice(0,4).map(w=>{
+    const map = {"Source Data":"Source data load reconciliation and rejected-row monitoring","Driver Analysis":"Driver population governance and validation","Rule Balancing":"Rule Balancing workflow mastery","Allocation Trace":"Allocation Trace forward/backward tracing practice","Performance":"Source Segmentation & ASO performance tuning","Model Architecture":"Dimensional design and attribute dimensions","Validation":"Model Validation Analysis discipline","Business Reconciliation":"Enterprise-to-detail reconciliation habits","Calculation Analysis":"Calculation Analysis / MDX script review","Root Cause":"Root-cause investigation sequencing","Solution":"Solution design and remediation planning"};
+    return map[w] || w;
+  }) : learningPool;
+
+  const skillRows = [
+    ["PCMCS Architecture", Math.min(98, 60+decisionsCorrect*3)],
+    ["Allocation Design", Math.min(98, 55+decisionsCorrect*3)],
+    ["Rule Balancing", Math.min(98, 58+avgChecklist*3)],
+    ["Allocation Trace", Math.min(98, 56+avgChecklist*3)],
+    ["Performance Optimization", Math.min(98, 50+decisionsCorrect*2.5)],
+    ["Business Understanding", Math.min(98, 60+avgChecklist*2.5)],
+    ["Architecture Defense", Math.min(98, 55+decisionsCorrect*2.8)],
+  ];
+
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('reportScreen').classList.add('active');
+  document.getElementById('reportWrap').innerHTML = `
+    <div class="report-header">
+      <div class="report-brand"><img src="data:image/jpeg;base64,${LOGO_B64}" alt="BISP"><span>BISP Trainings · www.bisptrainings.com · +91 769-409-5404</span></div>
+      <h2>Oracle PCMCS Senior Architect — Assessment Report</h2>
+      <div class="sub">Candidate: <b style="color:#fff;">${STATE.candidateName}</b> &nbsp;·&nbsp; Date: ${new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</div>
+      <div class="report-score-row">
+        <div class="rscore-card"><div class="v">${finalPct}/100</div><div class="l">FINAL SCORE</div></div>
+        <div class="rscore-card"><div class="v">${STATE.score}</div><div class="l">DECISION POINTS</div></div>
+        <div class="rscore-card"><div class="v">${decisionsCorrect}/${totalRounds}</div><div class="l">CORRECT DECISIONS</div></div>
+        <div class="rscore-card"><div class="v">${totalRounds}/30</div><div class="l">ROUNDS COMPLETED</div></div>
+      </div>
+      <div class="readiness-tag">${readiness}</div>
+    </div>
+
+    <div class="report-grid">
+      <div class="report-card">
+        <h3 style="color:var(--good);">✓ STRENGTHS</h3>
+        <ul>${strengths.length?strengths.map(s=>`<li>${s}</li>`).join(""):"<li>Complete more rounds to surface strength patterns.</li>"}</ul>
+      </div>
+      <div class="report-card">
+        <h3 style="color:var(--warn);">⚠ WEAK AREAS</h3>
+        <ul>${weakAreas.length?weakAreas.map(s=>`<li>${s}</li>`).join(""):"<li>No consistent weak areas detected.</li>"}</ul>
+      </div>
+      <div class="report-card">
+        <h3 style="color:var(--good);">🏆 BEST ARCHITECTURAL DECISIONS</h3>
+        <ul>${bestDecisions.length?bestDecisions.map(s=>`<li>${s}</li>`).join(""):"<li>No fully correct decisions recorded yet.</li>"}</ul>
+      </div>
+      <div class="report-card">
+        <h3 style="color:var(--bad);">🚨 CRITICAL MISTAKES</h3>
+        <ul>${criticalMistakes.length?criticalMistakes.map(s=>`<li>${s}</li>`).join(""):"<li>No critical mistakes recorded.</li>"}</ul>
+      </div>
+      <div class="report-card full">
+        <h3>📊 SKILL SCORECARD</h3>
+        ${skillRows.map(([label,val])=>`
+          <div class="skill-row">
+            <div>${label}</div>
+            <div class="track"><div class="fill" style="width:${val}%;"></div></div>
+            <div class="num">${Math.round(val)}</div>
+          </div>`).join("")}
+      </div>
+      <div class="report-card full">
+        <h3>📚 RECOMMENDED LEARNING AREAS (Oracle PCMCS)</h3>
+        <ul>${recommended.map(s=>`<li>${s}</li>`).join("")}</ul>
+      </div>
+    </div>
+
+    <div class="report-actions">
+      <button class="btn-secondary" onclick="location.reload()">Restart Simulation</button>
+    </div>
+
+    <div class="report-footer">
+      Prepared by the <b>Oracle PCMCS Senior Architect Live Interview Simulator</b><br>
+      <b>BISP Trainings</b> · Business Intelligence Solution Providers Inc.<br>
+      www.bisptrainings.com &nbsp;·&nbsp; Call Us: +91 769-409-5404
+    </div>
+  `;
+}
+
+</script>
+</body>
+</html>
