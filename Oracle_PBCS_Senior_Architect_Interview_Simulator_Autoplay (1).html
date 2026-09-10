@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle PBCS Senior Architect Live Interview Simulator | BISP Trainings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1626;
+  --bg-deep:#08111D;
+  --panel:#111F33;
+  --panel-raised:#152540;
+  --panel-hi:#1B2C48;
+  --line:#22374F;
+  --line-soft:#1A2C42;
+  --teal:#2FD9B5;
+  --teal-dim:#1D6E5D;
+  --amber:#F0A93E;
+  --red:#E5566D;
+  --blue:#4E8FE0;
+  --ink:#E8EEF6;
+  --ink-soft:#B7C6DA;
+  --muted:#7E93AD;
+  --muted-dim:#54687F;
+  --font-ui:'IBM Plex Sans',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --radius:6px;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:var(--bg-deep);
+  color:var(--ink);
+  font-family:var(--font-ui);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--teal-dim);color:#fff;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#233650;border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:#2c4260;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+a{color:var(--blue);}
+
+/* ---------- App shell ---------- */
+#app{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* ---------- Header ---------- */
+header.topbar{
+  background:linear-gradient(180deg,#0E1D30,#0B1626);
+  border-bottom:1px solid var(--line);
+  padding:12px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+.brand-block{display:flex;align-items:center;gap:14px;min-width:0;}
+.brand-logo{
+  height:38px;
+  border-radius:4px;
+  flex-shrink:0;
+  background:#fff;
+  padding:3px 6px;
+}
+.brand-text h1{
+  margin:0;
+  font-size:15.5px;
+  font-weight:700;
+  letter-spacing:.2px;
+  color:var(--ink);
+}
+.brand-text .sub{
+  margin:1px 0 0;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:.15px;
+}
+.title-block{
+  text-align:center;
+  flex:1;
+  min-width:280px;
+}
+.title-block h2{
+  margin:0;
+  font-size:17px;
+  font-weight:700;
+  color:var(--ink);
+}
+.title-block p{
+  margin:2px 0 0;
+  font-size:11.5px;
+  color:var(--muted);
+}
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.contact-block{
+  text-align:right;
+  font-size:11.5px;
+  color:var(--muted-dim);
+  line-height:1.6;
+}
+.contact-block strong{color:var(--ink-soft);font-weight:600;}
+.score-pill{
+  background:var(--panel-raised);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:6px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--font-mono);
+}
+.score-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);}
+.score-pill .val{font-weight:600;font-size:15px;color:var(--teal);}
+.score-pill .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+/* ---------- Status strip ---------- */
+.statusstrip{
+  background:var(--bg);
+  border-bottom:1px solid var(--line-soft);
+  padding:7px 20px;
+  display:flex;
+  gap:22px;
+  flex-wrap:wrap;
+  font-size:11.5px;
+  color:var(--muted);
+  font-family:var(--font-mono);
+}
+.statusstrip .chip{display:flex;gap:5px;align-items:center;}
+.statusstrip .chip b{color:var(--ink-soft);font-weight:600;}
+.statusstrip .live{color:var(--teal);}
+.statusstrip .live::before{content:'●';margin-right:4px;font-size:8px;}
+
+/* ---------- Main layout ---------- */
+.layout{
+  flex:1;
+  display:grid;
+  grid-template-columns:220px 1fr 360px;
+  gap:1px;
+  background:var(--line-soft);
+  min-height:0;
+}
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr;}
+  .nav-col{order:2;}
+  .work-col{order:1;}
+  .resp-col{order:3;}
+}
+
+/* ---------- Left nav ---------- */
+.nav-col{
+  background:var(--panel);
+  padding:14px 10px;
+  overflow-y:auto;
+}
+.nav-col .navhead{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  color:var(--muted-dim);
+  padding:6px 10px 8px;
+}
+.navitem{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:9px 10px;
+  border-radius:var(--radius);
+  color:var(--ink-soft);
+  font-size:13px;
+  margin-bottom:2px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:background .12s ease;
+}
+.navitem .ico{width:16px;text-align:center;opacity:.85;font-size:13px;}
+.navitem:hover{background:var(--panel-hi);}
+.navitem.active{
+  background:var(--panel-hi);
+  border-color:var(--teal-dim);
+  color:#fff;
+}
+.navitem.active .ico{color:var(--teal);}
+.navitem.inactive{opacity:.42;}
+.navitem .badge{
+  margin-left:auto;
+  font-size:9px;
+  background:var(--teal-dim);
+  color:#DFFFF6;
+  padding:1px 6px;
+  border-radius:8px;
+  font-family:var(--font-mono);
+}
+
+/* ---------- Center workspace ---------- */
+.work-col{
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  overflow-y:auto;
+}
+.work-toolbar{
+  padding:12px 20px;
+  border-bottom:1px solid var(--line-soft);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  background:var(--panel);
+}
+.breadcrumb{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--muted);
+}
+.breadcrumb b{color:var(--ink-soft);}
+.round-tag{
+  font-size:10.5px;
+  color:var(--bg-deep);
+  background:var(--amber);
+  padding:3px 9px;
+  border-radius:4px;
+  font-weight:600;
+  letter-spacing:.4px;
+}
+.work-body{
+  padding:20px 22px 40px;
+  flex:1;
+}
+.scenario-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-left:3px solid var(--teal);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-bottom:18px;
+}
+.scenario-card .eyebrow{font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;}
+.scenario-card p{margin:0;color:var(--ink-soft);font-size:14px;}
+.section-h{
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink);
+  margin:22px 0 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.section-h .n{
+  color:var(--muted-dim);
+  font-family:var(--font-mono);
+  font-size:11px;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  margin-bottom:14px;
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media (max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+/* investigation tree */
+.treelist{display:flex;flex-direction:column;gap:6px;}
+.treeitem{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel-raised);
+  cursor:pointer;
+  transition:border-color .12s;
+}
+.treeitem:hover{border-color:#33507a;}
+.treeitem .mk{
+  width:18px;height:18px;border-radius:4px;flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;border:1px solid var(--line);color:var(--muted-dim);
+}
+.treeitem.visited .mk{background:var(--teal-dim);border-color:var(--teal);color:#fff;}
+.treeitem.warn .mk{background:#5A2E1F;border-color:var(--amber);color:var(--amber);}
+.treeitem .tx b{display:block;font-size:13px;color:var(--ink);}
+.treeitem .tx span{font-size:12px;color:var(--muted);}
+.treeitem.visited{opacity:.72;}
+
+.feedback-line{
+  font-size:12.5px;
+  padding:9px 11px;
+  border-radius:4px;
+  margin-top:6px;
+  font-family:var(--font-mono);
+}
+.feedback-line.good{background:#0E3229;color:#7CF0CE;border:1px solid #1E6E56;}
+.feedback-line.warn{background:#3A2712;color:#FBCB84;border:1px solid #6E4A1E;}
+
+/* metric cards */
+.metric-card{
+  background:var(--panel-raised);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 14px;
+}
+.metric-card .lbl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.metric-card .num{font-family:var(--font-mono);font-size:22px;font-weight:600;color:var(--ink);margin-top:4px;}
+.metric-card .num.good{color:var(--teal);}
+.metric-card .num.bad{color:var(--red);}
+.metric-card .delta{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.logblock{
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  font-family:var(--font-mono);
+  font-size:12.3px;
+  color:#9FD8FF;
+  white-space:pre-wrap;
+  line-height:1.65;
+}
+.logblock .k{color:var(--muted);}
+
+/* choice list */
+.choice{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:var(--panel-raised);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:11px 13px;
+  color:var(--ink-soft);
+  font-size:13.3px;
+  margin-bottom:8px;
+  transition:border-color .12s;
+}
+.choice:hover:not(:disabled){border-color:#33507a;}
+.choice:disabled{cursor:default;}
+.choice.correct{border-color:var(--teal);background:#0E3229;color:#DFFFF6;}
+.choice.wrong{border-color:var(--red);background:#3A1B24;color:#FFD8DF;}
+
+/* config form */
+.formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.formrow label{font-size:12px;color:var(--muted);min-width:70px;}
+.formrow select{
+  background:var(--panel-raised);
+  border:1px solid var(--line);
+  color:var(--ink);
+  border-radius:4px;
+  padding:7px 9px;
+  font-size:13px;
+  flex:1;
+  min-width:140px;
+}
+.btn{
+  background:var(--teal);
+  color:#04231C;
+  border:none;
+  padding:9px 16px;
+  border-radius:5px;
+  font-weight:600;
+  font-size:13px;
+  letter-spacing:.2px;
+}
+.btn:hover{filter:brightness(1.08);}
+.btn.secondary{
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--ink-soft);
+}
+.btn.secondary:hover{border-color:#33507a;}
+.btn.amber{background:var(--amber);color:#3A2400;}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+
+/* sequence builder */
+.seq-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.seq-chip{
+  background:var(--panel-raised);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:7px 13px;
+  font-size:12.5px;
+  color:var(--ink-soft);
+}
+.seq-chip:hover:not(:disabled){border-color:var(--teal-dim);}
+.seq-chip:disabled{opacity:.3;}
+.seq-built{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:38px;padding:8px;background:var(--bg-deep);border:1px dashed var(--line);border-radius:var(--radius);}
+.seq-built .b{background:var(--teal-dim);color:#DFFFF6;border-radius:14px;padding:5px 12px;font-size:12px;font-family:var(--font-mono);}
+.seq-built .arrow{color:var(--muted-dim);font-size:12px;}
+
+/* tabs */
+.tabbar{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;}
+.tabbtn{
+  background:transparent;border:none;color:var(--muted);
+  padding:9px 13px;font-size:12.5px;border-bottom:2px solid transparent;
+}
+.tabbtn.active{color:var(--ink);border-color:var(--teal);}
+.tabpane textarea{
+  width:100%;min-height:90px;background:var(--panel-raised);border:1px solid var(--line);
+  border-radius:var(--radius);color:var(--ink);padding:10px;font-size:13px;resize:vertical;
+}
+.tabpane .readonly{
+  background:var(--bg-deep);border:1px solid var(--line);border-radius:var(--radius);
+  padding:10px 12px;font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;font-family:var(--font-mono);
+}
+
+/* reasoning panel */
+.reason-panel{
+  background:linear-gradient(180deg,#0E2033,#0F1D2D);
+  border:1px solid var(--teal-dim);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-top:16px;
+}
+.reason-panel h4{margin:0 0 10px;color:var(--teal);font-size:13px;}
+.reason-panel ul{margin:6px 0 12px;padding-left:18px;color:var(--ink-soft);font-size:12.8px;}
+.reason-panel .sig{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:10px;margin-top:10px;}
+
+/* ---------- Right response column ---------- */
+.resp-col{
+  background:var(--panel);
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+.resp-head{
+  padding:14px 16px;
+  border-bottom:1px solid var(--line-soft);
+}
+.resp-head h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);}
+.speaking-row{
+  display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;color:var(--muted);
+}
+.speaking-row .pulse{
+  width:8px;height:8px;border-radius:50%;background:var(--muted-dim);
+}
+.speaking-row.active .pulse{background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse 1s infinite;}
+.speaking-row.active{color:var(--ink-soft);}
+@keyframes pulse{0%{opacity:1;}50%{opacity:.35;}100%{opacity:1;}}
+
+.resp-body{
+  flex:1;
+  overflow-y:auto;
+  padding:14px 16px;
+}
+.transcript-box{
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 13px;
+  min-height:120px;
+  font-size:13px;
+  color:var(--ink-soft);
+  margin-bottom:10px;
+}
+.transcript-box.placeholder{color:var(--muted-dim);font-style:italic;}
+textarea#answerInput{
+  width:100%;min-height:92px;background:var(--panel-raised);
+  border:1px solid var(--line);border-radius:var(--radius);color:var(--ink);
+  padding:10px;font-size:13.3px;resize:vertical;margin-bottom:10px;
+}
+.resp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.mic-btn{
+  background:var(--panel-raised);border:1px solid var(--line);color:var(--ink-soft);
+  padding:8px 13px;border-radius:20px;font-size:12.5px;display:flex;align-items:center;gap:6px;
+}
+.mic-btn.on{border-color:var(--red);color:#fff;background:#2E141C;}
+
+.meter-wrap{margin-bottom:14px;}
+.meter-wrap .mlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.meter-track{height:6px;background:var(--bg-deep);border-radius:4px;overflow:hidden;}
+.meter-fill{height:100%;background:linear-gradient(90deg,var(--teal-dim),var(--teal));border-radius:4px;transition:width .3s ease;}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.chip-kw{
+  font-size:11px;background:var(--panel-raised);border:1px solid var(--line);
+  color:var(--muted);padding:4px 9px;border-radius:12px;font-family:var(--font-mono);
+}
+.chip-kw.hit{border-color:var(--teal-dim);color:var(--teal);background:#0E2A24;}
+
+.timer-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:12px;font-family:var(--font-mono);}
+
+.followup-card{
+  background:var(--panel-raised);
+  border:1px solid var(--line);
+  border-left:3px solid var(--amber);
+  border-radius:var(--radius);
+  padding:11px 13px;
+  margin-bottom:12px;
+  font-size:13px;
+  color:var(--ink-soft);
+}
+.followup-card .who{font-size:10.5px;color:var(--amber);font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+
+.score-mini{
+  background:var(--bg-deep);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 13px;
+  margin-top:auto;
+}
+.score-mini .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0;}
+.score-mini .row b{color:var(--ink-soft);font-family:var(--font-mono);}
+
+/* ---------- Interviewer bar ---------- */
+.interviewer-bar{
+  background:var(--bg-deep);
+  border-top:1px solid var(--line);
+  padding:14px 22px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.interviewer-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,#1B2C48,#0E1D30);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+.interviewer-text{flex:1;min-width:220px;}
+.interviewer-text .name{font-size:11px;color:var(--muted);letter-spacing:.3px;}
+.interviewer-text .q{font-size:14px;color:var(--ink);margin-top:2px;}
+.interviewer-bar .ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.progress-track{width:110px;height:5px;background:var(--panel-raised);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--teal);}
+
+/* ---------- Floating score widget ---------- */
+.float-score{
+  position:fixed;
+  bottom:96px;
+  right:18px;
+  width:220px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:13px 14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  z-index:50;
+  display:none;
+}
+.float-score.show{display:block;}
+.float-score h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:flex;justify-content:space-between;}
+.float-score .big{font-family:var(--font-mono);font-size:24px;color:var(--teal);font-weight:600;}
+.float-score .level{font-size:11px;color:var(--ink-soft);margin-bottom:8px;}
+.float-score .catrow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:2px 0;}
+.float-score .catrow b{color:var(--ink-soft);font-family:var(--font-mono);}
+.float-toggle{
+  position:fixed;bottom:44px;right:18px;z-index:51;
+  background:var(--panel-raised);border:1px solid var(--line);color:var(--ink-soft);
+  border-radius:18px;padding:7px 14px;font-size:11.5px;
+}
+
+/* ---------- Footer ---------- */
+footer.appfoot{
+  background:var(--bg-deep);
+  border-top:1px solid var(--line-soft);
+  text-align:center;
+  padding:10px;
+  font-size:11px;
+  color:var(--muted-dim);
+}
+footer.appfoot a{color:var(--muted);text-decoration:none;}
+
+/* ---------- Report screen ---------- */
+#reportScreen{display:none;padding:30px 6vw 60px;max-width:1100px;margin:0 auto;}
+#reportScreen.show{display:block;}
+.report-hero{text-align:center;padding:24px 0 30px;border-bottom:1px solid var(--line);margin-bottom:26px;}
+.report-hero .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
+.report-hero h2{font-size:26px;margin:8px 0 4px;}
+.report-hero .lvl{font-family:var(--font-mono);font-size:15px;color:var(--teal);}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+@media(max-width:800px){.report-grid{grid-template-columns:1fr;}}
+.report-box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;}
+.report-box h4{margin:0 0 10px;font-size:12px;color:var(--teal);text-transform:uppercase;letter-spacing:.8px;}
+.report-box ul{margin:0;padding-left:18px;color:var(--ink-soft);font-size:13px;line-height:1.8;}
+.catbar-row{display:flex;align-items:center;gap:10px;margin:8px 0;}
+.catbar-row .lbl{width:150px;font-size:12px;color:var(--muted);}
+.catbar-row .track{flex:1;height:8px;background:var(--bg-deep);border-radius:4px;overflow:hidden;}
+.catbar-row .fill{height:100%;background:linear-gradient(90deg,var(--teal-dim),var(--teal));}
+.catbar-row .num{width:34px;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);}
+.report-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;}
+canvas#radarCanvas{display:block;margin:0 auto;}
+
+@media print{
+  header.topbar,.statusstrip,.layout,.interviewer-bar,.float-score,.float-toggle,footer.appfoot,.report-actions{display:none !important;}
+  #reportScreen{display:block !important;padding:0;}
+  body{background:#fff;color:#000;}
+  .report-box{border-color:#ccc;background:#fafafa;}
+}
+
+/* ---------- Intro overlay ---------- */
+#introOverlay{
+  position:fixed;inset:0;z-index:200;
+  background:radial-gradient(circle at 50% 32%,#122439,#08111D 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:30px;
+}
+#introOverlay .ilogo{height:46px;border-radius:5px;background:#fff;padding:4px 8px;margin-bottom:26px;}
+#introOverlay h1{font-size:22px;margin:0 0 8px;letter-spacing:.2px;}
+#introOverlay p.isub{color:var(--muted);font-size:12.5px;margin:0 0 34px;max-width:480px;letter-spacing:.2px;}
+.eq{display:flex;align-items:flex-end;gap:5px;height:40px;margin-bottom:20px;}
+.eq span{width:5px;background:var(--teal);border-radius:3px;height:8px;animation:eqbar 1.1s ease-in-out infinite;}
+.eq span:nth-child(1){animation-delay:0s;}
+.eq span:nth-child(2){animation-delay:.15s;}
+.eq span:nth-child(3){animation-delay:.3s;}
+.eq span:nth-child(4){animation-delay:.45s;}
+.eq span:nth-child(5){animation-delay:.6s;}
+#introOverlay.idle .eq span{animation-play-state:paused;height:6px;opacity:.3;}
+@keyframes eqbar{0%,100%{height:8px;}50%{height:36px;}}
+#introOverlay .icaption{font-size:11.5px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:34px;font-family:var(--font-mono);}
+#introOverlay .ictrls{display:flex;gap:10px;}
+</style>
+</head>
+<body>
+
+<div id="introOverlay" class="idle">
+  <img class="ilogo" id="introLogo" alt="BISP Trainings logo">
+  <h1>Oracle PBCS Senior Architect Live Interview Simulator</h1>
+  <p class="isub">A full, self-running mock interview between a Senior Oracle Planning Architect and a Senior Architect Candidate — sit back and watch it play out automatically.</p>
+  <div class="eq" id="introEq"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="icaption" id="introCaption" style="font-size:11.5px;color:var(--muted);margin-bottom:18px;">Tap once below to start — your browser requires one click to enable sound. Everything after that runs on its own.</div>
+  <div class="ictrls">
+    <button class="btn" id="startIntroBtn">▶ Start Interview (Enable Sound)</button>
+    <button class="btn secondary" id="skipIntroBtn">Skip Intro</button>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="brand-block">
+      <img class="brand-logo" id="brandLogo" alt="BISP Trainings logo">
+      <div class="brand-text">
+        <h1>BISP TRAININGS</h1>
+        <p class="sub">www.bisptrainings.com&nbsp; &nbsp;+91 769-409-5404</p>
+      </div>
+    </div>
+    <div class="title-block">
+      <h2>ORACLE PBCS SENIOR ARCHITECT LIVE INTERVIEW SIMULATOR</h2>
+      <p>Enterprise Planning Architecture · Calculation Design · Performance · Security · Automation · Production Troubleshooting</p>
+    </div>
+    <div class="header-right">
+      <div class="score-pill">
+        <span class="dot"></span>
+        <span class="val" id="headerScoreVal">0%</span>
+        <span class="lbl">Architect Score</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- STATUS STRIP -->
+  <div class="statusstrip">
+    <span class="chip">Application: <b>FINPLAN</b></span>
+    <span class="chip">Environment: <b>PROD</b></span>
+    <span class="chip">User: <b>Senior Architect Candidate</b></span>
+    <span class="chip live">Connected</span>
+    <span class="chip">POV: <b id="povChip">FY26 · Forecast · Working · Total Entity</b></span>
+    <span class="chip">Job Status: <b id="jobChip">Idle</b></span>
+    <span class="chip" id="notifChip">Notifications: <b>0</b></span>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout" id="mainLayout">
+    <!-- LEFT NAV -->
+    <nav class="nav-col" id="navCol">
+      <div class="navhead">Application</div>
+      <div id="navList"></div>
+    </nav>
+
+    <!-- CENTER WORKSPACE -->
+    <section class="work-col" id="workCol">
+      <div class="work-toolbar">
+        <div class="breadcrumb">FINPLAN &nbsp;/&nbsp; PROD &nbsp;/&nbsp; <b id="crumbModule">Home</b></div>
+        <div class="round-tag" id="roundTag">ROUND 1 OF 10</div>
+      </div>
+      <div class="work-body" id="workBody"></div>
+    </section>
+
+    <!-- RIGHT RESPONSE -->
+    <aside class="resp-col">
+      <div class="resp-head">
+        <h3>Candidate Response</h3>
+        <div class="speaking-row" id="speakingRow"><span class="pulse"></span><span id="speakingLabel">Not speaking</span></div>
+      </div>
+      <div class="resp-body" id="respBody">
+        <div class="timer-row"><span>Response time</span><span id="respTimer">00:00</span></div>
+
+        <div class="transcript-box placeholder" id="transcriptBox">The candidate's spoken answer will appear here automatically…</div>
+
+        <textarea id="answerInput" placeholder="Candidate's spoken answer will appear here automatically…" readonly></textarea>
+
+        <div class="resp-actions">
+          <span style="font-size:11.5px;color:var(--muted);">▶ Autoplay — the candidate answers automatically. Nothing to type or click.</span>
+        </div>
+
+        <div class="meter-wrap">
+          <div class="mlbl"><span>Technical confidence meter</span><span id="confVal">0%</span></div>
+          <div class="meter-track"><div class="meter-fill" id="confFill" style="width:0%"></div></div>
+        </div>
+
+        <div class="section-h" style="margin-top:0;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Key Concepts Detected</div>
+        <div class="chips" id="kwChips"></div>
+
+        <div id="followupZone"></div>
+
+        <div class="score-mini">
+          <div class="row"><span>This round — action score</span><b id="miniActionScore">0 / 10</b></div>
+          <div class="row"><span>This round — answer score</span><b id="miniAnswerScore">0 / 10</b></div>
+          <div class="row"><span>Overall architect score</span><b id="miniOverall">0%</b></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- INTERVIEWER BAR -->
+  <div class="interviewer-bar" id="interviewerBar">
+    <div class="interviewer-avatar">🧑‍💼</div>
+    <div class="interviewer-text">
+      <div class="name">Senior Oracle Planning Architect — Interviewer</div>
+      <div class="q" id="interviewerQ">Loading scenario…</div>
+    </div>
+    <div class="ctrls">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+      <button class="btn secondary" id="muteToggleBtn">🔊 Mute Voices</button>
+      <button class="btn secondary" id="skipToReportBtn">⏭ Skip to Report</button>
+    </div>
+  </div>
+
+  <!-- REPORT SCREEN -->
+  <div id="reportScreen">
+    <div class="report-hero">
+      <div class="k">Oracle PBCS Senior Architect Interview Report</div>
+      <h2 id="reportOverallPct">—</h2>
+      <div class="lvl" id="reportLevel">—</div>
+    </div>
+    <canvas id="radarCanvas" width="420" height="360"></canvas>
+    <div class="section-h" style="margin-top:24px;">Category Scores</div>
+    <div class="panel" id="catBarWrap"></div>
+    <div class="report-grid">
+      <div class="report-box"><h4>Strengths</h4><ul id="repStrengths"></ul></div>
+      <div class="report-box"><h4>Weaknesses</h4><ul id="repWeak"></ul></div>
+      <div class="report-box"><h4>Technical Gaps</h4><ul id="repGaps"></ul></div>
+      <div class="report-box"><h4>Production Readiness</h4><ul id="repProd"></ul></div>
+    </div>
+    <div class="report-box" style="margin-bottom:24px;">
+      <h4>Recommendation</h4>
+      <p id="repRecommend" style="color:var(--ink-soft);font-size:13.5px;margin:0;"></p>
+    </div>
+    <div class="report-actions">
+      <button class="btn" id="exportReportBtn">Export Interview Report</button>
+      <button class="btn secondary" id="exportScorecardBtn">Export Scorecard</button>
+      <button class="btn secondary" id="printReportBtn">Print Report</button>
+      <button class="btn secondary" id="reviewBtn">Review Failed &amp; Correct Solutions</button>
+      <button class="btn amber" id="restartBtn">Restart Interview</button>
+    </div>
+    <div class="panel" id="reviewPanel" style="display:none;margin-top:20px;"></div>
+  </div>
+
+  <!-- FLOATING SCORE -->
+  <button class="float-toggle" id="floatToggle">Architect Score ▲</button>
+  <div class="float-score" id="floatScore">
+    <h4><span>Architect Score</span><span id="floatPct">0%</span></h4>
+    <div class="big" id="floatBig">0%</div>
+    <div class="level" id="floatLevel">Needs Preparation</div>
+    <div id="floatCats"></div>
+  </div>
+
+  <footer class="appfoot">© BISP Trainings | <a href="https://www.bisptrainings.com" target="_blank">www.bisptrainings.com</a> · +91 769-409-5404</footer>
+</div>
+
+<script>
+/* =========================================================================
+   ORACLE PBCS SENIOR ARCHITECT LIVE INTERVIEW SIMULATOR — BISP TRAININGS
+   Single-file vanilla JS application.
+   ========================================================================= */
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------------
+   0. LOGO (embedded)
+--------------------------------------------------------------------- */
+document.getElementById('brandLogo').src = document.getElementById('introLogo').src = "data:image/jpeg;base64,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";
+
+/* ---------------------------------------------------------------------
+   1. CATEGORY MODEL
+--------------------------------------------------------------------- */
+const CAT = {
+  arch:'Architecture', dim:'Dimensional Design', calc:'Calculation Design',
+  perf:'Performance', sec:'Security', data:'Data', auto:'Automation',
+  troubleshoot:'Troubleshooting', deploy:'Deployment', reasoning:'Architecture Reasoning'
+};
+const CAT_KEYS = Object.keys(CAT);
+
+/* ---------------------------------------------------------------------
+   2. NAV MODULES
+--------------------------------------------------------------------- */
+const MODULES = [
+  {id:'home',icon:'⌂',label:'Home'},
+  {id:'overview',icon:'▤',label:'Application Overview'},
+  {id:'dimensions',icon:'◇',label:'Dimensions'},
+  {id:'forms',icon:'▦',label:'Forms'},
+  {id:'dashboards',icon:'◉',label:'Dashboards'},
+  {id:'calcmgr',icon:'ƒ',label:'Calculation Manager'},
+  {id:'data',icon:'⇅',label:'Data'},
+  {id:'security',icon:'⛨',label:'Security'},
+  {id:'vi',icon:'∩',label:'Valid Intersections'},
+  {id:'subvars',icon:'§',label:'Substitution Variables'},
+  {id:'jobs',icon:'⟳',label:'Jobs'},
+  {id:'performance',icon:'⚡',label:'Performance'},
+  {id:'migration',icon:'⇄',label:'Migration'},
+  {id:'automation',icon:'⚙',label:'Automation'}
+];
+
+/* ---------------------------------------------------------------------
+   3. ROUND DATA
+   Each round: id, tag, module (primary workspace module), categories,
+   scenario, interviewerQ, followUps[], panelType + data, requiredKeywords,
+   reasoning summary.
+--------------------------------------------------------------------- */
+const ROUNDS = [
+
+/* ============ ROUND 1 — ENTERPRISE ARCHITECTURE ============ */
+{
+  id:'r1', tag:'ROUND 1 · ENTERPRISE ARCHITECTURE', module:'overview',
+  categories:['arch','reasoning'],
+  scenario:"You inherit a PBCS application supporting 12 business units, 18 planning processes, Workforce Planning, CapEx, Opex and Revenue Planning. The application has grown for six years. Before you change anything, walk me through your architecture assessment.",
+  interviewerQ:"Before you change anything, walk me through your architecture assessment.",
+  followUps:[
+    "What would you challenge in the requirements before approving this architecture?",
+    "Which of these 18 planning processes would you consolidate first, and why?",
+    "The business wants a rebuild. What do you tell them?"
+  ],
+  panelType:'investigate',
+  investigation:[
+    {id:'i1',label:'Application structure',desc:'Cubes, plan types, dimensionality',good:true,feedback:'You confirmed the plan type split (Workforce, CapEx, Opex, Revenue) before touching anything — correct starting point.'},
+    {id:'i2',label:'Dimension design',desc:'Sparse/dense, hierarchies, shared members',good:true,feedback:'Checking dimension design early catches structural debt before it compounds.'},
+    {id:'i3',label:'Business rules inventory',desc:'18 planning processes worth of logic',good:true,feedback:'A rules inventory reveals duplicated logic across six years of ad-hoc builds.'},
+    {id:'i4',label:'Forms & dashboards',desc:'Usage patterns and load times',good:true,feedback:'Form usage tells you where the business actually feels pain.'},
+    {id:'i5',label:'Delete everything and rebuild',desc:'Skip assessment, start fresh',good:false,feedback:'Rebuilding a 6-year production application without an assessment risks the business — this is not an architect-level move.'},
+    {id:'i6',label:'Application settings & calendar',desc:'Currency, plan type settings, time config',good:true,feedback:'Global settings constrain every downstream decision — worth confirming early.'}
+  ],
+  decision:{
+    prompt:"Based on your investigation, what is the single biggest architectural risk in this application?",
+    options:[
+      {id:'a',text:'Six years of organic growth with no consolidated calculation or dimension standard across 18 processes',correct:true},
+      {id:'b',text:'The application is simply too old and should be decommissioned',correct:false},
+      {id:'c',text:'There are too many business units for PBCS to support',correct:false},
+      {id:'d',text:'Smart View is the wrong reporting tool for this scale',correct:false}
+    ],
+    correctFeedback:"Correct. Organic growth without a standard produces exactly the calculation-scope and dimension sprawl issues you'll see in later rounds.",
+    wrongPush:"Interesting. What makes you confident that's the biggest risk rather than a symptom of something else?"
+  },
+  requiredKeywords:['assessment','dimension','calculation','risk','plan type','standard','governance','consolidat'],
+  reasoning:{
+    identified:['organic growth without a governance standard','duplicated logic across planning processes','undocumented dependencies between plan types'],
+    correctAction:'Run a structured assessment (dimensions, rules, forms, settings) before proposing any change, and document risk before scope.',
+    perfImpact:'Establishes a baseline so later optimization work has something to measure against.',
+    signal:'Candidate led with investigation and risk framing rather than jumping to a fix — a principal-level habit.'
+  }
+},
+
+/* ============ ROUND 2 — DIMENSIONAL ARCHITECTURE ============ */
+{
+  id:'r2', tag:'ROUND 2 · DIMENSIONAL ARCHITECTURE', module:'dimensions',
+  categories:['dim','perf'],
+  scenario:"The application has 25,000 Accounts, 3,000 Entities, and 15 custom dimensions across multiple hierarchies and planning processes, with heavy Smart View usage. Your Account and Entity dimensions are growing rapidly and the application is becoming slower.",
+  interviewerQ:"Show me how you would determine whether the dimensional design is causing the problem.",
+  followUps:[
+    "Is this a sparse problem or a dense problem — defend your answer.",
+    "Would adding an Attribute dimension help or hurt this design?",
+    "How would you validate your diagnosis before making a change?"
+  ],
+  panelType:'dimension',
+  metrics:[
+    {lbl:'Estimated Blocks',val:'8,420,000',cls:'bad'},
+    {lbl:'Sparse Intersections',val:'96%',cls:''},
+    {lbl:'Dense Intersections',val:'4%',cls:''},
+    {lbl:'Formula Members (Account)',val:'6,100',cls:''},
+    {lbl:'Dynamic Members',val:'1,900',cls:''},
+    {lbl:'Stored Members (Entity)',val:'2,750',cls:'bad'}
+  ],
+  investigation:[
+    {id:'i1',label:'Open Account dimension',desc:'25,000 members, deep formula nesting',good:true,feedback:'Account at 25K members with heavy formula nesting is a strong lead.'},
+    {id:'i2',label:'Open Entity dimension',desc:'3,000 members, mostly stored, shallow hierarchy',good:true,feedback:'3,000 mostly-stored Entities driving a sparse dimension is a classic block-explosion source.'},
+    {id:'i3',label:'Inspect sparse/dense configuration',desc:'Account & Entity marked sparse, Period/Scenario dense',good:true,feedback:'Confirming sparse/dense assignment tells you where block growth actually multiplies.'},
+    {id:'i4',label:'Inspect shared members',desc:'Low reuse — few shared members configured',good:true,feedback:'Low shared-member usage means duplicate calculation paths instead of reuse — worth flagging.'},
+    {id:'i5',label:'Inspect formula members',desc:'6,100 Account-level formulas, many Dynamic Calc',good:true,feedback:'A large ratio of Dynamic Calc formula members raises retrieval cost, separate from block count.'},
+    {id:'i6',label:'Rewrite every Smart View report instead',desc:'Skip dimension analysis, blame the client tool',good:false,feedback:'Smart View reports are a symptom surface, not the root cause of block growth — this skips diagnosis.'}
+  ],
+  decision:{
+    prompt:"What is the most likely root cause of the slowdown?",
+    options:[
+      {id:'a',text:'Two large sparse dimensions (Account, Entity) with low shared-member reuse are multiplying block count as both grow',correct:true},
+      {id:'b',text:'Smart View retrieval settings are misconfigured',correct:false},
+      {id:'c',text:'The application needs more custom dimensions to spread the load',correct:false},
+      {id:'d',text:'Period should be marked sparse instead of dense',correct:false}
+    ],
+    correctFeedback:"Correct. Block count scales with the product of sparse dimension members — Account × Entity growth without shared-member consolidation is exactly this pattern.",
+    wrongPush:"Interesting. Walk me through why that, specifically, explains an 8.4 million block estimate."
+  },
+  requiredKeywords:['sparse','dense','block','shared member','hierarchy','account','entity','formula'],
+  reasoning:{
+    identified:['sparse dimension growth without shared-member consolidation','high formula-member ratio increasing dynamic calc cost'],
+    correctAction:'Consolidate duplicate hierarchy branches into shared members and review whether every Account formula needs to be member-level versus rule-level.',
+    perfImpact:'Reduces the sparse block multiplier, the single biggest lever on block count in this design.',
+    signal:'Candidate reasoned from block-count math (sparse × sparse) rather than guessing at symptoms.'
+  }
+},
+
+/* ============ ROUND 3 — CALCULATION ARCHITECTURE ============ */
+{
+  id:'r3', tag:'ROUND 3 · CALCULATION ARCHITECTURE', module:'calcmgr',
+  categories:['calc','perf'],
+  scenario:"Here is the current Forecast calculation as written:\n\nIF(Entity == \"Total Entity\")\n    Calculate all entities\nENDIF\nCalculate all Accounts\nCalculate all Scenarios\nCalculate all Versions\nAggregate everything\n\nEstimated Runtime: 47 minutes. Blocks Processed: 8,420,000. Unnecessary Blocks: 6,900,000.",
+  interviewerQ:"Don't explain the problem. Fix it. Open Calculation Manager and redesign the rule.",
+  followUps:[
+    "Why did you choose that FIX scope?",
+    "What happens if the business wants all entities calculated overnight?",
+    "Show me the design that supports both requirements without calculating unnecessary blocks."
+  ],
+  panelType:'calcbuilder',
+  metricsBefore:{runtime:'47 min',blocks:'8,420,000',eff:'—'},
+  metricsAfter:{runtime:'9 min',blocks:'1,320,000',eff:'81%'},
+  formFields:[
+    {id:'scenario',label:'Scenario',options:['All Scenarios','Forecast'],correct:'Forecast'},
+    {id:'version',label:'Version',options:['All Versions','Working'],correct:'Working'},
+    {id:'entity',label:'Entity',options:['Total Entity (all)','Data-entry Entities only'],correct:'Data-entry Entities only'},
+    {id:'account',label:'Account scope',options:['All Accounts','Base-level input Accounts only'],correct:'Base-level input Accounts only'}
+  ],
+  requiredKeywords:['fix','endfix','scope','scenario','version','entity','aggregat','runtime prompt','sequence'],
+  reasoning:{
+    identified:['unscoped calculation across every Scenario, Version and Entity','unnecessary full aggregation every run'],
+    correctAction:'Wrap the rule in FIX(Forecast, Working, data-entry entities, base-level accounts)…ENDFIX so it only calculates what actually changed, and let a separate scheduled rule handle the full aggregation window.',
+    perfImpact:'Runtime dropped from 47 minutes to roughly 9 minutes with 81% fewer blocks processed.',
+    signal:'Candidate separated the every-run calculation from the periodic full-aggregation calculation instead of tuning one monolithic rule.'
+  }
+},
+
+/* ============ ROUND 4 — PRODUCTION PERFORMANCE WAR ROOM ============ */
+{
+  id:'r4', tag:'ROUND 4 · PRODUCTION PERFORMANCE WAR ROOM', module:'performance',
+  categories:['perf','troubleshoot'],
+  scenario:"It is month-end. A forecast calculation that normally takes 7 minutes is now taking 52 minutes. Business users are waiting. You have 15 minutes. Diagnose it.",
+  interviewerQ:"You have 15 minutes. Diagnose it. What would you change first, and why?",
+  followUps:[
+    "Walk me through exactly what you'd check in the first 60 seconds.",
+    "Was this a metadata change, a data volume change, or a rule deployment? How do you tell them apart?",
+    "The fix worked. How do you stop this from happening again next month-end?"
+  ],
+  panelType:'perfdash',
+  metrics:[
+    {lbl:'Calc Runtime (today)',val:'52 min',cls:'bad'},
+    {lbl:'Calc Runtime (baseline)',val:'7 min',cls:''},
+    {lbl:'Block Count',val:'4,812,991',cls:'bad'},
+    {lbl:'Data Volume (30d)',val:'+38%',cls:'bad'},
+    {lbl:'Recent Rule Deployments',val:'1 (2 days ago)',cls:'bad'},
+    {lbl:'Job Queue Depth',val:'6 pending',cls:'bad'}
+  ],
+  log:"Rule: Forecast_Calc\n\nStarted: 09:41:12\nCompleted: 10:33:48\n\nBlocks Created: 4,812,991\n\nDense Calculation: 4%\nSparse Calculation: 76%\nAggregation Passes: 12\nDynamic Calculation Dependencies: HIGH",
+  investigation:[
+    {id:'i1',label:'Check calculation log',desc:'12 aggregation passes, HIGH dynamic dependency',good:true,feedback:'12 aggregation passes on one run is unusually high — good catch.'},
+    {id:'i2',label:'Check recent rule deployments',desc:'A rule was deployed 2 days ago',good:true,feedback:'A deployment 2 days before the slowdown is the strongest correlated signal here.'},
+    {id:'i3',label:'Check data load volume trend',desc:'+38% data volume over 30 days',good:true,feedback:'Rising data volume matters, but it does not explain a jump from 7 to 52 minutes on its own.'},
+    {id:'i4',label:'Check job queue',desc:'6 jobs pending — possible contention',good:true,feedback:'Queue contention could be a contributing factor, worth ruling in or out, not the primary cause.'},
+    {id:'i5',label:'Restart the application service',desc:'Skip diagnosis, restart and hope',good:false,feedback:'Restarting without diagnosis in a live month-end window risks losing in-flight jobs and teaches you nothing.'},
+    {id:'i6',label:'Compare metadata change log',desc:'No structural metadata changes in the window',good:true,feedback:'Ruling metadata OUT is as valuable as finding the cause — narrows the field fast.'}
+  ],
+  decision:{
+    prompt:"What would you change first?",
+    options:[
+      {id:'a',text:'Roll back or review the rule deployed 2 days ago — it correlates directly with the aggregation-pass spike',correct:true},
+      {id:'b',text:'Add more hardware capacity to the environment',correct:false},
+      {id:'c',text:'Ask users to stop working until month-end is over',correct:false},
+      {id:'d',text:'Rebuild the Forecast_Calc rule from scratch',correct:false}
+    ],
+    correctFeedback:"Correct. Correlating the deployment timestamp with the aggregation-pass spike is exactly how you isolate cause from coincidence under time pressure.",
+    wrongPush:"You have 15 minutes and users waiting. Why is that your first move instead of checking the deployment?"
+  },
+  requiredKeywords:['deploy','aggregat','baseline','correlat','block','log','root cause','runtime'],
+  reasoning:{
+    identified:['aggregation pass count nearly tripled versus baseline','a rule deployment 2 days prior correlates with the spike'],
+    correctAction:'Review the diff on the recently deployed rule for scope creep (e.g. a widened FIX or removed condition) before touching hardware or data volume.',
+    perfImpact:'Isolates cause in minutes instead of guessing across multiple unrelated levers.',
+    signal:'Candidate used correlation between deployment log and calc log timestamps under time pressure — real war-room behavior.'
+  }
+},
+
+/* ============ ROUND 5 — FORM / UX TROUBLESHOOTING ============ */
+{
+  id:'r5', tag:'ROUND 5 · FORM & UX TROUBLESHOOTING', module:'forms',
+  categories:['perf','troubleshoot'],
+  scenario:"Both forms use the same application. Form A (Revenue Detail) takes 18 seconds to open. Form B (Revenue Summary) takes 3 seconds. Explain the difference.",
+  interviewerQ:"Both forms use the same application. Explain the difference, then redesign the slow one.",
+  followUps:[
+    "Would suppression alone have fixed this, or was that a red herring?",
+    "How does a Runtime Prompt change the answer here?",
+    "What's your rule of thumb for when a form should trigger a business rule on open?"
+  ],
+  panelType:'formcompare',
+  formA:{name:'Revenue Detail',time:'18 sec',rows:'2,400 base-level Products (Dynamic Calc)',cols:'12 months × 3 versions, no suppression',pov:'Fixed POV, no user variable',rule:'Business rule fires automatically on load'},
+  formB:{name:'Revenue Summary',time:'3 sec',rows:'40 stored Product Groups',cols:'12 months, single version',pov:'User variable drives Entity selection',rule:'No rule on load'},
+  investigation:[
+    {id:'i1',label:'Compare row dimension build',desc:'2,400 Dynamic Calc rows vs 40 stored rows',good:true,feedback:'Row count and Dynamic Calc density is the single biggest lever on form open time.'},
+    {id:'i2',label:'Compare suppression settings',desc:'Form A has no suppression configured',good:true,feedback:'Missing suppression means the grid renders and calculates empty intersections too.'},
+    {id:'i3',label:'Compare on-load business rules',desc:'Form A auto-fires a rule on open',good:true,feedback:'A rule firing on every open, not just on save, adds calc time to every single open.'},
+    {id:'i4',label:'Compare POV / user variables',desc:'Form B scopes Entity via user variable',good:true,feedback:'User variables narrow the POV before the grid even builds — meaningfully cheaper.'},
+    {id:'i5',label:'Just increase the form timeout setting',desc:'Mask the symptom, avoid the redesign',good:false,feedback:'Raising the timeout hides the problem from users without addressing what makes it slow.'}
+  ],
+  decision:{
+    prompt:"What is the primary fix for Form A?",
+    options:[
+      {id:'a',text:'Convert base-level Dynamic Calc rows to a stored/aggregated view, add suppression, and move the rule from on-load to on-save',correct:true},
+      {id:'b',text:'Just add more columns so users see more at once',correct:false},
+      {id:'c',text:'Delete the form and tell users to use Smart View only',correct:false},
+      {id:'d',text:'Increase server memory allocation',correct:false}
+    ],
+    correctFeedback:"Correct. Reducing Dynamic Calc row density, suppressing empty intersections, and moving the rule off the load path addresses all three real bottlenecks.",
+    wrongPush:"That may help marginally. What in the comparison specifically justifies that as the primary fix?"
+  },
+  requiredKeywords:['suppress','dynamic calc','row','on load','on save','user variable','pov','stored'],
+  reasoning:{
+    identified:['high Dynamic Calc row density on open','no suppression of empty intersections','a business rule firing on every load instead of on save'],
+    correctAction:'Redesign the row axis toward stored/aggregated members where possible, enable suppression, and move rule execution to on-save.',
+    perfImpact:'Form open time should move from 18 seconds toward something close to Form B\'s 3 seconds.',
+    signal:'Candidate compared the two forms feature-by-feature rather than assuming a single cause.'
+  }
+},
+
+/* ============ ROUND 6 — DATA LOAD INCIDENT ============ */
+{
+  id:'r6', tag:'ROUND 6 · DATA LOAD INCIDENT', module:'data',
+  categories:['data','troubleshoot'],
+  scenario:"A daily data load completed successfully, but planners report #MISSING values on the planning form. Trace Source → Mapping → Target Intersection → Form.",
+  interviewerQ:"Show me how you would prove the root cause, not just guess at it.",
+  followUps:[
+    "Why did the load status show Success if data is missing on the form?",
+    "Is this a mapping problem or a POV problem — how do you tell?",
+    "How would you prevent this specific failure mode going forward?"
+  ],
+  panelType:'dataload',
+  loadStatus:[
+    {lbl:'Load File',val:'GL_Actuals_Daily.csv'},
+    {lbl:'Import Status',val:'Success',cls:''},
+    {lbl:'Validation Status',val:'Success',cls:''},
+    {lbl:'Mapping Status',val:'Partial — 340 rows unmapped',cls:'bad'},
+    {lbl:'Rejected Records',val:'0',cls:''},
+    {lbl:'Invalid Members',val:'0',cls:''}
+  ],
+  investigation:[
+    {id:'i1',label:'Check mapping table',desc:'340 source rows unmapped to a target member',good:true,feedback:'Unmapped rows load successfully as a technical import but silently drop the actual data — this is the lead.'},
+    {id:'i2',label:'Check target intersection / Valid Intersections',desc:'Mapped intersection is not a valid input combination',good:true,feedback:'Even correctly mapped data disappears if the target intersection is not a valid intersection for input.'},
+    {id:'i3',label:'Check Scenario/Version on the load rule',desc:'Load rule points to Actual, form is viewing Forecast',good:true,feedback:'A POV mismatch between the load rule and the form is a very common #MISSING cause — worth confirming either way.'},
+    {id:'i4',label:'Check form suppression settings',desc:'Suppress missing data is enabled on the form',good:true,feedback:'Suppression settings explain why data looks absent even when it partially loaded — separate from the load itself.'},
+    {id:'i5',label:'Assume the ETL vendor is at fault and stop investigating',desc:'Skip PBCS-side tracing entirely',good:false,feedback:'Import Status: Success confirms the file reached PBCS — the fault is inside the PBCS mapping/target chain, not necessarily upstream.'}
+  ],
+  decision:{
+    prompt:"What is the proven root cause?",
+    options:[
+      {id:'a',text:'340 source rows failed mapping to a valid target member — they imported but never reached a valid intersection',correct:true},
+      {id:'b',text:'The data file itself is corrupted',correct:false},
+      {id:'c',text:'The planning form has a broken formula',correct:false},
+      {id:'d',text:'The user does not have data entry security',correct:false}
+    ],
+    correctFeedback:"Correct. \"Import Status: Success\" only proves the file was read — Mapping Status: Partial is the actual break in the Source → Mapping → Target → Form chain.",
+    wrongPush:"The load status shows Success. Prove that theory against what the mapping table actually shows."
+  },
+  requiredKeywords:['mapping','valid intersection','pov','scenario','trace','target','source','load rule'],
+  reasoning:{
+    identified:['a load can show Success while individual rows fail mapping silently','distinguishing import success from data completeness'],
+    correctAction:'Trace the specific 340 unmapped rows to the missing target members, fix the mapping table, and re-run rather than reloading the whole file blind.',
+    perfImpact:'Restores the missing data without re-processing already-correct records.',
+    signal:'Candidate proved the cause against the mapping table instead of accepting the load status at face value.'
+  }
+},
+
+/* ============ ROUND 7 — SECURITY / ACCESS CONTROL ============ */
+{
+  id:'r7', tag:'ROUND 7 · SECURITY & ACCESS CONTROL', module:'security',
+  categories:['sec','troubleshoot'],
+  scenario:"A planner can see the Entity US02 but cannot enter data. Another planner can enter data successfully on the same form. Don't guess. Diagnose it.",
+  interviewerQ:"Don't guess. Diagnose it. Walk me through Authentication → Authorization → Data Access → Workflow → Form.",
+  followUps:[
+    "Is Read access the same problem as Write access here — why or why not?",
+    "How does workflow/approval status interact with security access?",
+    "What's the fastest way to prove this to the planner without granting broad access?"
+  ],
+  panelType:'security',
+  users:[
+    {name:'Planner A (blocked)',role:'Planner',group:'Revenue Planners',entityAccess:'US02 — Read',formAccess:'Revenue Detail — Read/Write',workflow:'Not started'},
+    {name:'Planner B (working)',role:'Planner',group:'Revenue Planners',entityAccess:'US02 — Read/Write',formAccess:'Revenue Detail — Read/Write',workflow:'Not started'}
+  ],
+  investigation:[
+    {id:'i1',label:'Compare group membership',desc:'Both users in Revenue Planners group',good:true,feedback:'Same group membership rules out a group-assignment gap.'},
+    {id:'i2',label:'Compare Entity-level access',desc:'Planner A: Read only on US02. Planner B: Read/Write on US02',good:true,feedback:'This is the difference — Entity access is Read-only for Planner A.'},
+    {id:'i3',label:'Compare Form access',desc:'Both have Read/Write at the form level',good:true,feedback:'Form-level access is identical for both users, so the form itself is not the gap.'},
+    {id:'i4',label:'Check workflow / approval status',desc:'Neither planning unit has started workflow',good:true,feedback:'Workflow is not the blocker here — both units are in the same pre-workflow state.'},
+    {id:'i5',label:'Grant Planner A admin access to fix it fast',desc:'Skip diagnosis, over-provision access',good:false,feedback:'Granting admin access without diagnosing the actual gap is a security anti-pattern, even under time pressure.'}
+  ],
+  decision:{
+    prompt:"What is the exact access layer causing the problem?",
+    options:[
+      {id:'a',text:'Entity-level security: Planner A has Read-only access on Entity US02, overriding the Read/Write form access',correct:true},
+      {id:'b',text:'The form itself is misconfigured for all users',correct:false},
+      {id:'c',text:'Planner A is not in the correct group',correct:false},
+      {id:'d',text:'Workflow has not been promoted to Planner A\'s unit',correct:false}
+    ],
+    correctFeedback:"Correct. Data access security is the intersection of the most restrictive assignment across every dimension — Entity Read-only overrides form-level Read/Write for that user.",
+    wrongPush:"Both users have identical form access. What does that tell you about where the gap actually is?"
+  },
+  requiredKeywords:['entity access','read/write','intersection','group','authorization','security','form access'],
+  reasoning:{
+    identified:['most-restrictive-wins model across security dimensions','form access and entity access are independent layers'],
+    correctAction:'Update Planner A\'s Entity US02 assignment from Read to Read/Write rather than changing form or group security.',
+    perfImpact:'Not a performance issue — this is a precise, minimal-privilege fix.',
+    signal:'Candidate isolated the exact dimension causing the override instead of widening access broadly.'
+  }
+},
+
+/* ============ ROUND 8 — AUTOMATION / EPM AUTOMATE / REST ============ */
+{
+  id:'r8', tag:'ROUND 8 · AUTOMATION DESIGN', module:'automation',
+  categories:['auto','deploy'],
+  scenario:"The company wants to automate: data load, metadata update, calculation, validation, export, snapshot, and notification. Design the automation. I don't want a manual process.",
+  interviewerQ:"Design the automation pipeline end to end. I don't want a manual process anywhere in this chain.",
+  followUps:[
+    "What happens when the calculation job fails halfway through?",
+    "Where exactly does job-status polling belong in this design?",
+    "How would you version and recover from a bad metadata update?"
+  ],
+  panelType:'sequence',
+  pool:['Upload File','Load Metadata','Load Data','Validate','Run Calculation','Check Job Status','Export Results','Create Snapshot','Notify Team','Retry on Failure'],
+  correctOrder:['Upload File','Load Metadata','Load Data','Validate','Run Calculation','Check Job Status','Export Results','Create Snapshot','Notify Team'],
+  requiredKeywords:['epm automate','rest api','job status','poll','retry','error handling','snapshot','schedule'],
+  reasoning:{
+    identified:['a full pipeline needs metadata before data, and status polling after every long-running job'],
+    correctAction:'Sequence: upload → metadata → data → validate → calculate → poll job status → export → snapshot → notify, using EPM Automate/REST with retry and logging around each long-running step.',
+    perfImpact:'Removes every manual handoff and gives you an auditable, recoverable pipeline.',
+    signal:'Candidate sequenced metadata before data and inserted job-status polling after the calculation step — both easy to miss.'
+  }
+},
+
+/* ============ ROUND 9 — MIGRATION / DEPLOYMENT FAILURE ============ */
+{
+  id:'r9', tag:'ROUND 9 · MIGRATION & DEPLOYMENT FAILURE', module:'migration',
+  categories:['deploy','troubleshoot'],
+  scenario:"A development application must be promoted to production. You choose the deployment sequence. Then: production metadata has changed unexpectedly after deployment.",
+  interviewerQ:"Choose your deployment sequence, then investigate why production metadata changed unexpectedly after deployment.",
+  followUps:[
+    "Is this an artifact snapshot problem or a security snapshot problem?",
+    "Would you roll back the whole snapshot or restore selectively?",
+    "How do you prevent an unreviewed metadata change from reaching PROD again?"
+  ],
+  panelType:'sequence',
+  pool:['Snapshot DEV','Validate in TEST','Review Dimension Diff','Review Rule Diff','Approve Deployment','Snapshot PROD (pre-deploy)','Deploy to PROD','Post-Deploy Validation'],
+  correctOrder:['Snapshot DEV','Validate in TEST','Review Dimension Diff','Review Rule Diff','Approve Deployment','Snapshot PROD (pre-deploy)','Deploy to PROD','Post-Deploy Validation'],
+  incident:{
+    prompt:"Production metadata changed unexpectedly after deployment. What's your recovery move?",
+    options:[
+      {id:'a',text:'Compare the PROD pre-deploy snapshot against current state to isolate exactly what changed, then restore only that artifact',correct:true},
+      {id:'b',text:'Immediately restore the entire PROD snapshot with no diff review',correct:false},
+      {id:'c',text:'Tell users to manually re-enter the affected data',correct:false},
+      {id:'d',text:'Redeploy from DEV again and hope it overwrites the issue',correct:false}
+    ],
+    correctFeedback:"Correct. A pre-deploy PROD snapshot exists for exactly this reason — diff against it before restoring, so you fix the actual delta instead of rolling back unrelated changes.",
+    wrongPush:"That risks losing unrelated PROD changes made since deployment. What's a more targeted move?"
+  },
+  requiredKeywords:['snapshot','diff','rollback','artifact','pre-deploy','validate','dimension','rule'],
+  reasoning:{
+    identified:['a pre-deploy PROD snapshot is the safety net for exactly this scenario','diffing beats blind rollback'],
+    correctAction:'Snapshot PROD immediately before every deployment, and on incident, diff against that snapshot before restoring anything.',
+    perfImpact:'Limits recovery to the actual affected artifacts instead of losing unrelated PROD work.',
+    signal:'Candidate treated the pre-deploy snapshot as a diagnostic tool, not just a backup.'
+  }
+},
+
+/* ============ ROUND 10 — FINAL PRINCIPAL ARCHITECT CHALLENGE ============ */
+{
+  id:'r10', tag:'ROUND 10 · FINAL PRINCIPAL ARCHITECT CHALLENGE', module:'overview',
+  categories:['arch','reasoning','perf','sec','auto','deploy'],
+  scenario:"A 6-year-old PBCS application: 3,000 entities, 25,000 accounts, 15 custom dimensions, multiple planning processes (Workforce, CapEx, Opex, Revenue), extensive business rules, heavy Smart View usage, automated data loads, increasing data volume, month-end performance problems, security complaints, frequent metadata changes. You cannot rebuild it from scratch. You cannot stop the business. You have 90 days.",
+  interviewerQ:"You have 90 days. Give me your architecture stabilization plan.",
+  followUps:[
+    "What's your very first change in week one, and why that one?",
+    "What do you deliberately NOT fix in the first 90 days, and why?",
+    "How do you prove to the business that this plan is working at day 30, 60, and 90?"
+  ],
+  panelType:'warroom',
+  tabs:[
+    {id:'current',label:'Current State',readonly:"6-year application. 3,000 entities, 25,000 accounts, 15 custom dimensions. Known issues: month-end performance, security complaints, uncontrolled metadata changes.",prompt:'Summarize the current-state risk in your own words.'},
+    {id:'dim',label:'Dimension Analysis',readonly:"Sparse dimension growth (Account, Entity) with low shared-member reuse, echoing the pattern from Round 2.",prompt:'What is your dimension remediation approach?'},
+    {id:'calc',label:'Calculation Analysis',readonly:"Multiple unscoped legacy rules similar to the Round 3 Forecast_Calc pattern still in production.",prompt:'How do you prioritize which rules to re-scope first?'},
+    {id:'perf',label:'Performance',readonly:"Month-end runtimes trending upward in line with data volume growth (Round 4 pattern).",prompt:'What performance baseline and monitoring do you put in place?'},
+    {id:'sec',label:'Security',readonly:"Ad-hoc entity-level access grants causing intermittent complaints (Round 7 pattern).",prompt:'How do you redesign the access model without a big-bang cutover?'},
+    {id:'auto',label:'Automation',readonly:"Several manual steps still exist between data load and month-end close.",prompt:'What do you automate first for the fastest risk reduction?'},
+    {id:'migration',label:'Migration & Governance',readonly:"No consistent pre-deploy snapshot or diff-review discipline (Round 9 pattern).",prompt:'What deployment governance do you introduce?'},
+    {id:'risks',label:'Risks',readonly:"List the top risks if nothing changes in 90 days.",prompt:'Name the two risks that most threaten the business if unaddressed.'},
+    {id:'plan30',label:'30-Day Plan',readonly:"",prompt:'What ships in the first 30 days?'},
+    {id:'plan60',label:'60-Day Plan',readonly:"",prompt:'What ships in days 31–60?'},
+    {id:'plan90',label:'90-Day Plan',readonly:"",prompt:'What ships in days 61–90, and how do you prove stabilization?'}
+  ],
+  requiredKeywords:['governance','sparse','fix','scope','snapshot','security','automat','baseline','risk','priorit','30-day','60-day','90-day'],
+  reasoning:{
+    identified:['every earlier round\'s pattern is present simultaneously at production scale'],
+    correctAction:'Sequence stabilization by business risk, not technical elegance: quick, low-risk wins in week one (calculation re-scoping, snapshot governance), structural work (dimension consolidation) in the middle weeks, and a monitored, measurable close by day 90.',
+    perfImpact:'A phased plan reduces risk to the business while still producing measurable improvement at each 30-day checkpoint.',
+    signal:'Candidate connected every prior round\'s diagnosis into one prioritized, time-boxed plan instead of treating each issue in isolation.'
+  }
+}
+];
+
+/* ---------------------------------------------------------------------
+   4. STATE
+--------------------------------------------------------------------- */
+const state = {
+  idx:0,
+  results:ROUNDS.map(r=>({
+    id:r.id, investigated:new Set(), warnedCount:0, investigationScore:0,
+    decisionAttempts:0, decisionScore:0, decisionDone:false,
+    answerScore:0, answerText:'', followupIdx:0, followupDone:false,
+    complete:false, seqBuilt:[], calcRun:false
+  })),
+  respTimerStart:null, respTimerInterval:null,
+  speaking:false, recognition:null
+};
+
+function curRound(){ return ROUNDS[state.idx]; }
+function curResult(){ return state.results[state.idx]; }
+
+/* ---------------------------------------------------------------------
+   5. UTIL
+--------------------------------------------------------------------- */
+function el(tag,cls,html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+function pct(n){ return Math.round(n); }
+
+function pickVoice(role){
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices.length) return null;
+  if(role === 'narrator'){
+    return voices.find(v=>/female|zira|samantha|susan|karen|victoria/i.test(v.name)) || voices[0];
+  }
+  if(role === 'candidate'){
+    return voices.find(v=>/female|zira|samantha|susan|karen|victoria|aria|jenny/i.test(v.name))
+        || voices[voices.length-1] || voices[0];
+  }
+  return voices.find(v=>/male|david|mark|daniel|george/i.test(v.name)) || voices[0];
+}
+let voicesMuted = false;
+let speechUnlocked = false;
+function speakAs(role, text, onend){
+  if(voicesMuted){ if(onend) setTimeout(onend, 500); return; }
+  if(!('speechSynthesis' in window)){ if(onend) onend(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if(role === 'narrator'){ u.rate = 1.0; u.pitch = 1.05; }
+  else if(role === 'candidate'){ u.rate = 1.02; u.pitch = 1.15; }
+  else { u.rate = 0.98; u.pitch = 0.85; }
+  u.volume = 1;
+  const v = pickVoice(role);
+  if(v) u.voice = v;
+  let finished = false;
+  function finish(){ if(finished) return; finished = true; if(onend) onend(); }
+  u.onend = finish;
+  u.onerror = finish;
+  // Safety net: some browsers silently drop speak() calls without a prior user
+  // gesture, or stall on long utterances. If nothing happens in time, move on
+  // anyway so the autoplay never gets stuck on a silent utterance.
+  const safetyMs = Math.max(4000, text.length * 90);
+  setTimeout(finish, safetyMs);
+  window.speechSynthesis.speak(u);
+}
+function speak(text, onend){ speakAs('interviewer', text, onend); }
+function unlockSpeech(){
+  if(speechUnlocked || !('speechSynthesis' in window)) return;
+  speechUnlocked = true;
+  try{
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0.01; u.rate = 10;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+// Chrome (desktop) has a long-standing bug where speechSynthesis pauses itself
+// after ~15s on long utterances. Nudging resume() periodically works around it.
+setInterval(()=>{
+  if('speechSynthesis' in window && window.speechSynthesis.speaking){
+    window.speechSynthesis.resume();
+  }
+}, 4000);
+
+/* ---------------------------------------------------------------------
+   6. NAV RENDER
+--------------------------------------------------------------------- */
+function renderNav(){
+  const wrap = document.getElementById('navList');
+  wrap.innerHTML = '';
+  const r = curRound();
+  MODULES.forEach(m=>{
+    const active = m.id === r.module;
+    const item = el('div','navitem '+(active?'active':'inactive'));
+    item.innerHTML = '<span class="ico">'+m.icon+'</span><span>'+m.label+'</span>'+(active?'<span class="badge">LIVE</span>':'');
+    item.addEventListener('click', ()=>{
+      document.getElementById('crumbModule').textContent = m.label;
+      if(!active){
+        document.getElementById('workBody').insertAdjacentHTML('afterbegin',
+          '<div class="panel" style="border-left:3px solid var(--muted-dim);color:var(--muted);font-size:12.5px;">'+m.label+' is not required for this round\'s scenario. Return to <b style="color:var(--ink-soft)">'+MODULES.find(mm=>mm.id===r.module).label+'</b> to continue the investigation.</div>');
+      }
+    });
+    wrap.appendChild(item);
+  });
+}
+
+/* ---------------------------------------------------------------------
+   7. WORKSPACE RENDERERS
+--------------------------------------------------------------------- */
+function renderScenarioHeader(r){
+  const c = el('div','scenario-card');
+  c.innerHTML = '<div class="eyebrow">Interviewer Scenario</div><p>'+r.scenario.replace(/\n/g,'<br>')+'</p>';
+  return c;
+}
+
+function metricCard(m){
+  const c = el('div','metric-card');
+  c.innerHTML = '<div class="lbl">'+m.lbl+'</div><div class="num '+(m.cls||'')+'">'+m.val+'</div>';
+  return c;
+}
+
+function renderInvestigationList(r, body){
+  const res = curResult();
+  body.appendChild(el('div','section-h','<span class="n">01</span> Investigate'));
+  const tl = el('div','treelist');
+  r.investigation.forEach(item=>{
+    const visited = res.investigated.has(item.id);
+    const row = el('div','treeitem'+(visited?' visited':'')+(visited && !item.good?' warn':''));
+    row.innerHTML = '<div class="mk">'+(visited?(item.good?'✓':'!'):'')+'</div><div class="tx"><b>'+item.label+'</b><span>'+item.desc+'</span></div>';
+    row.addEventListener('click', ()=>{
+      if(res.investigated.has(item.id)) return;
+      res.investigated.add(item.id);
+      res.investigationScore = clamp(res.investigationScore + (item.good?1.6:-1.2), 0, 10);
+      if(!item.good) res.warnedCount++;
+      const fb = el('div', 'feedback-line '+(item.good?'good':'warn'), (item.good?'ARCHITECT SIGNAL: ':'ARCHITECT WARNING: ')+item.feedback);
+      row.appendChild(fb);
+      row.classList.add('visited', item.good?'':'warn');
+      row.querySelector('.mk').textContent = item.good?'✓':'!';
+      updateScoreDisplays();
+    });
+    tl.appendChild(row);
+  });
+  body.appendChild(tl);
+}
+
+function renderDecision(r, body){
+  if(!r.decision) return;
+  const res = curResult();
+  body.appendChild(el('div','section-h','<span class="n">02</span> Diagnosis Decision'));
+  const panel = el('div','panel');
+  panel.appendChild(el('div','',(r.decision.prompt)));
+  panel.style.paddingBottom='16px';
+  const listWrap = el('div','',''); listWrap.style.marginTop='10px';
+  panel.appendChild(listWrap);
+  const fbZone = el('div','');
+  panel.appendChild(fbZone);
+
+  function draw(){
+    listWrap.innerHTML='';
+    r.decision.options.forEach(opt=>{
+      const b = el('button','choice');
+      b.textContent = opt.text;
+      if(res.decisionDone){
+        b.disabled = true;
+        if(opt.correct) b.classList.add('correct');
+      }
+      b.addEventListener('click', ()=>{
+        res.decisionAttempts++;
+        if(opt.correct){
+          res.decisionDone = true;
+          res.decisionScore = clamp(10 - (res.decisionAttempts-1)*2.5, 3, 10);
+          fbZone.innerHTML = '<div class="feedback-line good">'+r.decision.correctFeedback+'</div>';
+          renderReasoning(r, body);
+        } else {
+          if(res.decisionAttempts>=2){
+            res.decisionDone = true;
+            res.decisionScore = 2;
+            fbZone.innerHTML = '<div class="feedback-line warn">'+r.decision.wrongPush+' <br><br><b>ARCHITECT FEEDBACK:</b> Your approach addresses the symptom, not the root cause. Reviewing the investigation panel above again would have surfaced the correct driver.</div>';
+            renderReasoning(r, body);
+          } else {
+            fbZone.innerHTML = '<div class="feedback-line warn">INTERVIEWER: "'+r.decision.wrongPush+'"</div>';
+          }
+        }
+        updateScoreDisplays();
+        draw();
+      });
+      listWrap.appendChild(b);
+    });
+  }
+  draw();
+  body.appendChild(panel);
+}
+
+function renderDimensionPanel(r, body){
+  body.appendChild(el('div','section-h','<span class="n">·</span> Dimension Density Analysis'));
+  const g = el('div','grid3');
+  r.metrics.forEach(m=>g.appendChild(metricCard(m)));
+  body.appendChild(g);
+  renderInvestigationList(r, body);
+  renderDecision(r, body);
+}
+
+function renderCalcBuilder(r, body){
+  const res = curResult();
+  body.appendChild(el('div','section-h','<span class="n">·</span> Current Rule — Calculation Manager'));
+  const before = el('div','grid3');
+  before.appendChild(metricCard({lbl:'Estimated Runtime',val:r.metricsBefore.runtime,cls:'bad'}));
+  before.appendChild(metricCard({lbl:'Blocks Processed',val:r.metricsBefore.blocks,cls:'bad'}));
+  before.appendChild(metricCard({lbl:'Efficiency Gain',val:r.metricsBefore.eff}));
+  body.appendChild(before);
+
+  body.appendChild(el('div','section-h','<span class="n">·</span> Redesign — FIX Scope Builder'));
+  const panel = el('div','panel');
+  r.formFields.forEach(f=>{
+    const row = el('div','formrow');
+    row.appendChild(el('label','',f.label));
+    const sel = el('select'); sel.dataset.field = f.id;
+    f.options.forEach(o=>{ const opt = el('option','',o); opt.value=o; sel.appendChild(opt); });
+    row.appendChild(sel);
+    panel.appendChild(row);
+  });
+  const btnRow = el('div','btn-row');
+  const runBtn = el('button','btn','RUN TEST');
+  btnRow.appendChild(runBtn);
+  panel.appendChild(btnRow);
+  const resultZone = el('div',''); resultZone.style.marginTop='12px';
+  panel.appendChild(resultZone);
+  body.appendChild(panel);
+
+  runBtn.addEventListener('click', ()=>{
+    const selects = panel.querySelectorAll('select');
+    let correctCount = 0;
+    selects.forEach(s=>{
+      const field = r.formFields.find(f=>f.id===s.dataset.field);
+      if(s.value === field.correct) correctCount++;
+    });
+    const ratio = correctCount / r.formFields.length;
+    res.calcRun = true;
+    if(ratio === 1){
+      res.decisionScore = 10; res.decisionDone = true;
+      const g = el('div','grid3');
+      g.appendChild(metricCard({lbl:'New Runtime',val:r.metricsAfter.runtime,cls:'good'}));
+      g.appendChild(metricCard({lbl:'Blocks Processed',val:r.metricsAfter.blocks,cls:'good'}));
+      g.appendChild(metricCard({lbl:'Efficiency Improvement',val:r.metricsAfter.eff,cls:'good'}));
+      resultZone.innerHTML='';
+      resultZone.appendChild(g);
+      resultZone.appendChild(el('div','feedback-line good','ARCHITECT SIGNAL: FIX scope correctly narrowed to Forecast / Working / data-entry entities / base-level accounts — matches the target design.'));
+      renderReasoning(r, body);
+    } else if(ratio >= 0.5){
+      res.decisionScore = 6; res.decisionDone = true;
+      resultZone.innerHTML = '<div class="feedback-line warn">Partial improvement only — runtime dropped to roughly '+Math.round(47-(47-9)*ratio)+' min. Some scope dimensions are still too broad. INTERVIEWER: "Why did you choose that FIX scope?"</div>';
+    } else {
+      res.decisionScore = clamp(res.decisionScore-1,1,10); res.decisionDone = false;
+      resultZone.innerHTML = '<div class="feedback-line warn">ARCHITECT WARNING: This scope barely changes block count — you are still calculating far more than the Working Forecast requires. Reconsider each dimension.</div>';
+    }
+    updateScoreDisplays();
+  });
+}
+
+function renderPerfDash(r, body){
+  body.appendChild(el('div','section-h','<span class="n">·</span> Performance Dashboard'));
+  const g = el('div','grid3');
+  r.metrics.forEach(m=>g.appendChild(metricCard(m)));
+  body.appendChild(g);
+  body.appendChild(el('div','section-h','<span class="n">·</span> Calculation Log'));
+  body.appendChild(el('div','logblock', r.log.replace(/\n/g,'<br>')));
+  renderInvestigationList(r, body);
+  renderDecision(r, body);
+}
+
+function renderFormCompare(r, body){
+  body.appendChild(el('div','section-h','<span class="n">·</span> Form Comparison'));
+  const g = el('div','grid2');
+  [r.formA, r.formB].forEach(f=>{
+    const c = el('div','panel');
+    c.innerHTML = '<div style="font-weight:600;margin-bottom:8px;">'+f.name+' <span style="color:var(--muted);font-family:var(--font-mono);font-size:12px;">('+f.time+')</span></div>'+
+      '<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.9;">'+
+      '<b style="color:var(--muted);">Rows:</b> '+f.rows+'<br>'+
+      '<b style="color:var(--muted);">Columns:</b> '+f.cols+'<br>'+
+      '<b style="color:var(--muted);">POV:</b> '+f.pov+'<br>'+
+      '<b style="color:var(--muted);">Rule:</b> '+f.rule+'</div>';
+    g.appendChild(c);
+  });
+  body.appendChild(g);
+  renderInvestigationList(r, body);
+  renderDecision(r, body);
+}
+
+function renderDataLoad(r, body){
+  body.appendChild(el('div','section-h','<span class="n">·</span> Data Load Monitor'));
+  const g = el('div','grid3');
+  r.loadStatus.forEach(m=>g.appendChild(metricCard(m)));
+  body.appendChild(g);
+  renderInvestigationList(r, body);
+  renderDecision(r, body);
+}
+
+function renderSecurity(r, body){
+  body.appendChild(el('div','section-h','<span class="n">·</span> Security — User Comparison'));
+  const g = el('div','grid2');
+  r.users.forEach(u=>{
+    const c = el('div','panel');
+    c.innerHTML = '<div style="font-weight:600;margin-bottom:8px;">'+u.name+'</div>'+
+      '<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.9;">'+
+      '<b style="color:var(--muted);">Group:</b> '+u.group+'<br>'+
+      '<b style="color:var(--muted);">Entity access:</b> '+u.entityAccess+'<br>'+
+      '<b style="color:var(--muted);">Form access:</b> '+u.formAccess+'<br>'+
+      '<b style="color:var(--muted);">Workflow:</b> '+u.workflow+'</div>';
+    g.appendChild(c);
+  });
+  body.appendChild(g);
+  renderInvestigationList(r, body);
+  renderDecision(r, body);
+}
+
+function renderSequence(r, body){
+  const res = curResult();
+  body.appendChild(el('div','section-h','<span class="n">·</span> '+(r.id==='r8'?'Automation Designer':'Deployment Sequence Builder')));
+  const panel = el('div','panel');
+  panel.appendChild(el('div','',(r.id==='r8'?'Click each step, in order, to build the automation pipeline.':'Click each step, in order, to build the deployment sequence.')));
+  const pool = el('div','seq-pool'); pool.style.marginTop='12px';
+  const built = el('div','seq-built');
+  const fbZone = el('div','');
+  panel.appendChild(pool); panel.appendChild(built); panel.appendChild(fbZone);
+  body.appendChild(panel);
+
+  function draw(){
+    pool.innerHTML='';
+    r.pool.forEach(step=>{
+      const used = res.seqBuilt.includes(step);
+      const b = el('button','seq-chip', step);
+      b.disabled = used || res.decisionDone;
+      b.addEventListener('click', ()=>{
+        res.seqBuilt.push(step);
+        checkOrder();
+        draw(); drawBuilt();
+      });
+      pool.appendChild(b);
+    });
+  }
+  function drawBuilt(){
+    built.innerHTML = res.seqBuilt.length? '' : '<span style="color:var(--muted-dim);font-size:12px;">Sequence will build here…</span>';
+    res.seqBuilt.forEach((s,i)=>{
+      if(i>0) built.appendChild(el('span','arrow','→'));
+      built.appendChild(el('span','b',s));
+    });
+  }
+  function checkOrder(){
+    if(res.seqBuilt.length === r.correctOrder.length){
+      const match = res.seqBuilt.every((s,i)=>s===r.correctOrder[i]);
+      res.decisionDone = true;
+      if(match){
+        res.decisionScore = 10;
+        fbZone.innerHTML = '<div class="feedback-line good">ARCHITECT SIGNAL: Sequence matches a sound production pipeline — dependencies respected at every step.</div>';
+        if(r.incident) renderIncident(r, body); else renderReasoning(r, body);
+      } else {
+        res.decisionScore = 5;
+        fbZone.innerHTML = '<div class="feedback-line warn">ARCHITECT WARNING: Order builds, but one or more dependencies are out of sequence (e.g. validation before load, or status checks skipped). This can fail silently in production.</div>';
+        if(r.incident) renderIncident(r, body); else renderReasoning(r, body);
+      }
+      updateScoreDisplays();
+    }
+  }
+  draw(); drawBuilt();
+}
+
+function renderIncident(r, body){
+  if(!r.incident) return;
+  const res = curResult();
+  body.appendChild(el('div','section-h','<span class="n">·</span> Incident'));
+  const panel = el('div','panel');
+  panel.appendChild(el('div','',r.incident.prompt));
+  const listWrap = el('div',''); listWrap.style.marginTop='10px';
+  panel.appendChild(listWrap);
+  const fbZone = el('div','');
+  panel.appendChild(fbZone);
+  let attempts = 0;
+  function draw(){
+    listWrap.innerHTML='';
+    r.incident.options.forEach(opt=>{
+      const b = el('button','choice', opt.text);
+      const doneKey = res.incidentDone;
+      if(doneKey){ b.disabled=true; if(opt.correct) b.classList.add('correct'); }
+      b.addEventListener('click', ()=>{
+        attempts++;
+        if(opt.correct){
+          res.incidentDone = true;
+          res.answerScore = clamp((res.answerScore||0)+2,0,10);
+          fbZone.innerHTML = '<div class="feedback-line good">'+r.incident.correctFeedback+'</div>';
+          renderReasoning(r, body);
+        } else if(attempts>=2){
+          res.incidentDone = true;
+          fbZone.innerHTML = '<div class="feedback-line warn">'+r.incident.wrongPush+'</div>';
+          renderReasoning(r, body);
+        } else {
+          fbZone.innerHTML = '<div class="feedback-line warn">INTERVIEWER: "'+r.incident.wrongPush+'"</div>';
+        }
+        updateScoreDisplays();
+        draw();
+      });
+      listWrap.appendChild(b);
+    });
+  }
+  draw();
+  body.appendChild(panel);
+}
+
+function renderWarroom(r, body){
+  const res = curResult();
+  body.appendChild(el('div','section-h','<span class="n">·</span> Architect War Room'));
+  const wrap = el('div','panel');
+  const tabbar = el('div','tabbar');
+  const paneWrap = el('div','tabpane');
+  wrap.appendChild(tabbar); wrap.appendChild(paneWrap);
+  body.appendChild(wrap);
+  if(!res.warroomNotes) res.warroomNotes = {};
+  let active = r.tabs[0].id;
+
+  function drawTabs(){
+    tabbar.innerHTML='';
+    r.tabs.forEach(t=>{
+      const b = el('button','tabbtn'+(t.id===active?' active':''), t.label);
+      b.addEventListener('click', ()=>{ active=t.id; drawTabs(); drawPane(); });
+      tabbar.appendChild(b);
+    });
+  }
+  function drawPane(){
+    const t = r.tabs.find(x=>x.id===active);
+    paneWrap.innerHTML='';
+    if(t.readonly) paneWrap.appendChild(el('div','readonly', t.readonly));
+    paneWrap.appendChild(el('div','',t.prompt));
+    const ta = el('textarea'); ta.value = res.warroomNotes[t.id]||'';
+    ta.style.marginTop='8px';
+    ta.addEventListener('input', ()=>{ res.warroomNotes[t.id]=ta.value; scoreWarroom(); });
+    paneWrap.appendChild(ta);
+  }
+  function scoreWarroom(){
+    const all = Object.values(res.warroomNotes).join(' ').toLowerCase();
+    let hits=0;
+    r.requiredKeywords.forEach(k=>{ if(all.includes(k)) hits++; });
+    res.answerScore = clamp((hits/r.requiredKeywords.length)*10,0,10);
+    res.decisionScore = res.answerScore;
+    res.decisionDone = Object.keys(res.warroomNotes).length >= 3;
+    updateScoreDisplays();
+  }
+  drawTabs(); drawPane();
+  body.appendChild(el('div','','')); // spacer
+  const finishBtn = el('button','btn','Finalize Stabilization Plan');
+  finishBtn.style.marginTop='6px';
+  finishBtn.addEventListener('click', ()=>{
+    if(Object.keys(res.warroomNotes).length < 3){
+      alert('Fill in at least 3 tabs before finalizing your plan.');
+      return;
+    }
+    res.decisionDone = true;
+    renderReasoning(r, document.getElementById('workBody'));
+    updateScoreDisplays();
+  });
+  body.appendChild(finishBtn);
+}
+
+function renderReasoning(r, body){
+  if(document.getElementById('reasoningBlock')) return;
+  const p = el('div','reason-panel'); p.id='reasoningBlock';
+  let html = '<h4>WHY YOUR APPROACH WORKED</h4><div style="color:var(--ink-soft);font-size:12.8px;margin-bottom:8px;"><b>Candidate identified:</b></div><ul>';
+  r.reasoning.identified.forEach(x=> html += '<li>'+x+'</li>');
+  html += '</ul><div style="font-size:12.8px;"><b style="color:var(--ink);">Correct action:</b> <span style="color:var(--ink-soft);">'+r.reasoning.correctAction+'</span></div>';
+  html += '<div class="sig"><b style="color:var(--ink);">Performance impact:</b> '+r.reasoning.perfImpact+'<br><br><b style="color:var(--ink);">Architect-level signal:</b> '+r.reasoning.signal+'</div>';
+  p.innerHTML = html;
+  body.appendChild(p);
+}
+
+function renderWorkspace(){
+  const r = curRound();
+  const body = document.getElementById('workBody');
+  body.innerHTML='';
+  document.getElementById('crumbModule').textContent = MODULES.find(m=>m.id===r.module).label;
+  document.getElementById('roundTag').textContent = r.tag.split(' · ')[0]+' OF 10';
+  body.appendChild(renderScenarioHeader(r));
+
+  switch(r.panelType){
+    case 'investigate': renderInvestigationList(r, body); renderDecision(r, body); break;
+    case 'dimension': renderDimensionPanel(r, body); break;
+    case 'calcbuilder': renderCalcBuilder(r, body); break;
+    case 'perfdash': renderPerfDash(r, body); break;
+    case 'formcompare': renderFormCompare(r, body); break;
+    case 'dataload': renderDataLoad(r, body); break;
+    case 'security': renderSecurity(r, body); break;
+    case 'sequence': renderSequence(r, body); break;
+    case 'warroom': renderWarroom(r, body); break;
+  }
+
+  const res = curResult();
+  if(res.decisionDone) renderReasoning(r, body);
+
+  renderNav();
+}
+
+/* ---------------------------------------------------------------------
+   8. RESPONSE PANEL (transcript / speech / keywords / follow-ups)
+--------------------------------------------------------------------- */
+let respSeconds = 0;
+function startRespTimer(){
+  clearInterval(state.respTimerInterval);
+  respSeconds = 0;
+  document.getElementById('respTimer').textContent = '00:00';
+  state.respTimerInterval = setInterval(()=>{
+    respSeconds++;
+    const m = String(Math.floor(respSeconds/60)).padStart(2,'0');
+    const s = String(respSeconds%60).padStart(2,'0');
+    document.getElementById('respTimer').textContent = m+':'+s;
+  },1000);
+}
+
+function updateKeywordChips(){
+  const r = curRound();
+  const res = curResult();
+  const text = (res.answerText||'').toLowerCase();
+  const zone = document.getElementById('kwChips');
+  zone.innerHTML = '';
+  let hits = 0;
+  r.requiredKeywords.forEach(k=>{
+    const hit = text.includes(k.toLowerCase());
+    if(hit) hits++;
+    zone.appendChild(el('span','chip-kw'+(hit?' hit':''), k));
+  });
+  const conf = clamp(Math.round((hits/r.requiredKeywords.length)*100),0,100);
+  document.getElementById('confVal').textContent = conf+'%';
+  document.getElementById('confFill').style.width = conf+'%';
+  res.answerScore = clamp((hits/r.requiredKeywords.length)*10, 0, 10);
+  return hits;
+}
+
+function renderResponsePanel(){
+  const r = curRound();
+  const res = curResult();
+  document.getElementById('answerInput').value = res.answerText||'';
+  document.getElementById('transcriptBox').className = 'transcript-box'+(res.answerText?'':' placeholder');
+  document.getElementById('transcriptBox').textContent = res.answerText || 'The candidate\'s spoken answer will appear here automatically…';
+  updateKeywordChips();
+  renderFollowups();
+  startRespTimer();
+}
+
+function renderFollowups(){
+  const r = curRound();
+  const res = curResult();
+  const zone = document.getElementById('followupZone');
+  zone.innerHTML='';
+  if(!res.submitted) return;
+  for(let i=0;i<res.followupIdx && i<r.followUps.length;i++){
+    const card = el('div','followup-card');
+    card.innerHTML = '<div class="who">Interviewer follow-up '+(i+1)+'</div>'+r.followUps[i];
+    zone.appendChild(card);
+  }
+  if(res.followupIdx < r.followUps.length){
+    const btn = el('button','btn secondary','Hear next follow-up question');
+    btn.addEventListener('click', ()=>{
+      const q = r.followUps[res.followupIdx];
+      document.getElementById('interviewerQ').textContent = q;
+      speak(q);
+      res.followupIdx++;
+      renderFollowups();
+    });
+    zone.appendChild(btn);
+  } else {
+    res.followupDone = true;
+    zone.appendChild(el('div','feedback-line good','All follow-up questions addressed. Complete the workspace task above, then advance to the next round.'));
+  }
+}
+
+/* ---------------------------------------------------------------------
+   9. SPEECH RECOGNITION
+--------------------------------------------------------------------- */
+function setupRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = 'en-US';
+  rec.onresult = (ev)=>{
+    let txt = '';
+    for(let i=0;i<ev.results.length;i++){ txt += ev.results[i][0].transcript; }
+    const res = curResult();
+    res.answerText = txt;
+    document.getElementById('answerInput').value = txt;
+    document.getElementById('transcriptBox').className='transcript-box';
+    document.getElementById('transcriptBox').textContent = txt;
+    updateKeywordChips();
+  };
+  rec.onend = ()=>{ if(state.speaking){ try{ rec.start(); }catch(e){} } };
+  return rec;
+}
+
+function toggleMic(){
+  if(!state.recognition){
+    state.recognition = setupRecognition();
+    if(!state.recognition){
+      alert('Speech recognition is not supported in this browser. Please use Type Answer instead.');
+      return;
+    }
+  }
+  state.speaking = !state.speaking;
+  const btn = document.getElementById('micBtn');
+  const row = document.getElementById('speakingRow');
+  if(state.speaking){
+    try{ state.recognition.start(); }catch(e){}
+    btn.classList.add('on'); btn.textContent='⏹ Stop Speaking';
+    row.classList.add('active');
+    document.getElementById('speakingLabel').textContent='Candidate is speaking…';
+  } else {
+    try{ state.recognition.stop(); }catch(e){}
+    btn.classList.remove('on'); btn.textContent='🎙 Speak Answer';
+    row.classList.remove('active');
+    document.getElementById('speakingLabel').textContent='Not speaking';
+  }
+}
+
+/* ---------------------------------------------------------------------
+   10. SCORING / SCOREBOARD
+--------------------------------------------------------------------- */
+function computeCategoryScores(){
+  const cat = {}; CAT_KEYS.forEach(k=>cat[k]={sum:0,n:0});
+  ROUNDS.forEach((r,i)=>{
+    const res = state.results[i];
+    const parts = [];
+    if(r.investigation && r.investigation.length) parts.push(res.investigationScore||0);
+    parts.push(res.decisionScore||0);
+    parts.push(res.answerScore||0);
+    const roundScore = parts.reduce((a,b)=>a+b,0) / parts.length;
+    r.categories.forEach(c=>{ cat[c].sum += roundScore; cat[c].n++; });
+  });
+  const out = {};
+  CAT_KEYS.forEach(k=>{ out[k] = cat[k].n ? cat[k].sum/cat[k].n : 0; });
+  return out;
+}
+function overallPercent(){
+  const cats = computeCategoryScores();
+  const vals = CAT_KEYS.map(k=>cats[k]).filter(v=>v>0);
+  if(!vals.length) return 0;
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  return pct(avg*10);
+}
+function architectLevel(p){
+  if(p>=90) return 'PRINCIPAL ARCHITECT READY';
+  if(p>=80) return 'STRONG SENIOR ARCHITECT';
+  if(p>=65) return 'SENIOR ARCHITECT';
+  if(p>=45) return 'SENIOR CONSULTANT';
+  return 'NEEDS PREPARATION';
+}
+
+function updateScoreDisplays(){
+  const res = curResult();
+  document.getElementById('miniActionScore').textContent = (res.investigationScore||0).toFixed(1)+' / 10';
+  document.getElementById('miniAnswerScore').textContent = (res.answerScore||0).toFixed(1)+' / 10';
+  const p = overallPercent();
+  document.getElementById('miniOverall').textContent = p+'%';
+  document.getElementById('headerScoreVal').textContent = p+'%';
+  document.getElementById('floatPct').textContent = p+'%';
+  document.getElementById('floatBig').textContent = p+'%';
+  document.getElementById('floatLevel').textContent = architectLevel(p);
+  const cats = computeCategoryScores();
+  const fc = document.getElementById('floatCats');
+  fc.innerHTML='';
+  CAT_KEYS.forEach(k=>{
+    if(cats[k]>0){
+      const row = el('div','catrow');
+      row.innerHTML = '<span>'+CAT[k]+'</span><b>'+cats[k].toFixed(1)+'/10</b>';
+      fc.appendChild(row);
+    }
+  });
+}
+
+/* ---------------------------------------------------------------------
+   11. ROUND NAVIGATION
+--------------------------------------------------------------------- */
+function loadRound(idx, onSpoken){
+  state.idx = idx;
+  const r = curRound();
+  document.getElementById('interviewerQ').textContent = r.interviewerQ;
+  document.getElementById('roundTag').textContent = r.tag.split(' · ')[0]+' OF '+ROUNDS.length;
+  document.getElementById('progressFill').style.width = Math.round(((idx+1)/ROUNDS.length)*100)+'%';
+  document.getElementById('povChip').textContent = 'FY26 · Forecast · Working · '+ (r.id==='r7'?'US02':'Total Entity');
+  document.getElementById('jobChip').textContent = ['r3','r4','r8'].includes(r.id) ? 'Running' : 'Idle';
+  renderWorkspace();
+  renderResponsePanel();
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateScoreDisplays();
+  setTimeout(()=>speakAs('interviewer', r.interviewerQ, onSpoken), 450);
+}
+
+function submitAnswer(){
+  const res = curResult();
+  const text = document.getElementById('answerInput').value.trim();
+  if(!text){ alert('Type or speak an answer before submitting.'); return; }
+  res.answerText = text;
+  res.submitted = true;
+  updateKeywordChips();
+  renderFollowups();
+}
+
+function goNext(){
+  const res = curResult();
+  if(!res.submitted){
+    if(!confirm('You have not submitted an answer for this round. Continue anyway?')) return;
+  }
+  res.complete = true;
+  if(state.idx < ROUNDS.length-1){
+    loadRound(state.idx+1);
+  } else {
+    showReport();
+  }
+}
+function goPrev(){
+  if(state.idx>0) loadRound(state.idx-1);
+}
+
+/* ---------------------------------------------------------------------
+   12. FINAL REPORT
+--------------------------------------------------------------------- */
+function showReport(){
+  document.getElementById('mainLayout').style.display='none';
+  document.getElementById('interviewerBar').style.display='none';
+  document.getElementById('floatScore').classList.remove('show');
+  document.getElementById('floatToggle').style.display='none';
+  const screen = document.getElementById('reportScreen');
+  screen.classList.add('show');
+
+  const p = overallPercent();
+  const level = architectLevel(p);
+  document.getElementById('reportOverallPct').textContent = 'Overall Score: '+p+'%';
+  document.getElementById('reportLevel').textContent = level;
+
+  const cats = computeCategoryScores();
+  const catWrap = document.getElementById('catBarWrap');
+  catWrap.innerHTML='';
+  CAT_KEYS.forEach(k=>{
+    const row = el('div','catbar-row');
+    const v = cats[k]||0;
+    row.innerHTML = '<div class="lbl">'+CAT[k]+'</div><div class="track"><div class="fill" style="width:'+(v*10)+'%"></div></div><div class="num">'+v.toFixed(1)+'</div>';
+    catWrap.appendChild(row);
+  });
+
+  const strengths = CAT_KEYS.filter(k=>cats[k]>=7.5).map(k=>CAT[k]+' — consistently strong across rounds');
+  const weaknesses = CAT_KEYS.filter(k=>cats[k]>0 && cats[k]<5.5).map(k=>CAT[k]+' — needs deeper reasoning under pressure');
+  const gaps = state.results.filter(res=>{
+    const r = ROUNDS.find(rr=>rr.id===res.id);
+    return (res.decisionScore||0) < 5;
+  }).map(res=>{
+    const r = ROUNDS.find(rr=>rr.id===res.id);
+    return r.tag.split(' · ')[1] + ' — root-cause reasoning needs reinforcement';
+  });
+  const prod = [];
+  if((cats.troubleshoot||0)>=7) prod.push('Demonstrated production-grade diagnostic sequencing under time pressure.');
+  if((cats.perf||0)>=7) prod.push('Shows measurable, metrics-driven performance tuning judgment.');
+  if((cats.sec||0)>0 && cats.sec<6) prod.push('Security reasoning needs to move faster from symptom to exact access layer.');
+  if((cats.deploy||0)>0 && cats.deploy<6) prod.push('Deployment governance instincts (snapshot/diff before restore) need reinforcement.');
+  if(!prod.length) prod.push('Overall production readiness is broadly consistent with the scores above.');
+
+  fillList('repStrengths', strengths.length?strengths:['Solid baseline across categories — no single dominant strength yet.']);
+  fillList('repWeak', weaknesses.length?weaknesses:['No category fell below a passing bar.']);
+  fillList('repGaps', gaps.length?gaps:['No major technical gaps identified in this session.']);
+  fillList('repProd', prod);
+
+  const recos = {
+    'PRINCIPAL ARCHITECT READY':'PRINCIPAL ARCHITECT READY. Consistently root-caused issues before acting, connected calculation, dimension, security and deployment concerns into a single prioritized plan, and defended decisions under interviewer pressure.',
+    'STRONG SENIOR ARCHITECT':'STRONG SENIOR ARCHITECT. Demonstrates strong PBCS calculation and performance troubleshooting skills. Continue sharpening security and deployment governance reasoning.',
+    'SENIOR ARCHITECT':'SENIOR ARCHITECT. Solid technical fundamentals with room to tighten root-cause reasoning speed under time pressure, particularly in the war-room style rounds.',
+    'SENIOR CONSULTANT':'SENIOR CONSULTANT. Strong on individual technical tasks; needs more practice connecting investigation findings into an architect-level decision before acting.',
+    'NEEDS PREPARATION':'NEEDS PREPARATION. Revisit dimension design, calculation scoping, and root-cause diagnosis fundamentals before the next attempt.'
+  };
+  document.getElementById('repRecommend').textContent = recos[level];
+
+  drawRadar(cats);
+  buildReviewPanel();
+}
+function fillList(id, arr){
+  const ul = document.getElementById(id);
+  ul.innerHTML='';
+  arr.forEach(x=> ul.appendChild(el('li','',x)));
+}
+
+function drawRadar(cats){
+  const canvas = document.getElementById('radarCanvas');
+  const ctx = canvas.getContext('2d');
+  const keys = ['arch','calc','perf','sec','auto','troubleshoot'];
+  const labels = keys.map(k=>CAT[k]);
+  const vals = keys.map(k=>cats[k]||0);
+  const cx = canvas.width/2, cy = canvas.height/2 - 6, R = 130;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle = '#22374F';
+  ctx.fillStyle = '#7E93AD';
+  ctx.font = '11px IBM Plex Mono';
+  const N = keys.length;
+  for(let ring=1; ring<=4; ring++){
+    ctx.beginPath();
+    for(let i=0;i<=N;i++){
+      const a = (Math.PI*2*i/N) - Math.PI/2;
+      const rr = R*ring/4;
+      const x = cx + rr*Math.cos(a), y = cy + rr*Math.sin(a);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  for(let i=0;i<N;i++){
+    const a = (Math.PI*2*i/N) - Math.PI/2;
+    const x = cx + R*Math.cos(a), y = cy + R*Math.sin(a);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
+    const lx = cx + (R+26)*Math.cos(a), ly = cy + (R+26)*Math.sin(a);
+    ctx.textAlign = 'center';
+    ctx.fillText(labels[i], lx, ly);
+  }
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const idx = i % N;
+    const a = (Math.PI*2*idx/N) - Math.PI/2;
+    const rr = R*(vals[idx]/10);
+    const x = cx + rr*Math.cos(a), y = cy + rr*Math.sin(a);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(47,217,181,0.28)';
+  ctx.strokeStyle = '#2FD9B5';
+  ctx.lineWidth = 2;
+  ctx.fill(); ctx.stroke();
+}
+
+function buildReviewPanel(){
+  const panel = document.getElementById('reviewPanel');
+  panel.innerHTML = '';
+  ROUNDS.forEach((r,i)=>{
+    const res = state.results[i];
+    const total = (((res.investigationScore||0)+(res.decisionScore||0)+(res.answerScore||0))/3).toFixed(1);
+    const box = el('div','',''); box.style.marginBottom='16px'; box.style.paddingBottom='14px'; box.style.borderBottom='1px solid var(--line-soft)';
+    box.innerHTML = '<div style="font-weight:600;font-size:13px;margin-bottom:4px;">'+r.tag+' — <span style="font-family:var(--font-mono);color:'+(total>=7?'var(--teal)':total>=4.5?'var(--amber)':'var(--red)')+';">'+total+' / 10</span></div>'+
+      '<div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;">'+r.reasoning.correctAction+'</div>';
+    panel.appendChild(box);
+  });
+}
+
+/* ---------------------------------------------------------------------
+   13. EXPORT / PRINT / RESTART
+--------------------------------------------------------------------- */
+function buildReportText(){
+  const p = overallPercent();
+  const level = architectLevel(p);
+  const cats = computeCategoryScores();
+  let out = 'ORACLE PBCS SENIOR ARCHITECT INTERVIEW REPORT\n';
+  out += 'BISP Trainings | www.bisptrainings.com | +91 769-409-5404\n';
+  out += '================================================\n\n';
+  out += 'Candidate: Senior Architect Candidate\n';
+  out += 'Overall Score: '+p+'%\n';
+  out += 'Architect Level: '+level+'\n\n';
+  out += 'CATEGORY SCORES\n';
+  CAT_KEYS.forEach(k=>{ if(cats[k]>0) out += '  '+CAT[k]+': '+cats[k].toFixed(1)+' / 10\n'; });
+  out += '\nROUND-BY-ROUND\n';
+  ROUNDS.forEach((r,i)=>{
+    const res = state.results[i];
+    const total = (((res.investigationScore||0)+(res.decisionScore||0)+(res.answerScore||0))/3).toFixed(1);
+    out += '\n'+r.tag+' — '+total+'/10\n  '+r.reasoning.correctAction+'\n';
+  });
+  out += '\nRECOMMENDATION\n'+document.getElementById('repRecommend').textContent+'\n';
+  return out;
+}
+function downloadText(filename, text){
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------------------------------------------------------------
+   14. INTRO SEQUENCE (short, simulator-only — no narration box, no promo)
+--------------------------------------------------------------------- */
+const INTRO_SCRIPT = "Welcome to the Oracle PBCS Senior Architect Live Interview Simulator. "+
+  "In a moment you'll watch a full mock interview play out automatically between a senior Oracle Planning architect and a senior architect candidate, "+
+  "across ten real production scenarios — from enterprise assessment to performance, security, automation and a live war-room incident. "+
+  "There's nothing for you to do — just sit back and watch it unfold. Let's begin.";
+
+const OUTRO_SCRIPT = "That concludes this mock interview. "+
+  "This simulator is proudly brought to you by BISP Trainings. For more Oracle E P M training, mentorship, and interview preparation, visit "+
+  "www dot bisp trainings dot com, or call plus nine one, seven six nine, four zero nine, five four zero four. "+
+  "Thank you for watching.";
+
+let introFinished = false;
+let introStarted = false;
+function endIntro(){
+  if(introFinished) return;
+  introFinished = true;
+  window.speechSynthesis.cancel();
+  const overlay = document.getElementById('introOverlay');
+  overlay.style.transition = 'opacity .5s ease';
+  overlay.style.opacity = '0';
+  setTimeout(()=>{ overlay.remove(); }, 520);
+  autoplayRound(0);
+}
+function playIntro(){
+  if(introStarted) return;
+  introStarted = true;
+  speechUnlocked = true;
+  const overlay = document.getElementById('introOverlay');
+  const eq = document.getElementById('introEq');
+  const caption = document.getElementById('introCaption');
+  overlay.classList.remove('idle');
+  if(eq) eq.style.opacity = '1';
+  if(caption) caption.textContent = 'Playing intro…';
+  speakAs('narrator', INTRO_SCRIPT, endIntro);
+}
+function startIntroWhenReady(){
+  // Try a silent-safe autoplay attempt in case this browser allows it without
+  // a gesture. If the browser blocks it, the Start button (a real click) is
+  // what actually triggers playback — that single tap is also what unlocks
+  // audio for every voice line for the rest of the interview.
+  if(!('speechSynthesis' in window)) return;
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices.length){
+    window.speechSynthesis.onvoiceschanged = ()=>{};
+  }
+}
+function toggleMute(){
+  voicesMuted = !voicesMuted;
+  const btn = document.getElementById('muteToggleBtn');
+  if(voicesMuted){ window.speechSynthesis.cancel(); if(btn) btn.textContent = '🔈 Unmute Voices'; }
+  else if(btn){ btn.textContent = '🔊 Mute Voices'; }
+}
+
+/* ---------------------------------------------------------------------
+   15. FULL AUTOPLAY ENGINE — interviewer + candidate, hands-free
+--------------------------------------------------------------------- */
+const ACK_LINES = [
+  "Happy to go deeper on any part of that if it's useful.",
+  "That's the core of my reasoning — glad to expand on any piece of it.",
+  "I'm confident in that read, but I'm happy to defend it further.",
+  "That's exactly how I'd defend that decision in a real production review."
+];
+function shortAck(){ return ACK_LINES[Math.floor(Math.random()*ACK_LINES.length)]; }
+function candidateAnswerText(r){
+  const idPart = r.reasoning.identified.join(', ');
+  return "Sure — walking through this, what I'm seeing is "+idPart+". "+
+    "So the move I'd make is: "+r.reasoning.correctAction+" "+
+    "The impact of that should be that "+r.reasoning.perfImpact;
+}
+function setAnswerAndSubmit(text){
+  const ai = document.getElementById('answerInput');
+  if(!ai) return;
+  ai.value = text;
+  ai.dispatchEvent(new Event('input',{bubbles:true}));
+  submitAnswer();
+}
+function stepInvestigateThenAnswer(r, cb){
+  if(r.investigation && r.investigation.length){
+    const rows = Array.from(document.querySelectorAll('#workBody .treeitem'));
+    const goodIdx = [];
+    r.investigation.forEach((it,i)=>{ if(it.good) goodIdx.push(i); });
+    let k=0;
+    (function step(){
+      if(k>=goodIdx.length){ cb(); return; }
+      const row = rows[goodIdx[k]];
+      if(row) row.click();
+      k++;
+      setTimeout(step, 550);
+    })();
+  } else { cb(); }
+}
+function resolveChoicePanel(options, cb){
+  setTimeout(()=>{
+    const btns = Array.from(document.querySelectorAll('#workBody .choice'));
+    const correctIdx = options ? options.findIndex(o=>o.correct) : -1;
+    if(correctIdx>=0 && btns[correctIdx]) btns[correctIdx].click();
+    setTimeout(cb, 400);
+  }, 300);
+}
+function runCalcBuilder(r, cb){
+  const selects = Array.from(document.querySelectorAll('#workBody select[data-field]'));
+  selects.forEach(sel=>{
+    const field = r.formFields.find(f=>f.id===sel.dataset.field);
+    if(field) sel.value = field.correct;
+  });
+  const btns = Array.from(document.querySelectorAll('#workBody .btn'));
+  const runBtn = btns.find(b=>b.textContent.trim()==='RUN TEST');
+  if(runBtn) runBtn.click();
+  setTimeout(cb, 500);
+}
+function runSequence(r, cb){
+  let k=0;
+  (function step(){
+    if(k>=r.correctOrder.length){ setTimeout(cb, 400); return; }
+    const chips = Array.from(document.querySelectorAll('#workBody .seq-chip'));
+    const target = chips.find(c=>!c.disabled && c.textContent.trim()===r.correctOrder[k]);
+    if(target) target.click();
+    k++;
+    setTimeout(step, 450);
+  })();
+}
+function runWarroom(r, cb){
+  const masterText = "Governance is the core gap here — sparse Account and Entity growth without a shared-member consolidation standard needs "+
+    "a scoped fix, snapshot discipline, and a security review. Priorities: baseline the biggest risk first, automate the manual steps, and phase "+
+    "delivery across a 30-day, 60-day and 90-day plan so we can prove stabilization at each checkpoint.";
+  let k=0;
+  (function step(){
+    if(k>=r.tabs.length){
+      setTimeout(()=>{
+        const btns = Array.from(document.querySelectorAll('#workBody .btn'));
+        const finBtn = btns.find(b=>b.textContent.includes('Finalize'));
+        if(finBtn) finBtn.click();
+        setTimeout(cb, 600);
+      }, 300);
+      return;
+    }
+    const tabBtns = Array.from(document.querySelectorAll('#workBody .tabbtn'));
+    const tb = tabBtns[k];
+    if(tb) tb.click();
+    setTimeout(()=>{
+      const ta = document.querySelector('#workBody .tabpane textarea');
+      if(ta){
+        ta.value = masterText;
+        ta.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+      k++;
+      setTimeout(step, 350);
+    }, 150);
+  })();
+}
+function resolvePanel(r, cb){
+  if(r.panelType==='calcbuilder'){ runCalcBuilder(r, cb); }
+  else if(r.panelType==='sequence'){
+    runSequence(r, ()=>{ if(r.incident){ resolveChoicePanel(r.incident.options, cb); } else { cb(); } });
+  }
+  else if(r.panelType==='warroom'){ runWarroom(r, cb); }
+  else { resolveChoicePanel(r.decision ? r.decision.options : null, cb); }
+}
+let autoplayActive = true;
+function autoplayRound(idx){
+  if(!autoplayActive) return;
+  if(idx >= ROUNDS.length){ finishAutoplay(); return; }
+  loadRound(idx, ()=>{
+    const r = curRound();
+    setTimeout(()=>{
+      stepInvestigateThenAnswer(r, ()=>{
+        const answer = candidateAnswerText(r);
+        setAnswerAndSubmit(answer);
+        speakAs('candidate', answer, ()=>{
+          setTimeout(()=>{
+            resolvePanel(r, ()=>{
+              setTimeout(()=>{
+                const res = curResult();
+                const followUp = (r.followUps && r.followUps[0]) || '';
+                if(followUp){
+                  document.getElementById('interviewerQ').textContent = followUp;
+                  speakAs('interviewer', followUp, ()=>{
+                    res.followupIdx = 1;
+                    renderFollowups();
+                    const ack = shortAck();
+                    setTimeout(()=>{
+                      speakAs('candidate', ack, ()=>{ setTimeout(()=>{ autoplayRound(idx+1); }, 700); });
+                    }, 250);
+                  });
+                } else {
+                  setTimeout(()=>{ autoplayRound(idx+1); }, 700);
+                }
+              }, 500);
+            });
+          }, 400);
+        });
+      });
+    }, 500);
+  });
+}
+function finishAutoplay(){
+  showReport();
+  setTimeout(()=>{ speakAs('narrator', OUTRO_SCRIPT); }, 900);
+}
+function skipToReport(){
+  window.speechSynthesis.cancel();
+  const wasMuted = voicesMuted;
+  voicesMuted = true;
+  (function fastRound(idx){
+    if(idx>=ROUNDS.length){ voicesMuted = wasMuted; finishAutoplay(); return; }
+    loadRound(idx, ()=>{
+      const r = curRound();
+      stepInvestigateThenAnswer(r, ()=>{
+        setAnswerAndSubmit(candidateAnswerText(r));
+        resolvePanel(r, ()=>{ fastRound(idx+1); });
+      });
+    });
+  })(state.idx);
+}
+
+/* ---------------------------------------------------------------------
+   15. EVENT WIRING / INIT
+--------------------------------------------------------------------- */
+function init(){
+  document.getElementById('answerInput').addEventListener('input', (e)=>{
+    curResult().answerText = e.target.value;
+    document.getElementById('transcriptBox').className='transcript-box';
+    document.getElementById('transcriptBox').textContent = e.target.value || 'The candidate\'s spoken answer will appear here automatically…';
+    updateKeywordChips();
+    updateScoreDisplays();
+  });
+  document.getElementById('muteToggleBtn').addEventListener('click', toggleMute);
+  document.getElementById('skipToReportBtn').addEventListener('click', skipToReport);
+
+  document.getElementById('floatToggle').addEventListener('click', ()=>{
+    document.getElementById('floatScore').classList.toggle('show');
+  });
+  document.getElementById('floatScore').classList.add('show');
+
+  document.getElementById('exportReportBtn').addEventListener('click', ()=>downloadText('PBCS_Interview_Report.txt', buildReportText()));
+  document.getElementById('exportScorecardBtn').addEventListener('click', ()=>{
+    const cats = computeCategoryScores();
+    let out = 'ARCHITECT SCORECARD\nOverall: '+overallPercent()+'%\n\n';
+    CAT_KEYS.forEach(k=>{ if(cats[k]>0) out += CAT[k]+': '+cats[k].toFixed(1)+'/10\n'; });
+    downloadText('PBCS_Scorecard.txt', out);
+  });
+  document.getElementById('printReportBtn').addEventListener('click', ()=>window.print());
+  document.getElementById('reviewBtn').addEventListener('click', ()=>{
+    const p = document.getElementById('reviewPanel');
+    p.style.display = p.style.display==='none' ? 'block' : 'none';
+  });
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    if(confirm('Restart the full interview from Round 1? All progress will be cleared.')) location.reload();
+  });
+
+  document.getElementById('startIntroBtn').addEventListener('click', ()=>{ unlockSpeech(); playIntro(); });
+  document.getElementById('skipIntroBtn').addEventListener('click', ()=>{ unlockSpeech(); endIntro(); });
+
+  startIntroWhenReady();
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else { init(); }
+
+})();
+</script>
+</body>
+</html>
