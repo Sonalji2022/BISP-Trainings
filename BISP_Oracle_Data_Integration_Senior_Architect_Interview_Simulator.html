@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senior Oracle Data Integration Architect | Interview Simulator</title>
+<style>
+:root{
+  --navy-950:#060a14;
+  --navy-900:#0a1120;
+  --navy-800:#0f1830;
+  --navy-700:#152040;
+  --navy-600:#1c2b52;
+  --blue-500:#2f7bff;
+  --blue-400:#5c9bff;
+  --blue-300:#8fbaff;
+  --cyan:#25d9c9;
+  --amber:#f5a623;
+  --red:#ff5c6c;
+  --green:#38d97a;
+  --text-hi:#eef3ff;
+  --text-mid:#a9b6d6;
+  --text-low:#6c7aa0;
+  --glass-bg:rgba(21,32,64,0.55);
+  --glass-border:rgba(140,170,255,0.16);
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(47,123,255,0.18), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(37,217,201,0.10), transparent 60%),
+    linear-gradient(180deg, var(--navy-950), var(--navy-900) 40%, #070c18 100%);
+  color:var(--text-hi);
+  font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  min-height:100vh;
+}
+.app{max-width:1500px;margin:0 auto;padding:18px 20px 60px;}
+
+/* ---------- HEADER ---------- */
+header.top{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:14px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:18px 24px;
+  backdrop-filter:blur(14px);
+  box-shadow:0 8px 30px rgba(0,0,0,0.35);
+  margin-bottom:18px;
+}
+.brandblock{display:flex;flex-direction:column;gap:4px;}
+.eyebrow{font-size:11px;letter-spacing:3px;color:var(--cyan);font-weight:700;text-transform:uppercase;}
+h1.title{margin:0;font-size:22px;letter-spacing:0.5px;font-weight:800;
+  background:linear-gradient(90deg,#fff,var(--blue-300));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.subtitle{font-size:13px;color:var(--text-mid);margin:0;}
+.stat-strip{display:flex;gap:10px;flex-wrap:wrap;}
+.stat-chip{
+  background:var(--navy-800);border:1px solid var(--glass-border);
+  border-radius:10px;padding:8px 14px;min-width:92px;text-align:center;
+}
+.stat-chip .num{font-size:18px;font-weight:800;color:var(--blue-300);}
+.stat-chip .lbl{font-size:10px;color:var(--text-low);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.progress-wrap{width:100%;height:6px;background:var(--navy-700);border-radius:6px;margin-top:14px;overflow:hidden;}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue-500),var(--cyan));transition:width .5s ease;}
+
+/* ---------- LAYOUT ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:1.05fr 1.05fr 1.3fr;
+  gap:16px;
+  align-items:stretch;
+}
+@media (max-width:1100px){
+  .grid{grid-template-columns:1fr;}
+}
+.panel{
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:18px;
+  backdrop-filter:blur(14px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.30);
+  display:flex;flex-direction:column;
+  min-height:520px;
+}
+.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--glass-border);}
+.avatar{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;
+  box-shadow:0 0 0 3px rgba(255,255,255,0.05) inset;
+}
+.avatar.interviewer{background:linear-gradient(135deg,#22406f,#0d1a35);color:var(--blue-300);border:1px solid var(--blue-500);}
+.avatar.candidate{background:linear-gradient(135deg,#5c2f7b,#2b1240);color:#e6b9ff;border:1px solid #a855f7;}
+.avatar.workspace{background:linear-gradient(135deg,#0f5c52,#062e28);color:var(--cyan);border:1px solid var(--cyan);}
+.panel-head h2{margin:0;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--text-hi);}
+.panel-head .role-sub{font-size:11px;color:var(--text-low);margin-top:1px;}
+
+/* ---------- INTERVIEWER PANEL ---------- */
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.badge{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px solid;}
+.badge.level1{color:#8fbaff;border-color:#2f7bff;background:rgba(47,123,255,0.10);}
+.badge.level2{color:#25d9c9;border-color:#25d9c9;background:rgba(37,217,201,0.10);}
+.badge.level3{color:#f5a623;border-color:#f5a623;background:rgba(245,166,35,0.10);}
+.badge.level4{color:#ff5c6c;border-color:#ff5c6c;background:rgba(255,92,108,0.10);}
+.badge.cat{color:var(--text-mid);border-color:var(--glass-border);background:rgba(255,255,255,0.03);}
+.qcard{
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border:1px solid var(--glass-border);border-radius:12px;padding:16px;
+  font-size:15px;line-height:1.55;color:var(--text-hi);flex:1;
+  min-height:120px;
+}
+.qcard .tag-line{font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700;}
+.followup-box{
+  margin-top:12px;padding:12px 14px;border-radius:10px;
+  background:rgba(245,166,35,0.08);border:1px dashed rgba(245,166,35,0.45);
+  font-size:13px;color:#ffd9a0;display:none;
+}
+.followup-box.show{display:block;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+button{
+  font-family:inherit;cursor:pointer;border:none;border-radius:9px;
+  padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:0.3px;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+button:active{transform:scale(0.97);}
+button:disabled{opacity:0.35;cursor:not-allowed;}
+.btn-primary{background:linear-gradient(135deg,var(--blue-500),#1c56d6);color:#fff;box-shadow:0 4px 16px rgba(47,123,255,0.35);}
+.btn-primary:hover:not(:disabled){box-shadow:0 6px 20px rgba(47,123,255,0.5);}
+.btn-ghost{background:rgba(255,255,255,0.06);color:var(--text-hi);border:1px solid var(--glass-border);}
+.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,0.1);}
+.btn-outline-amber{background:rgba(245,166,35,0.08);color:#ffcf80;border:1px solid rgba(245,166,35,0.5);}
+.btn-danger{background:rgba(255,92,108,0.1);color:#ffb1ba;border:1px solid rgba(255,92,108,0.5);}
+
+/* ---------- CANDIDATE PANEL ---------- */
+textarea#answerInput{
+  width:100%;flex:1;min-height:150px;resize:vertical;
+  background:var(--navy-800);border:1px solid var(--glass-border);
+  border-radius:10px;color:var(--text-hi);padding:12px 14px;font-size:14px;
+  font-family:inherit;line-height:1.5;
+}
+textarea#answerInput:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(47,123,255,0.15);}
+.mic-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+.mic-btn{
+  width:34px;height:34px;border-radius:50%;background:var(--navy-700);
+  border:1px solid var(--glass-border);color:var(--text-mid);font-size:15px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.mic-btn.listening{background:rgba(255,92,108,0.2);color:var(--red);border-color:var(--red);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,92,108,0.5);}70%{box-shadow:0 0 0 10px rgba(255,92,108,0);}100%{box-shadow:0 0 0 0 rgba(255,92,108,0);}}
+.mic-hint{font-size:11px;color:var(--text-low);}
+.analysis-block{margin-top:14px;display:none;}
+.analysis-block.show{display:block;}
+.score-hero{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+.score-ring{
+  width:74px;height:74px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  background:conic-gradient(var(--blue-500) calc(var(--pct,0)*1%), var(--navy-700) 0);
+  position:relative;
+}
+.score-ring::before{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--navy-900);}
+.score-ring span{position:relative;z-index:1;}
+.result-label{font-size:15px;font-weight:800;letter-spacing:0.5px;}
+.result-label.Excellent{color:var(--green);}
+.result-label.Strong{color:var(--cyan);}
+.result-label.Good{color:var(--amber);}
+.result-label.Needs{color:var(--red);}
+.subscores{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.subscore{background:var(--navy-800);border:1px solid var(--glass-border);border-radius:8px;padding:8px 10px;}
+.subscore .lab{font-size:10px;color:var(--text-low);text-transform:uppercase;letter-spacing:0.5px;}
+.subscore .barwrap{height:5px;background:var(--navy-700);border-radius:4px;margin-top:5px;overflow:hidden;}
+.subscore .bar{height:100%;background:linear-gradient(90deg,var(--blue-500),var(--cyan));}
+.feedback-list{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;color:var(--text-mid);}
+.feedback-list li{padding:6px 0 6px 20px;position:relative;border-top:1px solid rgba(255,255,255,0.05);}
+.feedback-list li:first-child{border-top:none;}
+.feedback-list li::before{content:'▸';position:absolute;left:2px;color:var(--cyan);}
+.ideal-answer-box{
+  margin-top:12px;padding:14px;border-radius:10px;display:none;
+  background:rgba(56,217,122,0.06);border:1px solid rgba(56,217,122,0.35);
+  font-size:13px;line-height:1.55;color:#c9f5da;
+}
+.ideal-answer-box.show{display:block;}
+.ideal-answer-box .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--green);font-weight:700;margin-bottom:6px;}
+
+/* ---------- WORKSPACE PANEL ---------- */
+.workspace-title-row{display:flex;justify-content:space-between;align-items:center;}
+.sim-tag{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--navy-950);background:var(--amber);padding:3px 8px;border-radius:6px;font-weight:800;}
+.mode-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.mode-tab{font-size:10px;padding:5px 10px;border-radius:20px;background:var(--navy-800);color:var(--text-low);border:1px solid var(--glass-border);letter-spacing:0.5px;text-transform:uppercase;}
+.mode-tab.active{background:rgba(47,123,255,0.18);color:var(--blue-300);border-color:var(--blue-500);}
+.workspace-canvas{
+  flex:1;background:var(--navy-950);border:1px solid var(--glass-border);border-radius:12px;
+  padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  position:relative;overflow:hidden;min-height:280px;
+}
+.workspace-canvas::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(140,170,255,0.05) 1px, transparent 1px),linear-gradient(90deg, rgba(140,170,255,0.05) 1px, transparent 1px);
+  background-size:24px 24px;pointer-events:none;
+}
+.flow-node{
+  position:relative;z-index:1;width:100%;max-width:290px;
+  background:var(--navy-800);border:1.5px solid var(--glass-border);
+  border-radius:10px;padding:10px 14px;text-align:center;font-size:12.5px;font-weight:700;
+  letter-spacing:0.5px;color:var(--text-mid);transition:all .35s ease;
+}
+.flow-node .sub{display:block;font-size:10px;font-weight:400;color:var(--text-low);margin-top:2px;letter-spacing:0;text-transform:none;}
+.flow-node.lit{border-color:var(--blue-500);color:var(--text-hi);box-shadow:0 0 18px rgba(47,123,255,0.35);background:linear-gradient(135deg,rgba(47,123,255,0.16),rgba(47,123,255,0.02));}
+.flow-node.matched{border-color:var(--green);box-shadow:0 0 18px rgba(56,217,122,0.4);background:linear-gradient(135deg,rgba(56,217,122,0.16),rgba(56,217,122,0.02));}
+.flow-arrow{position:relative;z-index:1;color:var(--text-low);font-size:16px;line-height:1;transition:color .3s ease;}
+.flow-arrow.lit{color:var(--blue-400);}
+.map-table{width:100%;border-collapse:collapse;font-size:12px;position:relative;z-index:1;}
+.map-table th{text-align:left;color:var(--text-low);text-transform:uppercase;font-size:10px;letter-spacing:0.5px;padding:6px 8px;border-bottom:1px solid var(--glass-border);}
+.map-table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-mid);}
+.map-table tr.matched td{color:var(--text-hi);background:rgba(56,217,122,0.08);}
+.map-table tr.matched td:first-child{border-left:3px solid var(--green);}
+.status-msg{
+  margin-top:10px;font-size:11.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;
+  padding:7px 14px;border-radius:20px;background:rgba(47,123,255,0.12);color:var(--blue-300);
+  border:1px solid rgba(47,123,255,0.4);position:relative;z-index:1;opacity:0;transition:opacity .4s ease;
+}
+.status-msg.show{opacity:1;}
+.concept-chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;position:relative;z-index:1;}
+.concept-chip{font-size:10px;padding:4px 9px;border-radius:20px;border:1px solid var(--glass-border);color:var(--text-low);background:var(--navy-800);}
+.concept-chip.hit{color:var(--green);border-color:var(--green);background:rgba(56,217,122,0.1);}
+.workspace-placeholder{color:var(--text-low);font-size:12.5px;text-align:center;line-height:1.6;position:relative;z-index:1;}
+
+/* ---------- FINAL REPORT ---------- */
+.report-overlay{
+  position:fixed;inset:0;background:rgba(4,7,16,0.88);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.report-overlay.show{display:flex;}
+.report-card{
+  max-width:760px;width:100%;max-height:92vh;overflow-y:auto;
+  background:linear-gradient(180deg,var(--navy-800),var(--navy-900));
+  border:1px solid var(--glass-border);border-radius:18px;padding:32px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+.report-card h2{margin:0 0 4px;font-size:24px;background:linear-gradient(90deg,#fff,var(--blue-300));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.report-card .rsub{color:var(--text-mid);font-size:13px;margin-bottom:20px;}
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.rstat{background:var(--navy-800);border:1px solid var(--glass-border);border-radius:10px;padding:14px;text-align:center;}
+.rstat .n{font-size:22px;font-weight:800;color:var(--blue-300);}
+.rstat .l{font-size:10px;color:var(--text-low);text-transform:uppercase;margin-top:4px;letter-spacing:0.5px;}
+.readiness-badge{
+  display:inline-block;padding:8px 20px;border-radius:24px;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;
+}
+.readiness-badge.Expert{background:rgba(56,217,122,0.15);color:var(--green);border:1px solid var(--green);}
+.readiness-badge.Strong{background:rgba(37,217,201,0.15);color:var(--cyan);border:1px solid var(--cyan);}
+.readiness-badge.Ready{background:rgba(245,166,35,0.15);color:var(--amber);border:1px solid var(--amber);}
+.readiness-badge.Prep{background:rgba(255,92,108,0.15);color:var(--red);border:1px solid var(--red);}
+.area-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.area-cols h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-low);margin:0 0 8px;}
+.area-cols ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--text-mid);line-height:1.7;}
+/* BISP promo */
+.promo{
+  margin-top:8px;border-radius:14px;padding:20px;
+  background:linear-gradient(120deg, rgba(47,123,255,0.12), rgba(37,217,201,0.08));
+  border:1px solid rgba(47,123,255,0.3);
+}
+.promo-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+.promo-head img{height:34px;border-radius:6px;background:#fff;padding:4px 8px;}
+.promo h3{margin:0;font-size:15px;color:#fff;}
+.promo-tagline{font-size:11px;color:var(--blue-300);letter-spacing:0.5px;}
+.promo-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px;}
+.promo-tags span{font-size:10.5px;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);padding:4px 10px;border-radius:20px;color:var(--text-mid);}
+.promo-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.promo-link{font-size:12px;color:var(--cyan);text-decoration:none;font-weight:700;}
+.promo-contact{font-size:11.5px;color:var(--text-mid);}
+.close-report{float:right;background:none;border:1px solid var(--glass-border);color:var(--text-mid);width:30px;height:30px;border-radius:50%;font-size:14px;}
+
+/* footer promo strip below simulator (always visible, small) */
+.foot-promo{
+  margin-top:18px;
+}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--navy-600);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+.intro-overlay{
+  position:absolute;inset:0;background:rgba(6,10,20,0.85);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:20px;z-index:5;
+}
+.intro-overlay h3{margin:0;font-size:16px;color:var(--text-hi);}
+.intro-overlay p{margin:0;font-size:12.5px;color:var(--text-mid);max-width:320px;line-height:1.6;}
+.rel-wrap{position:relative;flex:1;display:flex;flex-direction:column;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brandblock">
+      <span class="eyebrow">BISP Trainings &middot; AI Interview Simulator</span>
+      <h1 class="title">SENIOR ORACLE DATA INTEGRATION ARCHITECT</h1>
+      <p class="subtitle">Interactive AI-Based Technical Interview Simulator</p>
+    </div>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num" id="statQnum">0/30</div><div class="lbl">Question</div></div>
+      <div class="stat-chip"><div class="num" id="statDiff">—</div><div class="lbl">Difficulty</div></div>
+      <div class="stat-chip"><div class="num" id="statScore">0</div><div class="lbl">Score</div></div>
+      <div class="stat-chip"><div class="num" id="statAvg">0%</div><div class="lbl">Avg Accuracy</div></div>
+    </div>
+    <div class="progress-wrap" style="width:100%;"><div class="progress-bar" id="progressBar"></div></div>
+  </header>
+
+  <div class="grid">
+    <!-- INTERVIEWER -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="avatar interviewer">👔</div>
+        <div><h2>Interviewer</h2><div class="role-sub">Senior Enterprise Integration Architect</div></div>
+      </div>
+      <div class="q-meta" id="qMeta"></div>
+      <div class="rel-wrap">
+      <div class="qcard" id="qCard">
+        <div class="tag-line">Welcome</div>
+        Click <strong>Start Interview</strong> to begin the Senior Oracle Data Integration Architect technical interview. You will face 30 questions across four difficulty tiers, each visually demonstrated in the Live Architect Workspace on the right.
+      </div>
+      </div>
+      <div class="followup-box" id="followupBox"></div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btnStart">▶ Start Interview</button>
+        <button class="btn-outline-amber" id="btnIdeal" disabled>💡 Show Ideal Answer</button>
+        <button class="btn-ghost" id="btnNext" disabled>Next Question ➜</button>
+      </div>
+    </section>
+
+    <!-- CANDIDATE -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="avatar candidate">👩‍💼</div>
+        <div><h2>Candidate</h2><div class="role-sub">Senior Oracle Data Integration Architect</div></div>
+      </div>
+      <textarea id="answerInput" placeholder="Type the candidate's answer here… (or use the mic)" disabled></textarea>
+      <div class="mic-row">
+        <button class="mic-btn" id="btnMic" title="Voice input">🎤</button>
+        <span class="mic-hint" id="micHint">Voice input uses your browser's built-in Speech Recognition, if supported.</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btnSubmit" disabled>Submit Answer</button>
+      </div>
+      <div class="analysis-block" id="analysisBlock">
+        <div class="tag-line" style="color:var(--blue-300);margin-top:10px;">Answer Analysis</div>
+        <div class="score-hero">
+          <div class="score-ring" id="scoreRing" style="--pct:0;"><span id="scoreNum">0</span></div>
+          <div>
+            <div class="result-label" id="resultLabel">—</div>
+            <div style="font-size:11.5px;color:var(--text-low);">out of 100 &middot; concept match score</div>
+          </div>
+        </div>
+        <div class="subscores" id="subscores"></div>
+        <div class="tag-line" style="color:var(--amber);">Architect Feedback</div>
+        <ul class="feedback-list" id="feedbackList"></ul>
+      </div>
+      <div class="ideal-answer-box" id="idealBox">
+        <div class="lbl">Ideal Architect-Level Answer</div>
+        <div id="idealText"></div>
+      </div>
+    </section>
+
+    <!-- WORKSPACE -->
+    <section class="panel">
+      <div class="panel-head" style="justify-content:space-between;width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="avatar workspace">🛠️</div>
+          <div><h2>Live Architect Workspace</h2><div class="role-sub">Simulated technical visualization</div></div>
+        </div>
+        <span class="sim-tag">Simulated Workspace</span>
+      </div>
+      <div class="mode-tabs" id="modeTabs">
+        <span class="mode-tab" data-m="architecture">Architecture</span>
+        <span class="mode-tab" data-m="mapping">Mapping</span>
+        <span class="mode-tab" data-m="pipeline">Pipeline</span>
+        <span class="mode-tab" data-m="troubleshooting">Troubleshoot</span>
+      </div>
+      <div class="workspace-canvas" id="workspaceCanvas">
+        <div class="workspace-placeholder">The architecture, mapping, pipeline, or troubleshooting flow relevant to each answer will animate here — a simulated visualization only, not a live Oracle environment.</div>
+      </div>
+      <div class="status-msg" id="statusMsg"></div>
+      <div class="concept-chip-row" id="conceptChips"></div>
+    </section>
+  </div>
+</div>
+
+<!-- FINAL REPORT OVERLAY -->
+<div class="report-overlay" id="reportOverlay">
+  <div class="report-card">
+    <button class="close-report" id="closeReport">✕</button>
+    <h2>INTERVIEW COMPLETED</h2>
+    <div class="rsub">Senior Oracle Data Integration Architect &middot; Full Simulation Summary</div>
+    <span class="readiness-badge" id="readinessBadge">—</span>
+    <div class="report-grid">
+      <div class="rstat"><div class="n" id="rOverall">0</div><div class="l">Overall Score</div></div>
+      <div class="rstat"><div class="n" id="rTech">0</div><div class="l">Technical</div></div>
+      <div class="rstat"><div class="n" id="rArch">0</div><div class="l">Architecture</div></div>
+      <div class="rstat"><div class="n" id="rTrouble">0</div><div class="l">Troubleshooting</div></div>
+      <div class="rstat"><div class="n" id="rPerf">0</div><div class="l">Performance</div></div>
+      <div class="rstat"><div class="n" id="rQ">0/30</div><div class="l">Questions Answered</div></div>
+    </div>
+    <div class="area-cols">
+      <div><h4>Strong Areas</h4><ul id="strongAreas"></ul></div>
+      <div><h4>Improvement Areas</h4><ul id="improveAreas"></ul></div>
+    </div>
+
+    <div class="promo">
+      <div class="promo-head">
+        <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAQEBAQFBAUGBgUHCAcIBwoKCQkKChALDAsMCxAYDxEPDxEPGBUZFRMVGRUmHhoaHiYsJSMlLDUvLzVDP0NXV3UBBAQEBAUEBQYGBQcIBwgHCgoJCQoKEAsMCwwLEBgPEQ8PEQ8YFRkVExUZFSYeGhoeJiwlIyUsNS8vNUM/Q1dXdf/CABEIAEAAwAMBIgACEQEDEQH/xAAdAAACAgMBAQEAAAAAAAAAAAAABwYIAwQFAgEJ/9oACAEBAAAAAL/ALvn5AOU5QAAAK74AisqPk3bKzgPL92DQ7G2YzIc639sRYPcFmz/AlrArKmb3WM/Rdk1HdRO+EbZWrLze4c2C+xYNvr0kma7uRTyyMSVL479fGhryx7gAJawJ+cz3jsJili5Xv1If6jvTt1edAAYF3YQo52+E8UM89La4EzUlxCC8DBnNfJha26eebv8AnPzNvY1Nsx5Ko9rLj9S6B7XJ7JMYbscGSd/h5+LhncVl3//EABsBAAIDAQEBAAAAAAAAAAAAAAAEAwUGBwIB/9oACAECEAAAALYQmQkt00q/yamqU9WF/pYeU5lCTrdWfXbW2Z5rhY981KCIAB//xAAbAQACAwEBAQAAAAAAAAAAAAAABQMEBgcBCP/aAAgBAxAAAABYamjc8yttg2kMczfx0EGNl7brXcHz0yPKS1VX6p1OfilWMLnoAH//xAA0EAABBAIBAAYIBQUBAAAAAAAEAgMFBgEHAAgSExYXNxARFBU1VVZXICMwNlMiJCYxMlH/2gAIAQEAAQwA/BsuWkI6t/2T2WnmtQ1HqJ7b255zwipn8JfPCKmfwl88IqZ/CXzwipn8JfBIlNSu8KHHlk5A/VsdkuFsuh9Zrh+I4Xwrv33MkOeFd++5khzwrv33MkOW+h2yKjhHzLsWe3nVV++5khzwrv33MkOZ1lshj8wbZJantXXWSnxZICWZw1L8tX7+o3Lbvxmv2OSiVV9x7IfSHMNSrIlJOfwD0k4fJWGj4AwZMJNxc3GMHxxSHxrL0gmYOwycXmvLezrfYaLtHGlpjlC4t+xICs9Vp9S3y87Itqme3RQJHsKdseGsr7omG3RTr3eG6mIE+sFZPEb8ZdWlDdcIUpzfTLK+o9Wyms1LYtdsyltDLW0VqzzB2b+Da2erX43Of9L/AO1enWfmts30WjPq2DRv/dt+ZFl50ZPhtk50ghRWNiOLaxjGejI+Z/kbOcq9l2b5g2jnRlz6q3P8Ysamr0mZMRl7kNPRMyEkmPLbfbt1YsD+youWio5WUb9+DwvKB+9a9zcwQr9JJfW0nLtWLeEskO+1nOF6s8wdm/gl4kGXjyQDGuuO3QJphCW2LzMoa7i2D69mOdxbB9ezHKXXJQ2+3UJixmjPeH9k+vpjleozEXJqky5IyRP235kWXmnZHYwYUx3Zigi27qRYiraW/Z2XmC9NGUddYyNXlu+vZvmBZ+dGf9uTXNo0A6Iky5MRnK44M0wR9L4xDrDlE3GegkcCcyl5rfvwiE5WJMeKsEYc/hWWtg7THskZ7rjgX0Na11xNHTQUkaKsYLVnmDs39DWnmts307b8yLLzoyfDbJzpMtoxM15WMY6+hSyGdjgNtqz1dm+YFn50b8u4qliy2nGVawu05aT5hqSUP2dp0/W5ZDrwSPYSzxHgiiRn09V3bmXc0in5e9fbURCV3OBQvGFIbCDa/qbHaTnkFKh0za9uFmXcCs97ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOd7ar8/jOFXemisOPvWCOw3ppL0rO3Kz4ZW2H6Nk63vcpep8wOBKeH12xtekinsj0lwnlrp237tYPbTYBbOdS6lzUcvHnvNvSV/1te5C6WEsSAKcH0LW56AgpZmUj3BXJah26t2Z+cq/UdZd2JsjqdhijvpIqOppo6XxK2L1ITuSvzUxFxLUcCshVNoVyCtUKSRCkNs+iRaoFvW7GEuxki74Hat+n+M6X1O/h3sYZtfPA7Vv0/zwO1b9P8APBjU+Scj+5m+38EtW9fqe40dfwm1EER+ZGBpcDaDaFYQKhpLHoWtKG1KVnGExU3CTA7r0dJCloQQMt51lL7eXnDRUrShZDSV8lJmHiWEvyUgMG0GaEYK2QMQ0+zxB4KhfaMFM5Y9AxA76MOsvNup5G1S7tvuoEAlEFzuNiSLJ5bMfYG2y4DYZOZZ3KZZhx2L2Os2x4U9MIWILsPBtXeyDLeq4VywGXhJAiDEByVYvjBuSRRZVa2qvdXeqS4GY6+4XcclKAANkvf8dXryaw2089OthPBbJXGH5wzO4sMBETxFCswciCYY3HRlrR7S5mLmlRUDH3+KkGpUuPlnUgVrZbKH3mhZFEyNA2uQNbabRYxYOXr9tmYfWuHMqaPJodiiFntxpcu80iJvS22Mge+GI9MDc3XmmpICYexCwOziu1Ykn5lPKMHaQrlNpMak1ggVS5sNnLwiTY5TvfwMiYqUBn3Sv//EADoQAAIBBAADBgMEBwkAAAAAAAECAwAEERITFCEFEDFBdLJRcdIVIHLRBiIwMmFikiMkM0JDgZGjs//aAAgBAQANPwD7l1dw2ol84xMcFhWP1pGupMufMnBr1Uleqkr1UleqkrtOO5WS1lkMgR4U3DoT+27OH9+vsZcuemq1+F/rr8D/AF1+B/rp76CJYnVgEdzgSdWPVa/C/wBdfgf66UZQSK+hPwOWNdlT8C7xgB/IOB3b3/8A5VaShDILgLtkA+GtKQGMUpkA/pSs4cq4kKfNSFqUHR1+I8QR5EVaXDw8QXIUNr541qCcQ4Mgk26A5plyttD1br4FvICsZyW64+WtICWtpsZIHjqfOp5WQBXCYwM+YNMcBROCfbXmDKAf+CtBdjbyjDkfFSMgiufT3v8AcHbFkT/VWT38eLuzfH/qrml9grmrf2mpbCB5fx9VpeAw+AlOa+0Zq54ewUnaLSSJ4kqGIwM/AeFEDOp6r/Bh4g1AIGnmyqKxDEN8zrXNyeyuejqCWJo3x1BLhTS3sOMdMgsAa59Pe/3JRhhnBBHUEHyIoDCIdW1XyGa+S18lq0mQS3cYXe5/i9fJK4ZjWe5bPDQ+SAeFc0vsFGaIz8dwpDanGASKcpxUVQpWMDCiME4xUTbXSTgC43b/ADOBX2jLX2gPYKnkMhKjPBdj1DfBaXqHjYqenyqRwiXfg6E9Bv5EVzknsq2uEkcIASQPhTyI0jyY2YKcgBVzVtKso4q6tMynICqfKufT3v8AsONF380vsFc1b+001pOCf4BxU9tcJKB5qEL19oy0L3I+YjqCCLWFI9RlyQ2c5NHJBj/wmP8AMlQSPHIo8mQ4NYj3+fBFNfRggjNfFUA7u1nS4tLmTpGRsTgtXqo/zr1Uf516qP8AOvVR/nXqo/zr1Uf50gy2LhHP+yqSSa7RvQtruMF1QnJ75bkNHKCuGAQVdyI7GSRVKlARWgSJDIixQoPIEtU0egEfVIE8wCfEmp76R4nGmGU096HQPjJXQCpWYvak4/fOWTBwCtMMA6SMoJozmZ7cnZ5nJz+vjooqK5d2CY6ApUN2jSOdcKo74CxaATI8sRU6t+4dlwa9RL9VJIyPrcyNq6nBU4bxFeol+qvUS/VQQOY+Zk2CHoDjasA45iXOP6qjAYpLcv4HOCVZ/wCU0EXhCMAJoR01x0x3qpJJOAAOuTUb6s8EqyqGHkSpODUaqXQMCyb+Gw8s4ouEWPYAsxBbAHxwCe5nCK88qxKWIzgFiOtOMxyRsHRh8QR0PdtoJQ41L76a5+O3T59+7LlGDLsh1YdPMEYPdAf0h0M0VtbwQc4JuDJbTxkSPIWZcbU1xb8taszIX1tArbcGVHi/tfBuoB6kVHa9oz2cUF5oObNwjQ50ID4XIGehFML4l4AWWRHnUwCHecLkJ5IEOMgnNRyBDbm5lEQjFycyu7SlkPD/ANOYPlcKDmpYex4J57eYwsYo7id5k3UhgMMM01nb28s3GeVns7W/nLRnWVGMhiZCMEMRmuRiEckmFlXQX3DU7SSHKCVPEk0yX8KnnVa1AjssxRmLfCujfFRhqEl8yoZ5baVCLUCPLGeWQgy5Iy3jUlqDBcC5VbNYjbIGTTcLxt8+Wd+uauGnW0s7l3tpWgeMKYxJJJO67NnBc0s1kty7QQ2fa00MYkBhzalOJHGShz0JGaa6tOMiuslzLbCG6SNJeo3eMvHvVza2DvPLMHQvFYTwkMSxG6y4ozyERXF66XSsLRgxdw5fQy41Gf3qtpUk7QuJYUuOC5spEcujHBJdsVFYRzJy9wLYT3N1dPJeaRoVQScI4TyFXt7JZiK5uSbizs5eHJzJ3YnKlHC5O2GFc/ayWPCnxbQpF2g0svMqHAOUwRkHpTz2aX7JI8IduZzK8MvGYheHkHhhRisT6XF3M2AeNmNAu7o408HQL06MM1Bx57OKK4McTTydqTzFiithyYSM7dMUzyJdyNOJLSR5LjEb28ZY4VUOSVxha//EADsRAAIBBAADAgoFDQAAAAAAAAECAwAEBRESEzEGIRUiQVFUcZGSk9EHEBRTYSMkMDI0QlVyc4GhsbL/2gAIAQIBAT8AGNiRENxexQuyhghVmIB6b4RX2HH/AMVi+HJ8qGOx0t5Osl/EVRI+EmNyPG3vQ1XgTDeS+tvhP8qucXDbzvFJBHxL5gCCD3gisXj7m6luIbaLi4G3rYGhoeej2ezA3+a7I6gOpPsBq1x17dSyRQwkug8ZSQpHtq/1YNIt0RGUOm2flUeTspJEjEhDN+qGVl36tgVcZfH28xilnCuNbHCT19QqDL46eQRx3Clz0BBU/wCazX7e39KH/gfURLHO7LGXDKvQgEa9dc6f0ZveX51lbi5N0vFZup5EPcXU/uDzGuwyv4QvGYaLx717oq1tHHaS8n5seuWBwBtv0HUVipud2iyT8po/yYHCw0e7Q2a+kaK5OSeaIEiKbib2DRpM5aZBYobpWhYSKwdemx/qs2yrnwxOgGiJ/tqsiwv8zCbQF9BAWA7gQetZeGV7tZFjZkeGIqwBIICAVyJ/un901yJ/un900Le4JAEMhP8AKazPdflfKsUKt+BVACK7JTww305klRAYSNsQPKKjjiXtHLetdW4h13Hmrs+KF6Va5SwmztzIsyKgtlQOxChiG33brtfLOM59ogLSQLIeYsZ3xAqAD3ddVk7O3vp4hY2zq5J5jcBRAPx3WTtLg5uMrDIyAw+MFJHdqgAOgFQ3t5CvDFcyovmVyBXhTJem3HxGrwpkvTbj4jV4UyXps/xGrv2Sf0H/xAA7EQACAQMCBAEIBA8AAAAAAAABAgMABAUREgYTITFRBxUiMkFUkpMQU1XRFBYjJDA0QmFyc5GUobLS/9oACAEDAQE/ADkJHZ+RaSSqrFS4KqCR301Nfhl99myfGn30MzmMfgMc9pbzwvNcXPNMciqx2bAupB7da/HHi0d3yH9wPvq34szk8KyJlbzQ+MjAiuJclFHb4m7u5vyk1qd8hGpdlldQTp3OgoZ3FdPzgAHsSrAf5FXOQtLaJJJZQEf1SASD/SsZDNk2jWyjaYuCVCj2Crjh7LwW8kzQBo4/XMciSbP4ghOlWPDGdvrVbi2sy8Ta6NvQduh7kVe8MZ6ytzPPYuIgNS4KuAPE7SaxH6iv8yX/AHP0Qvj7vF2tvNerbyQSzNq0bMrrJt7bAdCNtebsV9twfJm/4rGYvEC2IGet2HNl68iYftnxWvKFPavYYuCCUypbryzJtKhiWdzoD109Kri5U8P2kPKk1367yui9z2NZOIRYHHpzA/pk6g6jrqa8kFxYC1ktbghWurbYhJ016nVQfE1Nwfk8HJc3eOdLpDBIjQyAhtjd+3rVwjG8nBBRFJZo7kAeJJNYFGwfCd0uUIiLNKVjdhqQygBQPE1ipoktTG0iq6SyBlJ0I1YmufB9anxCufB9anxCjcW4BJmT4hWJ62Yb2NJIw/eGYkGuKIZZbOERxs5EvZRr7DUjyNgIrRbacy6jUctunpa1c469iwsCNE5czl9oGpUEVwNFYSYG5s7nlQ3UkKm3lmG0IysSV1Pqk1w9lb7C2dycxfxPEqjkIJllkY+C7SelcPZOwHCE6vdQRyMl0RGZAGG4sQAKLMx1JJqWztJW3SW8bt4soJrzbj/dIPlrXm3H+6QfLWvN2P8AdIfgFAADQfoP/9k=" alt="BISP Trainings logo">
+        <div>
+          <h3>BUILD YOUR NEXT CAREER LEVEL WITH BISP TRAININGS</h3>
+          <div class="promo-tagline">BISP Trainings</div>
+        </div>
+      </div>
+      <div class="promo-tags">
+        <span>AI-Based Interview Preparation</span><span>Corporate Training</span><span>Job Support</span>
+        <span>Oracle Training</span><span>Certification Preparation</span><span>Structured Learning</span>
+      </div>
+      <div class="promo-foot">
+        <a class="promo-link" href="https://www.bisptrainings.com" target="_blank" rel="noopener">Explore BISP Trainings →</a>
+        <span class="promo-contact">www.bisptrainings.com &middot; Call Us: +91 769-409-5404</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SENIOR ORACLE DATA INTEGRATION ARCHITECT — INTERVIEW SIMULATOR
+   Single-file, self-contained, client-side only.
+   All "workspace" visuals are SIMULATED for learning purposes and
+   do not represent a live Oracle environment or real API calls.
+   ============================================================ */
+
+const ARCH_NODES = ["SOURCE","LOCATION","IMPORT FORMAT","MAPPING","VALIDATION","DATA LOAD RULE","TARGET"];
+const PIPE_NODES = ["START","STEP 1","STEP 2","VALIDATE","LOAD","COMPLETE"];
+const TROUBLE_NODES = ["ERROR","LOG ANALYSIS","ROOT CAUSE","CORRECTION","RE-RUN","VALIDATION"];
+const FINAL_NODES = ["SOURCE","INTEGRATION","VALIDATION","MAPPING","LOAD","MONITORING","ERROR HANDLING","RECOVERY"];
+const MAP_ROWS = [
+  {type:"Explicit", source:"1000", target:"1100"},
+  {type:"Explicit", source:"2000", target:"2100"},
+  {type:"Between",  source:"4000–4999", target:"4100"},
+  {type:"In",       source:"5010,5020,5030", target:"5100"},
+  {type:"Like",     source:"7*", target:"7100"}
+];
+
+/* concept category codes: tech, arch, trouble, practice */
+function c(label,keywords,cat,node){return {label,keywords,cat,node};}
+
+const QUESTIONS = [
+/* ===================== LEVEL 1 — SENIOR FOUNDATION (8) ===================== */
+{
+ id:"L1-Q1", level:1, levelName:"Senior Foundation", category:"Architecture",
+ question:"Walk me through the end-to-end architecture of a file-based Oracle Data Integration load into an EPM Cloud target application — every component the data passes through.",
+ idealAnswer:"A source flat file is registered against a Location, which pairs a source connection with an Import Format that defines column structure and data-type mapping. On import, the file is staged and validated against the Import Format; values then pass through Data Load Mapping (Explicit, Between, In, Multi-Dimension, Like) to convert source values into target dimension members, including Period and Category mapping to resolve the target POV. A Data Load Rule then executes the import, validate, and export/load steps in sequence, applying the chosen load method (Replace, Append, Merge) before writing to the target application, with process logs and rejected-record reports available at every stage.",
+ mode:"architecture",
+ concepts:[
+   c("Location","location",'tech',"LOCATION"),
+   c("Import Format","import format",'tech',"IMPORT FORMAT"),
+   c("Mapping","mapping",'tech',"MAPPING"),
+   c("Validation","validat",'trouble',"VALIDATION"),
+   c("Data Load Rule","data load rule|load rule",'arch',"DATA LOAD RULE"),
+   c("Target load","target|load method|replace|append|merge",'practice',"TARGET")
+ ],
+ followUp:null,
+ commonWrong:"Says the file is 'just uploaded and mapped' without distinguishing Location, Import Format, and Data Load Rule as separate configuration objects.",
+ insight:"Interviewers use this question to separate candidates who have configured Data Integration from those who have only used it operationally — the architecture-level answer must name each configuration object and its purpose, not just describe the outcome."
+},
+{
+ id:"L1-Q2", level:1, levelName:"Senior Foundation", category:"Configuration",
+ question:"What is the functional difference between a Location and an Import Format in Data Integration, and why does the product require both as separate objects instead of one combined setting?",
+ idealAnswer:"An Import Format is a reusable definition of source file/table structure — column order, data type, and how source columns map to the standard dimension columns Data Integration expects. A Location binds that Import Format to a specific source connection, target application, and category/period behavior, and is what a Data Load Rule actually points to. Separating them lets one Import Format be reused across multiple Locations — for example, the same GL extract structure loaded into two different target applications or POV contexts — without redefining the column layout each time.",
+ mode:"architecture",
+ concepts:[
+   c("Import Format = structure","structure|column|data type",'tech',"IMPORT FORMAT"),
+   c("Location = binding","bind|connection|target application",'arch',"LOCATION"),
+   c("Reusability","reus",'practice',null),
+   c("Data Load Rule reference","data load rule",'tech',"DATA LOAD RULE"),
+   c("POV/category","pov|category",'tech',null)
+ ],
+ followUp:null,
+ commonWrong:"Treats Location and Import Format as interchangeable synonyms for 'the source setup'.",
+ insight:"A senior candidate should immediately reach for the reusability argument — one Import Format, many Locations — because that is the actual architectural reason the product separates the two objects."
+},
+{
+ id:"L1-Q3", level:1, levelName:"Senior Foundation", category:"Mapping",
+ question:"Explain the five Data Load Mapping rule types — Explicit, Between, In, Multi-Dimension, and Like — and the order in which Data Integration evaluates them.",
+ idealAnswer:"Explicit maps one exact source value to one target value and is the most specific rule. Between and In both handle ranges or discrete lists of source values mapping to a single target value, with Between for a continuous numeric/alpha range and In for an enumerated list. Multi-Dimension mapping evaluates a combination of source values across two or more columns to decide the target value, useful when the same account must map differently depending on entity or another dimension. Like uses wildcard pattern matching and is evaluated last, acting as a catch-all. Data Integration evaluates rule types from most specific to least specific — Explicit first, then Between/In, then Multi-Dimension, then Like — so a narrower rule always wins over a broader one.",
+ mode:"mapping",
+ concepts:[
+   c("Explicit","explicit",'tech',"Explicit"),
+   c("Between","between",'tech',"Between"),
+   c("In","\\bin\\b|list of values",'tech',"In"),
+   c("Multi-Dimension","multi-dimension|multi dimension",'arch',"Multi-Dimension"),
+   c("Like","like|wildcard",'tech',"Like"),
+   c("Precedence order","precedence|order|specific",'practice',null)
+ ],
+ followUp:{
+   question:"If both an Explicit rule and a Like rule could apply to the same source value, which one loads, and why does that matter for governance?",
+   idealAnswer:"Explicit wins because it is the most specific rule type; Like is a catch-all evaluated last. This matters for governance because a broad Like rule can silently mask new or exceptional source values that should have triggered an explicit mapping review — so wildcard rules must be periodically audited against unmapped-value reports."
+ },
+ commonWrong:"Lists the five rule types but cannot state or defend the evaluation/precedence order.",
+ insight:"Precedence is the real test here — many candidates can name the rule types from memory but stumble when asked which one wins in a conflict, which is exactly the situation that causes production mapping defects."
+},
+{
+ id:"L1-Q4", level:1, levelName:"Senior Foundation", category:"Configuration",
+ question:"How do Period Mapping and Category Mapping work together to determine which POV a Data Load Rule ultimately writes to in the target application?",
+ idealAnswer:"Period Mapping translates a source period value — a fiscal month, a numeric period, or a date range — into the target application's period and year, and can be defined globally, per application, or per source-specific override. Category Mapping translates a source scenario or data-type indicator into the target Scenario/Category member, and can also drive frequency behavior, such as whether monthly or quarterly data is expected. Together, the Data Load Rule combines the resolved period, category, and any fixed POV dimensions to determine exactly where in the target application the incoming data lands; getting either mapping wrong silently loads correct-looking data into the wrong POV.",
+ mode:"architecture",
+ concepts:[
+   c("Period Mapping","period mapping|period",'tech',"MAPPING"),
+   c("Category Mapping","category mapping|category|scenario",'tech',"MAPPING"),
+   c("Global/app/source-specific","global|application|source-specific",'arch',null),
+   c("POV resolution","pov",'trouble',"DATA LOAD RULE"),
+   c("Silent misload risk","silent|wrong pov|misload",'practice',null)
+ ],
+ followUp:null,
+ commonWrong:"Describes Period and Category mapping as cosmetic labels rather than as controls that determine the actual target write location.",
+ insight:"The 'silently loads into the wrong POV' framing separates architects from configurators — a wrong period/category mapping produces a technically successful load that is still functionally wrong, which is a recurring root cause in production incidents."
+},
+{
+ id:"L1-Q5", level:1, levelName:"Senior Foundation", category:"Configuration",
+ question:"How does a Data Load Rule differ from a Data Load Mapping, and how does the load method — Replace, Append, or Merge — change what happens to existing target data?",
+ idealAnswer:"A Data Load Mapping is a configuration artifact that converts source dimension values to target dimension values; it does not execute anything by itself. A Data Load Rule is the executable object — it ties a Location, period, category, and load parameters together and actually runs the import, mapping, validation, and export steps against the target. Replace clears existing data in the target POV/scope before loading, which protects against duplicated or stale values but requires the full data set to be present in the source each run. Append adds new rows without clearing existing data, which risks double-counting if the same run is executed twice. Merge updates existing intersections and inserts new ones, which is safer for partial or incremental loads but requires that the merge scope be scoped correctly to avoid leaving stale data untouched.",
+ mode:"architecture",
+ concepts:[
+   c("Mapping vs Rule","mapping is configuration|rule executes|not execute",'tech',"MAPPING"),
+   c("Replace","replace",'tech',"DATA LOAD RULE"),
+   c("Append","append",'tech',"DATA LOAD RULE"),
+   c("Merge","merge",'tech',"DATA LOAD RULE"),
+   c("Double-count risk","double-count|duplicat",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Uses 'mapping' and 'rule' interchangeably, or cannot explain the double-counting risk of Append on re-run.",
+ insight:"The load-method trade-off is one of the most common real-world design decisions an architect makes, and the double-counting risk with Append is a classic production trap for less experienced consultants."
+},
+{
+ id:"L1-Q6", level:1, levelName:"Senior Foundation", category:"Architecture",
+ question:"When would you choose a file-based integration over a direct integration in Data Integration, and what does each approach actually require operationally?",
+ idealAnswer:"A file-based integration is appropriate when the source system cannot expose a direct connector, when the business wants a durable audit artifact of exactly what was loaded, or when extraction is owned by a separate team that delivers flat files on a schedule. It requires a reliable file-delivery mechanism, consistent file naming and structure, and a defined cutoff time before the load window. A direct integration connects Data Integration straight to the source application or database, removing the file hand-off and its associated latency and staging risk, but it requires stable connectivity, appropriate source-side credentials/permissions, and tighter coupling between the source system's availability and the integration schedule.",
+ mode:"architecture",
+ concepts:[
+   c("File-based use case","file-based|flat file|audit",'arch',"SOURCE"),
+   c("Direct integration use case","direct integration|direct connect",'arch',"SOURCE"),
+   c("File delivery reliability","file delivery|naming|schedule",'practice',null),
+   c("Connectivity/credentials","credential|connectivity|permission",'tech',null),
+   c("Coupling trade-off","coupl|dependency|availability",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Claims direct integration is always superior without acknowledging the tighter operational coupling it introduces.",
+ insight:"A strong answer treats this as a trade-off decision, not a technology preference — file-based integration trades convenience for an audit trail and looser coupling, which is often the right choice for regulated or multi-team environments."
+},
+{
+ id:"L1-Q7", level:1, levelName:"Senior Foundation", category:"Troubleshooting",
+ question:"What validations happen automatically during import versus during the load-to-target step, and where would rejected or unmapped records actually surface?",
+ idealAnswer:"During import, Data Integration validates the file against the Import Format — column count, data types, and basic structural conformance — and rejects rows that do not parse correctly, which typically surface in the import process log. During the mapping and load-to-target step, values are checked against the configured Data Load Mapping rules; source values with no matching rule become unmapped and are flagged before export, and target-side validation — such as balancing rules or required dimension combinations — can reject or flag records at the load step itself. All of this surfaces in the Data Load Rule's process details, including import statistics, mapping exceptions, and load/validation results, which is where an architect should look first, not in the target application.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Import-time structural validation","import format|column|data type|parse",'tech',"LOG ANALYSIS"),
+   c("Unmapped value detection","unmapped|no matching rule",'trouble',"ROOT CAUSE"),
+   c("Target-side validation","balanc|required combination|target valid",'tech',"VALIDATION"),
+   c("Process logs as source of truth","process details|process log|logs",'practice',"LOG ANALYSIS"),
+   c("Do not check target first","not in the target|before checking",'arch',null)
+ ],
+ followUp:null,
+ commonWrong:"Assumes all validation happens in one place, or says the only way to find rejected records is to inspect the target application after the fact.",
+ insight:"Directing the candidate's instinct toward the process log/process details as the first diagnostic stop — rather than the target application — is the single most useful troubleshooting habit for this role."
+},
+{
+ id:"L1-Q8", level:1, levelName:"Senior Foundation", category:"Configuration",
+ question:"You receive a trial balance source file with twelve monthly amount columns instead of one amount column per row. How would you configure this using Import Format settings rather than asking the source team to restructure the file?",
+ idealAnswer:"Rather than forcing a source-side restructure, I would configure the Import Format to treat each monthly column as a separate mapped amount field tied to its own period, so a single physical row produces twelve logical data points — one per period — during import. The remaining dimension columns (account, entity, etc.) stay constant across all twelve derived records, and Period Mapping resolves each column to the correct target period. This avoids a brittle source-side transformation step and keeps the period logic inside Data Integration where it is visible and supportable.",
+ mode:"mapping",
+ concepts:[
+   c("Multi-period column handling","twelve|monthly column|per period",'tech',null),
+   c("Import Format configuration","import format",'tech',"Explicit"),
+   c("Avoid source restructure","avoid|without asking|source-side",'practice',null),
+   c("Period Mapping tie-in","period mapping|period",'arch',null),
+   c("Supportability","support|visible|maintain",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Insists the source system must always deliver one amount column per row, showing no familiarity with wide/columnar trial balance formats.",
+ insight:"Wide trial-balance files are extremely common in real GL extracts; an architect who can only handle a single 'tall' file format will struggle with a large share of real client source systems."
+},
+
+/* ===================== LEVEL 2 — ADVANCED CONFIGURATION (8) ===================== */
+{
+ id:"L2-Q1", level:2, levelName:"Advanced Configuration", category:"Mapping",
+ question:"You need to map a 4,000-account source chart of accounts into a much smaller consolidated target account dimension. Design a mapping rule strategy that minimizes rule count without sacrificing accuracy.",
+ idealAnswer:"Start by grouping the 4,000 source accounts into natural numeric ranges that already roll up consistently to the same target account, and cover those with Between rules rather than one Explicit rule per account. Use In rules for small, non-contiguous groups that share a target value. Reserve Explicit rules only for true exceptions that would otherwise be mis-caught by a range or wildcard rule. Avoid a single broad Like rule as the primary mechanism, since it hides new or reclassified accounts; instead use Like sparingly as a final catch-all combined with an unmapped-value report reviewed each period so new accounts are caught and explicitly classified rather than silently absorbed.",
+ mode:"mapping",
+ concepts:[
+   c("Between for ranges","between|range|contiguous",'tech',"Between"),
+   c("In for discrete groups","\\bin\\b|discrete|non-contiguous",'tech',"In"),
+   c("Explicit for exceptions","explicit|exception",'tech',"Explicit"),
+   c("Avoid broad Like as primary","like|wildcard|catch-all",'arch',"Like"),
+   c("Unmapped-value governance","unmapped|review|governance",'practice',null)
+ ],
+ followUp:{
+   question:"Six months later, the source system adds 200 new accounts numbered outside any existing range. How does your design behave, and what breaks if you had used only Explicit rules?",
+   idealAnswer:"With range-based Between/In rules, most new accounts that fall inside an existing numeric range are automatically classified correctly with no rule changes, while any outside the ranges surface on the unmapped-value report for explicit review. If the design had used only Explicit rules for all 4,000 accounts, every one of the 200 new accounts would load as unmapped or default, requiring a bulk rule-authoring exercise before the next load can be trusted."
+ },
+ commonWrong:"Proposes writing 4,000 individual Explicit rules as the 'safest' option, ignoring maintainability and the unmapped-value governance process.",
+ insight:"The right answer isn't just 'use fewer rules' — it's designing a rule hierarchy that stays accurate as the source chart of accounts evolves, with a governance loop that catches drift instead of silently absorbing it."
+},
+{
+ id:"L2-Q2", level:2, levelName:"Advanced Configuration", category:"Mapping",
+ question:"A source system sends GL accounts 71000 through 71999 that should all map like-for-like to the same numeric account number in the target. Which mapping rule type fits best, and why not the alternatives?",
+ idealAnswer:"A Between rule from 71000 to 71999 mapping to the same value pattern is the cleanest fit when the target account numbers mirror the source numbers one-to-one within that range — it is explicit about the boundary and easy to audit. A Like rule using a wildcard such as 71* would also technically work but is looser: it would also match any future five-digit account starting with 71 that might belong to a different range or require different treatment, which is a governance risk. In is wrong here because the values are contiguous, not an arbitrary list, so In would require enumerating a thousand values unnecessarily.",
+ mode:"mapping",
+ concepts:[
+   c("Between is correct","between",'tech',"Between"),
+   c("Like is looser/riskier alternative","like|wildcard",'trouble',"Like"),
+   c("In is wrong for contiguous range","\\bin\\b|enumerat",'tech',"In"),
+   c("Auditability","audit|boundary|explicit",'practice',null),
+   c("Future-value risk","future|risk|unintended match",'arch',null)
+ ],
+ followUp:null,
+ commonWrong:"Picks Like as the default answer for any range-like pattern without comparing it against Between.",
+ insight:"This question tests whether the candidate actually distinguishes between the five rule types functionally, rather than reaching for whichever rule 'feels' most flexible."
+},
+{
+ id:"L2-Q3", level:2, levelName:"Advanced Configuration", category:"Configuration",
+ question:"How would you configure a single Data Load Rule to load twelve months of history in one execution, and what has to change in your Period Mapping to support that?",
+ idealAnswer:"The Data Load Rule needs to be run with a period range (a start and end period) rather than a single period, which most implementations support either through the rule's execution parameters or by looping the rule across periods via the REST API or a scheduler. Period Mapping must resolve every source period value present in the twelve-month file to its correct target period and year — this usually means the mapping cannot rely on a single hard-coded target period and instead needs a proper source-period-to-target-period table, often combined with the source file itself carrying an explicit period column per row rather than assuming one static period for the whole file.",
+ mode:"architecture",
+ concepts:[
+   c("Period range execution","period range|multiple period|twelve months",'tech',"DATA LOAD RULE"),
+   c("Source period column","period column|per row",'tech',null),
+   c("Period Mapping table","period mapping|mapping table",'arch',"MAPPING"),
+   c("Avoid hard-coded period","hard-cod|static period",'trouble',null),
+   c("Automation/looping","rest api|scheduler|loop|automate",'practice',null)
+ ],
+ followUp:null,
+ commonWrong:"Suggests running twelve separate manual executions with no mention of parameterized period ranges or automation.",
+ insight:"Historical/bulk loads are a routine implementation task; an architect should default to a parameterized, repeatable pattern rather than manual per-period execution."
+},
+{
+ id:"L2-Q4", level:2, levelName:"Advanced Configuration", category:"Architecture",
+ question:"Explain how you would configure a direct integration connecting to a source ERP system without staging a flat file, and what changes in your operational model as a result.",
+ idealAnswer:"A direct integration is configured at the Location level by selecting a connection type appropriate to the source ERP and supplying the connection details and credentials for that source, rather than pointing the Location at a file directory. Data Integration then extracts data directly from the source at execution time using the configured Import Format applied to the source's native structure. Operationally, this removes file-delivery latency and staging risk, but it introduces a hard dependency on the source system's availability during the load window, requires managing service-account credentials and their rotation, and means network/firewall connectivity between the integration and the source becomes part of the supported architecture.",
+ mode:"architecture",
+ concepts:[
+   c("Location-level connection config","location|connection type|credentials",'tech',"LOCATION"),
+   c("No file staging","no file|without staging|direct extract",'tech',"SOURCE"),
+   c("Source availability dependency","availability|dependency|window",'trouble',null),
+   c("Credential management","credential|service account|rotation",'practice',null),
+   c("Network/firewall","network|firewall|connectivity",'arch',null)
+ ],
+ followUp:null,
+ commonWrong:"Describes direct integration purely as a convenience feature without naming the new operational dependencies it introduces (source availability, credentials, connectivity).",
+ insight:"Direct integration trades file-based durability for tighter coupling — a senior candidate should flag the new failure modes it introduces, not just the latency it removes."
+},
+{
+ id:"L2-Q5", level:2, levelName:"Advanced Configuration", category:"Mapping",
+ question:"The same source account code must map to different target accounts depending on which entity it comes from. How do you handle this without writing separate mapping tables per entity?",
+ idealAnswer:"This is exactly the case Multi-Dimension mapping is designed for — a single rule set that evaluates the combination of the source account column and the source entity column together to determine the target account, rather than maintaining fully separate mapping tables per entity. This keeps the mapping centralized and auditable in one place, and any entity that doesn't have an entity-specific exception simply falls through to the standard account-only rule as a default.",
+ mode:"mapping",
+ concepts:[
+   c("Multi-Dimension mapping","multi-dimension|multi dimension",'tech',"Multi-Dimension"),
+   c("Combination of columns","combination|entity and account|two columns",'tech',null),
+   c("Centralized/auditable","centraliz|single place|auditable",'arch',null),
+   c("Default fallback","default|fall through|fallback",'practice',null),
+   c("Avoid per-entity tables","per-entity|separate table",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Proposes creating a full duplicate mapping table for every entity instead of using Multi-Dimension mapping.",
+ insight:"This is one of the most direct 'do you know the feature exists' questions in the interview — Multi-Dimension mapping is precisely built for this scenario, and not knowing it usually means the candidate has only done simple single-dimension implementations."
+},
+{
+ id:"L2-Q6", level:2, levelName:"Advanced Configuration", category:"Troubleshooting",
+ question:"What check or validation rules would you configure to catch out-of-balance data or unmapped values before they ever reach the target application?",
+ idealAnswer:"I would configure validation at two layers: first, mapping-level checks that flag any source value without a matching Data Load Mapping rule so it is visible before load rather than silently defaulting; second, target-side check/balance validation — such as debit-equals-credit checks on a trial balance, or required-intersection checks for mandatory dimensions — that runs before or immediately after load and halts or flags the batch on failure. Both layers should write to a reviewable exception report so the pattern of failures, not just the current run, is visible to whoever owns the mapping and reconciliation process.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Unmapped-value check","unmapped|no matching rule",'trouble',"VALIDATION"),
+   c("Balance/check validation","balanc|debit|credit|check rule",'tech',"VALIDATION"),
+   c("Halt-or-flag on failure","halt|flag|stop|block",'arch',"ROOT CAUSE"),
+   c("Exception reporting","exception report|reviewable",'practice',null),
+   c("Pre-load vs post-load timing","before load|after load|before reaching target",'tech',null)
+ ],
+ followUp:null,
+ commonWrong:"Relies solely on the target application's own balancing to catch problems, with no pre-load or mapping-level validation.",
+ insight:"Pushing validation as early as possible in the pipeline — rather than trusting the target application to catch everything — is a core architecture principle for this role."
+},
+{
+ id:"L2-Q7", level:2, levelName:"Advanced Configuration", category:"Configuration",
+ question:"A source system occasionally changes the column order in its export file without notice. How would you design the Import Format so this doesn't silently corrupt loaded data?",
+ idealAnswer:"Where the source can deliver a header row, I would configure the Import Format to read column position from the header rather than assuming a fixed physical order, so a reordered file still maps correctly by column name. Where that isn't possible, I would add a structural validation step — comparing column count and a sample of expected values against known patterns (e.g., an account column should contain account-like values) — that fails the import loudly rather than loading misaligned data silently. Either way, the goal is to convert a silent corruption risk into a visible, fail-fast error.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Header-based column resolution","header|column name|position",'tech',"IMPORT FORMAT"),
+   c("Structural validation fallback","structural validation|column count|pattern check",'trouble',"VALIDATION"),
+   c("Fail-fast vs silent corruption","fail-fast|silently|loudly",'arch',"ROOT CAUSE"),
+   c("Source change notification","notice|change control",'practice',null)
+ ],
+ followUp:null,
+ commonWrong:"Assumes column order is always fixed and offers no mitigation for source-side changes.",
+ insight:"This question probes whether the candidate designs for the source system's actual reliability, not its documented/ideal behavior — real ERP extracts do drift, and a good architect designs for that."
+},
+{
+ id:"L2-Q8", level:2, levelName:"Advanced Configuration", category:"Configuration",
+ question:"Explain the role of target options such as a topside/plug account and drill-region configuration within a Data Load Rule, and why they matter operationally.",
+ idealAnswer:"Target options let the Data Load Rule handle values the mapping intentionally routes to a designated plug or topside account — for example, an out-of-balance remainder or an unmapped-but-immaterial value that needs to land somewhere visible rather than block the load — while keeping that routing explicit and reportable rather than silent. Drill-region configuration determines what source-level detail a target-application user can drill back into from a loaded cell, which matters operationally because it is often the first thing finance users check when they question a number; if drill-through isn't configured correctly, every data question turns into a manual investigation instead of a self-service one.",
+ mode:"architecture",
+ concepts:[
+   c("Plug/topside account routing","plug|topside",'tech',"DATA LOAD RULE"),
+   c("Explicit, reportable routing","explicit|reportable|visible",'practice',null),
+   c("Drill-region / drill-through","drill",'arch',"TARGET"),
+   c("User self-service impact","finance user|self-service|investigation",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Has never configured or discussed drill-through, treating it as a cosmetic feature rather than an operational necessity.",
+ insight:"Drill-through is frequently underestimated by candidates who have only built the load path — but it is usually the single most-used feature by end users after go-live, so its absence generates a disproportionate volume of support tickets."
+},
+
+/* ===================== LEVEL 3 — ARCHITECT (8) ===================== */
+{
+ id:"L3-Q1", level:3, levelName:"Architect", category:"Architecture",
+ question:"Design a reusable enterprise Data Integration framework serving ten source systems that feed three EPM Cloud target applications, each with a different data delivery frequency (daily, weekly, monthly).",
+ idealAnswer:"I would standardize on a common pattern — consistent Location naming, a shared library of Import Formats where source structures genuinely overlap, and a governed mapping-exception process — while explicitly isolating anything source-specific to its own Location and mapping set rather than forcing one giant shared configuration. Frequency differences are handled by separate Data Load Rules and schedules per source rather than trying to force a single schedule; a lightweight orchestration layer using REST APIs or a scheduler enforces dependency order (e.g., currency loads before GL loads) and centralizes logging and reconciliation counts across all thirty-plus integration paths so operations has one place to check status regardless of which source or frequency is involved.",
+ mode:"architecture",
+ concepts:[
+   c("Standardized common pattern","standard|common pattern|reusable",'arch',"LOCATION"),
+   c("Isolate source-specific exceptions","isolate|source-specific|exception",'practice',null),
+   c("Per-source scheduling","frequency|daily|weekly|monthly|schedule",'tech',"DATA LOAD RULE"),
+   c("Orchestration/dependency order","orchestrat|dependency|sequence",'arch',"MAPPING"),
+   c("Centralized logging/reconciliation","centraliz|reconcil|logging|status",'practice',"TARGET")
+ ],
+ followUp:{
+   question:"One of the ten sources needs a mapping exception that doesn't fit the standard pattern. How do you keep that from contaminating the shared framework?",
+   idealAnswer:"The exception is isolated at the narrowest possible layer — a source-specific mapping rule or an override table scoped only to that Location — documented with its owner, its business justification, and a review date, rather than being generalized into the shared Import Format or mapping logic that every other source relies on."
+ },
+ commonWrong:"Proposes one monolithic integration configuration for all ten sources regardless of frequency or structural differences.",
+ insight:"The architect-level answer optimizes for controlled reuse, not maximum reuse — a shared pattern that requires constant conditional exceptions is often less maintainable than a small number of clearly governed variants."
+},
+{
+ id:"L3-Q2", level:3, levelName:"Architect", category:"Pipeline",
+ question:"Design a multi-stage pipeline that chains file validation, a currency load, a GL data load, and a metadata refresh in that order. How do you handle dependencies and failure at each stage?",
+ idealAnswer:"The pipeline runs file validation first as a hard gate — if the source file fails structural checks, nothing downstream should execute. Currency load runs next because GL load depends on current-period exchange rates being present; the pipeline should treat currency load success as a precondition, not an assumption, and check for it explicitly rather than just running in sequence. GL load runs third and should itself validate before finalizing (unmapped values, balance checks). Metadata refresh runs last only if GL load succeeded, since refreshing metadata against incomplete or failed data serves no purpose and can mask the real failure. Each stage should stop the pipeline on failure rather than continuing, log which stage failed and why, and notify an owner rather than silently retrying into an inconsistent state.",
+ mode:"pipeline",
+ concepts:[
+   c("Sequential gating","validation first|gate|precondition",'arch',"VALIDATE"),
+   c("Explicit dependency checks","depend|precondition|check for it explicitly",'tech',"STEP 1"),
+   c("Stop-on-failure","stop|halt|fail|not continue",'trouble',"STEP 2"),
+   c("Stage-level logging/notification","log|notify|owner",'practice',"COMPLETE"),
+   c("Avoid masking failures","mask|inconsistent state|incomplete",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Chains the four stages purely by execution order with no explicit dependency checks or stop-on-failure behavior between them.",
+ insight:"A pipeline is only as reliable as its failure handling between stages — sequencing four steps correctly on the happy path is easy; stopping cleanly and informatively when step two fails is what actually matters in production."
+},
+{
+ id:"L3-Q3", level:3, levelName:"Architect", category:"Troubleshooting",
+ question:"Design a solution that automatically reconciles source-to-target totals after every load and alerts on variance, without requiring a human to manually check numbers each time.",
+ idealAnswer:"Capture a control total from the source at extraction time — record count and a sum of key numeric fields — before any mapping is applied. After the load completes, compute the equivalent total from what was actually written to the target for that POV. Compare the two automatically as the final pipeline step; if they match within a defined tolerance, mark the run as reconciled, and if they don't, halt further downstream processing (such as reporting refreshes) and alert the integration owner with both totals and the variance amount so investigation starts from evidence rather than a vague 'the numbers look wrong' report.",
+ mode:"pipeline",
+ concepts:[
+   c("Source control totals","control total|source total|record count",'tech',"STEP 1"),
+   c("Target-side total comparison","target total|compare|written to the target",'tech',"VALIDATE"),
+   c("Automated variance alerting","alert|variance|automatic",'arch',"COMPLETE"),
+   c("Tolerance threshold","tolerance|threshold",'practice',null),
+   c("Evidence-based investigation start","evidence|investigation",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Suggests manually spot-checking totals after each load instead of building an automated, evidence-producing reconciliation step into the pipeline itself.",
+ insight:"Reconciliation should be a design control built into the pipeline, not a manual post-incident activity performed only when someone complains — that shift from reactive to proactive is a hallmark of architect-level thinking."
+},
+{
+ id:"L3-Q4", level:3, levelName:"Architect", category:"Performance",
+ question:"A 20-million-record source file causes runtime to balloon from 20 minutes to 4 hours. Walk through your performance diagnosis and remediation approach.",
+ idealAnswer:"I would measure before changing anything — capture a stage-by-stage timing breakdown across extraction/import, mapping/transformation, validation, and target load to find where the time is actually going rather than guessing. If import/parsing dominates, look at file format efficiency and whether the source can pre-aggregate or filter data that isn't needed downstream. If mapping/transformation dominates, look for inefficient wildcard-heavy rule sets being evaluated against every row and consider restructuring toward more specific rule types. If target load dominates, examine load method (Replace vs Merge) and batch sizing. Any fix must be verified with a repeatable before/after measurement, and I would reject an optimization that changes business semantics, hides rejected records, or weakens reconciliation just to make the run faster.",
+ mode:"pipeline",
+ concepts:[
+   c("Measure before optimizing","measure|baseline|before redesign",'arch',"STEP 1"),
+   c("Stage-by-stage isolation","stage-by-stage|isolate|which stage",'tech',"STEP 2"),
+   c("Mapping/rule efficiency","wildcard|rule set|inefficient mapping",'tech',null),
+   c("Load method/batch tuning","load method|batch|replace|merge",'tech',"LOAD"),
+   c("Reject unsafe optimizations","reject|hide rejected|weaken reconciliation",'practice',"COMPLETE")
+ ],
+ followUp:null,
+ commonWrong:"Jumps straight to 'add more mapping rules' or 'run in parallel' without first isolating which stage is actually the bottleneck.",
+ insight:"Performance tuning must be evidence-driven and must preserve correctness and observability — a faster run that hides rejected records or loses reconciliation accuracy is not actually an improvement."
+},
+{
+ id:"L3-Q5", level:3, levelName:"Architect", category:"Automation",
+ question:"Design a REST-API-driven automation approach to trigger fifteen Data Load Rules nightly with dependency ordering and centralized status monitoring.",
+ idealAnswer:"An orchestration script or scheduler calls the Data Integration REST APIs to start each rule, but does not fire all fifteen at once — it groups them by dependency, for example metadata and currency rules first, then GL and sub-ledger rules that depend on them, then downstream consolidation-related rules last. After triggering each rule, the orchestrator polls the job-status endpoint rather than assuming success, and only proceeds to the next dependency tier once the prior tier's rules report success. All fifteen results — status, timing, record counts, and any errors — are written to a single centralized log or dashboard so operations staff have one place to check the health of the whole nightly batch instead of opening fifteen separate rule histories.",
+ mode:"pipeline",
+ concepts:[
+   c("REST API triggering","rest api|trigger",'tech',"STEP 1"),
+   c("Dependency tiers/grouping","dependency|tier|group|order",'arch',"STEP 2"),
+   c("Job-status polling","poll|status|job status",'tech',"VALIDATE"),
+   c("Centralized monitoring dashboard","centraliz|dashboard|one place",'practice',"COMPLETE"),
+   c("Avoid fire-and-forget","fire all|assume success|not assume",'trouble',null)
+ ],
+ followUp:null,
+ commonWrong:"Describes firing all fifteen rules simultaneously with no dependency ordering or status polling, assuming success rather than confirming it.",
+ insight:"Automation is itself a production architecture layer with its own failure modes — an orchestration design that doesn't confirm status before proceeding will eventually chain a failure into a cascade of downstream errors."
+},
+{
+ id:"L3-Q6", level:3, levelName:"Architect", category:"Troubleshooting",
+ question:"How would you design error handling and retry logic for unattended overnight automation, where no one is watching the batch run live?",
+ idealAnswer:"Define explicit preconditions for each job — required files present, upstream dependency completed — and check them before attempting execution rather than letting a job fail messily on a missing precondition. Use bounded retries only for transient, well-understood failure classes such as a temporary connectivity blip, with a small retry count and backoff, never for failures caused by bad data, since retrying bad data just reproduces the same bad result. Every failure state should be observable — a distinct status, a run identifier, and a captured error message — and should trigger a notification to an on-call owner rather than failing silently until someone notices missing data the next morning. Recovery should be idempotent: re-running a failed job must not double-load data that partially succeeded before the failure.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Explicit preconditions","precondition|check first|required file",'arch',"LOG ANALYSIS"),
+   c("Bounded retry for transient failures","bounded retry|transient|backoff",'tech',"ROOT CAUSE"),
+   c("No retry on bad data","bad data|do not retry|same bad result",'trouble',null),
+   c("Observable failure + notification","observable|notification|on-call|alert",'practice',"CORRECTION"),
+   c("Idempotent recovery","idempoten|re-run|double-load",'tech',"RE-RUN")
+ ],
+ followUp:null,
+ commonWrong:"Proposes retrying every failure automatically and repeatedly regardless of cause, with no distinction between transient and data-driven failures.",
+ insight:"The idempotency requirement is the detail that separates architect-level automation design from a naive retry loop — without it, 'just retry the job' can turn one bad run into duplicated production data."
+},
+{
+ id:"L3-Q7", level:3, levelName:"Architect", category:"Architecture",
+ question:"Compare orchestrating loads with scripted automation tools versus Data Integration's own REST APIs. When would you choose each?",
+ idealAnswer:"A scripted automation tool is well suited for simple, linear, schedule-driven jobs — for example, a single nightly rule execution with basic success/failure notification — because it is quick to set up and widely understood by support teams. Data Integration's REST APIs are the better choice when the orchestration needs finer control: triggering specific rules with dynamic parameters, polling detailed job status, importing/exporting mapping configuration as part of a controlled deployment process, or building conditional dependency logic between many rules. In practice, many enterprise implementations use both — simple scheduling for straightforward jobs and API-driven orchestration for the more complex, dependency-heavy nightly batch.",
+ mode:"architecture",
+ concepts:[
+   c("Simple scripted scheduling use case","simple|linear|schedule-driven",'tech',"SOURCE"),
+   c("REST API for fine control","rest api|fine control|dynamic parameter",'tech',"DATA LOAD RULE"),
+   c("Conditional/dependency logic","conditional|dependency logic",'arch',"MAPPING"),
+   c("Config import/export via API","import/export|mapping configuration|deployment",'practice',null),
+   c("Hybrid use in practice","both|hybrid|combination",'arch',null)
+ ],
+ followUp:null,
+ commonWrong:"Claims one approach is universally superior rather than matching the tool to the complexity of the orchestration requirement.",
+ insight:"This is a trade-off question, not a trivia question — the right answer demonstrates that the candidate has actually had to choose between these approaches on a real engagement, not just read about both."
+},
+{
+ id:"L3-Q8", level:3, levelName:"Architect", category:"Mapping",
+ question:"Design a mapping governance process so that a brand-new, previously unseen source value doesn't silently load incorrectly or block the entire nightly batch.",
+ idealAnswer:"Configure the mapping layer so any source value without a matching rule is routed to a clearly labeled default or suspense target value rather than being dropped or causing a hard failure — this keeps the batch moving while making the exception impossible to miss. That routed value, along with its source context, is written to an unmapped-value report that runs automatically after every load. A defined owner reviews that report on a set cadence, adds the appropriate mapping rule, and the value is reprocessed under a documented, auditable change rather than a silent one-off fix applied directly in production.",
+ mode:"mapping",
+ concepts:[
+   c("Default/suspense routing","default|suspense",'tech',"Like"),
+   c("No hard batch failure","not block|batch keeps moving|not fail",'arch',null),
+   c("Automated unmapped-value report","unmapped|report|automatic",'trouble',null),
+   c("Defined ownership/cadence","owner|cadence|review",'practice',null),
+   c("Documented, auditable reprocessing","documented|auditable|change",'practice',null)
+ ],
+ followUp:null,
+ commonWrong:"Says an unmapped value should simply cause the batch to fail and wait for someone to fix it manually before anything else can load.",
+ insight:"Good governance balances two failure modes — silently absorbing bad data versus blocking an entire batch over one new value — and the routed-suspense-plus-report pattern is the standard way to avoid both extremes."
+},
+
+/* ===================== LEVEL 4 — PRODUCTION / EXPERT (6, incl. final) ===================== */
+{
+ id:"L4-Q1", level:4, levelName:"Production / Expert", category:"Production Incident",
+ question:"Production incident: last night's automated load reported success, but users say this month's P&L is understated by roughly $2M. Walk through your triage from the first five minutes.",
+ idealAnswer:"First, resist the instinct to reload immediately — preserve the current state and evidence before touching anything. Pull the process details for last night's Data Load Rule and compare the source control total against the target-side total for the affected POV; a technical 'success' status only means the steps completed, not that the business result is correct. Check the unmapped-value and rejected-record reports for that run specifically, since a set of unmapped accounts landing in a suspense location — rather than the correct P&L accounts — is a very common cause of an understated total that still shows as a successful run. Once the missing population is identified, correct the mapping or root cause, and only then reprocess under a controlled, documented change.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Preserve evidence before reloading","preserve|before reload|do not reload immediately",'arch',"ERROR"),
+   c("Success status ≠ business completeness","success does not mean|technical success|business complete",'trouble',"LOG ANALYSIS"),
+   c("Compare control totals","control total|source total|target total|compare",'tech',"ROOT CAUSE"),
+   c("Check unmapped/rejected reports","unmapped|rejected|suspense",'tech',"ROOT CAUSE"),
+   c("Controlled reprocessing","controlled|documented change|reprocess",'practice',"RE-RUN")
+ ],
+ followUp:{
+   question:"What exact artifacts would you capture before making any correction, in case this needs to be escalated or audited later?",
+   idealAnswer:"The exact source file and its version/timestamp, the run's process log and job ID, counts at each stage (source, mapped, loaded), the mapping configuration version in effect at run time, the unmapped/rejected record list, and the business user's description of the expected versus actual result — captured before any reload or mapping change is made."
+ },
+ commonWrong:"Immediately reloads the data again without first identifying the missing-record population or the root cause, risking the same defect recurring.",
+ insight:"This is the single most common real production incident pattern for this role — a technically successful run with an incomplete or misclassified business result — and a candidate's instinct to preserve evidence before acting is the clearest signal of production readiness."
+},
+{
+ id:"L4-Q2", level:4, levelName:"Production / Expert", category:"Troubleshooting",
+ question:"A Data Load Rule that has run correctly for eighteen months suddenly starts rejecting records after the source ERP is upgraded. How do you isolate and fix this?",
+ idealAnswer:"Since the rule itself hasn't changed, the first hypothesis is that the upgrade changed something about the source output — column order, a new/changed field, a data-type change, or a new value in a previously stable dimension. Compare a sample of the new source file or extract against the Import Format's expected structure field by field, and check whether the rejected records share a common pattern, such as all coming from one new source module or all containing a newly introduced value. Fix the Import Format or mapping to accommodate the confirmed change — not just the specific rejected records — and add the new pattern to the regression set so a future upgrade that reintroduces a similar change is caught faster.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Hypothesis: source-side change from upgrade","upgrade|source change|not the rule",'arch',"ERROR"),
+   c("Field-by-field structural comparison","compare|field by field|structure",'tech',"LOG ANALYSIS"),
+   c("Pattern in rejected records","pattern|common|which module",'trouble',"ROOT CAUSE"),
+   c("Fix the structural cause, not just symptoms","fix the import format|not just the records|structural",'tech',"CORRECTION"),
+   c("Add to regression set","regression|future upgrade|catch faster",'practice',"VALIDATION")
+ ],
+ followUp:null,
+ commonWrong:"Assumes the Data Load Rule itself must be broken and starts reconfiguring mapping rules before confirming what actually changed on the source side.",
+ insight:"An eighteen-month stable rule breaking right after an upgrade is a strong environmental signal that most candidates should read immediately — jumping to reconfigure the rule before confirming the source-side change wastes time and risks masking the real cause."
+},
+{
+ id:"L4-Q3", level:4, levelName:"Production / Expert", category:"Production Support",
+ question:"It's mid-month during a period-end freeze, and a mapping fix must go to production without disrupting an in-flight submission cycle. How do you handle this?",
+ idealAnswer:"First confirm whether the fix is truly urgent enough to warrant a freeze exception, and if so, scope the change to affect only the specific mapping rule needed, tested against both the previously working values and the newly failing value to confirm no regression. Deploy the change during a window that avoids active user submission or calculation activity, ideally coordinated with the process owner who controls the submission cycle, and communicate the change and its POV scope to stakeholders so anyone reconciling numbers mid-cycle knows exactly what changed and when. Document the change as a freeze exception with its justification and rollback plan, rather than treating it as a routine update.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Confirm urgency/justify exception","urgent|justif|freeze exception",'arch',"ERROR"),
+   c("Scoped, regression-tested change","scoped|regression|previously working values",'tech',"CORRECTION"),
+   c("Coordinate deployment window","window|coordinate|process owner",'practice',"RE-RUN"),
+   c("Stakeholder communication","communicat|stakeholder|inform",'practice',null),
+   c("Documented rollback plan","rollback|document|exception",'trouble',"VALIDATION")
+ ],
+ followUp:null,
+ commonWrong:"Pushes the mapping fix directly to production without coordinating timing or communicating the change to the submission-cycle owner.",
+ insight:"Production support maturity shows up in how carefully a change is scoped and communicated during a sensitive window — the technical fix is usually the easy part; the change-control discipline around it is what actually prevents a bigger incident."
+},
+{
+ id:"L4-Q4", level:4, levelName:"Production / Expert", category:"Production Support",
+ question:"Design your monitoring and alerting strategy for a portfolio of forty nightly integrations spread across multiple EPM Cloud environments.",
+ idealAnswer:"Centralize status collection so every integration's outcome — success, failure, or completed-with-exceptions — lands in one dashboard rather than forty separate rule histories, using the REST job-status APIs to pull results on a schedule after each expected run window. Define severity tiers: a hard failure on a business-critical integration pages an on-call owner immediately, while a completed-with-unmapped-values result generates a lower-urgency next-morning review item. Track trend data over time, not just pass/fail for last night, so a slowly growing unmapped-value count or a gradually increasing runtime is visible before it becomes an outage. Make sure the dashboard shows which integrations depend on which, so a failure in an upstream feed is understood as the root cause rather than forty independent alerts firing at once.",
+ mode:"pipeline",
+ concepts:[
+   c("Centralized dashboard/API polling","centraliz|dashboard|rest api|job-status",'tech',"STEP 1"),
+   c("Severity tiers","severity|tier|page|urgency",'arch',"VALIDATE"),
+   c("Trend tracking over time","trend|over time|growing|gradually",'practice',"LOAD"),
+   c("Dependency-aware alerting","dependency|upstream|root cause|forty independent alerts",'trouble',"COMPLETE"),
+   c("Avoid alert fatigue","alert fatigue|independent alerts|noise",'practice',null)
+ ],
+ followUp:null,
+ commonWrong:"Proposes checking each of the forty integrations' status pages manually every morning with no centralized dashboard or severity differentiation.",
+ insight:"At forty-plus integrations, undifferentiated alerting becomes its own operational risk — the design must distinguish business-critical failures from low-urgency exceptions, or the on-call team will start ignoring alerts altogether."
+},
+{
+ id:"L4-Q5", level:4, levelName:"Production / Expert", category:"Recovery",
+ question:"A Data Load Rule fails halfway through a multi-period run, having already successfully loaded some periods. How do you recover without double-counting or missing data on re-run?",
+ idealAnswer:"Before re-running anything, check exactly which periods completed successfully by reviewing the process log's per-period results, not just the overall failed status. If the load method for completed periods was Replace, those periods are safe to leave as-is since a Replace re-run would simply reproduce the same result; the recovery only needs to target the periods that did not complete. If the load method was Append, I would need to verify whether any partial data was written for the failed period specifically and clear or account for it before re-running, since Append re-running a partially loaded period risks duplicating rows. Going forward, I would prefer designing multi-period runs so each period is treated as its own committed unit rather than one long uninterruptible batch, precisely to make partial-failure recovery this straightforward.",
+ mode:"troubleshooting",
+ concepts:[
+   c("Check per-period completion status","per-period|which periods completed|process log",'tech',"LOG ANALYSIS"),
+   c("Replace load method is safe to re-run","replace|safe to re-run|reproduce same result",'tech',"ROOT CAUSE"),
+   c("Append risks duplication on partial re-run","append|duplicat|partial data",'trouble',"CORRECTION"),
+   c("Target only the failed periods","target only|failed period|re-run",'arch',"RE-RUN"),
+   c("Design periods as committed units","committed unit|design for recovery|own unit",'practice',"VALIDATION")
+ ],
+ followUp:null,
+ commonWrong:"Re-runs the entire multi-period batch from scratch without checking which periods already completed successfully or which load method was used.",
+ insight:"Recovery behavior depends entirely on the load method in effect — treating Replace and Append the same way during recovery is a common and costly mistake, since one is naturally idempotent and the other is not."
+},
+{
+ id:"L4-Q6", level:4, levelName:"Production / Expert", category:"Final Architect Challenge", isFinal:true,
+ question:"FINAL ARCHITECT CHALLENGE — Design a production-grade Oracle Data Integration solution for loading external source data into a target environment. Explain how you would handle mapping, validation, scheduling, errors, monitoring, performance, and recovery.",
+ idealAnswer:"Source data lands through a registered Location/Import Format pair with structural validation at import. Mapping uses a governed rule hierarchy (Explicit for exceptions, Between/In for ranges and groups, Multi-Dimension where combinations matter, Like only as a monitored catch-all) with an automated unmapped-value report routed to an owner. Validation runs at both the mapping stage (unmapped detection) and the target stage (balance/required-intersection checks), with control-total reconciliation comparing source and target as the final automated step. Scheduling respects dependency order across related integrations, triggered and monitored via REST APIs with job-status polling rather than fire-and-forget execution. Errors are classified — transient failures get bounded, backed-off retries; data-driven failures route to suspense and alert an owner rather than retrying blindly. Performance is managed by measuring stage-by-stage timing before optimizing, and rejecting any optimization that weakens reconciliation or hides rejected records. Monitoring centralizes status, trend data, and dependency awareness across all integrations in one dashboard with tiered alerting. Recovery is designed for idempotency — periods or batches treated as committed units so a partial failure can be reprocessed precisely, without double-counting or silent data loss.",
+ mode:"final",
+ concepts:[
+   c("Mapping governance","mapping|explicit|between|multi-dimension|like",'tech',"MAPPING"),
+   c("Two-layer validation + reconciliation","validation|control total|reconcil",'tech',"VALIDATION"),
+   c("Dependency-aware scheduling via REST","schedul|rest api|dependency|job-status",'arch',"INTEGRATION"),
+   c("Classified error handling","error|transient|retry|suspense",'trouble',"ERROR HANDLING"),
+   c("Evidence-based performance management","performance|measure|stage-by-stage",'practice',"LOAD"),
+   c("Centralized, tiered monitoring","monitor|dashboard|tiered|alert",'practice',"MONITORING"),
+   c("Idempotent recovery","idempoten|recovery|committed unit|double-count",'arch',"RECOVERY")
+ ],
+ followUp:null,
+ commonWrong:"Describes only the happy-path load sequence (source → mapping → target) without addressing error handling, monitoring, performance, or recovery as first-class design concerns.",
+ insight:"This challenge deliberately asks for all seven dimensions at once because a production-grade design is judged by how it behaves under failure and scale, not by how cleanly it runs when everything goes right — an answer that only covers the happy path has not actually designed for production."
+}
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  idx:-1,
+  started:false,
+  totalScore:0,
+  answered:0,
+  subTotals:{tech:0,arch:0,trouble:0,practice:0,comm:0},
+  subCounts:{tech:0,arch:0,trouble:0,practice:0,comm:0},
+  strongTags:new Set(),
+  weakTags:new Set(),
+  currentMatched:new Set(),
+  awaitingFollowup:false,
+  submittedMain:false
+};
+
+/* ============================================================
+   DOM REFS
+   ============================================================ */
+const qCard=document.getElementById('qCard');
+const qMeta=document.getElementById('qMeta');
+const followupBox=document.getElementById('followupBox');
+const btnStart=document.getElementById('btnStart');
+const btnIdeal=document.getElementById('btnIdeal');
+const btnNext=document.getElementById('btnNext');
+const btnSubmit=document.getElementById('btnSubmit');
+const answerInput=document.getElementById('answerInput');
+const analysisBlock=document.getElementById('analysisBlock');
+const idealBox=document.getElementById('idealBox');
+const idealText=document.getElementById('idealText');
+const workspaceCanvas=document.getElementById('workspaceCanvas');
+const statusMsg=document.getElementById('statusMsg');
+const conceptChips=document.getElementById('conceptChips');
+const modeTabs=document.getElementById('modeTabs');
+const statQnum=document.getElementById('statQnum');
+const statDiff=document.getElementById('statDiff');
+const statScore=document.getElementById('statScore');
+const statAvg=document.getElementById('statAvg');
+const progressBar=document.getElementById('progressBar');
+const reportOverlay=document.getElementById('reportOverlay');
+const btnMic=document.getElementById('btnMic');
+const micHint=document.getElementById('micHint');
+
+/* ============================================================
+   START / NAVIGATION
+   ============================================================ */
+btnStart.addEventListener('click',()=>{
+  state.started=true;
+  state.idx=0;
+  answerInput.disabled=false;
+  btnSubmit.disabled=false;
+  btnStart.textContent='↺ Restart Interview';
+  loadQuestion();
+});
+
+btnNext.addEventListener('click',()=>{
+  state.idx++;
+  if(state.idx>=QUESTIONS.length){ showReport(); return; }
+  loadQuestion();
+});
+
+btnIdeal.addEventListener('click',()=>{
+  const q=QUESTIONS[state.idx];
+  const src = state.awaitingFollowup && q.followUp ? q.followUp.idealAnswer : q.idealAnswer;
+  idealText.textContent=src;
+  idealBox.classList.add('show');
+});
+
+function currentQ(){ return QUESTIONS[state.idx]; }
+
+function loadQuestion(){
+  const q=currentQ();
+  state.submittedMain=false;
+  state.awaitingFollowup=false;
+  state.currentMatched=new Set();
+  answerInput.value='';
+  answerInput.disabled=false;
+  btnSubmit.disabled=false;
+  btnSubmit.textContent='Submit Answer';
+  btnIdeal.disabled=false;
+  btnNext.disabled=true;
+  analysisBlock.classList.remove('show');
+  idealBox.classList.remove('show');
+  followupBox.classList.remove('show');
+  statusMsg.classList.remove('show');
+  conceptChips.innerHTML='';
+
+  qMeta.innerHTML=`
+    <span class="badge level${q.level}">Level ${q.level} &middot; ${q.levelName}</span>
+    <span class="badge cat">${q.category}</span>`;
+  qCard.innerHTML=`<div class="tag-line">Interviewer Question ${state.idx+1} of ${QUESTIONS.length}</div>${escapeHtml(q.question)}`;
+
+  statQnum.textContent=`${state.idx+1}/${QUESTIONS.length}`;
+  statDiff.textContent=q.levelName.split(' ')[0];
+  progressBar.style.width=((state.idx)/QUESTIONS.length*100)+'%';
+
+  drawWorkspace(q.mode, q, new Set());
+  setActiveTab(q.mode);
+}
+
+/* ============================================================
+   SUBMIT / ANALYSIS
+   ============================================================ */
+btnSubmit.addEventListener('click',()=>{
+  const q=currentQ();
+  const text=answerInput.value.trim();
+  if(!text){ answerInput.focus(); return; }
+
+  if(!state.awaitingFollowup){
+    analyzeAndScore(q, text, false);
+    state.submittedMain=true;
+    if(q.followUp){
+      state.awaitingFollowup=true;
+      followupBox.innerHTML=`<strong>INTERVIEWER FOLLOW-UP:</strong><br>${escapeHtml(q.followUp.question)}`;
+      followupBox.classList.add('show');
+      answerInput.value='';
+      answerInput.focus();
+      btnSubmit.textContent='Submit Follow-up';
+    } else {
+      finishQuestion(q);
+    }
+  } else {
+    analyzeAndScore(q, text, true);
+    finishQuestion(q);
+  }
+});
+
+function finishQuestion(q){
+  btnSubmit.disabled=true;
+  answerInput.disabled=true;
+  btnNext.disabled=false;
+  btnNext.textContent = state.idx===QUESTIONS.length-1 ? 'View Final Report ➜' : 'Next Question ➜';
+  state.answered++;
+}
+
+function analyzeAndScore(q, text, isFollowup){
+  const lower=text.toLowerCase();
+  const concepts=q.concepts;
+  let matchedNodes=new Set();
+  let matchedCount=0;
+  const cats={tech:{m:0,n:0},arch:{m:0,n:0},trouble:{m:0,n:0},practice:{m:0,n:0}};
+  const missed=[];
+
+  concepts.forEach(cp=>{
+    const cat=cats[cp.cat]; cat.n++;
+    const re=new RegExp(cp.keywords,'i');
+    const hit=re.test(lower);
+    if(hit){ matchedCount++; cat.m++; if(cp.node) matchedNodes.add(cp.node); state.strongTags.add(cp.label); }
+    else { missed.push(cp.label); state.weakTags.add(cp.label); }
+  });
+
+  const matchRatio = concepts.length ? matchedCount/concepts.length : 0;
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  const structureWords=/(first|then|because|therefore|next|finally|second|third)/i.test(text);
+  let commScore = 35;
+  if(wordCount>15) commScore=55;
+  if(wordCount>35) commScore=75;
+  if(wordCount>60) commScore=88;
+  if(structureWords) commScore=Math.min(98,commScore+8);
+
+  function pct(o){ return o.n? Math.round((o.m/o.n)*100) : Math.round(matchRatio*100); }
+  const techPct = pct(cats.tech), archPct = pct(cats.arch), troublePct = pct(cats.trouble), practicePct = pct(cats.practice);
+  const overall = Math.round((techPct*0.30 + archPct*0.25 + troublePct*0.20 + practicePct*0.15 + commScore*0.10));
+
+  state.totalScore += overall;
+  state.subTotals.tech+=techPct; state.subCounts.tech++;
+  state.subTotals.arch+=archPct; state.subCounts.arch++;
+  state.subTotals.trouble+=troublePct; state.subCounts.trouble++;
+  state.subTotals.practice+=practicePct; state.subCounts.practice++;
+  state.subTotals.comm+=commScore; state.subCounts.comm++;
+
+  statScore.textContent=state.totalScore;
+  statAvg.textContent = Math.round(state.totalScore/((state.answered||0)+1)) + '%';
+
+  renderAnalysis(overall, techPct, archPct, troublePct, practicePct, commScore, missed, q);
+  drawWorkspace(q.mode, q, matchedNodes);
+
+  let msg='ARCHITECTURE VALIDATED';
+  if(q.mode==='mapping') msg='MAPPING LOGIC IDENTIFIED';
+  else if(q.mode==='pipeline') msg='PIPELINE FLOW IDENTIFIED';
+  else if(q.mode==='troubleshooting') msg='TROUBLESHOOTING PATH IDENTIFIED';
+  else if(q.mode==='final') msg='FULL ARCHITECTURE VALIDATED';
+  statusMsg.textContent=msg;
+  statusMsg.classList.add('show');
+
+  renderConceptChips(concepts, matchedNodes, lower);
+}
+
+function renderAnalysis(overall,tech,arch,trouble,practice,comm,missed,q){
+  analysisBlock.classList.add('show');
+  document.getElementById('scoreRing').style.setProperty('--pct',overall);
+  document.getElementById('scoreNum').textContent=overall;
+  let label='Needs Improvement', cls='Needs';
+  if(overall>=85){label='Excellent';cls='Excellent';}
+  else if(overall>=70){label='Strong';cls='Strong';}
+  else if(overall>=50){label='Good';cls='Good';}
+  const rl=document.getElementById('resultLabel');
+  rl.textContent=label; rl.className='result-label '+cls;
+
+  const subs=[
+    ['Technical Accuracy',tech],['Architecture Thinking',arch],
+    ['Troubleshooting',trouble],['Best Practices',practice],['Communication',comm]
+  ];
+  document.getElementById('subscores').innerHTML=subs.map(s=>`
+    <div class="subscore"><div class="lab">${s[0]}</div>
+      <div class="barwrap"><div class="bar" style="width:${s[1]}%;"></div></div>
+    </div>`).join('');
+
+  const fb=[];
+  if(overall>=85) fb.push('Architect-level response — covers the mechanism, the reasoning, and the operational consequence.');
+  else if(overall>=70) fb.push('Strong response with solid technical grounding; a bit more operational detail would push this to architect level.');
+  else if(overall>=50) fb.push('Good foundation, but the answer misses some of the depth an architect-level interviewer would probe for.');
+  else fb.push('This answer needs more technical specificity — reference the actual Data Integration objects and mechanisms involved.');
+  if(missed.length){
+    fb.push('Consider explicitly addressing: '+missed.slice(0,3).join(', ')+ (missed.length>3?', among others.':'.'));
+  }
+  fb.push('Architect insight: '+q.insight);
+  if(overall<70) fb.push('Common pitfall to avoid: '+q.commonWrong);
+  document.getElementById('feedbackList').innerHTML=fb.map(f=>`<li>${escapeHtml(f)}</li>`).join('');
+}
+
+function renderConceptChips(concepts, matchedNodes, lower){
+  conceptChips.innerHTML = concepts.map(cp=>{
+    const hit = new RegExp(cp.keywords,'i').test(lower);
+    return `<span class="concept-chip ${hit?'hit':''}">${hit?'✓ ':''}${cp.label}</span>`;
+  }).join('');
+}
+
+/* ============================================================
+   WORKSPACE RENDERING
+   ============================================================ */
+function setActiveTab(mode){
+  const m = mode==='final' ? 'architecture' : mode;
+  [...modeTabs.children].forEach(t=>t.classList.toggle('active', t.dataset.m===m));
+}
+
+function drawWorkspace(mode, q, matchedNodes){
+  setActiveTab(mode);
+  if(mode==='mapping'){ drawMapping(q, matchedNodes); return; }
+  let nodes = ARCH_NODES;
+  if(mode==='pipeline') nodes = PIPE_NODES;
+  else if(mode==='troubleshooting') nodes = TROUBLE_NODES;
+  else if(mode==='final') nodes = FINAL_NODES;
+  drawFlow(nodes, matchedNodes);
+}
+
+function drawFlow(nodes, matchedNodes){
+  let html='';
+  nodes.forEach((n,i)=>{
+    const isMatched = matchedNodes.has(n);
+    html+=`<div class="flow-node" data-i="${i}" id="fn${i}">${n}</div>`;
+    if(i<nodes.length-1) html+=`<div class="flow-arrow" id="fa${i}">↓</div>`;
+  });
+  workspaceCanvas.innerHTML=html;
+  // sequential lighting animation
+  nodes.forEach((n,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById('fn'+i);
+      if(!el) return;
+      el.classList.add('lit');
+      if(matchedNodes.has(n)) el.classList.add('matched');
+      const arrow=document.getElementById('fa'+i);
+      if(arrow) arrow.classList.add('lit');
+    }, i*220);
+  });
+}
+
+function drawMapping(q, matchedNodes){
+  let rows = MAP_ROWS.map(r=>{
+    const matched = matchedNodes.has(r.type);
+    return `<tr class="${matched?'matched':''}"><td>${r.source}</td><td>${r.type}</td><td>${r.target}</td></tr>`;
+  }).join('');
+  workspaceCanvas.innerHTML = `
+    <table class="map-table">
+      <thead><tr><th>Source</th><th>Mapping Type</th><th>Target</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+/* ============================================================
+   FINAL REPORT
+   ============================================================ */
+function showReport(){
+  progressBar.style.width='100%';
+  const overallAvg = state.answered? Math.round(state.totalScore/state.answered) : 0;
+  const avg=k=> state.subCounts[k] ? Math.round(state.subTotals[k]/state.subCounts[k]) : 0;
+  document.getElementById('rOverall').textContent=overallAvg;
+  document.getElementById('rTech').textContent=avg('tech');
+  document.getElementById('rArch').textContent=avg('arch');
+  document.getElementById('rTrouble').textContent=avg('trouble');
+  document.getElementById('rPerf').textContent=avg('practice');
+  document.getElementById('rQ').textContent=`${state.answered}/${QUESTIONS.length}`;
+
+  let readiness='Prep', rlabel='Needs More Preparation';
+  if(overallAvg>=85){readiness='Expert';rlabel='Expert';}
+  else if(overallAvg>=70){readiness='Strong';rlabel='Strong';}
+  else if(overallAvg>=55){readiness='Ready';rlabel='Interview Ready';}
+  const rb=document.getElementById('readinessBadge');
+  rb.textContent='Architect Readiness: '+rlabel;
+  rb.className='readiness-badge '+readiness;
+
+  const strong=[...state.strongTags].slice(0,6);
+  const weak=[...state.weakTags].filter(w=>!state.strongTags.has(w)).slice(0,6);
+  document.getElementById('strongAreas').innerHTML = (strong.length?strong:['Keep practicing to build strong areas']).map(s=>`<li>${escapeHtml(s)}</li>`).join('');
+  document.getElementById('improveAreas').innerHTML = (weak.length?weak:['No major gaps identified']).map(s=>`<li>${escapeHtml(s)}</li>`).join('');
+
+  reportOverlay.classList.add('show');
+}
+document.getElementById('closeReport').addEventListener('click',()=>reportOverlay.classList.remove('show'));
+
+/* ============================================================
+   SPEECH RECOGNITION (optional, browser-native only)
+   ============================================================ */
+(function(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ micHint.textContent='Voice input is not supported in this browser — text input works as usual.'; btnMic.disabled=true; btnMic.style.opacity=0.35; return; }
+  const rec = new SR();
+  rec.continuous=true; rec.interimResults=true; rec.lang='en-US';
+  let listening=false;
+  btnMic.addEventListener('click',()=>{
+    if(answerInput.disabled) return;
+    if(!listening){ rec.start(); listening=true; btnMic.classList.add('listening'); micHint.textContent='Listening… click the mic again to stop.'; }
+    else { rec.stop(); listening=false; btnMic.classList.remove('listening'); micHint.textContent="Voice input uses your browser's built-in Speech Recognition."; }
+  });
+  rec.onresult=(e)=>{
+    let finalTranscript='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) finalTranscript+=e.results[i][0].transcript;
+    }
+    if(finalTranscript) answerInput.value += (answerInput.value?' ':'') + finalTranscript.trim();
+  };
+  rec.onerror=()=>{ listening=false; btnMic.classList.remove('listening'); };
+  rec.onend=()=>{ if(listening){ try{rec.start();}catch(e){} } };
+})();
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+</script>
+</body>
+</html>
