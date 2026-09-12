@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Oracle EPBCS Senior Architect Interview Simulator</title>
+<style>
+  :root{
+    --bg:#0A1018;
+    --bg2:#0D1620;
+    --panel:#111C29;
+    --panel2:#0C1620;
+    --line:#20303F;
+    --line-soft:#182533;
+    --brand:#3E93C7;
+    --brand2:#59D6C8;
+    --violet:#8B7CF6;
+    --text:#EAF1F7;
+    --muted:#7E93A7;
+    --amber:#EFB35D;
+    --red:#E37A63;
+    --female:#E38FC4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;}
+  #app{display:flex;flex-direction:column;min-height:100vh;position:relative;overflow-x:hidden;}
+  #app::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(89,214,200,.08), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(139,124,246,.07), transparent 60%);
+  }
+  #app > *{position:relative;z-index:1;}
+
+  /* ---- top bar ---- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 26px;border-bottom:1px solid var(--line);background:rgba(13,22,32,.9);
+    backdrop-filter:blur(6px);}
+  .brandmark{display:flex;align-items:center;gap:10px;}
+  .brandmark .logo{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--brand),var(--brand2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#06121a;}
+  .brandmark span{font-weight:600;letter-spacing:.3px;font-size:13px;color:var(--muted);}
+  .liveflag{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--red);font-weight:700;letter-spacing:.5px;}
+  .liveflag .reddot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(1.4);}}
+
+  .progresswrap{height:3px;background:var(--line);}
+  .progressbar{height:100%;background:linear-gradient(90deg,var(--brand),var(--violet),var(--brand2));
+    width:0%;transition:width .5s ease;}
+
+  /* ---- main split ---- */
+  main{flex:1;display:flex;min-height:0;}
+  .left{width:46%;padding:26px 30px;overflow-y:auto;border-right:1px solid var(--line);}
+  .right{width:54%;padding:26px 30px;overflow-y:auto;background:var(--panel);}
+
+  /* speaker cards */
+  .speakerrow{display:flex;gap:14px;margin-bottom:20px;}
+  .speakercard{flex:1;display:flex;align-items:center;gap:12px;background:var(--panel2);
+    border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;transition:all .3s ease;}
+  .speakercard.active{border-color:var(--brand2);box-shadow:0 0 0 1px rgba(89,214,200,.25), 0 8px 24px -12px rgba(89,214,200,.35);}
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;font-weight:700;font-size:14px;color:#06121a;position:relative;}
+  .avatar.interviewer{background:linear-gradient(135deg,var(--brand),#2C6B94);}
+  .avatar.candidate{background:linear-gradient(135deg,var(--female),#B564A0);}
+  .avatar::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;}
+  .speakercard.active .avatar::after{border-color:var(--brand2);animation:ring 1.2s infinite;}
+  @keyframes ring{0%{transform:scale(.9);opacity:1;}100%{transform:scale(1.35);opacity:0;}}
+  .scmeta{flex:1;min-width:0;}
+  .scmeta .name{font-size:13px;font-weight:700;}
+  .scmeta .role{font-size:11px;color:var(--muted);}
+  .eq{display:flex;align-items:flex-end;gap:2px;height:16px;opacity:0;transition:opacity .2s;}
+  .speakercard.active .eq{opacity:1;}
+  .eq span{width:3px;background:var(--brand2);border-radius:2px;animation:eq 0.9s infinite ease-in-out;}
+  .eq span:nth-child(1){animation-delay:0s;}
+  .eq span:nth-child(2){animation-delay:.15s;}
+  .eq span:nth-child(3){animation-delay:.3s;}
+  .eq span:nth-child(4){animation-delay:.45s;}
+  @keyframes eq{0%,100%{height:4px;}50%{height:16px;}}
+
+  .section-tag{display:inline-block;font-size:11px;color:var(--brand2);margin-bottom:8px;
+    background:rgba(89,214,200,.08);border:1px solid rgba(89,214,200,.25);padding:3px 10px;border-radius:20px;}
+  .qnum{font-size:12px;color:var(--muted);margin-bottom:14px;float:right;}
+
+  .cardstack{transition:opacity .35s ease;}
+  .bubble{border-radius:10px;padding:16px 18px;margin-bottom:14px;line-height:1.6;font-size:14.5px;
+    animation:fadein .4s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .interviewer{background:var(--panel2);border:1px solid var(--line-soft);border-left:3px solid var(--brand);}
+  .interviewer .who{color:var(--brand);font-size:11px;font-weight:700;margin-bottom:6px;letter-spacing:.3px;}
+  .candidate{background:rgba(227,143,196,.06);border:1px solid rgba(227,143,196,.28);border-left:3px solid var(--female);}
+  .candidate .who{color:var(--female);font-size:11px;font-weight:700;margin-bottom:6px;letter-spacing:.3px;}
+
+  .revealbtn,.iconbtn{background:var(--brand);color:#06121a;border:none;padding:9px 16px;
+    border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;}
+  .revealbtn:hover,.iconbtn:hover{background:var(--brand2);}
+
+  .score-row{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:12.5px;color:var(--muted);}
+  .score-pill{background:var(--panel2);border:1px solid var(--line-soft);padding:4px 12px;border-radius:20px;
+    color:var(--amber);font-weight:700;}
+
+  /* transport controls */
+  .transport{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft);}
+  .tbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line-soft);background:var(--panel2);
+    color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .tbtn:hover{border-color:var(--brand);}
+  .tbtn.play{width:46px;height:46px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#06121a;border:none;}
+  .tbtn.play:hover{filter:brightness(1.08);}
+  .tbtn:disabled{opacity:.3;cursor:default;}
+  .speedgroup{margin-left:auto;display:flex;gap:6px;}
+  .speedbtn{font-size:11px;padding:6px 9px;border-radius:6px;border:1px solid var(--line-soft);
+    background:var(--panel2);color:var(--muted);cursor:pointer;}
+  .speedbtn.active{color:var(--brand2);border-color:var(--brand2);}
+  .mutebtn{border:1px solid var(--line-soft);background:var(--panel2);color:var(--muted);border-radius:6px;
+    padding:6px 10px;font-size:12px;cursor:pointer;}
+  .mutebtn.off{color:var(--red);border-color:rgba(227,122,99,.4);}
+
+  /* ---- right / technical workspace ---- */
+  .screenhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .screenhead .label{font-size:11px;color:var(--muted);letter-spacing:.6px;}
+  .dotrow{display:flex;gap:5px;}
+  .dotrow span{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .dotrow span:nth-child(1){background:#e37a63;}
+  .dotrow span:nth-child(2){background:#efb35d;}
+  .dotrow span:nth-child(3){background:#59d6c8;}
+
+  .workspace{border:1px solid var(--line-soft);border-radius:12px;background:var(--panel2);
+    min-height:440px;padding:24px;box-shadow: 0 20px 50px -30px rgba(0,0,0,.6);}
+  .flowtitle{font-size:15px;font-weight:700;margin-bottom:20px;color:var(--text);}
+  .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .node{background:var(--panel);border:1px solid var(--line-soft);border-radius:7px;
+    padding:10px 14px;font-size:13px;color:var(--muted);transition:all .35s ease;}
+  .node.hot{border-color:var(--brand2);color:var(--brand2);box-shadow:0 0 0 1px rgba(89,214,200,.3) inset, 0 0 18px -6px rgba(89,214,200,.5);
+    background:rgba(89,214,200,.06);transform:translateY(-1px);}
+  .node.done{color:var(--text);border-color:var(--line-soft);}
+  .arrow{color:var(--line-soft);font-size:14px;}
+
+  .metricsrow{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;}
+  .metric{background:var(--panel);border:1px solid var(--line-soft);border-radius:8px;padding:12px 16px;min-width:130px;}
+  .metric .k{font-size:10.5px;color:var(--muted);margin-bottom:4px;letter-spacing:.3px;}
+  .metric .v{font-size:18px;font-weight:700;color:var(--brand2);}
+
+  .note{margin-top:26px;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line-soft);
+    padding-top:14px;}
+
+  /* ---- intro / results screens ---- */
+  .centerscreen{max-width:740px;margin:auto;padding:64px 24px;text-align:left;}
+  .centerscreen h1{font-size:34px;margin:0 0 8px;background:linear-gradient(90deg,var(--text),var(--brand2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .centerscreen .sub{color:var(--muted);font-size:15px;margin-bottom:26px;}
+  .difficulty{display:inline-block;background:var(--panel2);border:1px solid var(--line-soft);
+    padding:8px 14px;border-radius:8px;font-size:13px;color:var(--amber);font-weight:700;margin-bottom:22px;}
+  .introquote{border-left:3px solid var(--brand);padding-left:16px;color:var(--text);
+    font-size:15px;line-height:1.65;margin:20px 0;font-style:italic;}
+
+  .voicecheck{display:flex;gap:10px;align-items:center;margin:18px 0;font-size:13px;color:var(--muted);}
+  .voicecheck .swatch{width:10px;height:10px;border-radius:50%;}
+
+  .startbtn{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#06121a;border:none;
+    padding:15px 28px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;
+    box-shadow:0 12px 30px -14px rgba(89,214,200,.6);}
+  .startbtn:hover{filter:brightness(1.06);}
+  .startbtn.secondary{background:transparent;border:1px solid var(--line-soft);color:var(--text);box-shadow:none;margin-left:10px;}
+
+  /* results */
+  .barlist{margin-top:10px;}
+  .barrow{margin-bottom:14px;}
+  .barrow .toprow{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--muted);}
+  .bartrack{height:8px;background:var(--panel2);border:1px solid var(--line-soft);border-radius:4px;overflow:hidden;}
+  .barfill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width 1s ease;}
+
+  .finalscore{text-align:center;margin:34px 0;}
+  .finalscore .num{font-size:60px;font-weight:800;background:linear-gradient(135deg,var(--brand2),var(--violet));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .finalscore .lbl{color:var(--muted);font-size:12px;letter-spacing:.5px;}
+  .rec{display:inline-block;margin-top:10px;background:rgba(89,214,200,.1);border:1px solid var(--brand2);
+    color:var(--brand2);padding:8px 18px;border-radius:20px;font-weight:700;font-size:13px;}
+
+  .colsplit{display:flex;gap:20px;margin-top:26px;}
+  .colsplit .col{flex:1;background:var(--panel2);border:1px solid var(--line-soft);border-radius:10px;padding:18px;}
+  .colsplit h3{margin:0 0 10px;font-size:13px;color:var(--muted);letter-spacing:.3px;}
+  .colsplit ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.75;}
+
+  .bispcard{margin-top:36px;border:1px solid var(--brand);border-radius:14px;padding:30px;
+    background:linear-gradient(135deg, rgba(62,147,199,.12), rgba(89,214,200,.06));text-align:center;
+    box-shadow:0 20px 60px -30px rgba(62,147,199,.4);}
+  .bispcard .biglogo{font-weight:800;font-size:23px;letter-spacing:.5px;}
+  .bispcard .biglogo span{color:var(--amber);}
+  .bispcard .tag{color:var(--muted);margin:8px 0 16px;font-size:13px;}
+  .bispcard .cta{font-size:14px;margin-top:4px;line-height:1.6;}
+  .bispcard .cta b{color:var(--brand2);}
+  .bispcard .contact{margin-top:16px;font-size:15px;color:var(--text);font-weight:600;}
+  .bispcard .demo{margin-top:10px;font-size:12px;color:var(--amber);}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+  @media (max-width:860px){
+    main{flex-direction:column;}
+    .left,.right{width:100%;border-right:none;}
+    .left{border-bottom:1px solid var(--line);}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const QUESTIONS = [
+{sec:"Architecture", q:"Walk me through how you would architect an enterprise-scale EPBCS application from requirements through production.",
+ a:"I'd start by capturing business requirements per planning process, then design the application architecture: which modules to enable, custom cubes if needed, and the dimensional model. From there I move to forms and navigation flows, business rules and Groovy for automation, security by role, Data Integration for actuals, and reporting. I close the loop with testing, a Lifecycle Management migration path across development, test and production, and a production support model with monitoring and a tuning cadence.",
+ follow:"Which of those steps do you refuse to compress under deadline pressure?",
+ followA:"Security design and the dimensional model — both are expensive to unwind later, so I protect the time for them even if forms and dashboards get trimmed for a phase two release.",
+ flow:["Requirements","Architecture Design","Dimensions","Modules & Cubes","Forms","Rules & Groovy","Security","Data Integration","Reporting","Migration","Production Support"],
+ score:9.2},
+{sec:"Architecture", q:"You're asked for workforce, financial, capital and project planning. How do you decide between standard EPBCS modules and a custom Planning application?",
+ a:"I default to standard modules. They carry Oracle's tested calculation logic, upgrade automatically, and reduce our maintenance load. I only go custom where a requirement genuinely can't be met by configuring the module, for example a highly specific allocation methodology. Even then I prefer extending a module over building parallel custom cubes, since that keeps reporting and integration unified.",
+ flow:["Requirements","Module Fit Assessment","Standard Module","Custom Extension","Architecture Decision"],
+ score:9.0},
+{sec:"Architecture", q:"How do you design the dimensional model for a complex global EPBCS implementation?",
+ a:"I build around the standard Account, Entity, Scenario, Version, Period and Year dimensions, add Currency for multi currency reporting, and introduce custom dimensions only where the business genuinely segments data that way, like Product or Project. I keep dense dimensions to the ones driving heavy calculation, use shared members and alternate hierarchies for reporting views rather than duplicating base members, and define valid intersections early so forms and security both respect them.",
+ flow:["Account","Entity","Scenario","Version","Period / Year","Currency","Custom Dims"],
+ score:9.4},
+{sec:"App Design", q:"How do you determine whether a dimension should be dense or sparse, and what's the performance impact?",
+ a:"Dense dimensions are the ones nearly every data cell touches, typically Account and Period, because Essbase creates a full data block per dense combination. Sparse dimensions, like Entity or Scenario, create blocks only where data actually exists. Getting this wrong is the single biggest cause of block explosion: too many sparse dimensions inflate block count and slow both retrieval and calculation, while over densifying wastes space on empty cells.",
+ flow:["Dimension Analysis","Data Density Check","Block Creation Model","Calc / Retrieval Impact"],
+ score:8.8},
+{sec:"App Design", q:"What are the most common dimensional modeling mistakes you've seen in EPBCS production applications?",
+ a:"Excessive dimensionality that nobody actually reports on, hierarchies with unnecessary depth, poor use of shared members leading to duplicated stored data, and member formulas placed on dense dimensions where they trigger recalculation constantly. I also see over sparsification, where teams mark everything sparse defensively instead of analyzing actual data density.",
+ flow:["Bad Architecture","Assessment","Optimized Architecture"],
+ score:8.6},
+{sec:"Forms & UX", q:"A planner says a form takes thirty to forty seconds to open. How do you isolate whether it's the form, the cube, calculation, Smart Push or the network?",
+ a:"I work outside in. First rule out network and browser latency, then check whether the form itself has too many suppressed rows or dynamic calc members forcing on the fly aggregation. Next I look at the underlying cube, block count and retrieval time via diagnostics, then check whether a business rule or Smart Push is firing on form open. I isolate each layer rather than guessing, because the fix is completely different depending on where the bottleneck actually is.",
+ flow:["Form Load","Network","Metadata","Essbase Retrieval","Business Rule","Smart Push","Root Cause"],
+ score:9.1},
+{sec:"Forms & UX", q:"How do you design a form for hundreds of planners without sacrificing performance?",
+ a:"I minimize dynamic calc members on the grid, use Suppress Missing aggressively, and drive the point of view with runtime prompts and user variables so each planner only ever renders their own slice. I also lean on Smart View for heavy analysis instead of asking the web form to carry it.",
+ flow:["POV","Rows / Columns","User Variables","Runtime Prompts","Suppress Missing","Smart View"],
+ score:8.7},
+{sec:"Calculation Manager", q:"How do you design calculation rules without creating unnecessary overhead?",
+ a:"I scope every rule as tightly as possible with FIX statements driven by runtime prompts or variables, sequence rules so dependent calculations don't run redundantly, and keep rules modular rather than monolithic so I can control exactly what recalculates. I also review block creation impact before deploying anything that touches a sparse dimension broadly.",
+ flow:["Rule Design","Runtime Prompt","FIX Scope","Calculation","Validation","Deployment"],
+ score:9.0},
+{sec:"Calculation Manager", q:"A rule that normally runs in twenty seconds suddenly takes twelve minutes. How do you diagnose it?",
+ a:"First I reproduce it and check whether data volume changed materially. Then I review the rule's FIX scope against current sparse intersections, check for unexpected block creation, and look at whether a dependent calculation or a concurrent job is competing for resources. I don't touch the rule itself until I know which of those it is, then I optimize and regression test before redeploying.",
+ flow:["Reproduce","Data Volume Check","FIX Scope Review","Block Creation Check","Concurrent Jobs","Optimize","Regression Test"],
+ score:9.3},
+{sec:"Groovy", q:"When would you use Groovy instead of a standard Calculation Manager rule?",
+ a:"I would not default to Groovy. If the logic is static and expressible cleanly through FIX and standard functions, I keep it in Calculation Manager, it's simpler to maintain and easier for the next architect to read. I reach for Groovy when the calculation needs to be dynamic or metadata driven, for example reading which intersections actually have data before deciding what to calculate, or validating user input before it's committed.",
+ flow:["Requirement","Static Logic?","Calculation Manager","Dynamic / Metadata Driven?","Groovy Rule"],
+ score:9.0},
+{sec:"Groovy", q:"How would a Groovy rule dynamically identify relevant planning intersections instead of calculating the whole cube?",
+ a:"I'd use a DataGridDefinitionBuilder to read only the grid the user is actually viewing, inspect which intersections have real data, and construct a dynamic FIX from that instead of hardcoding one. If the rule then needs to write results back, I'd build that output with a DataGridBuilder. Either way the calculation stays scoped to what actually changed rather than sweeping the entire cube.",
+ flow:["User Input","DataGridDefinitionBuilder (read)","Intersection Detection","Dynamic FIX","DataGridBuilder (write)","Execution Log"],
+ score:8.9},
+{sec:"Data Integration", q:"Design a data integration architecture where actuals come from an ERP system and budgets from another source.",
+ a:"For the ERP actuals I'd configure a source connection, an import format mapping ERP columns to EPBCS dimensions, and a scheduled load rule with validation before it hits the target cube. For the second budget source, if it's on premise I'd use the EPM Integration Agent rather than a flat file, so the whole pipeline stays automatable. Both paths converge on the same reconciliation step before planners see the numbers.",
+ flow:["Source","Connection","Import Format","Mapping","Data Load","Validation","Target Cube","Reconciliation"],
+ score:9.1},
+{sec:"Data Integration", q:"A nightly data load is failing intermittently. How do you troubleshoot it?",
+ a:"I check the job console first for the actual error rather than assuming, mapping issues, source data anomalies, and target validation failures all look different in the log. I trace back to whether the source extract changed shape, confirm the mapping still holds, and only then decide between a retry, a mapping fix, or an upstream fix.",
+ flow:["Job Console","Error Detail","Mapping Check","Source Data Check","Target Validation","Retry / Fix"],
+ score:8.8},
+{sec:"Smart Push", q:"Explain Smart Push architecture and when you'd use it versus a broader data movement approach.",
+ a:"Smart Push moves data from a source cube to a target cube triggered from a form, using a predefined data map, it's ideal when a planner's edit needs to reflect immediately in a downstream cube, like pushing a workforce plan into the financials cube. For broad, scheduled movement between applications, I'd use Data Integration instead, since Smart Push is user and form scoped, not built for bulk scheduled transfer.",
+ flow:["Source Form","Smart Push","Data Map","Target Cube","Validation"],
+ score:8.7},
+{sec:"REST & Automation", q:"Design an automation framework for EPBCS using REST APIs.",
+ a:"I'd authenticate once and wrap job submission, polling and logging into a reusable pattern: submit the job, capture the job ID, poll status, and only mark success once both the HTTP response and the job's actual completion status confirm it. I'd extend this to cover imports, exports, business rule execution and snapshots, with failure notifications wired into our monitoring.",
+ flow:["Authentication","REST Endpoint","Job Submission","Job ID","Poll Status","Success / Failure","Logging & Alerts"],
+ score:9.0},
+{sec:"REST & Automation", q:"An automated REST job returns success, but the expected data isn't there. How do you investigate?",
+ a:"I separate three layers that people often conflate: the HTTP response being two hundred, the job status being completed, and the actual business outcome being correct. A two hundred only means the request was accepted, the job status tells you it finished, neither tells you the data validation actually passed. I'd check the job's own log for a completed with warnings state and validate the target data directly.",
+ flow:["HTTP 200","Job Status: Completed","Data Validation: Failed","Root Cause"],
+ score:9.2},
+{sec:"Security", q:"How would you design security for a global implementation with regional planners, finance managers and administrators?",
+ a:"I build role based groups first, then layer entity and account security on top so each group only sees their region and their accounts. I keep it least privilege by default and test with representative users in each role before go live, since form level access and dimension level access can silently disagree.",
+ flow:["Users","Groups","Roles","Entity Security","Account Security","Forms","Application Access"],
+ score:8.9},
+{sec:"Security", q:"A user can open a form but can't see expected members. Where do you investigate?",
+ a:"I work down the access chain rather than guessing: application access, then role, then group, then dimension level security on the specific entity and account, then whether the intersection is even valid, then finally the form definition itself. Almost always it's a dimension security assignment that doesn't match what the form expects.",
+ flow:["Application Access","Role","Group","Dimension Security","Valid Intersection","Form Definition"],
+ score:8.8},
+{sec:"Migration", q:"Explain how you'd manage migration from Development to Test to Production.",
+ a:"I use Lifecycle Management to snapshot artifacts out of development, migrate into test for validation and user acceptance testing, then promote the same artifact set into production, never rebuilding manually in each environment. I keep security, variables and configuration versioned alongside the artifacts, and always take a rollback snapshot immediately before a production migration.",
+ flow:["DEV","Snapshot","Migration","TEST","UAT","PROD","Rollback Plan"],
+ score:8.9},
+{sec:"Performance", q:"You inherit an application where planners say everything is slow. What's your first sixty minute diagnostic strategy?",
+ a:"I don't jump straight to optimizing business rules. I systematically check forms, then rules, then cube design, then data volume and metadata, then integrations and Smart Push, then concurrent jobs, and only then look at user behavior and reporting load. Most everything is slow complaints trace to one or two specific bottlenecks once you look at it this way.",
+ flow:["Forms","Rules","Cube Design","Data Volume","Integrations","Smart Push","Concurrent Jobs","Bottleneck Found"],
+ score:9.3},
+{sec:"Performance", q:"What's your approach to reducing calculation scope in EPBCS?",
+ a:"FIX statements driven by runtime prompts and substitution variables so a rule only touches the current period and relevant scenario, avoiding full cube calculations wherever possible, and preferring incremental recalculation of just what changed over a blanket recalculation.",
+ flow:["Full-Cube Calc","FIX + RTP","Substitution Variables","Incremental Scope"],
+ score:8.6},
+{sec:"Incident Scenarios", q:"It's month end close. A process that normally takes twenty minutes is at three hours and the CFO is waiting. What do you do?",
+ a:"I isolate the bottleneck immediately rather than trying to fix everything, usually that means letting the current run finish while checking data volume and concurrent jobs. I apply a temporary mitigation to get the business through close, validate the numbers are still correct, then do the permanent fix and root cause analysis afterward rather than blocking the CFO on a full investigation.",
+ flow:["Alert","Isolate Bottleneck","Temporary Mitigation","Business Validation","Permanent Fix","RCA"],
+ score:9.4},
+{sec:"Incident Scenarios", q:"A rule works in Development but fails in Production. How do you isolate the difference?",
+ a:"I compare development, test and production side by side on the things that commonly drift: metadata, security, substitution variables, data volume, and application settings. Rules rarely break on their own, it's almost always an environment difference the rule wasn't written to tolerate.",
+ flow:["DEV","TEST","PROD","Metadata Diff","Variables Diff","Security Diff","Root Cause"],
+ score:8.9},
+{sec:"Design Challenge", q:"Design a solution for a multinational operating in twenty countries, multiple currencies and legal entities, with workforce, revenue, capital planning and rolling forecasts.",
+ a:"I'd use standard EPBCS modules for each planning process, a shared entity hierarchy reflecting the legal structure, multi currency enabled at the entity level, and a rolling forecast scenario and version structure that doesn't require a structural rebuild each cycle. Groovy handles the dynamic parts, like automatically opening the next forecast period, while Data Integration keeps actuals flowing in from each country's ERP instance. Security is built by region and role from day one, not retrofitted.",
+ flow:["Architecture","Entity Hierarchy","Currency","Modules","Rolling Forecast Design","Security","Integration","Automation"],
+ score:9.5},
+{sec:"Extreme Scenarios", q:"Five thousand planners, millions of intersections. How do you prevent performance degradation as the user base grows?",
+ a:"I design for that scale from the start rather than patching later: dynamic calculation via Hybrid BSO where appropriate to cut stored block count, tightly scoped forms per user segment, and calculation rules that never touch more than the current planner's slice. I also put monitoring in place early so degradation shows up as a metric trend, not a support ticket.",
+ flow:["Growth Projection","Hybrid BSO","Form Scoping","Calc Scoping","Monitoring"],
+ score:9.0},
+{sec:"Extreme Scenarios", q:"The business asks for one giant rule that calculates revenue, workforce, operating expense, capital and cash flow together. Do you accept that design?",
+ a:"No, I'd push back professionally and explain why. A single giant rule is nearly impossible to troubleshoot, forces full recalculation for any single change, and creates a single point of failure. I'd propose modular rules per planning area feeding a consolidation layer, which is just as functionally complete but maintainable and independently testable.",
+ flow:["One Giant Rule (rejected)","Revenue","Workforce","Opex","Capex","Consolidated Planning"],
+ score:9.1},
+{sec:"Rapid Fire", q:"What's the biggest EPBCS performance anti pattern?", a:"Full cube recalculation instead of scoped, incremental calculation.", flow:["Anti-Pattern Check"], score:8.5},
+{sec:"Rapid Fire", q:"When would you avoid Groovy?", a:"When the logic is static and a standard rule expresses it just as clearly, simplicity wins.", flow:["Decision Point"], score:8.4},
+{sec:"Rapid Fire", q:"When do you use Smart Push?", a:"When a planner's form edit needs to reflect immediately in a downstream cube.", flow:["Decision Point"], score:8.6},
+{sec:"Rapid Fire", q:"What causes excessive block creation?", a:"Too many sparse dimensions combined, or dense and sparse settings that don't match actual data density.", flow:["Root Cause"], score:8.5},
+{sec:"Rapid Fire", q:"What separates a consultant from an architect?", a:"A consultant configures what's asked for, an architect anticipates scale, maintainability and failure modes before they're asked about.", flow:["Perspective"], score:9.0},
+];
+
+const RUBRIC = [
+ {k:"Technical Accuracy"},
+ {k:"Architecture Thinking"},
+ {k:"Problem Solving"},
+ {k:"EPBCS Depth"},
+ {k:"Production Experience"},
+];
+
+/* ---------------- state ---------------- */
+let state = "intro";
+let idx = 0;
+let revealed = false;
+let followRevealed = false;
+let scoreShown = false;
+let currentSpeaker = null; // 'interviewer' | 'candidate' | null
+let autoplay = false;
+let ttsEnabled = true;
+let speed = 1;
+let sessionToken = 0;
+let flowActiveIdx = -1;
+let flowTimer = null;
+let voiceMap = {interviewer:null, candidate:null};
+let voicesReady = false;
+
+const app = document.getElementById("app");
+
+/* ---------------- voice setup ---------------- */
+function pickVoices(){
+  const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  if(!voices.length) return false;
+  const en = voices.filter(v=>/^en/i.test(v.lang));
+  const pool = en.length ? en : voices;
+  let male = pool.find(v=>/male/i.test(v.name) && !/female/i.test(v.name)) ||
+             pool.find(v=>/india|hindi|ravi|david|daniel|george/i.test(v.name));
+  let female = pool.find(v=>/female/i.test(v.name)) ||
+               pool.find(v=>/heera|zira|susan|samantha|veena|karen/i.test(v.name));
+  if(!male) male = pool[0];
+  if(!female) female = pool.find(v=>v!==male) || pool[1] || male;
+  voiceMap.interviewer = male;
+  voiceMap.candidate = female;
+  voicesReady = true;
+  return true;
+}
+if(window.speechSynthesis){
+  pickVoices();
+  speechSynthesis.onvoiceschanged = pickVoices;
+}
+
+function stripText(t){
+  const d = document.createElement("div");
+  d.innerHTML = t;
+  return d.textContent || d.innerText || "";
+}
+
+function speak(text, speaker){
+  return new Promise((resolve)=>{
+    if(!ttsEnabled || !window.speechSynthesis){ resolve(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(stripText(text));
+    const v = voiceMap[speaker];
+    if(v) u.voice = v;
+    u.pitch = speaker==="interviewer" ? 0.88 : 1.12;
+    u.rate = speed * (speaker==="interviewer" ? 0.97 : 1.0);
+    let done = false;
+    const finish = ()=>{ if(!done){ done=true; resolve(); } };
+    u.onend = finish;
+    u.onerror = finish;
+    setTimeout(()=>{ // safety timeout in case events never fire
+      if(!done){ finish(); }
+    }, Math.max(4000, text.length*90));
+    speechSynthesis.speak(u);
+  });
+}
+function cancelSpeech(){ if(window.speechSynthesis) speechSynthesis.cancel(); }
+
+/* ---------------- flow node highlight animation ---------------- */
+function startFlowCycle(len, durationMs){
+  stopFlowCycle();
+  if(len<=0) return;
+  const step = Math.max(500, durationMs/len);
+  flowActiveIdx = 0;
+  renderFlowOnly();
+  let i=0;
+  flowTimer = setInterval(()=>{
+    i++;
+    flowActiveIdx = i % len;
+    renderFlowOnly();
+  }, step);
+}
+function stopFlowCycle(){
+  if(flowTimer){ clearInterval(flowTimer); flowTimer=null; }
+}
+function renderFlowOnly(){
+  const nodes = document.querySelectorAll(".flow .node");
+  nodes.forEach((n,i)=>{
+    n.classList.toggle("hot", i===flowActiveIdx);
+    n.classList.toggle("done", i<flowActiveIdx);
+  });
+}
+
+function estimateDuration(text){ return Math.min(9000, Math.max(1800, text.length*55)); }
+
+/* ---------------- render dispatch ---------------- */
+function render(){
+  if(state==="intro") return renderIntro();
+  if(state==="interview") return renderInterview();
+  if(state==="results") return renderResults();
+}
+
+function renderIntro(){
+  const vOk = voicesReady || pickVoices();
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="brandmark"><div class="logo">B</div><span>BISP TRAININGS &nbsp;·&nbsp; EPBCS INTERVIEW SIMULATOR</span></div>
+      <div class="liveflag"><span class="reddot"></span>VOICE ENABLED</div>
+    </div>
+    <div class="centerscreen">
+      <div class="difficulty">DIFFICULTY 9.5 / 10 &nbsp;·&nbsp; EXPERT LEVEL</div>
+      <h1>Oracle EPBCS Senior Architect Interview</h1>
+      <div class="sub">Interview Type: Senior Solution Architect / Technical Architect &nbsp;·&nbsp; ${QUESTIONS.length} questions, fully narrated, autoplaying from start to finish.</div>
+      <p class="introquote">"This is an advanced Oracle EPBCS Architect interview. The questions will test not only your product knowledge, but also your ability to design, troubleshoot, optimize and architect EPBCS solutions in real production environments."</p>
+      <div class="voicecheck">
+        <span class="swatch" style="background:var(--brand);"></span> Interviewer voice
+        <span class="swatch" style="background:var(--female);margin-left:14px;"></span> Candidate voice
+        ${vOk ? "" : `<span style="color:var(--red);margin-left:14px;">— voices load once you press play</span>`}
+      </div>
+      <p style="color:var(--muted);font-size:14px;line-height:1.6;">Press play and the interview runs itself: each question is spoken by the interviewer, the candidate's answer is narrated while the technical workspace animates the matching workflow, and a full scored assessment appears at the end.</p>
+      <div style="margin-top:26px;">
+        <button class="startbtn" onclick="beginAutoplay()">▶ Start Autoplay Interview</button>
+        <button class="startbtn secondary" onclick="beginManual()">Step Through Manually</button>
+      </div>
+    </div>
+  `;
+}
+
+function currentQ(){ return QUESTIONS[idx]; }
+
+function renderInterview(){
+  const q = currentQ();
+  const pct = Math.round((idx/QUESTIONS.length)*100);
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="brandmark"><div class="logo">B</div><span>BISP TRAININGS &nbsp;·&nbsp; EPBCS SIMULATOR</span></div>
+      <div class="liveflag"><span class="reddot"></span>${autoplay?"AUTOPLAY":"MANUAL"} &nbsp;·&nbsp; Q${idx+1}/${QUESTIONS.length}</div>
+    </div>
+    <div class="progresswrap"><div class="progressbar" style="width:${pct}%"></div></div>
+    <main>
+      <div class="left">
+        <div class="speakerrow">
+          <div class="speakercard ${currentSpeaker==='interviewer'?'active':''}" id="card-interviewer">
+            <div class="avatar interviewer">RA</div>
+            <div class="scmeta"><div class="name">Interviewer</div><div class="role">Senior Hiring Manager</div></div>
+            <div class="eq"><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="speakercard ${currentSpeaker==='candidate'?'active':''}" id="card-candidate">
+            <div class="avatar candidate">AS</div>
+            <div class="scmeta"><div class="name">Candidate</div><div class="role">Sr. EPBCS Architect</div></div>
+            <div class="eq"><span></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <div class="qnum">Question ${idx+1}</div>
+        <div class="section-tag">${q.sec}</div>
+
+        <div class="cardstack">
+          <div class="bubble interviewer">
+            <div class="who">INTERVIEWER</div>
+            ${q.q}
+          </div>
+
+          ${revealed ? `
+            <div class="bubble candidate">
+              <div class="who">CANDIDATE</div>
+              ${q.a}
+            </div>
+            ${q.follow ? `
+              <div class="bubble interviewer">
+                <div class="who">INTERVIEWER — FOLLOW-UP</div>
+                ${q.follow}
+              </div>
+              ${followRevealed ? `
+                <div class="bubble candidate">
+                  <div class="who">CANDIDATE</div>
+                  ${q.followA}
+                </div>
+              ` : ``}
+            ` : ``}
+            ${scoreShown ? `<div class="score-row">Question score <span class="score-pill">${q.score.toFixed(1)} / 10</span></div>` : ``}
+          ` : ``}
+        </div>
+
+        <div class="transport">
+          <button class="tbtn" onclick="prevQ()" ${idx===0?"disabled":""} title="Previous">⏮</button>
+          <button class="tbtn play" onclick="togglePlay()" title="Play/Pause">${autoplay?"⏸":"▶"}</button>
+          <button class="tbtn" onclick="skipNext()" title="Next">⏭</button>
+          <button class="mutebtn ${ttsEnabled?'':'off'}" onclick="toggleMute()">${ttsEnabled?"🔊 Voice On":"🔇 Voice Off"}</button>
+          <div class="speedgroup">
+            <button class="speedbtn ${speed===0.85?'active':''}" onclick="setSpeed(0.85)">0.85x</button>
+            <button class="speedbtn ${speed===1?'active':''}" onclick="setSpeed(1)">1x</button>
+            <button class="speedbtn ${speed===1.2?'active':''}" onclick="setSpeed(1.2)">1.2x</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="screenhead">
+          <div class="label">TECHNICAL WORKSPACE</div>
+          <div class="dotrow"><span></span><span></span><span></span></div>
+        </div>
+        <div class="workspace">
+          <div class="flowtitle">${q.sec} — Live Workflow</div>
+          <div class="flow">
+            ${q.flow.map((n,i)=>`<div class="node">${n}</div>${i<q.flow.length-1?'<span class="arrow">→</span>':''}`).join("")}
+          </div>
+          <div class="metricsrow">
+            <div class="metric"><div class="k">SECTION</div><div class="v" style="font-size:14px;">${q.sec}</div></div>
+            <div class="metric"><div class="k">STEPS</div><div class="v">${q.flow.length}</div></div>
+            <div class="metric"><div class="k">STATUS</div><div class="v" style="font-size:14px;">${scoreShown?"Scored":revealed?"Answering":"Listening"}</div></div>
+          </div>
+          <div class="note">The workflow highlights step by step as the candidate explains it, mirroring how an architect would demonstrate the process live.</div>
+        </div>
+      </div>
+    </main>
+  `;
+  renderFlowOnly();
+}
+
+/* ---------------- sequence engine ---------------- */
+function delay(ms, token){
+  return new Promise(res=>setTimeout(()=>res(token===sessionToken), ms));
+}
+
+async function runQuestion(token){
+  const q = currentQ();
+  revealed=false; followRevealed=false; scoreShown=false; currentSpeaker="interviewer";
+  render();
+  await speak(q.q, "interviewer");
+  if(token!==sessionToken) return;
+
+  revealed=true; currentSpeaker="candidate"; render();
+  startFlowCycle(q.flow.length, estimateDuration(q.a));
+  await speak(q.a, "candidate");
+  stopFlowCycle(); flowActiveIdx = q.flow.length-1; renderFlowOnly();
+  if(token!==sessionToken) return;
+
+  if(q.follow){
+    currentSpeaker="interviewer"; render();
+    await speak(q.follow, "interviewer");
+    if(token!==sessionToken) return;
+    followRevealed=true; currentSpeaker="candidate"; render();
+    await speak(q.followA, "candidate");
+    if(token!==sessionToken) return;
+  }
+
+  currentSpeaker=null; scoreShown=true; render();
+
+  if(autoplay){
+    const ok = await delay(1200, token);
+    if(!ok) return;
+    if(idx < QUESTIONS.length-1){
+      idx++;
+      runQuestion(token);
+    } else {
+      state="results"; render();
+    }
+  }
+}
+
+function beginAutoplay(){
+  autoplay=true; state="interview"; idx=0; sessionToken++;
+  runQuestion(sessionToken);
+}
+function beginManual(){
+  autoplay=false; state="interview"; idx=0; revealed=false; followRevealed=false; scoreShown=false; currentSpeaker=null;
+  render();
+}
+
+function togglePlay(){
+  if(autoplay){
+    autoplay=false; cancelSpeech(); currentSpeaker=null; stopFlowCycle(); sessionToken++; render();
+  } else {
+    autoplay=true; sessionToken++;
+    if(!revealed){ runQuestion(sessionToken); }
+    else if(!scoreShown){
+      // resume mid-question: just move to next after a short beat
+      scoreShown=true; render();
+      (async ()=>{ const ok= await delay(900, sessionToken); if(ok && autoplay){
+        if(idx<QUESTIONS.length-1){ idx++; runQuestion(sessionToken); } else { state="results"; render(); }
+      }})();
+    } else {
+      (async ()=>{ if(idx<QUESTIONS.length-1){ idx++; runQuestion(sessionToken); } else { state="results"; render(); } })();
+    }
+  }
+}
+
+function skipNext(){
+  cancelSpeech(); stopFlowCycle(); sessionToken++;
+  if(idx<QUESTIONS.length-1){ idx++; if(autoplay){ runQuestion(sessionToken); } else { revealed=false; followRevealed=false; scoreShown=false; currentSpeaker=null; render(); } }
+  else { state="results"; render(); }
+}
+function prevQ(){
+  cancelSpeech(); stopFlowCycle(); sessionToken++;
+  if(idx>0){ idx--; revealed=true; followRevealed=true; scoreShown=true; currentSpeaker=null; render();
+    if(autoplay){ /* stay paused-in-place on manual nav */ autoplay=false; }
+  }
+}
+function toggleMute(){ ttsEnabled=!ttsEnabled; if(!ttsEnabled) cancelSpeech(); render(); }
+function setSpeed(s){ speed=s; render(); }
+
+function avg(arr){ return arr.reduce((a,b)=>a+b,0)/arr.length; }
+
+function renderResults(){
+  cancelSpeech(); stopFlowCycle();
+  const overall = avg(QUESTIONS.map(q=>q.score));
+  const finalScore = (overall*10).toFixed(1);
+
+  const catScores = RUBRIC.map((r,i)=>{
+    const jitter = Math.round(Math.sin(i*13.7)*3);
+    const val = Math.min(99, Math.max(80, Math.round(overall*10 + jitter)));
+    return {k:r.k, v:val};
+  });
+
+  const strong = ["EPBCS Architecture","Performance Optimization","Production Troubleshooting","Integration Design"];
+  const improve = catScores.slice().sort((a,b)=>a.v-b.v).slice(0,2).map(c=>c.k);
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="brandmark"><div class="logo">B</div><span>BISP TRAININGS &nbsp;·&nbsp; EPBCS SIMULATOR</span></div>
+      <div class="liveflag" style="color:var(--brand2);"><span class="reddot" style="background:var(--brand2);"></span>ASSESSMENT COMPLETE</div>
+    </div>
+    <div class="centerscreen" style="max-width:820px;">
+      <h1>Interview Result</h1>
+      <div class="sub">Candidate: Senior Oracle EPBCS Architect</div>
+
+      <div class="finalscore">
+        <div class="num">${finalScore}</div>
+        <div class="lbl">FINAL SCORE / 100</div>
+        <div class="rec">Recommendation: ${finalScore>=85?"Shortlist":finalScore>=70?"Consider with Follow-up":"Further Assessment Needed"}</div>
+      </div>
+
+      <div class="barlist">
+        ${catScores.map(c=>`
+          <div class="barrow">
+            <div class="toprow"><span>${c.k}</span><span>${c.v}%</span></div>
+            <div class="bartrack"><div class="barfill" style="width:${c.v}%"></div></div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="colsplit">
+        <div class="col">
+          <h3>STRONG AREAS</h3>
+          <ul>${strong.map(s=>`<li>${s}</li>`).join("")}</ul>
+        </div>
+        <div class="col">
+          <h3>AREAS TO IMPROVE</h3>
+          <ul>${improve.map(s=>`<li>${s}</li>`).join("")}</ul>
+        </div>
+      </div>
+
+      <p style="margin-top:26px;color:var(--text);line-height:1.65;font-size:15px;">
+      You demonstrated strong architecture-level understanding of Oracle EPBCS, particularly in application design, performance optimization, integration, automation and production troubleshooting. Your responses showed that you understand not only how EPBCS features work, but also when and why an architect should use them.
+      </p>
+
+      <div class="bispcard">
+        <div class="biglogo">BISP <span>TRAININGS</span></div>
+        <div class="tag">Oracle EPBCS / EPM Training — Architecture · Implementation · Integration · Groovy · Performance Tuning</div>
+        <div class="cta">Learn the skills for real world Oracle EPBCS projects and get interview ready with project based training. <b>Learn. Practice. Build.</b></div>
+        <div class="contact">www.bisptrainings.com &nbsp;·&nbsp; Call Us: +91 769-409-5404</div>
+        <div class="demo">Free Demo Every Saturday — New Batch Starting Soon</div>
+      </div>
+
+      <div style="text-align:center;margin-top:26px;">
+        <button class="startbtn secondary" onclick="restart()">Restart Interview</button>
+      </div>
+    </div>
+  `;
+}
+
+function restart(){
+  cancelSpeech(); stopFlowCycle(); sessionToken++;
+  state="intro"; idx=0; revealed=false; followRevealed=false; scoreShown=false; currentSpeaker=null; autoplay=false;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
