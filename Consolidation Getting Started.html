@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>BISP Trainings — IFRS 10 AI Consolidation Lab</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--ink:#172033;--mut:#65748a;--line:#d9e1ea;--nav:#111827;--blue:#2563eb;--green:#15803d;--red:#bd3434;--violet:#7c3aed;--gold:#a16207}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+button{font:inherit}header{height:60px;background:var(--nav);color:#fff;display:flex;align-items:center;padding:0 20px;gap:16px}.brand{font-weight:900}.brand span{font-weight:500;color:#aeb9c9}.grow{flex:1}.tag{font-size:11px;border:1px solid #435168;border-radius:14px;padding:5px 9px}
+main{max-width:1350px;margin:auto;padding:14px}.hero,.card,.controls{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 7px #0f172a0a}.hero{padding:16px;margin-bottom:10px}.hero h1{font-size:22px;margin:0 0 5px}.hero p{margin:0;color:var(--mut);font-size:13px;line-height:1.5}
+.controls{padding:9px;display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}button{padding:8px 11px;border:1px solid #cbd5e1;background:#fff;border-radius:7px;font-weight:700;cursor:pointer}.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.voice{background:#edf8f1;border-color:#a8d8b7}
+.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}.head{padding:10px 13px;border-bottom:1px solid var(--line);font-weight:850;display:flex}.head small{margin-left:auto;color:var(--mut);font-weight:500}.body{padding:12px}
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:10px}.step{padding:8px 4px;text-align:center;border:1px solid var(--line);border-radius:7px;font-size:10px;color:var(--mut)}.step.on{border-color:var(--blue);color:var(--blue);background:#eff6ff;font-weight:800}.step.done{border-color:#a7d8b7;background:#f0fdf4;color:var(--green)}
+#viz{height:390px;background:linear-gradient(#fff,#fbfcfe);overflow:hidden}.progress{height:5px;background:#e8edf3}.bar{height:100%;width:0;background:var(--blue)}
+svg{width:100%;height:100%}.edge{fill:none;stroke:#b1bdcb;stroke-width:2.4}.node rect{fill:#fff;stroke:#bac6d4;stroke-width:1.6;rx:10}.node .t{font-size:15px;font-weight:850}.node .s{font-size:11px;fill:#66758a}.dot{fill:#94a3b8}.node.active rect{stroke:var(--blue);stroke-width:3}.node.ok rect{stroke:var(--green);stroke-width:2.6}.node.active .dot{fill:var(--blue)}.node.ok .dot{fill:var(--green)}.packet{fill:var(--blue)}
+.lesson{font-size:14px;line-height:1.55;background:#f8fafc;border-left:4px solid var(--blue);padding:11px;border-radius:4px}.simple{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:9px}.box{border:1px solid var(--line);border-radius:7px;padding:10px}.box b{display:block;margin-bottom:5px}.box span{font-size:12px;color:var(--mut);line-height:1.45}
+.big{font-size:22px;font-weight:900;color:var(--blue)}.tabs{display:flex;overflow:auto;border-bottom:1px solid var(--line)}.tabs button{border:0;border-radius:0;background:transparent;white-space:nowrap}.tabs button.sel{color:var(--blue);border-bottom:3px solid var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px 8px;border-bottom:1px solid #edf1f5;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#f7f9fb}.total td{font-weight:850;background:#f7f9fb}.elim{color:var(--red)}.nci{color:var(--violet)}.scroll{max-height:355px;overflow:auto}
+.voiceStatus{font-size:11px;color:var(--mut);margin-top:7px}.formula{background:#fffaf0;border:1px solid #f1d9a5;border-radius:7px;padding:10px;margin:8px 0;font-size:13px;line-height:1.55}.formula strong{color:var(--gold)}
+.focusDim{filter:brightness(.68) saturate(.55);opacity:.55;transition:filter .3s,opacity .3s}
+.focusTarget{position:relative!important;z-index:8!important;filter:none!important;opacity:1!important}
+.focusTarget::after{content:"";position:absolute;inset:-7px;border:3px solid #f59e0b;border-radius:10px;pointer-events:none;animation:focusRing 1.05s ease-in-out infinite}
+@keyframes focusRing{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.45),0 0 16px rgba(245,158,11,.25)}50%{box-shadow:0 0 0 9px rgba(245,158,11,0),0 0 30px rgba(245,158,11,.62)}}
+@keyframes numPop{0%,100%{transform:scale(1)}45%{transform:scale(1.28)}}
+@keyframes svgPulse{0%,100%{filter:drop-shadow(0 0 3px rgba(245,158,11,.35))}50%{filter:drop-shadow(0 0 14px rgba(245,158,11,.95))}}
+#focusPointer{position:fixed;z-index:9999;display:none;pointer-events:none;font-size:31px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.28));transform:translate(-50%,-50%)}
+#focusPointer.show{display:block}
+#focusLabel{position:fixed;z-index:9998;display:none;max-width:310px;padding:8px 11px;background:#111827;color:#fff;border-radius:8px;font-size:12px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none}
+#focusLabel.show{display:block}
+.syncGlow{outline:3px solid #f59e0b!important;box-shadow:0 0 0 7px rgba(245,158,11,.18),0 0 24px rgba(245,158,11,.35)!important;transition:.2s}
+.syncText{background:#fff3bf!important;color:#7c4a03!important;border-radius:4px;padding:2px 4px;box-shadow:0 0 0 3px rgba(245,158,11,.14)}
+.syncNum{background:#fef08a!important;color:#713f12!important;border-radius:5px;padding:2px 5px;box-shadow:0 0 0 5px rgba(245,158,11,.20);animation:numPop .9s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.node.syncNode rect{stroke:#f59e0b!important;stroke-width:5!important;animation:svgPulse .9s ease-in-out infinite}.node.syncNode .t{fill:#9a5a00!important;font-weight:900}
+#caption{margin-top:8px;padding:10px 12px;border:1px solid #f1d28b;background:#fffaf0;border-radius:7px;font-size:13px;line-height:1.45;min-height:42px}
+#caption b{color:#9a5a00}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.steps{grid-template-columns:repeat(3,1fr)}}
+
+.immersiveDim{filter:brightness(.42) blur(.6px)!important;opacity:.30!important;transition:.28s}
+.immersiveTarget{position:relative!important;z-index:30!important;filter:none!important;opacity:1!important;animation:attentionBeat .8s ease-in-out infinite}
+@keyframes attentionBeat{0%,100%{box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 18px rgba(245,158,11,.4)}50%{box-shadow:0 0 0 13px rgba(245,158,11,0),0 0 42px rgba(245,158,11,.95)}}
+#transcript{margin:10px 0 0;background:#111827;color:#f8fafc;border-radius:10px;padding:13px 15px;min-height:92px;font-size:17px;line-height:1.65;box-shadow:inset 0 0 0 1px #334155}
+#transcript .spoken{color:#facc15;font-weight:850}#transcript .future{color:#94a3b8}
+#transcriptHead{font-size:10px;letter-spacing:.12em;color:#93c5fd;text-transform:uppercase;margin-bottom:5px}
+.quizWrap{display:none;margin-top:12px}.quizTop{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.quizProgress{flex:1;min-width:180px;height:9px;background:#e5e7eb;border-radius:9px;overflow:hidden}.quizProgress i{display:block;height:100%;width:0;background:#2563eb}.qvisual{min-height:190px;background:#f8fafc;border:1px solid #dbe3ec;border-radius:9px;margin:10px 0;padding:12px;display:flex;align-items:center;justify-content:center}.qvisual svg{max-height:180px}
+.qtext{font-size:16px;font-weight:800;line-height:1.45;margin:10px 0}.opts{display:grid;gap:7px}.opt{text-align:left;padding:10px 12px}.opt.correct{background:#ecfdf5;border-color:#22c55e}.opt.wrong{background:#fff1f2;border-color:#ef4444}.feedback{display:none;margin-top:9px;padding:10px;border-radius:7px;background:#eff6ff;line-height:1.5;font-size:13px}.score{font-weight:900;color:#2563eb}
+.barChart{display:flex;align-items:flex-end;gap:20px;height:140px;border-left:2px solid #94a3b8;border-bottom:2px solid #94a3b8;padding:8px 20px}.barChart div{width:58px;background:#93c5fd;text-align:center;font-size:11px;padding-top:5px;min-height:20px}.miniTable{max-width:520px}
+@media(max-width:700px){#transcript{font-size:15px}.qvisual{min-height:160px}}
+
+/* V5 Eight-mechanism attention engine */
+#cinemaMask{position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:20;pointer-events:none;opacity:0;transition:opacity .3s}
+#cinemaMask.on{opacity:1}.cinemaLift{position:relative!important;z-index:25!important}
+.zoomFocus{transform-origin:center!important;transition:transform .35s,filter .35s!important;transform:scale(1.09)!important}
+#inkLayer{position:fixed;inset:0;width:100vw;height:100vh;z-index:40;pointer-events:none}
+.inkPath{fill:none;stroke:#f59e0b;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))}
+#laser{position:fixed;z-index:45;width:18px;height:18px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 6px rgba(239,68,68,.2),0 0 24px #ef4444;display:none;pointer-events:none}
+#laser.show{display:block}
+.flyNum{position:fixed;z-index:50;padding:7px 10px;border-radius:8px;background:#fef08a;color:#713f12;font-size:22px;font-weight:950;box-shadow:0 8px 25px rgba(0,0,0,.25);pointer-events:none}
+#conceptStage{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;display:none;width:min(680px,90vw);background:#fff;border-radius:14px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.42);text-align:center}
+#conceptStage.show{display:block}.wrongRight{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wrongBox,.rightBox{padding:16px;border-radius:10px;font-weight:850}.wrongBox{background:#fff1f2;border:2px solid #ef4444}.rightBox{background:#ecfdf5;border:2px solid #22c55e}.crossBig{font-size:34px;color:#dc2626}.checkBig{font-size:34px;color:#16a34a}
+#mergeStage{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px}.mergeChip{padding:9px 12px;border:2px solid #2563eb;border-radius:8px;background:#eff6ff;font-weight:900}.mergeResult{padding:11px 15px;border:3px solid #16a34a;border-radius:9px;background:#ecfdf5;font-size:20px;font-weight:950}
+#transcript .word{display:inline-block;margin-right:4px;transition:.15s}#transcript .word.now{color:#111827;background:#facc15;border-radius:4px;padding:0 3px;transform:scale(1.08);font-weight:950}#transcript .word.past{color:#fff}
+.attentionLegend{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}.attentionLegend span{font-size:9px;text-align:center;padding:5px;border:1px solid #dbe3ec;border-radius:5px;background:#fff}
+@media(max-width:700px){.attentionLegend{grid-template-columns:repeat(2,1fr)}.wrongRight{grid-template-columns:1fr}}
+
+/* V6 animation-only upgrade — no learning content changes */
+@keyframes ambientFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes haloBreath{0%,100%{filter:drop-shadow(0 0 2px rgba(37,99,235,.2))}50%{filter:drop-shadow(0 0 12px rgba(37,99,235,.5))}}
+@keyframes sheen{0%{transform:translateX(-140%) skewX(-18deg)}100%{transform:translateX(340%) skewX(-18deg)}}
+.card{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;transform-style:preserve-3d}
+.card.motionLift{box-shadow:0 20px 45px rgba(15,23,42,.18);transform:translateY(-3px)}
+.node{transform-box:fill-box;transform-origin:center}
+
+.node rect{transition:stroke-width .3s,filter .3s}
+#packet{filter:drop-shadow(0 0 8px rgba(245,158,11,.8))}
+.motionTrail{fill:none;stroke:#f59e0b;stroke-width:5;stroke-linecap:round;stroke-dasharray:8 12;opacity:.8;filter:drop-shadow(0 0 6px rgba(245,158,11,.55))}
+.dataParticle{position:fixed;z-index:48;width:10px;height:10px;border-radius:50%;background:#f59e0b;box-shadow:0 0 12px #f59e0b;pointer-events:none}
+.sheenHost{position:relative;overflow:hidden}.sheenHost::before{content:"";position:absolute;top:-20%;left:0;width:28%;height:140%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);animation:sheen 1.25s ease-out 1;pointer-events:none;z-index:4}
+.kineticNumber{display:inline-block;transform-origin:center}
+#cinemaMask{backdrop-filter:blur(1.5px);transition:opacity .45s ease}
+#focusLabel{transition:opacity .2s,transform .25s;transform-origin:center bottom}
+#laser{transition:box-shadow .25s}
+#inkLayer{overflow:visible}
+.step{transition:transform .3s,box-shadow .3s,background .3s}.step.on{transform:translateY(-3px) scale(1.025);box-shadow:0 10px 24px rgba(37,99,235,.15)}
+#bar{transition:width .65s cubic-bezier(.2,.8,.2,1)}
+.opt{transition:transform .18s,box-shadow .18s,background .18s}.opt:hover{transform:translateX(5px);box-shadow:0 5px 14px rgba(15,23,42,.09)}
+
+/* V7 Clear Focus Mode — protected reading zone */
+:root{--read-zone:190px}
+body{padding-bottom:calc(var(--read-zone) + 18px)}
+#transcript{position:fixed!important;left:18px!important;right:18px!important;bottom:14px!important;z-index:10000!important;
+ min-height:150px!important;max-height:176px!important;overflow:auto!important;margin:0!important;
+ background:rgba(15,23,42,.98)!important;border:2px solid #60a5fa!important;box-shadow:0 -12px 40px rgba(2,6,23,.28)!important;
+ padding:14px 18px!important;border-radius:13px!important}
+#transcriptHead{position:sticky;top:-14px;background:#0f172a;padding:3px 0 7px;z-index:2}
+#transcript .sentence{font-size:18px;line-height:1.7;color:#f8fafc}
+#transcript .phrase{display:inline;border-radius:5px;padding:1px 3px;transition:background .25s,color .25s,box-shadow .25s}
+#transcript .phrase.hot{background:#facc15;color:#111827;box-shadow:0 0 0 3px rgba(250,204,21,.18);font-weight:950}
+#caption{position:fixed;right:30px;bottom:calc(var(--read-zone) + 24px);z-index:9000;width:min(390px,42vw);
+ background:#fff!important;border:2px solid #f59e0b!important;box-shadow:0 12px 30px rgba(15,23,42,.2)!important}
+#focusLabel,#focusPointer,#laser,#inkLayer,#conceptStage,.flyNum,.dataParticle{max-height:calc(100vh - var(--read-zone) - 28px)}
+#cinemaMask{bottom:var(--read-zone)!important;height:auto!important}
+#inkLayer{height:calc(100vh - var(--read-zone) - 8px)!important}
+#conceptStage{top:calc((100vh - var(--read-zone))/2)!important}
+.safeAnimationZone{max-height:calc(100vh - var(--read-zone) - 22px)}
+#voiceStatus{margin-bottom:8px}
+.clarityBadge{position:fixed;left:28px;bottom:calc(var(--read-zone) + 26px);z-index:9001;background:#eff6ff;border:1px solid #93c5fd;
+ color:#1e3a8a;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:900;letter-spacing:.05em}
+#nowCard{position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:8500;display:none;min-width:280px;max-width:520px;
+ padding:9px 14px;background:#fff;border:2px solid #2563eb;border-radius:10px;box-shadow:0 10px 28px rgba(15,23,42,.18);text-align:center}
+#nowCard.show{display:block}#nowCard small{display:block;color:#64748b;font-size:9px;letter-spacing:.12em}#nowCard b{font-size:15px;color:#1e3a8a}
+@media(max-width:700px){:root{--read-zone:220px}#transcript{left:8px!important;right:8px!important;bottom:7px!important;min-height:180px!important}.sentence{font-size:15px!important}#caption{display:none}.clarityBadge{display:none}}
+
+/* Alternate animation language — content unchanged */
+.revealCurtain{position:fixed;z-index:46;background:#2563eb;pointer-events:none;border-radius:8px;transform-origin:left center}
+.rippleDot{position:fixed;z-index:47;border:3px solid #2563eb;border-radius:50%;pointer-events:none}
+.motionGhost{position:fixed;z-index:49;background:#fff;border:2px solid #2563eb;border-radius:8px;padding:7px 10px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.18);pointer-events:none}
+.flipActive{transform-style:preserve-3d}
+.equationStage{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:70;background:#fff;border:2px solid #2563eb;border-radius:12px;padding:14px 18px;box-shadow:0 18px 50px rgba(15,23,42,.28);font-size:23px;font-weight:950;display:none}
+.equationStage.show{display:block}.eqPart{display:inline-block;margin:0 5px;opacity:0}
+#motionRail{position:fixed;left:20px;top:50%;transform:translateY(-50%);z-index:8200;width:8px;height:230px;background:#e2e8f0;border-radius:8px}
+#motionRail i{position:absolute;left:-5px;width:18px;height:18px;border-radius:50%;background:#2563eb;box-shadow:0 0 0 5px rgba(37,99,235,.15);top:0}
+#motionRail small{position:absolute;left:22px;width:70px;color:#475569;font-size:9px;font-weight:800}
+.waterfallRow{transform-origin:left center}
+.connectorSpark{fill:#2563eb;filter:drop-shadow(0 0 5px rgba(37,99,235,.75))}
+@media(max-width:900px){#motionRail{display:none}}
+
+/* Three-statement step impact panel */
+#impactPanel{margin-top:12px;border:2px solid #2563eb;border-radius:11px;background:#fff;overflow:hidden}
+#impactPanel .impactHead{padding:9px 12px;background:#eff6ff;border-bottom:1px solid #bfdbfe;display:flex;justify-content:space-between;gap:8px;align-items:center}
+#impactPanel .impactHead b{color:#1e3a8a}.impactGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.impactStmt{padding:10px;border-right:1px solid #e2e8f0}.impactStmt:last-child{border-right:0}.impactStmt h4{margin:0 0 7px;font-size:12px;color:#334155}
+.impactRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:5px 6px;border-radius:5px;font-size:11px;transition:.25s}.impactRow.quiet{opacity:.46}
+.impactRow.hit{opacity:1;background:#fef3c7;box-shadow:0 0 0 2px #f59e0b;font-weight:900;transform:scale(1.025)}
+.impactRow.elim{background:#fff1f2;box-shadow:0 0 0 2px #ef4444}.impactRow.add{background:#ecfdf5;box-shadow:0 0 0 2px #22c55e}
+.impactRow .amt{font-variant-numeric:tabular-nums;font-weight:850}.impactDelta{font-size:9px;font-weight:900;margin-left:5px}
+.impactDelta.pos{color:#15803d}.impactDelta.neg{color:#b91c1c}.impactDelta.info{color:#1d4ed8}
+#impactNote{padding:8px 12px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:11px;line-height:1.45;color:#475569}
+@media(max-width:800px){.impactGrid{grid-template-columns:1fr}.impactStmt{border-right:0;border-bottom:1px solid #e2e8f0}}
+
+/* V3 Beginner Workspace: Visual Story + Three-Statement Impact side-by-side */
+.beginnerWorkspace{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(440px,.98fr);gap:14px;align-items:start;margin-top:12px}
+.storyColumn,.impactColumn{min-width:0}
+.storyColumn .card,.impactColumn #impactPanel{margin-top:0!important}
+#impactPanel{position:sticky;top:12px}
+#impactPanel .impactHead{min-height:48px}
+#impactPanel .impactGrid{grid-template-columns:1fr;max-height:520px;overflow:auto}
+#impactPanel .impactStmt{border-right:0;border-bottom:1px solid #e2e8f0;padding:9px 11px}
+#impactPanel .impactStmt:last-child{border-bottom:0}
+#impactPanel .impactStmt h4{display:flex;align-items:center;gap:7px;font-size:11px}
+#impactPanel .impactStmt h4::before{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;border-radius:50%;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:950}
+#impactPanel .impactStmt:nth-child(1) h4::before{content:"BS"}#impactPanel .impactStmt:nth-child(2) h4::before{content:"P&L"}#impactPanel .impactStmt:nth-child(3) h4::before{content:"CF"}
+.impactRow{font-size:10.5px;padding:4px 6px}
+#impactNote{font-size:10.5px}
+.beginnerGuide{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.guideItem{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 9px;font-size:10px;line-height:1.4;color:#475569}
+.guideItem b{display:block;color:#0f172a;font-size:11px;margin-bottom:2px}
+.beginnerHint{margin:8px 0 0;padding:7px 9px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:5px;font-size:10.5px;color:#334155}
+#motionRail{opacity:.5}
+#nowCard{top:10px;max-width:430px}
+@media(max-width:1050px){.beginnerWorkspace{grid-template-columns:1fr}.impactColumn #impactPanel{position:relative;top:auto}.impactGrid{grid-template-columns:repeat(3,1fr)!important;max-height:none!important}}
+@media(max-width:760px){.beginnerGuide{grid-template-columns:1fr}.impactGrid{grid-template-columns:1fr!important}}
+
+/* V4 fitted side-by-side workspace */
+.beginnerWorkspace{
+ width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ gap:10px!important;align-items:stretch!important
+}
+.storyColumn,.impactColumn{width:100%!important;min-width:0!important;overflow:hidden!important}
+.storyColumn .card,#impactPanel{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+.storyColumn svg{width:100%!important;max-width:100%!important;height:auto!important;max-height:430px!important}
+#impactPanel{position:relative!important;top:auto!important;height:100%!important;overflow:hidden!important}
+#impactPanel .impactHead{padding:7px 9px!important;min-height:40px!important;font-size:11px!important}
+#impactPanel .impactHead b{font-size:11px!important;white-space:normal!important;line-height:1.25!important}
+#impactPanel .impactGrid{grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important}
+#impactPanel .impactStmt{padding:6px 8px!important}
+#impactPanel .impactStmt h4{margin-bottom:4px!important;font-size:10px!important}
+.impactRow{font-size:9.5px!important;padding:3px 5px!important;gap:5px!important}
+.impactDelta{font-size:7.5px!important}
+#impactNote{padding:6px 9px!important;font-size:9.5px!important;line-height:1.3!important}
+.beginnerGuide{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin:0 0 7px!important}
+.guideItem{padding:5px 6px!important;font-size:8.7px!important}.guideItem b{font-size:9.5px!important}
+.beginnerHint{padding:5px 7px!important;font-size:9px!important;margin-top:6px!important}
+.layout,.wrap,.container,main{max-width:100%!important;box-sizing:border-box!important}
+.card{max-width:100%!important;box-sizing:border-box!important}
+@media(min-width:901px){
+ body{overflow-x:hidden!important}
+ .beginnerWorkspace{display:grid!important}
+}
+@media(max-width:900px){
+ .beginnerWorkspace{grid-template-columns:1fr!important}
+ .impactGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:650px){.impactGrid{grid-template-columns:1fr!important}.beginnerGuide{grid-template-columns:1fr!important}}
+
+/* V5 Live Financial Cockpit — both teaching surfaces always visible */
+:root{--cockpit-h:520px;--read-zone:154px}
+body{padding-bottom:calc(var(--read-zone) + 12px)!important;overflow-x:hidden}
+.beginnerWorkspace{
+ display:grid!important;grid-template-columns:minmax(0,58%) minmax(0,42%)!important;
+ gap:10px!important;width:100%!important;height:var(--cockpit-h)!important;
+ max-height:calc(100vh - var(--read-zone) - 82px)!important;min-height:410px!important;
+ margin:8px 0 0!important;align-items:stretch!important;overflow:hidden!important
+}
+.storyColumn,.impactColumn{height:100%!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+.beginnerGuide{display:none!important}.beginnerHint{display:none!important}
+.storyColumn .card{height:100%!important;min-height:0!important;margin:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:9px!important}
+.storyColumn .card>h2,.storyColumn .card>h3{flex:0 0 auto;margin:0 0 5px!important;font-size:14px!important}
+.storyColumn svg{flex:1 1 auto!important;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;object-fit:contain}
+#impactPanel{height:100%!important;min-height:0!important;display:grid!important;grid-template-rows:auto 1fr auto!important;margin:0!important;border-radius:9px!important}
+#impactPanel .impactHead{padding:6px 8px!important;min-height:34px!important;display:grid!important;grid-template-columns:1fr auto!important}
+#impactPanel .impactHead b{font-size:10.5px!important;line-height:1.15!important}
+#impactStep{font-size:9px!important;white-space:nowrap!important;align-self:center}
+#impactPanel .impactGrid{min-height:0!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(3,minmax(0,1fr))!important;overflow:hidden!important}
+#impactPanel .impactStmt{min-height:0!important;overflow:hidden!important;padding:4px 7px!important;display:flex!important;flex-direction:column!important}
+#impactPanel .impactStmt h4{flex:0 0 auto;margin:0 0 2px!important;font-size:9px!important}
+#impactBS,#impactPL,#impactCF{min-height:0!important;overflow:auto!important;scrollbar-width:thin}
+.impactRow{font-size:8.8px!important;padding:2px 4px!important;line-height:1.15!important}
+.impactRow.hit{transform:none!important}
+.impactDelta{font-size:6.8px!important}
+#impactNote{padding:4px 7px!important;font-size:8.5px!important;line-height:1.18!important;max-height:42px!important;overflow:auto!important}
+#transcript{min-height:116px!important;max-height:136px!important;left:14px!important;right:14px!important;bottom:8px!important;padding:8px 13px!important}
+#transcriptHead{top:-8px!important;padding:2px 0 4px!important;font-size:9px!important}
+#transcript .sentence{font-size:14px!important;line-height:1.48!important}
+#caption{bottom:calc(var(--read-zone) + 7px)!important;width:min(330px,34vw)!important;font-size:10px!important;padding:6px!important}
+#nowCard{top:6px!important;padding:5px 9px!important;max-width:380px!important}
+#nowCard small{font-size:7px!important}#nowCard b{font-size:11px!important}
+#motionRail{display:none!important}
+.clarityBadge{display:none!important}
+.cockpitLabel{position:absolute;z-index:4;top:7px;right:8px;background:#0f172a;color:#fff;border-radius:999px;padding:3px 7px;font-size:7.5px;font-weight:900;letter-spacing:.05em}
+.storyColumn .card{position:relative}
+@media(max-width:900px){
+ :root{--read-zone:165px}
+ .beginnerWorkspace{grid-template-columns:1fr 1fr!important;height:470px!important;max-height:calc(100vh - var(--read-zone) - 72px)!important}
+ .storyColumn .card{padding:5px!important}.impactRow{font-size:8px!important}
+}
+@media(max-width:650px){
+ .beginnerWorkspace{grid-template-columns:1fr!important;height:auto!important;max-height:none!important;overflow:visible!important}
+ .storyColumn{height:330px!important}.impactColumn{height:420px!important}
+ #impactPanel .impactGrid{grid-template-columns:1fr!important}
+ body{padding-bottom:180px!important}
+}
+
+/* V7 DESIGN-ONLY PATCH — voice/animation engine unchanged from working V5 */
+
+/* Main cockpit: Visual Story + Live Three-Statement Impact */
+.beginnerWorkspace{
+  display:grid!important;
+  grid-template-columns:minmax(0,56%) minmax(0,44%)!important;
+  gap:10px!important;
+  width:100%!important;
+  height:520px!important;
+  max-height:calc(100vh - 205px)!important;
+  min-height:430px!important;
+  margin:8px 0 0!important;
+  overflow:hidden!important;
+  align-items:stretch!important;
+}
+.storyColumn,.impactColumn{
+  min-width:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+}
+.storyColumn .card{
+  height:100%!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.storyColumn svg{
+  width:100%!important;
+  max-width:100%!important;
+  height:auto!important;
+  max-height:330px!important;
+}
+#impactPanel{
+  height:100%!important;
+  margin:0!important;
+  position:relative!important;
+  top:auto!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  overflow:hidden!important;
+}
+#impactPanel .impactGrid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:repeat(3,minmax(0,1fr))!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+#impactPanel .impactStmt{
+  min-height:0!important;
+  padding:5px 8px!important;
+  overflow:hidden!important;
+}
+#impactBS,#impactPL,#impactCF{
+  min-height:0!important;
+  overflow:auto!important;
+}
+.impactRow{
+  font-size:9px!important;
+  line-height:1.15!important;
+  padding:2px 4px!important;
+}
+#impactNote{
+  font-size:8.5px!important;
+  line-height:1.2!important;
+  padding:5px 8px!important;
+  max-height:45px!important;
+  overflow:auto!important;
+}
+
+/* Remove beginner helper boxes to maximize live cockpit space */
+.beginnerGuide,.beginnerHint{display:none!important}
+
+/* Hide the visible read-along UI only.
+   Do NOT remove transcript DOM: existing voice/animation JS may reference it. */
+#transcript,#transcriptHead{display:none!important}
+#voiceStatus{display:none!important}
+
+/* Keep live cue compact and outside the core content */
+#caption{
+  position:fixed!important;
+  right:18px!important;
+  bottom:12px!important;
+  z-index:9000!important;
+  width:min(360px,34vw)!important;
+  max-height:62px!important;
+  overflow:hidden!important;
+  padding:6px 9px!important;
+  font-size:9px!important;
+  line-height:1.25!important;
+  pointer-events:none!important;
+}
+#nowCard{
+  top:7px!important;
+  max-width:390px!important;
+  padding:5px 9px!important;
+}
+
+/* No reserved transcript footer */
+:root{--read-zone:0px!important}
+body{padding-bottom:0!important;overflow-x:hidden!important}
+#cinemaMask{bottom:0!important}
+#inkLayer{height:100vh!important}
+
+/* Navigation remains visible and compact */
+.controls{
+  position:sticky!important;
+  top:0!important;
+  z-index:100!important;
+}
+.steps{
+  position:sticky!important;
+  top:60px!important;
+  z-index:99!important;
+  background:#f5f7fa!important;
+  padding:3px 0!important;
+}
+
+/* Responsive fallback */
+@media(max-width:950px){
+  .beginnerWorkspace{
+    grid-template-columns:minmax(0,54%) minmax(0,46%)!important;
+    height:480px!important;
+    max-height:none!important;
+  }
+  .storyColumn svg{max-height:295px!important}
+  .impactRow{font-size:8.4px!important}
+}
+@media(max-width:720px){
+  .beginnerWorkspace{
+    grid-template-columns:1fr!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .storyColumn{height:430px!important}
+  .impactColumn{height:440px!important}
+  #caption{width:calc(100vw - 20px)!important;right:10px!important}
+  .controls,.steps{position:relative!important;top:auto!important}
+}
+
+/* V8 attachment-matched layout — DESIGN ONLY */
+
+/* Keep the first row as a clean 2-column live teaching area */
+.beginnerWorkspace{
+  display:grid!important;
+  grid-template-columns:minmax(0,56%) minmax(0,44%)!important;
+  gap:10px!important;
+  width:100%!important;
+  height:545px!important;
+  min-height:545px!important;
+  max-height:545px!important;
+  overflow:hidden!important;
+  align-items:stretch!important;
+  margin:8px 0 0!important;
+}
+.storyColumn,.impactColumn{
+  width:100%!important;
+  min-width:0!important;
+  height:545px!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.storyColumn .card{
+  width:100%!important;
+  height:545px!important;
+  min-height:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+.storyColumn .card .head{min-height:39px!important}
+.storyColumn .card .body{padding:8px 10px!important}
+.storyColumn svg{
+  display:block!important;
+  width:100%!important;
+  height:350px!important;
+  max-height:350px!important;
+  margin:0 auto!important;
+}
+.storyColumn #lesson{
+  max-height:105px!important;
+  overflow:auto!important;
+  margin-top:6px!important;
+  padding:8px 10px!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+
+/* Right-side financial impact fills the same row, aligned at the top */
+.impactColumn{
+  display:block!important;
+  position:relative!important;
+}
+#impactPanel{
+  position:relative!important;
+  top:auto!important;
+  width:100%!important;
+  height:545px!important;
+  max-height:545px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+}
+#impactPanel .impactHead{
+  min-height:39px!important;
+  padding:7px 9px!important;
+}
+#impactPanel .impactGrid{
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:repeat(3,minmax(0,1fr))!important;
+  overflow:hidden!important;
+}
+#impactPanel .impactStmt{
+  min-height:0!important;
+  padding:6px 8px!important;
+  overflow:hidden!important;
+}
+#impactBS,#impactPL,#impactCF{
+  min-height:0!important;
+  overflow:auto!important;
+}
+.impactRow{
+  padding:3px 5px!important;
+  font-size:9.2px!important;
+  line-height:1.18!important;
+}
+#impactNote{
+  padding:5px 8px!important;
+  max-height:46px!important;
+  overflow:auto!important;
+  font-size:8.5px!important;
+  line-height:1.2!important;
+}
+
+/* Beginner Accounting View: force it below BOTH columns at full width */
+.layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,56%) minmax(0,44%)!important;
+  gap:10px!important;
+  align-items:start!important;
+}
+.beginnerWorkspace{
+  grid-column:1 / -1!important;
+}
+.layout > section.card:not(.storyColumn .card){
+  grid-column:1 / -1!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin-top:10px!important;
+}
+
+/* Explicitly keep accounting card full width if it follows workspace */
+.beginnerWorkspace + .card,
+.beginnerWorkspace ~ .card{
+  grid-column:1 / -1!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+
+/* Keep helper content out of the live row */
+.beginnerGuide,.beginnerHint{display:none!important}
+
+/* Existing V7 hidden transcript remains hidden */
+#transcript,#transcriptHead,#voiceStatus{display:none!important}
+
+/* Fit viewport cleanly */
+main,.wrap,.container{
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+body{overflow-x:hidden!important}
+
+/* Smaller desktop / tablet */
+@media(max-width:980px){
+  .beginnerWorkspace{
+    grid-template-columns:minmax(0,54%) minmax(0,46%)!important;
+    height:510px!important;min-height:510px!important;max-height:510px!important;
+  }
+  .storyColumn,.impactColumn,.storyColumn .card,#impactPanel{
+    height:510px!important;max-height:510px!important;
+  }
+  .storyColumn svg{height:315px!important;max-height:315px!important}
+}
+
+/* Mobile stacks, desktop remains exactly side by side */
+@media(max-width:720px){
+  .layout{display:block!important}
+  .beginnerWorkspace{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    height:auto!important;min-height:0!important;max-height:none!important;
+    overflow:visible!important;
+  }
+  .storyColumn,.impactColumn,.storyColumn .card,#impactPanel{
+    height:460px!important;max-height:460px!important;
+  }
+  .storyColumn svg{height:290px!important;max-height:290px!important}
+}
+
+/* V9 — FORCE LIVE PANELS SIDE-BY-SIDE ON DESKTOP/LAPTOP */
+.beginnerWorkspace{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:545px!important;
+  min-height:545px!important;
+  max-height:545px!important;
+  overflow:hidden!important;
+}
+.beginnerWorkspace > .storyColumn{
+  flex:0 0 calc(55% - 5px)!important;
+  width:calc(55% - 5px)!important;
+  max-width:calc(55% - 5px)!important;
+  min-width:0!important;
+  height:545px!important;
+}
+.beginnerWorkspace > .impactColumn{
+  flex:0 0 calc(45% - 5px)!important;
+  width:calc(45% - 5px)!important;
+  max-width:calc(45% - 5px)!important;
+  min-width:0!important;
+  height:545px!important;
+}
+.storyColumn .card,#impactPanel{
+  width:100%!important;
+  max-width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+}
+.storyColumn,.impactColumn,#impactPanel,.storyColumn .card{
+  float:none!important;
+  clear:none!important;
+}
+#impactPanel{
+  position:relative!important;
+  top:auto!important;
+  left:auto!important;
+  right:auto!important;
+}
+.storyColumn svg{
+  width:100%!important;
+  max-width:100%!important;
+  height:350px!important;
+  max-height:350px!important;
+}
+
+/* Accounting section stays BELOW the complete two-panel row */
+.layout{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+.layout > .beginnerWorkspace{
+  width:100%!important;
+}
+.beginnerWorkspace ~ .card{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin-top:10px!important;
+  clear:both!important;
+}
+
+/* Laptop widths remain side-by-side */
+@media (min-width:721px) and (max-width:1100px){
+  .beginnerWorkspace{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    height:510px!important;
+    min-height:510px!important;
+    max-height:510px!important;
+  }
+  .beginnerWorkspace > .storyColumn{
+    flex-basis:calc(54% - 5px)!important;
+    width:calc(54% - 5px)!important;
+    max-width:calc(54% - 5px)!important;
+    height:510px!important;
+  }
+  .beginnerWorkspace > .impactColumn{
+    flex-basis:calc(46% - 5px)!important;
+    width:calc(46% - 5px)!important;
+    max-width:calc(46% - 5px)!important;
+    height:510px!important;
+  }
+  .storyColumn svg{height:315px!important;max-height:315px!important}
+}
+
+/* Only phones stack */
+@media (max-width:720px){
+  .beginnerWorkspace{
+    display:flex!important;
+    flex-direction:column!important;
+    flex-wrap:nowrap!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .beginnerWorkspace > .storyColumn,
+  .beginnerWorkspace > .impactColumn{
+    flex:0 0 auto!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:460px!important;
+  }
+}
+
+
+/* V10 TRUE TILE VIEW — STATIC DOM, NO RUNTIME LAYOUT DEPENDENCY */
+.layout{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+.liveTileView{
+  display:grid!important;
+  grid-template-columns:minmax(0,55fr) minmax(0,45fr)!important;
+  grid-template-rows:520px!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:100%!important;
+  height:520px!important;
+  margin:8px 0 10px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  align-items:stretch!important;
+}
+.liveTileView > .visualTile,
+.liveTileView > .impactTile{
+  display:block!important;
+  position:relative!important;
+  float:none!important;
+  clear:none!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:520px!important;
+  min-height:520px!important;
+  max-height:520px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.visualTile{
+  display:grid!important;
+  grid-template-rows:auto 5px minmax(0,1fr) auto!important;
+}
+.visualTile #viz{
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.visualTile #viz svg{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:330px!important;
+  margin:0 auto!important;
+}
+.visualTile .body{
+  padding:7px 10px!important;
+  min-height:0!important;
+}
+.visualTile #lesson{
+  margin:0!important;
+  max-height:100px!important;
+  overflow:auto!important;
+  font-size:11px!important;
+  line-height:1.42!important;
+}
+.visualTile .simple,
+.visualTile .attentionLegend,
+.visualTile #transcript,
+.visualTile #voiceStatus{
+  display:none!important;
+}
+
+/* Right tile: live statements fill same screen height */
+.impactTile{
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  border:2px solid #2563eb!important;
+  border-radius:10px!important;
+  background:#fff!important;
+}
+.impactTile .impactHead{
+  min-height:38px!important;
+  padding:7px 9px!important;
+}
+.impactTile .impactHead b{
+  font-size:11px!important;
+  line-height:1.2!important;
+}
+.impactTile #impactStep{
+  font-size:8.5px!important;
+}
+.impactTile .impactGrid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:repeat(3,minmax(0,1fr))!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+.impactTile .impactStmt{
+  min-height:0!important;
+  padding:5px 7px!important;
+  overflow:hidden!important;
+  border-right:0!important;
+  border-bottom:1px solid #e2e8f0!important;
+}
+.impactTile .impactStmt:last-child{border-bottom:0!important}
+.impactTile #impactBS,
+.impactTile #impactPL,
+.impactTile #impactCF{
+  min-height:0!important;
+  overflow:auto!important;
+}
+.impactTile .impactRow{
+  padding:2px 4px!important;
+  font-size:9px!important;
+  line-height:1.18!important;
+}
+.impactTile #impactNote{
+  padding:5px 7px!important;
+  max-height:44px!important;
+  overflow:auto!important;
+  font-size:8.4px!important;
+  line-height:1.2!important;
+}
+
+/* Beginner Accounting View is a separate full-width row below the cockpit */
+.layout > .card{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0 0 10px!important;
+}
+
+/* Desktop/laptop MUST remain two tiles */
+@media (min-width:721px){
+  .liveTileView{
+    display:grid!important;
+    grid-template-columns:minmax(0,55fr) minmax(0,45fr)!important;
+    grid-template-rows:520px!important;
+  }
+}
+
+/* Only phones stack */
+@media (max-width:720px){
+  .liveTileView{
+    grid-template-columns:1fr!important;
+    grid-template-rows:430px 450px!important;
+    height:890px!important;
+    overflow:visible!important;
+  }
+  .liveTileView > .visualTile{
+    height:430px!important;min-height:430px!important;max-height:430px!important;
+  }
+  .liveTileView > .impactTile{
+    height:450px!important;min-height:450px!important;max-height:450px!important;
+  }
+}
+
+/* V11 AI-inspired BISP Cover */
+#bispCover{position:fixed;inset:0;z-index:50000;background:
+radial-gradient(circle at 18% 20%,rgba(37,99,235,.25),transparent 31%),
+radial-gradient(circle at 82% 16%,rgba(124,58,237,.24),transparent 30%),
+radial-gradient(circle at 62% 82%,rgba(14,165,233,.16),transparent 34%),
+linear-gradient(135deg,#050816 0%,#0b1226 48%,#111a35 100%);color:#fff;overflow:auto;font-family:Inter,Segoe UI,Arial,sans-serif}
+.coverGrid{min-height:100%;display:grid;grid-template-columns:1.08fr .92fr;gap:34px;align-items:center;max-width:1320px;margin:auto;padding:42px 54px;box-sizing:border-box}
+.coverBrand{display:flex;align-items:center;gap:12px;margin-bottom:28px}.brandMark{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#2563eb,#7c3aed);box-shadow:0 0 35px rgba(96,165,250,.35);font-weight:950;font-size:18px}
+.coverBrand b{display:block;font-size:17px}.coverBrand span{font-size:10px;color:#93c5fd;letter-spacing:.14em;text-transform:uppercase}
+.aiPill{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(147,197,253,.32);background:rgba(30,64,175,.16);padding:7px 11px;border-radius:999px;font-size:10px;font-weight:800;color:#bfdbfe;letter-spacing:.06em}
+.aiDot{width:7px;height:7px;border-radius:50%;background:#60a5fa;box-shadow:0 0 14px #60a5fa;animation:aiPulse 1.7s infinite}
+@keyframes aiPulse{50%{transform:scale(1.6);opacity:.55}}
+.coverTitle{font-size:clamp(42px,5.2vw,76px);line-height:.98;margin:18px 0 17px;letter-spacing:-.055em;font-weight:950}.coverTitle em{font-style:normal;background:linear-gradient(90deg,#60a5fa,#c4b5fd,#67e8f9);-webkit-background-clip:text;color:transparent}
+.coverSub{max-width:720px;color:#cbd5e1;font-size:16px;line-height:1.65;margin:0 0 24px}.coverSub strong{color:#fff}
+.coverActions{display:flex;gap:10px;flex-wrap:wrap}.enterLab{border:0;border-radius:10px;background:linear-gradient(90deg,#2563eb,#7c3aed);color:#fff;padding:13px 19px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(37,99,235,.28)}.enterLab:hover{transform:translateY(-1px)}
+.coverGhost{border:1px solid rgba(148,163,184,.3);background:rgba(255,255,255,.05);color:#dbeafe;border-radius:10px;padding:12px 15px;font-size:11px;font-weight:800}
+.coverStats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:28px}.coverStat{border:1px solid rgba(148,163,184,.18);background:rgba(255,255,255,.045);border-radius:11px;padding:11px}.coverStat b{display:block;font-size:19px;color:#fff}.coverStat span{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}
+.aiConsole{position:relative;border:1px solid rgba(96,165,250,.3);background:linear-gradient(145deg,rgba(15,23,42,.86),rgba(30,41,59,.64));border-radius:22px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.06);overflow:hidden}
+.aiConsole:before{content:"";position:absolute;inset:-1px;background:linear-gradient(110deg,transparent 20%,rgba(96,165,250,.16),transparent 60%);transform:translateX(-100%);animation:scan 5s infinite;pointer-events:none}@keyframes scan{60%,100%{transform:translateX(120%)}}
+.consoleTop{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid rgba(148,163,184,.16)}.consoleTop b{font-size:12px}.consoleTop span{font-size:9px;color:#67e8f9}
+.aiFlow{padding:23px 6px 10px}.flowNode{border:1px solid rgba(96,165,250,.32);background:rgba(15,23,42,.72);border-radius:13px;padding:12px;margin:8px 0;position:relative}.flowNode b{font-size:11px}.flowNode small{display:block;color:#94a3b8;margin-top:3px}.flowNode.active{border-color:#60a5fa;box-shadow:0 0 26px rgba(37,99,235,.17)}.flowArrow{text-align:center;color:#60a5fa;font-size:19px}
+.miniImpact{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}.miniImpact div{background:rgba(2,6,23,.48);border:1px solid rgba(148,163,184,.15);border-radius:9px;padding:9px;text-align:center}.miniImpact b{display:block;color:#93c5fd;font-size:10px}.miniImpact span{font-size:9px;color:#cbd5e1}
+.coverFoot{margin-top:22px;color:#64748b;font-size:9px;letter-spacing:.05em}
+#bispCover.hideCover{animation:coverExit .55s ease forwards;pointer-events:none}@keyframes coverExit{to{opacity:0;transform:scale(1.025);visibility:hidden}}
+@media(max-width:850px){.coverGrid{grid-template-columns:1fr;padding:28px 24px}.aiConsole{display:none}.coverStats{grid-template-columns:1fr 1fr 1fr}.coverTitle{font-size:45px}}
+
+
+/* V12 BISP branding */
+.brandLogoBox{width:122px;height:62px;background:#fff;border-radius:10px;padding:5px 8px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.brandLogoBox img{display:block;width:100%;height:100%;object-fit:contain}
+.coverContact{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:16px;font-size:11px;font-weight:850}
+.coverContact a{color:#93c5fd;text-decoration:none;border-bottom:1px solid rgba(147,197,253,.35);padding-bottom:2px}.coverContact a:hover{color:#fff}
+.bispAppBrand{display:flex;align-items:center;gap:10px;max-width:1400px;margin:8px auto 0;padding:7px 12px;background:#fff;border:1px solid #dbe4ef;border-radius:10px;box-shadow:0 3px 12px rgba(15,23,42,.06);box-sizing:border-box}
+.appLogo{width:88px;height:38px;display:flex;align-items:center}.appLogo img{width:100%;height:100%;object-fit:contain}
+.appBrandText{display:flex;flex-direction:column;line-height:1.15}.appBrandText b{font-size:12px;color:#0f172a}.appBrandText small{font-size:8.5px;color:#64748b}
+.appContact{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:9.5px;font-weight:800;white-space:nowrap}.appContact a{color:#1d4ed8;text-decoration:none}.appContact a:hover{text-decoration:underline}
+@media(max-width:700px){.bispAppBrand{flex-wrap:wrap}.appContact{width:100%;margin-left:0;white-space:normal}.brandLogoBox{width:104px;height:52px}}
+
+
+/* V13 Full Three-Statement Impact */
+.impactTile .impactGrid{grid-template-rows:1.55fr 1fr .85fr!important}
+.impactTile .impactStmt{padding:4px 6px!important}
+.impactTile .impactStmt h4{margin:0 0 2px!important;font-size:8.5px!important}
+.impactTile .impactRow{font-size:8.1px!important;padding:1.7px 4px!important;line-height:1.1!important}
+.impactTile .impactRow .amt{font-size:8.1px!important}
+.impactTile .impactRow.hit{background:#fff3bf!important;box-shadow:inset 3px 0 #f59e0b!important}
+.impactTile .impactRow.elim{background:#fee2e2!important;box-shadow:inset 3px 0 #ef4444!important}
+.impactTile .impactRow.add{background:#dcfce7!important;box-shadow:inset 3px 0 #22c55e!important}
+.impactLegend{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:3px 7px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:7px;font-weight:800;color:#475569}
+.impactLegend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:2px;vertical-align:-1px}
+.impactLegend .chg{background:#f59e0b}.impactLegend .elimKey{background:#ef4444}.impactLegend .addKey{background:#22c55e}
+
+</style></head>
+<body>
+<div id="bispCover">
+ <div class="coverGrid">
+  <section>
+   <div class="coverBrand">
+      <div class="brandLogoBox"><img src="data:image/png;base64,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" alt="BISP logo"></div>
+      <div><b>BISP Trainings</b><span>Business Intelligence Solution Providers Inc.</span></div>
+    </div>
+   <div class="aiPill"><i class="aiDot"></i> AI-INSPIRED • INTERACTIVE • HANDS-ON</div>
+   <h1 class="coverTitle">Master <em>IFRS 10</em><br>Consolidation Visually.</h1>
+   <p class="coverSub">Learn consolidation by watching the <strong>Visual Story</strong> and the live <strong>Balance Sheet, P&amp;L and Cash Flow impact</strong> together—supported by guided voice, animation and scenario-based practice.</p>
+   <div class="coverActions">
+    <button class="enterLab" onclick="document.getElementById('bispCover').classList.add('hideCover')">▶ Enter Live Consolidation Lab</button>
+    <div class="coverGhost">BISP Trainings • Learn EPM by Doing</div>
+   </div>
+   <div class="coverContact">
+      <a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a>
+      <span>•</span>
+      <a href="tel:+917694095404">Mohit: +91 76940 95404</a>
+    </div>
+    <div class="coverStats">
+    <div class="coverStat"><b>6</b><span>Consolidation Steps</span></div>
+    <div class="coverStat"><b>3</b><span>Live Financial Statements</span></div>
+    <div class="coverStat"><b>20</b><span>Scenario MCQs</span></div>
+   </div>
+   <div class="coverFoot">BISP TRAININGS • www.bisptrainings.com • Mohit: +91 76940 95404 • IFRS 10 BEGINNER CONSOLIDATION LAB</div>
+  </section>
+  <section class="aiConsole">
+   <div class="consoleTop"><b>AI CONSOLIDATION LEARNING ASSISTANT</b><span>● LIVE LAB READY</span></div>
+   <div class="aiFlow">
+    <div class="flowNode active"><b>01 · CONTROL</b><small>Identify parent control over Subsidiary A and Subsidiary B.</small></div>
+    <div class="flowArrow">↓</div>
+    <div class="flowNode"><b>02 · CONSOLIDATE</b><small>Combine 100% → eliminate investment → recognize goodwill &amp; NCI.</small></div>
+    <div class="flowArrow">↓</div>
+    <div class="flowNode active"><b>03 · SEE THE IMPACT LIVE</b><small>Animation and financial-statement consequences remain visible together.</small></div>
+    <div class="miniImpact"><div><b>BALANCE SHEET</b><span>Live impact</span></div><div><b>P&amp;L</b><span>Live impact</span></div><div><b>CASH FLOW</b><span>Live impact</span></div></div>
+   </div>
+  </section>
+ </div>
+</div>
+
+<div class="bispAppBrand">
+  <div class="appLogo"><img src="data:image/png;base64,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" alt="BISP logo"></div>
+  <div class="appBrandText"><b>BISP Trainings</b><small>IFRS 10 Interactive Consolidation Lab</small></div>
+  <div class="appContact">
+    <a href="https://www.bisptrainings.com" target="_blank" rel="noopener">www.bisptrainings.com</a>
+    <span>•</span>
+    <a href="tel:+917694095404">Mohit: +91 76940 95404</a>
+  </div>
+</div>
+
+<header><div class="brand">BISP <span>Trainings</span></div><div>IFRS 10 Consolidation — Beginner Consolidation Cockpit — True Tile View</div><div class="grow"></div><div class="tag">Visual Story ↔ Three-Statement Impact • Always Side-by-Side on Desktop • 20 MCQs</div></header>
+<div class="clarityBadge">ALTERNATE MOTION • PROTECTED READING ZONE</div><div id="motionRail" title="Lesson progress"><i id="railDot"></i><small style="top:-3px">Lesson motion</small></div><div class="equationStage" id="equationStage"></div><div id="nowCard"><small>NOW EXPLAINING</small><b id="nowText">Ready</b></div><div id="cinemaMask"></div><svg id="inkLayer"></svg><div id="laser"></div><div id="conceptStage"></div><div id="focusPointer">☝️</div><div id="focusLabel"></div><main>
+<section class="hero"><h1>Think of the group as one economic family</h1><p>The parent controls two companies. IFRS 10 consolidation asks us to present the parent and its controlled subsidiaries as if they were one economic entity. This lab deliberately uses simple numbers before introducing advanced consolidation topics.</p></section>
+<section class="controls"><button class="primary" id="start">▶ Start Beginner Lesson</button><button id="next">Next Step →</button><button id="reset">↻ Start Again</button><button class="voice" id="voice">🔊 Voice ON</button><button id="repeat">🔁 Repeat Explanation</button><button id="openQuiz">🎓 20 Scenario MCQs</button></section>
+<div class="steps">
+<div class="step" id="s1">1. Control</div><div class="step" id="s2">2. Combine 100%</div><div class="step" id="s3">3. Remove Investment</div><div class="step" id="s4">4. Goodwill</div><div class="step" id="s5">5. NCI</div><div class="step" id="s6">6. Group Accounts</div>
+</div>
+
+<div class="layout"><div class="liveTileView"><section class="card visualTile"><div class="head">Visual Story <small id="phase">Ready</small></div><div class="progress"><div class="bar" id="bar"></div></div>
+<div id="viz"><svg viewbox="0 0 800 380">
+<path class="edge" d="M175,300 C195,230 305,210 400,115" id="pathA"></path><path class="edge" d="M625,300 C605,230 495,210 400,115" id="pathB"></path>
+<g class="node" id="parent" transform="translate(305 35)"><rect height="86" width="190"></rect><circle class="dot" cx="173" cy="15" r="5"></circle><text class="t" text-anchor="middle" x="95" y="27">HOLDING COMPANY</text><text class="s" text-anchor="middle" x="95" y="50">Parent</text><text class="s" id="pstatus" text-anchor="middle" x="95" y="68">Owns &amp; controls subsidiaries</text></g>
+<g class="node" id="a" transform="translate(70 285)"><rect height="82" width="210"></rect><circle class="dot" cx="192" cy="15" r="5"></circle><text class="t" text-anchor="middle" x="105" y="26">SUBSIDIARY A</text><text class="s" text-anchor="middle" x="105" y="49">Parent owns <tspan id="svg80">80%</tspan></text><text class="s" text-anchor="middle" x="105" y="66">Outside owners = <tspan id="svg20">20%</tspan></text></g>
+<g class="node" id="b" transform="translate(520 285)"><rect height="82" width="210"></rect><circle class="dot" cx="192" cy="15" r="5"></circle><text class="t" text-anchor="middle" x="105" y="26">SUBSIDIARY B</text><text class="s" text-anchor="middle" x="105" y="49">Parent owns <tspan id="svg70">70%</tspan></text><text class="s" text-anchor="middle" x="105" y="66">Outside owners = <tspan id="svg30">30%</tspan></text></g>
+<circle class="packet" id="packet" opacity="0" r="8"></circle>
+<g id="cross" opacity="0" transform="translate(337 185)"><rect fill="#fff5f5" height="54" rx="8" stroke="#bd3434" width="126"></rect><text fill="#bd3434" font-size="11" font-weight="800" text-anchor="middle" x="63" y="22">REMOVE</text><text font-size="10" text-anchor="middle" x="63" y="40">Investment vs Equity</text></g>
+</svg></div>
+<div class="body"><div class="lesson" id="lesson"><b>Welcome.</b> Press Start Beginner Lesson. The lab will explain one consolidation idea at a time.</div>
+<div class="simple"><div class="box"><b>Subsidiary A</b><span>80% owned by Parent<br/>20% belongs to outside shareholders</span></div><div class="box"><b>Subsidiary B</b><span>70% owned by Parent<br/>30% belongs to outside shareholders</span></div></div>
+<div id="caption"><b>Live narration cue:</b> Spotlight, pointer, number pulse and dimming will direct attention to the exact item being narrated.</div><div class="attentionLegend"><span>① Spotlight</span><span>② Camera Zoom</span><span>③ Instructor Ink</span><span>④ Moving Pointer</span><span>⑤ Flying Numbers</span><span>⑥ Split / Merge</span><span>⑦ Karaoke Text</span><span>⑧ Wrong → Right</span></div><div id="transcript"><div id="transcriptHead">Read along with narration • synchronized visual focus</div><span class="future">Press Start Beginner Lesson. The spoken words will appear here while the matching visual is highlighted.</span></div><div class="voiceStatus" id="voiceStatus">Voice engine: waiting to initialize.</div></div></section><section class="impactTile" id="impactPanel">
+<div class="impactHead"><b>Three-Statement Impact — Current Consolidation Step</b><span id="impactStep">Ready</span></div>
+<div class="impactLegend"><span><i class="chg"></i>Current step impact</span><span><i class="elimKey"></i>Eliminated</span><span><i class="addKey"></i>Recognized / added</span></div><div class="impactGrid">
+<div class="impactStmt"><h4>BALANCE SHEET</h4><div id="impactBS"></div></div>
+<div class="impactStmt"><h4>PROFIT &amp; LOSS</h4><div id="impactPL"></div></div>
+<div class="impactStmt"><h4>CASH FLOW</h4><div id="impactCF"></div></div>
+</div>
+<div id="impactNote">Start the lesson to see which financial-statement numbers are affected at each consolidation step.</div>
+</section></div>
+
+<section class="card"><div class="head">Beginner Accounting View <small>USD millions</small></div>
+<div class="tabs"><button class="sel" data-tab="concept">Key Idea</button><button data-tab="goodwill">Goodwill</button><button data-tab="nci">NCI</button><button data-tab="fs">Financial Statements</button></div>
+<div class="body">
+<div class="pane" id="concept"><div class="formula"><strong>Most important beginner rule:</strong><br/>If the parent controls a subsidiary, consolidation does not simply take 80% or 70% of every line. For this simplified controlled-subsidiary example, the group brings in 100% of the subsidiary's assets, liabilities, income and expenses, then separately presents the portion belonging to outside shareholders as NCI.</div>
+<table><tr><th>Company</th><th>Parent ownership</th><th>NCI</th></tr><tr><td>Subsidiary A</td><td>80%</td><td>20%</td></tr><tr><td>Subsidiary B</td><td>70%</td><td>30%</td></tr></table></div>
+<div class="pane" id="goodwill" style="display:none"><div class="formula"><strong>Sub A Goodwill</strong><br/>Parent paid $42M.<br/>Parent share of acquisition net assets = 80% × $50M = $40M.<br/><span class="big">Goodwill = $2M</span></div><div class="formula"><strong>Sub B Goodwill</strong><br/>Parent paid $30M.<br/>Parent share = 70% × $40M = $28M.<br/><span class="big">Goodwill = $2M</span></div><div class="formula"><strong>Total Group Goodwill = $4M</strong><br/>This beginner example uses proportionate NCI / partial goodwill.</div></div>
+<div class="pane" id="nci" style="display:none"><div class="formula"><strong>What is NCI?</strong><br/>NCI means Non-controlling Interest. Older material may call it minority interest. It represents the part of a controlled subsidiary that belongs to shareholders outside the parent group.</div><table><tr><th></th><th>Sub A</th><th>Sub B</th></tr><tr><td>Outside ownership</td><td>20%</td><td>30%</td></tr><tr><td>Current profit</td><td>$10M</td><td>$8M</td></tr><tr class="nci"><td>NCI share of profit</td><td>$2.0M</td><td>$2.4M</td></tr><tr class="total"><td>Total NCI income</td><td colspan="2">$4.4M</td></tr></table></div>
+<div class="pane" id="fs" style="display:none"><div class="tabs" id="entityTabs"><button class="sel" data-e="parent">Holding</button><button data-e="a">Sub A</button><button data-e="b">Sub B</button><button data-e="group">Group</button></div><div class="tabs" id="stmtTabs"><button class="sel" data-s="bs">Balance Sheet</button><button data-s="pl">P&amp;L</button><button data-s="cf">Cash Flow</button></div><div class="scroll" id="statement"></div></div>
+</div></section>
+</div>
+<section class="card quizWrap" id="quizWrap">
+<div class="head">IFRS 10 Consolidation Basics — 20 Scenario MCQs <small>Numeric • Diagram • Flow • Graph</small></div>
+<div class="body">
+<div class="quizTop"><b id="qnum">Question 1 of 20</b><div class="quizProgress"><i id="qbar"></i></div><span class="score" id="score">Score: 0</span><button id="closeQuiz">Back to Lesson</button></div>
+<div class="qvisual" id="qvisual"></div><div class="qtext" id="qtext"></div><div class="opts" id="opts"></div><div class="feedback" id="feedback"></div>
+<div style="margin-top:10px"><button class="primary" disabled="" id="nextQ">Next Question →</button><button id="restartQ">Restart Quiz</button></div>
+</div></section>
+</main>
+<script>
+gsap.registerPlugin(MotionPathPlugin);
+const $=s=>document.querySelector(s);let voiceOn=true,lastSpeech="",current=0,entity="parent",stmt="bs",cueTimers=[];
+const FS={
+parent:{bs:[["Cash",30],["Receivables",35],["Investment in Sub A",42],["Investment in Sub B",30],["PPE",83],["Total Assets",220,"total"],["Liabilities",90],["Common Stock",70],["Retained Earnings",60],["Total E&L",220,"total"]],pl:[["Revenue",100],["Costs",-80],["Net Income",20,"total"]],cf:[["Operating CF",28],["Investing CF",-10],["Financing CF",-8],["Net Change",10,"total"]]},
+a:{bs:[["Cash",15],["Receivables",20],["PPE",35],["Total Assets",70,"total"],["Liabilities",10],["Common Stock",30],["Retained Earnings",30],["Total E&L",70,"total"]],pl:[["Revenue",70],["Costs",-60],["Net Income",10,"total"]],cf:[["Operating CF",14],["Investing CF",-5],["Financing CF",-2],["Net Change",7,"total"]]},
+b:{bs:[["Cash",12],["Receivables",18],["PPE",28],["Total Assets",58,"total"],["Liabilities",10],["Common Stock",25],["Retained Earnings",23],["Total E&L",58,"total"]],pl:[["Revenue",60],["Costs",-52],["Net Income",8,"total"]],cf:[["Operating CF",12],["Investing CF",-4],["Financing CF",-3],["Net Change",5,"total"]]},
+group:{bs:[["Cash",57],["Receivables",73],["Investment in subsidiaries",0,"elim"],["PPE",146],["Goodwill",4],["Selected Group Assets",280,"total"],["Parent Common Stock",70],["NCI",26.4,"nci"]],pl:[["Revenue",230],["Costs",-192],["Consolidated Net Income",38,"total"],["NCI share of income",-4.4,"nci"],["Income attributable to Parent",33.6,"total"]],cf:[["Operating CF",54],["Investing CF",-19],["Financing CF",-13],["Net Change",22,"total"]]}
+};
+
+const impactSteps=[
+{name:"Control assessment",
+bs:[["Cash",57],["Accounts Receivable",73],["Inventory",0],["PPE",146],["Investment in Subsidiary A",42],["Investment in Subsidiary B",30],["Goodwill",0],["Total Assets",348],["Liabilities",110],["Parent Common Stock",70],["Group Retained Earnings",141.6],["NCI",26.4],["Total Equity & Liabilities",348]],
+pl:[["Revenue",230],["Operating Costs",-178],["Operating Profit",52],["Other / Finance",-14],["Profit Before Attribution",38],["NCI Income",0],["Profit Attributable to Parent",38]],
+cf:[["Operating Cash Flow",54],["Investing Cash Flow",-19],["Financing Cash Flow",-13],["Net Change in Cash",22],["Opening Cash",35],["Closing Cash",57]],
+hit:["Investment in Subsidiary A","Investment in Subsidiary B"],note:"Control is assessed first. The investment balances are still visible before consolidation eliminations. The highlighted accounts are the balances that will be addressed by the consolidation process."},
+
+{name:"Combine 100%",
+bs:[["Cash",57],["Accounts Receivable",73],["Inventory",0],["PPE",146],["Investment in Subsidiary A",42],["Investment in Subsidiary B",30],["Goodwill",0],["Total Assets",348],["Liabilities",110],["Parent Common Stock",70],["Combined Equity before Eliminations",168],["Total Equity & Liabilities",348]],
+pl:[["Revenue",230],["Operating Costs",-178],["Operating Profit",52],["Other / Finance",-14],["Combined Net Income",38],["NCI Income",0],["Parent Attributable Income",38]],
+cf:[["Operating Cash Flow",54],["Investing Cash Flow",-19],["Financing Cash Flow",-13],["Net Change in Cash",22],["Opening Cash",35],["Closing Cash",57]],
+hit:["Cash","Accounts Receivable","PPE","Revenue","Operating Costs","Operating Profit","Combined Net Income","Operating Cash Flow","Investing Cash Flow","Financing Cash Flow","Net Change in Cash","Closing Cash"],note:"The parent and both controlled subsidiaries are combined at 100% before consolidation eliminations. Highlighted rows show the full-statement values entering the group view."},
+
+{name:"Investment / equity elimination",
+bs:[["Cash",57],["Accounts Receivable",73],["Inventory",0],["PPE",146],["Investment in Subsidiary A",0],["Investment in Subsidiary B",0],["Goodwill",0],["Total Assets before Goodwill",276],["Liabilities",110],["Parent Common Stock",70],["Subsidiary Acquisition Equity Eliminated",0],["Temporary Consolidation Difference",96],["Total Equity & Liabilities",276]],
+pl:[["Revenue",230],["Operating Costs",-178],["Operating Profit",52],["Other / Finance",-14],["Net Income",38],["NCI Income",0],["Parent Attributable Income",38]],
+cf:[["Operating Cash Flow",54],["Investing Cash Flow",-19],["Financing Cash Flow",-13],["Consolidation Elimination Cash Effect",0],["Net Change in Cash",22],["Opening Cash",35],["Closing Cash",57]],
+hit:["Investment in Subsidiary A","Investment in Subsidiary B","Subsidiary Acquisition Equity Eliminated","Consolidation Elimination Cash Effect"],elim:["Investment in Subsidiary A","Investment in Subsidiary B","Subsidiary Acquisition Equity Eliminated"],note:"Parent investments are eliminated against relevant subsidiary acquisition-date equity. This is a consolidation entry, so the current-period cash-flow effect is zero."},
+
+{name:"Goodwill",
+bs:[["Cash",57],["Accounts Receivable",73],["Inventory",0],["PPE",146],["Investment in Subsidiary A",0],["Investment in Subsidiary B",0],["Goodwill — Sub A",2],["Goodwill — Sub B",2],["Total Goodwill",4],["Total Assets",280],["Liabilities",110],["Parent Common Stock",70],["Group Retained Earnings",73.6],["NCI",26.4],["Total Equity & Liabilities",280]],
+pl:[["Revenue",230],["Operating Costs",-178],["Operating Profit",52],["Other / Finance",-14],["Consolidated Net Income",38],["NCI Income",-4.4],["Profit Attributable to Parent",33.6]],
+cf:[["Operating Cash Flow",54],["Investing Cash Flow",-19],["Financing Cash Flow",-13],["Goodwill Recognition Cash Effect",0],["Net Change in Cash",22],["Opening Cash",35],["Closing Cash",57]],
+hit:["Goodwill — Sub A","Goodwill — Sub B","Total Goodwill","Goodwill Recognition Cash Effect"],add:["Goodwill — Sub A","Goodwill — Sub B","Total Goodwill"],note:"The simplified partial-goodwill calculation recognizes $2M for Sub A and $2M for Sub B. Goodwill is added to the consolidated Balance Sheet; its consolidation recognition does not itself create current-period cash flow."},
+
+{name:"NCI",
+bs:[["Cash",57],["Accounts Receivable",73],["Inventory",0],["PPE",146],["Investment in Subsidiaries",0],["Goodwill",4],["Total Assets",280],["Liabilities",110],["Parent Common Stock",70],["Group Retained Earnings",73.6],["NCI — Sub A",12],["NCI — Sub B",14.4],["Total NCI",26.4],["Total Equity & Liabilities",280]],
+pl:[["Revenue",230],["Operating Costs",-178],["Operating Profit",52],["Other / Finance",-14],["Consolidated Net Income",38],["NCI Income — Sub A",-2],["NCI Income — Sub B",-2.4],["Total NCI Income",-4.4],["Profit Attributable to Parent",33.6]],
+cf:[["Operating Cash Flow",54],["Investing Cash Flow",-19],["Financing Cash Flow",-13],["NCI Attribution Cash Effect",0],["Net Change in Cash",22],["Opening Cash",35],["Closing Cash",57]],
+hit:["NCI — Sub A","NCI — Sub B","Total NCI","NCI Income — Sub A","NCI Income — Sub B","Total NCI Income","Profit Attributable to Parent","NCI Attribution Cash Effect"],add:["NCI — Sub A","NCI — Sub B","Total NCI"],note:"NCI is presented separately within consolidated equity. Consolidated profit remains $38M; $4.4M is attributed to NCI and $33.6M to owners of the parent. Profit attribution itself has no cash-flow effect."},
+
+{name:"Group financial statements",
+bs:[["Cash",57],["Accounts Receivable",73],["Inventory",0],["PPE",146],["Investment in Subsidiaries",0],["Goodwill",4],["Total Assets",280],["Liabilities",110],["Parent Common Stock",70],["Group Retained Earnings",73.6],["NCI",26.4],["Total Equity",170],["Total Equity & Liabilities",280]],
+pl:[["Revenue",230],["Operating Costs",-178],["Operating Profit",52],["Other / Finance",-14],["Consolidated Net Income",38],["NCI Income",-4.4],["Profit Attributable to Parent",33.6]],
+cf:[["Operating Cash Flow",54],["Investing Cash Flow",-19],["Financing Cash Flow",-13],["Net Change in Cash",22],["Opening Cash",35],["Closing Cash",57]],
+hit:["Total Assets","Investment in Subsidiaries","Goodwill","Group Retained Earnings","NCI","Total Equity","Total Equity & Liabilities","Consolidated Net Income","NCI Income","Profit Attributable to Parent","Net Change in Cash","Closing Cash"],note:"Final consolidated teaching view: investments are eliminated, goodwill and NCI are presented, the Balance Sheet balances at $280M, consolidated net income is $38M with $4.4M attributed to NCI, and closing cash is $57M."}
+];
+function impactMoney(v){return (v<0?"(":"")+"$"+Math.abs(v).toFixed(1)+"M"+(v<0?")":"")}
+function renderImpact(step){
+ let d=impactSteps[step]||impactSteps[0];$("#impactStep").textContent=d.name;$("#impactNote").textContent=d.note;
+ function rows(arr){
+  return arr.map(([n,v])=>{
+    let cls="quiet",delta="";
+    if((d.hit||[]).includes(n))cls="hit";
+    if((d.elim||[]).includes(n)){cls+=" elim";delta='<span class="impactDelta neg">ELIMINATED</span>'}
+    if((d.add||[]).includes(n)){cls+=" add";delta='<span class="impactDelta pos">RECOGNIZED</span>'}
+    return `<div class="impactRow ${cls}" data-impact="${n}"><span>${n}${delta}</span><span class="amt">${impactMoney(v)}</span></div>`
+  }).join("")
+ }
+ $("#impactBS").innerHTML=rows(d.bs);$("#impactPL").innerHTML=rows(d.pl);$("#impactCF").innerHTML=rows(d.cf);
+ let hits=[...document.querySelectorAll("#impactPanel .hit")];
+ gsap.fromTo(hits,{x:-12,opacity:.25},{x:0,opacity:1,stagger:.08,duration:.42,ease:"power2.out"});
+ hits.forEach((r,i)=>cueTimers.push(setTimeout(()=>gsap.fromTo(r,{scale:1},{scale:1.045,duration:.22,yoyo:true,repeat:1}),i*120)));
+}
+
+const lessons=[
+{title:"1 • Does the parent control them?",pct:16,tab:"concept",text:"First ask about control. In this teaching case, the Holding Company controls both subsidiaries. It owns 80 percent of Subsidiary A and 70 percent of Subsidiary B. Because control exists, both are subsidiaries for consolidation.",
+ cues:[
+ [0,"Control is the first question.",["parent"]],
+ [1800,"Holding Company controls both subsidiaries.",["parent","a","b"]],
+ [4700,"Subsidiary A: parent ownership is 80%.",["a","svg80"]],
+ [7200,"Subsidiary B: parent ownership is 70%.",["b","svg70"]]
+]},
+{title:"2 • Combine 100%",pct:33,tab:"concept",text:"Next, combine the parent with 100 percent of each controlled subsidiary's assets, liabilities, income and expenses. Do not take only 80 percent of Sub A or 70 percent of Sub B. The outside ownership is handled separately as NCI.",
+ cues:[
+ [0,"Combine 100% of each controlled subsidiary.",["a","b"]],
+ [3400,"Not only 80% of Sub A.",["a","svg80"]],
+ [5600,"Not only 70% of Sub B.",["b","svg70"]],
+ [7600,"The outside ownership is shown separately as NCI.",["svg20","svg30"]]
+]},
+{title:"3 • Remove the parent's investment",pct:50,tab:"concept",text:"The parent shows Investment in Subsidiary on its own balance sheet. The subsidiaries show their own common stock and other equity. Inside the group these represent the same ownership relationship, so consolidation eliminates the parent's investment against the relevant subsidiary acquisition-date equity.",
+ cues:[
+ [0,"Parent standalone accounts contain investments in subsidiaries.",["parent"]],
+ [3500,"Subsidiaries contain their own common stock and equity.",["a","b"]],
+ [7200,"Consolidation removes the internal investment-versus-equity relationship.",["cross"]]
+]},
+{title:"4 • Calculate goodwill",pct:67,tab:"goodwill",text:"For Subsidiary A, the parent paid 42 million dollars and its share of acquisition net assets is 40 million, giving 2 million goodwill. For Subsidiary B, 30 million consideration less 28 million parent share gives another 2 million. Total goodwill is 4 million.",
+ cues:[
+ [0,"Sub A: consideration is $42M.",["goodwill"]],
+ [2600,"Parent share of Sub A net assets is $40M.",["goodwill"]],
+ [4800,"Sub A goodwill is $2M.",["goodwill"]],
+ [7000,"Sub B: $30M less $28M gives $2M goodwill.",["goodwill"]],
+ [10200,"Total group goodwill is $4M.",["goodwill"]]
+]},
+{title:"5 • Show NCI",pct:84,tab:"nci",text:"NCI means non-controlling interest. It is the portion belonging to shareholders outside the parent. Sub A has 20 percent NCI and Sub B has 30 percent NCI. Their share of current profit is 2 million plus 2.4 million, or 4.4 million.",
+ cues:[
+ [0,"NCI means non-controlling interest.",["nci"]],
+ [3000,"Sub A outside ownership is 20%.",["a","svg20"]],
+ [5200,"Sub B outside ownership is 30%.",["b","svg30"]],
+ [7800,"NCI income is $2.0M plus $2.4M, totaling $4.4M.",["nci"]]
+]},
+{title:"6 • Produce group accounts",pct:100,tab:"fs",text:"Finally, present the group as one economic entity. The consolidated statements contain the controlled businesses, remove the parent's investments and subsidiary equity as required, recognize goodwill, and separately present NCI. You can now inspect the Holding, each Subsidiary, and the Group Balance Sheet, Profit and Loss, and Cash Flow.",
+ cues:[
+ [0,"Now present the parent and subsidiaries as one economic entity.",["parent","a","b"]],
+ [3500,"Investment balances are removed and goodwill is recognized.",["cross"]],
+ [6800,"NCI remains separately visible in group equity and profit attribution.",["fs"]],
+ [9800,"Review the Group Balance Sheet, P&L and Cash Flow.",["fs"]]
+]}
+];
+function money(n){return(n<0?"(":"")+"$"+Math.abs(n).toFixed(1)+"M"+(n<0?")":"")}
+function renderFS(){let rows=FS[entity][stmt];$("#statement").innerHTML='<table><tr><th>Line</th><th>Amount</th></tr>'+rows.map(r=>`<tr class="${r[2]||""}"><td>${r[0]}</td><td>${money(r[1])}</td></tr>`).join("")+"</table>"; if(typeof animateStatementRows==="function")requestAnimationFrame(animateStatementRows)}
+renderFS();
+function showTab(id){document.querySelectorAll(".pane").forEach(x=>x.style.display="none");$("#"+id).style.display="block";document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("sel",x.dataset.tab===id))}
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-e]").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");entity=b.dataset.e;renderFS()});
+document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-s]").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");stmt=b.dataset.s;renderFS()});
+function node(id,state){let e=$("#"+id);e.classList.remove("active","ok");if(state)e.classList.add(state)}
+function clearSync(){
+ cueTimers.forEach(clearTimeout);cueTimers=[]; if(typeof clearV5==="function")clearV5();
+ document.querySelectorAll(".syncGlow,.syncText,.syncNum,.syncNode,.focusTarget,.focusDim,.immersiveTarget,.immersiveDim").forEach(e=>e.classList.remove("syncGlow","syncText","syncNum","syncNode","focusTarget","focusDim"));
+ $("#focusPointer").classList.remove("show");$("#focusLabel").classList.remove("show");
+}
+function resolveTargets(key){
+ if(key==="goodwill")return [...document.querySelectorAll("#goodwill .formula")];
+ if(key==="nci")return [...document.querySelectorAll("#nci .formula,#nci table")];
+ if(key==="fs")return [$("#fs")];
+ let e=$("#"+key);return e?[e]:[];
+}
+function spotlight(targets,label){
+ // Dim major learning surfaces but never the active target.
+ let surfaces=[...document.querySelectorAll("#viz .node,#concept,#goodwill,#nci,#fs")].filter(Boolean);
+ surfaces.forEach(e=>{if(!targets.includes(e)&&!targets.some(t=>e.contains(t)||t.contains(e)))e.classList.add("focusDim","immersiveDim")});
+ targets.forEach(e=>{
+   e.classList.add("focusTarget","immersiveTarget");
+   if(e.classList.contains("node"))e.classList.add("syncNode");
+   else if(e.tagName==="tspan")e.classList.add("syncNum");
+   else e.classList.add("syncGlow");
+   gsap.fromTo(e,{scale:1},{scale:1.055,duration:.38,yoyo:true,repeat:1,transformOrigin:"center"});
+ });
+ let t=targets[0];if(!t)return;
+ let r=t.getBoundingClientRect(), readZone=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--read-zone"))||190, px=Math.min(window.innerWidth-30,Math.max(30,r.left+r.width*.5)), py=Math.min(window.innerHeight-readZone-45,Math.max(34,r.top-20));
+ let pointer=$("#focusPointer");pointer.style.left=px+"px";pointer.style.top=py+"px";pointer.classList.add("show");
+ let lab=$("#focusLabel");lab.textContent=label;lab.classList.add("show");
+ let lw=300,left=Math.min(window.innerWidth-lw-12,Math.max(12,r.left+r.width/2-lw/2)),top=Math.min(window.innerHeight-readZone-70,Math.max(8,r.bottom+10));
+ lab.style.left=left+"px";lab.style.top=top+"px";
+ gsap.fromTo(pointer,{y:-8,scale:.85},{y:3,scale:1.08,duration:.55,yoyo:true,repeat:-1,ease:"sine.inOut"});
+}
+function pulseTarget(key){spotlight(resolveTargets(key),"Focus here")}
+function caption(t){$("#caption").innerHTML="<b>Live narration cue:</b> "+t}
+function selectVoice(){
+ let vs=speechSynthesis.getVoices();
+ return vs.find(v=>/^en-(GB|US|IN)/i.test(v.lang)&&/Microsoft|Google|Natural|Samantha|Daniel|Zira/i.test(v.name))
+ ||vs.find(v=>/^en-/i.test(v.lang))||vs[0];
+}
+function stopVoice(){clearSync();if("speechSynthesis"in window)speechSynthesis.cancel()}
+function speakLesson(L){
+ lastSpeech=L.text;if(!voiceOn||!("speechSynthesis"in window)){runCues(L);return}
+ stopVoice();$("#voiceStatus").textContent="Voice: preparing synchronized narration…";
+ setTimeout(()=>{if(!voiceOn)return;let u=new SpeechSynthesisUtterance(L.text),chosen=selectVoice();if(chosen)u.voice=chosen;u.rate=.84;u.pitch=1;u.volume=.9;
+ u.onstart=()=>{$("#voiceStatus").textContent=`Voice: synchronized${chosen?" • "+chosen.name:""}`;runCues(L)};
+ u.onend=()=>{$("#voiceStatus").textContent="Voice: ready";clearSync();caption("Narration complete. Select Next Step.")};
+ u.onerror=()=>{$("#voiceStatus").textContent="Voice issue detected. Use Repeat Explanation.";clearSync()};
+ speechSynthesis.speak(u)},220)
+}
+function runCues(L){
+ L.cues.forEach(([ms,txt,keys])=>cueTimers.push(setTimeout(()=>{caption(txt);keys.forEach(pulseTargetSafe)},ms)));
+}
+function pulseTargetSafe(key){
+ document.querySelectorAll(".syncGlow,.syncText,.syncNum,.syncNode,.focusTarget,.focusDim,.immersiveTarget,.immersiveDim").forEach(e=>e.classList.remove("syncGlow","syncText","syncNum","syncNode","focusTarget","focusDim"));
+ $("#focusPointer").classList.remove("show");$("#focusLabel").classList.remove("show");
+ let targets=resolveTargets(key);
+ let cue=$("#caption").textContent.replace("Live narration cue:","").trim();
+ spotlight(targets,cue||"Focus here");
+}
+function visualStep(i){
+ stopVoice();current=i;renderImpact(i);let L=lessons[i];$("#phase").textContent=L.title;$("#lesson").innerHTML="<b>"+L.title+"</b><br>"+L.text;gsap.to("#bar",{width:L.pct+"%",duration:.4});
+ document.querySelectorAll(".step").forEach((x,k)=>{x.classList.toggle("on",k===i);x.classList.toggle("done",k<i)});showTab(L.tab);
+ if(i===0){node("a","active");node("b","active")}
+ if(i===1){cueTimers.push(setTimeout(()=>{gsap.set("#packet",{opacity:1});gsap.to("#packet",{duration:1.2,motionPath:{path:"#pathA",align:"#pathA",alignOrigin:[.5,.5]}})},900));cueTimers.push(setTimeout(()=>gsap.to("#packet",{duration:1.2,motionPath:{path:"#pathB",align:"#pathB",alignOrigin:[.5,.5]}}),4300))}
+ if(i===2)cueTimers.push(setTimeout(()=>gsap.to("#cross",{opacity:1,scale:1.08,duration:.45}),6800));
+ if(i===3)cueTimers.push(setTimeout(()=>gsap.from("#goodwill .formula",{y:12,opacity:0,stagger:.12,duration:.4}),400));
+ if(i===5){cueTimers.push(setTimeout(()=>{node("a","ok");node("b","ok");node("parent","ok");$("#pstatus").textContent="GROUP CONSOLIDATED";entity="group";renderFS();document.querySelectorAll("[data-e]").forEach(x=>x.classList.toggle("sel",x.dataset.e==="group"))},8800))}
+ speakLesson(L);
+}
+function reset(){stopVoice();$("#nowCard").classList.remove("show");renderImpact(0);current=0;node("parent","");node("a","");node("b","");$("#pstatus").textContent="Owns & controls subsidiaries";gsap.set("#cross",{opacity:0,scale:1});gsap.set("#packet",{opacity:0});$("#bar").style.width="0";$("#phase").textContent="Ready";$("#lesson").innerHTML="<b>Welcome.</b> Press Start Beginner Lesson. Narration, highlighted text, numbers and SVG animation will move together.";document.querySelectorAll(".step").forEach(x=>x.classList.remove("on","done"));showTab("concept");caption("Spotlight, pointer, number pulse and dimming will direct attention to the exact item being narrated.");$("#voiceStatus").textContent="Voice: ready"}
+$("#start").onclick=()=>{reset();visualStep(0)};
+$("#next").onclick=()=>visualStep(Math.min(current+1,lessons.length-1));
+$("#reset").onclick=reset;
+$("#repeat").onclick=()=>{stopVoice();speakLesson(lessons[current])};
+$("#voice").onclick=()=>{voiceOn=!voiceOn;$("#voice").textContent=voiceOn?"🔊 Voice ON":"🔇 Voice OFF";$("#voice").classList.toggle("voice",voiceOn);if(!voiceOn)stopVoice();$("#voiceStatus").textContent=voiceOn?"Voice: ready":"Voice: off"};
+if("speechSynthesis"in window)speechSynthesis.onvoiceschanged=()=>$("#voiceStatus").textContent="Voice: ready";
+
+
+
+let motionArtifacts=[];
+function cleanupMotion(){
+ motionArtifacts.forEach(x=>{try{x.kill&&x.kill()}catch(e){};try{x.remove&&x.remove()}catch(e){}});motionArtifacts=[];
+ document.querySelectorAll(".dataParticle,.motionTrail").forEach(e=>e.remove());
+ document.querySelectorAll(".motionLift,.sheenHost").forEach(e=>e.classList.remove("motionLift","sheenHost"));
+}
+function cinematicEntrance(targets){
+ targets.forEach((e,i)=>{if(!e)return;
+   gsap.fromTo(e,{opacity:.15,scale:.88,rotationX:7},{opacity:1,scale:1,rotationX:0,duration:.72,delay:i*.08,ease:"back.out(1.35)",transformOrigin:"center"});
+ });
+}
+function kineticPunch(el){
+ if(!el)return;
+ let tl=gsap.timeline();
+ tl.to(el,{scale:1.22,duration:.18,ease:"power2.out"}).to(el,{scale:.96,duration:.13}).to(el,{scale:1.08,duration:.16,ease:"back.out(2)"}).to(el,{scale:1,duration:.2});
+ motionArtifacts.push(tl);
+}
+function travelParticles(from,to,count=5){
+ if(!from||!to)return;
+ let a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
+ for(let i=0;i<count;i++){
+   let d=document.createElement("div");d.className="dataParticle";document.body.appendChild(d);
+   gsap.set(d,{left:a.left+a.width/2,top:a.top+a.height/2,scale:.6+Math.random()*.5});
+   let tw=gsap.to(d,{left:b.left+b.width/2,top:b.top+b.height/2,duration:.85+i*.11,delay:i*.08,ease:"power1.inOut",
+     onComplete:()=>d.remove()});motionArtifacts.push(tw);
+ }
+}
+function drawHierarchyPaths(){
+ ["#pathA","#pathB"].forEach((sel,i)=>{let p=$(sel);if(!p)return;let len=p.getTotalLength();gsap.set(p,{strokeDasharray:len,strokeDashoffset:len});
+   let tw=gsap.to(p,{strokeDashoffset:0,duration:.85,delay:i*.18,ease:"power2.inOut"});motionArtifacts.push(tw);
+ });
+}
+function cardSweep(el){
+ if(!el)return;let host=el.closest(".card")||el;host.classList.add("motionLift","sheenHost");
+ cueTimers.push(setTimeout(()=>host.classList.remove("motionLift","sheenHost"),1500));
+}
+function animateStatementRows(){
+ let rows=[...document.querySelectorAll("#statement tr")].slice(1);
+ gsap.fromTo(rows,{x:-22,opacity:0},{x:0,opacity:1,stagger:.075,duration:.38,ease:"power2.out"});
+}
+function animateQuizVisual(){
+ let v=$("#qvisual");if(!v)return;
+ gsap.fromTo(v,{opacity:0,scale:.96,y:12},{opacity:1,scale:1,y:0,duration:.5,ease:"back.out(1.2)"});
+ let bars=[...v.querySelectorAll(".barChart div")];if(bars.length)gsap.from(bars,{scaleY:.05,transformOrigin:"bottom",stagger:.1,duration:.65,ease:"back.out(1.4)"});
+ let shapes=[...v.querySelectorAll("svg rect,svg line,svg path")];if(shapes.length)gsap.from(shapes,{opacity:0,scale:.85,transformOrigin:"center",stagger:.04,duration:.35});
+}
+function animateAttentionCue(step,cueIndex,keys){
+ let targets=keys.flatMap(resolveTargets).filter(Boolean);cinematicEntrance(targets);targets.forEach(cardSweep);
+ if(targets[0])kineticPunch(targets[0]);
+ if(step===0&&(cueIndex===0||cueIndex===1))drawHierarchyPaths();
+ if(step===1&&cueIndex===0){travelParticles($("#a"),$("#parent"),6);travelParticles($("#b"),$("#parent"),6)}
+ if(step===2&&cueIndex===2){let x=$("#cross");kineticPunch(x);gsap.fromTo(x,{rotation:-3},{rotation:3,duration:.12,yoyo:true,repeat:5,ease:"none"})}
+ if(step===3&&cueIndex===0){let forms=document.querySelectorAll("#goodwill .formula");if(forms[0]){travelParticles($("#a"),forms[0],4);travelParticles($("#parent"),forms[0],4)}}
+ if(step===4&&cueIndex===3){let n=$("#nci");if(n)gsap.fromTo(n,{scale:.97},{scale:1.025,duration:.32,yoyo:true,repeat:3,ease:"sine.inOut"})}
+ if(step===5&&cueIndex===3){animateStatementRows()}
+}
+
+
+let altArtifacts=[];
+function clearAlt(){
+ altArtifacts.forEach(x=>{try{x.kill&&x.kill()}catch(e){};try{x.remove&&x.remove()}catch(e){}});altArtifacts=[];
+ document.querySelectorAll(".revealCurtain,.rippleDot,.motionGhost").forEach(e=>e.remove());
+ $("#equationStage").classList.remove("show");$("#equationStage").innerHTML="";
+}
+function ripple(el){
+ if(!el)return;let r=el.getBoundingClientRect();
+ for(let i=0;i<3;i++){let d=document.createElement("div");d.className="rippleDot";document.body.appendChild(d);
+   gsap.set(d,{left:r.left+r.width/2,top:r.top+r.height/2,width:10,height:10,xPercent:-50,yPercent:-50,opacity:.85});
+   let tw=gsap.to(d,{width:Math.max(r.width,r.height)+70+i*28,height:Math.max(r.width,r.height)+70+i*28,opacity:0,duration:.9,delay:i*.15,ease:"power1.out",onComplete:()=>d.remove()});altArtifacts.push(tw)}
+}
+function curtainReveal(el){
+ if(!el)return;let r=el.getBoundingClientRect(),d=document.createElement("div");d.className="revealCurtain";document.body.appendChild(d);
+ gsap.set(d,{left:r.left,top:r.top,width:r.width,height:r.height,scaleX:1});let tw=gsap.to(d,{scaleX:0,duration:.7,ease:"power3.inOut",onComplete:()=>d.remove()});altArtifacts.push(tw)
+}
+function flipCard(el){
+ if(!el)return;el.classList.add("flipActive");let tw=gsap.fromTo(el,{rotationY:-78,opacity:.2},{rotationY:0,opacity:1,duration:.65,ease:"back.out(1.4)",transformPerspective:800});altArtifacts.push(tw)
+}
+function ghostMove(text,from,to){
+ if(!from||!to)return;let a=from.getBoundingClientRect(),b=to.getBoundingClientRect(),g=document.createElement("div");g.className="motionGhost";g.textContent=text;document.body.appendChild(g);
+ gsap.set(g,{left:a.left+a.width/2,top:a.top+a.height/2,xPercent:-50,yPercent:-50});
+ let tw=gsap.to(g,{left:b.left+b.width/2,top:b.top+b.height/2,rotation:360,scale:.75,duration:1.1,ease:"power2.inOut",onComplete:()=>gsap.to(g,{opacity:0,duration:.25,onComplete:()=>g.remove()})});altArtifacts.push(tw)
+}
+function equation(parts){
+ let e=$("#equationStage");e.innerHTML=parts.map(x=>`<span class="eqPart">${x}</span>`).join("");e.classList.add("show");
+ gsap.to(e.querySelectorAll(".eqPart"),{opacity:1,y:0,from:{y:18},stagger:.28,duration:.35});
+ cueTimers.push(setTimeout(()=>e.classList.remove("show"),3400));
+}
+function waterfall(){
+ let rows=[...document.querySelectorAll("#statement tr")].slice(1);rows.forEach(r=>r.classList.add("waterfallRow"));
+ gsap.fromTo(rows,{opacity:0,x:-35,scaleX:.92},{opacity:1,x:0,scaleX:1,stagger:.11,duration:.45,ease:"power2.out"});
+}
+function countPulse(el){
+ if(!el)return;gsap.fromTo(el,{scale:.8,opacity:.35},{scale:1,opacity:1,duration:.55,ease:"elastic.out(1,.45)"});
+}
+function rail(step,cue){
+ let total=Math.max(1,lessons[step].cues.length-1),pct=((step+(cue/total))/lessons.length)*100;
+ gsap.to("#railDot",{top:`${Math.min(94,pct)}%`,duration:.55,ease:"power2.inOut"});
+}
+function altCue(step,cue,keys){
+ clearAlt();rail(step,cue);let ts=keys.flatMap(resolveTargets).filter(Boolean),t=ts[0];if(t){ripple(t);curtainReveal(t)}
+ if(cue%2===1&&t)flipCard(t);
+ if(step===0&&cue===2)equation(["80%","ownership","→","CONTROL"]);
+ if(step===0&&cue===3)equation(["70%","ownership","→","CONTROL"]);
+ if(step===1&&cue===0)equation(["CONTROL","→","100%","consolidation"]);
+ if(step===2&&cue===2){ghostMove("Investment",$("#parent"),$("#cross"));ghostMove("Subsidiary Equity",$("#a"),$("#cross"))}
+ if(step===3&&cue===0)equation(["$42M","−","$40M","=","$2M Goodwill"]);
+ if(step===3&&cue===3)equation(["$30M","−","$28M","=","$2M Goodwill"]);
+ if(step===4&&cue===1)equation(["$10M","×","20%","=","$2M NCI"]);
+ if(step===4&&cue===3)equation(["$2M","＋","$2.4M","=","$4.4M"]);
+ if(step===5&&cue===3)waterfall();
+}
+
+function clearV5(){
+ clearAlt(); cleanupMotion();
+ $("#cinemaMask").classList.remove("on");
+ document.querySelectorAll(".cinemaLift,.zoomFocus").forEach(e=>e.classList.remove("cinemaLift","zoomFocus"));
+ $("#inkLayer").innerHTML="";$("#laser").classList.remove("show");
+ document.querySelectorAll(".flyNum").forEach(e=>e.remove());$("#conceptStage").classList.remove("show");$("#conceptStage").innerHTML="";
+}
+function cinema(targets){
+ $("#cinemaMask").classList.add("on");targets.forEach(t=>t&&t.classList.add("cinemaLift","zoomFocus"));
+}
+function laserTo(el){
+ if(!el)return;let r=el.getBoundingClientRect(),l=$("#laser");l.classList.add("show");
+ let safeTop=Math.min(r.top+r.height*.5-9,window.innerHeight-parseInt(getComputedStyle(document.documentElement).getPropertyValue("--read-zone"))-40);gsap.to(l,{left:r.left+r.width*.5-9,top:safeTop,duration:.7,ease:"power2.out"});
+}
+function inkCircle(el){
+ if(!el)return;let r=el.getBoundingClientRect(),svg=$("#inkLayer"),cx=r.left+r.width/2,cy=r.top+r.height/2,rx=r.width/2+10,ry=r.height/2+8;
+ svg.innerHTML=`<ellipse class="inkPath" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" stroke-dasharray="900" stroke-dashoffset="900"/>`;
+ gsap.to(svg.querySelector("ellipse"),{strokeDashoffset:0,duration:.8,ease:"power1.inOut"});
+}
+function inkUnderline(el){
+ if(!el)return;let r=el.getBoundingClientRect(),svg=$("#inkLayer"),y=r.bottom+5;
+ svg.innerHTML=`<path class="inkPath" d="M${r.left-4},${y} Q${r.left+r.width/2},${y+6} ${r.right+4},${y}" stroke-dasharray="700" stroke-dashoffset="700"/>`;
+ gsap.to(svg.querySelector("path"),{strokeDashoffset:0,duration:.65});
+}
+function flyNumber(text,from,to){
+ if(!from||!to)return;let a=from.getBoundingClientRect(),b=to.getBoundingClientRect(),d=document.createElement("div");d.className="flyNum";d.textContent=text;document.body.appendChild(d);
+ gsap.set(d,{left:a.left+a.width/2,top:a.top+a.height/2,xPercent:-50,yPercent:-50});
+ gsap.to(d,{left:b.left+b.width/2,top:b.top+b.height/2,duration:1.05,ease:"power2.inOut",scale:1.18,onComplete:()=>gsap.to(d,{opacity:0,duration:.3,onComplete:()=>d.remove()})});
+}
+function misconception(){
+ let c=$("#conceptStage");c.innerHTML=`<div style="font-size:20px;font-weight:950;margin-bottom:12px">Ownership % is NOT the percentage of every line consolidated</div><div class="wrongRight"><div class="wrongBox"><div class="crossBig">✕</div>80% ownership<br>→ 80% of assets</div><div class="rightBox"><div class="checkBig">✓</div>CONTROL<br>→ 100% assets<br>+ separate NCI</div></div>`;c.classList.add("show");$("#cinemaMask").classList.add("on");
+ gsap.from(".wrongBox",{x:-35,opacity:0,duration:.45});gsap.from(".rightBox",{x:35,opacity:0,duration:.45,delay:.35});
+ cueTimers.push(setTimeout(()=>{c.classList.remove("show");$("#cinemaMask").classList.remove("on")},4300));
+}
+function mergeDemo(){
+ let c=$("#conceptStage");c.innerHTML=`<div style="font-size:19px;font-weight:950">Build Group Cash</div><div id="mergeStage"><div class="mergeChip">$30M Parent</div><div class="mergeChip">$15M Sub A</div><div class="mergeChip">$12M Sub B</div><div>→</div><div class="mergeResult">$57M Group</div></div>`;c.classList.add("show");$("#cinemaMask").classList.add("on");
+ gsap.from(".mergeChip",{y:35,opacity:0,stagger:.22,duration:.45});gsap.from(".mergeResult",{scale:.5,opacity:0,duration:.55,delay:.8});
+ cueTimers.push(setTimeout(()=>{c.classList.remove("show");$("#cinemaMask").classList.remove("on")},4000));
+}
+function v5Cue(step,cueIndex,keys){
+ clearV5();let targets=keys.flatMap(resolveTargets).filter(Boolean);if(targets.length){cinema(targets);laserTo(targets[0]);inkCircle(targets[0])}
+ if(step===0&&cueIndex===2){let e=$("#svg80");inkCircle(e)}
+ if(step===0&&cueIndex===3){let e=$("#svg70");inkCircle(e)}
+ if(step===1&&cueIndex===1)misconception();
+ if(step===2&&cueIndex===2){inkUnderline($("#cross"))}
+ if(step===3&&cueIndex===0){let forms=document.querySelectorAll("#goodwill .formula");if(forms[0]){flyNumber("$42M",$("#a"),forms[0]);flyNumber("$40M",$("#parent"),forms[0])}}
+ if(step===3&&cueIndex===4){let forms=document.querySelectorAll("#goodwill .formula");if(forms[2])inkCircle(forms[2])}
+ if(step===4&&cueIndex===1){inkCircle($("#svg20"))}
+ if(step===4&&cueIndex===2){inkCircle($("#svg30"))}
+ if(step===5&&cueIndex===3)mergeDemo();
+}
+
+const quiz=[
+{q:"Parent owns 80% of Sub A and has power over relevant activities. What percentage of Sub A's assets is normally brought into the consolidated statements in this simplified control case?",o:["80%","20%","100%","50%"],a:2,e:"Control leads to consolidation of 100% of the controlled subsidiary's assets and liabilities; NCI separately represents outside ownership.",v:"ownership"},
+{q:"Parent pays $42M for 80% of Sub A. Acquisition-date net assets are $50M. Using proportionate NCI (partial goodwill), what is goodwill?",o:["$2M","$8M","$10M","$42M"],a:0,e:"Parent share of net assets = 80% × $50M = $40M. Goodwill = $42M − $40M = $2M.",v:"goodwillA"},
+{q:"Parent owns 70% of Sub B. Sub B earns $8M after acquisition. What profit is attributable to NCI?",o:["$2.4M","$5.6M","$8.0M","$0M"],a:0,e:"NCI is 30%. 30% × $8M = $2.4M.",v:"profit"},
+{q:"Which relationship is eliminated when preparing group accounts?",o:["Parent cash vs subsidiary cash","Parent investment vs subsidiary acquisition-date equity","Parent revenue vs external customer revenue","Subsidiary PPE vs external debt"],a:1,e:"The parent's investment in the subsidiary is an internal group ownership relationship and is eliminated against the relevant subsidiary equity.",v:"flow"},
+{q:"Sub A has 20% outside ownership and Sub B has 30% outside ownership. What do these outside interests represent?",o:["Goodwill","Group common stock","Non-controlling interest","Intercompany debt"],a:2,e:"NCI is the equity in a subsidiary not attributable, directly or indirectly, to the parent.",v:"ownership"},
+{q:"Parent revenue is $100M, Sub A revenue $70M and Sub B revenue $60M. Assume no intercompany revenue. What is consolidated revenue?",o:["$161M","$230M","$184M","$170M"],a:1,e:"With control and no intercompany revenue in this example, revenue is combined at 100%: 100 + 70 + 60 = $230M.",v:"bars"},
+{q:"A parent owns 80% of a controlled subsidiary. Which statement is correct?",o:["Only 80% of each expense is consolidated","100% of expenses are consolidated and profit is attributed to parent and NCI","Only parent expenses appear","NCI is deducted from revenue"],a:1,e:"The controlled subsidiary is consolidated in full; attribution to NCI occurs after consolidated profit is determined.",v:"flow"},
+{q:"Sub A has acquisition net assets of $50M and the parent's ownership is 80%. What is the parent's share of those net assets?",o:["$10M","$30M","$40M","$50M"],a:2,e:"80% × $50M = $40M.",v:"goodwillA"},
+{q:"Parent paid $30M for 70% of Sub B. Acquisition net assets were $40M. Under the simplified partial-goodwill example, what is goodwill?",o:["$2M","$12M","$28M","$10M"],a:0,e:"70% × $40M = $28M. Consideration $30M − $28M = $2M.",v:"goodwillB"},
+{q:"Why does subsidiary common stock not simply remain as additional group common stock?",o:["It is converted into revenue","It is eliminated as part of subsidiary acquisition-date equity; group share capital is the parent's share capital","It becomes goodwill","It becomes cash"],a:1,e:"Consolidation removes the subsidiary's relevant equity against the investment. The consolidated share capital is the parent's share capital.",v:"flow"},
+{q:"The graph shows Parent $100M, Sub A $70M and Sub B $60M revenue. There is $10M intercompany sales inside the group. What consolidated revenue should be shown?",o:["$230M","$220M","$240M","$161M"],a:1,e:"Combine $230M then eliminate the $10M internal sale: consolidated revenue = $220M.",v:"barsIC"},
+{q:"Which comes first in a basic acquisition analysis?",o:["Calculate NCI income for future years","Identify control and acquisition-date consideration/net assets","Publish group cash flow","Eliminate external sales"],a:1,e:"Start by establishing control and the acquisition facts before calculating goodwill and consolidation adjustments.",v:"flow"},
+{q:"Sub A profit is $10M and NCI is 20%. How much profit is attributable to the parent from Sub A?",o:["$2M","$8M","$10M","$12M"],a:1,e:"Parent attribution is 80% × $10M = $8M.",v:"profit"},
+{q:"What is the main purpose of consolidated financial statements in this beginner example?",o:["Show only the parent","Show each legal entity separately","Present the parent and controlled subsidiaries as one economic entity","Show only minority shareholders"],a:2,e:"Consolidation presents the controlled group as a single economic entity while separately identifying NCI.",v:"ownership"},
+{q:"Parent has $30M cash, Sub A $15M and Sub B $12M. With no internal cash balances to eliminate, what is group cash?",o:["$30M","$45M","$57M","$47M"],a:2,e:"$30M + $15M + $12M = $57M.",v:"cash"},
+{q:"If the parent's investment in Sub A is $42M, what happens to that investment line in the consolidated balance sheet after the basic acquisition elimination?",o:["It stays at $42M","It doubles","It becomes zero as a separate investment line","It becomes NCI"],a:2,e:"The investment is eliminated in consolidation; the subsidiary's underlying assets and liabilities are consolidated instead.",v:"flow"},
+{q:"Consolidated net income is $38M and NCI income is $4.4M. What profit is attributable to owners of the parent?",o:["$42.4M","$33.6M","$38M","$4.4M"],a:1,e:"$38M − $4.4M = $33.6M attributable to the parent.",v:"profitGroup"},
+{q:"Which diagram best describes the basic process?",o:["Control → Combine → Eliminate → Goodwill/NCI → Group FS","Goodwill → Control → Delete subsidiary → Parent FS","NCI → Revenue → Control → Cash","Cash Flow → Investment → Ignore subsidiary"],a:0,e:"A beginner-friendly sequence is: establish control, combine controlled entities, eliminate internal ownership relationships, recognize goodwill/NCI, then report group statements.",v:"flow"},
+{q:"A controlled subsidiary has $20M receivables. Parent owns 80%. Before any intercompany elimination, how much of those receivables enters the consolidation?",o:["$16M","$4M","$20M","$0M"],a:2,e:"100% of the controlled subsidiary's receivables enter consolidation; NCI is not handled by reducing every asset line.",v:"ownership"},
+{q:"Which statement about NCI is most accurate for this lesson?",o:["NCI means the subsidiary is not consolidated","NCI is outside shareholders' interest in a controlled subsidiary and is separately presented","NCI is always goodwill","NCI is an intercompany payable"],a:1,e:"NCI represents ownership in a controlled subsidiary that is not attributable to the parent.",v:"ownership"}
+];
+let qi=0,qs=0,answered=false;
+function visual(kind){
+ const own=`<svg viewBox="0 0 520 170"><path d="M260 55 L135 120 M260 55 L385 120" stroke="#94a3b8" stroke-width="3"/><rect x="185" y="15" width="150" height="55" rx="10" fill="white" stroke="#2563eb" stroke-width="3"/><text x="260" y="47" text-anchor="middle" font-weight="800">PARENT</text><rect x="55" y="115" width="160" height="45" rx="8" fill="white" stroke="#f59e0b" stroke-width="3"/><text x="135" y="143" text-anchor="middle" font-weight="800">SUB A • 80%</text><rect x="305" y="115" width="160" height="45" rx="8" fill="white" stroke="#f59e0b" stroke-width="3"/><text x="385" y="143" text-anchor="middle" font-weight="800">SUB B • 70%</text></svg>`;
+ const flow=`<svg viewBox="0 0 650 160"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#2563eb"/></marker></defs>${["Control","Combine 100%","Eliminate","Goodwill + NCI","Group FS"].map((x,i)=>`<rect x="${10+i*128}" y="55" width="105" height="48" rx="8" fill="white" stroke="#2563eb" stroke-width="2"/><text x="${62+i*128}" y="84" text-anchor="middle" font-size="12" font-weight="700">${x}</text>${i<4?`<line x1="${115+i*128}" y1="79" x2="${135+i*128}" y2="79" stroke="#2563eb" stroke-width="2" marker-end="url(#ar)"/>`:""}`).join("")}</svg>`;
+ const bars=(ic=false)=>`<div style="width:500px"><div class="barChart"><div style="height:120px">Parent<br>100</div><div style="height:84px">Sub A<br>70</div><div style="height:72px">Sub B<br>60</div>${ic?'<div style="height:25px;background:#fecaca">IC<br>10</div>':''}</div><div style="text-align:center;font-size:11px;margin-top:5px">Revenue ($M)</div></div>`;
+ const gw=(b=false)=>`<table class="miniTable"><tr><th></th><th>${b?"Sub B":"Sub A"}</th></tr><tr><td>Consideration</td><td>${b?"$30M":"$42M"}</td></tr><tr><td>Ownership</td><td>${b?"70%":"80%"}</td></tr><tr><td>Acquisition net assets</td><td>${b?"$40M":"$50M"}</td></tr><tr class="total"><td>Calculate goodwill</td><td>?</td></tr></table>`;
+ const profit=`<table class="miniTable"><tr><th>Company</th><th>Profit</th><th>NCI %</th></tr><tr><td>Sub A</td><td>$10M</td><td>20%</td></tr><tr><td>Sub B</td><td>$8M</td><td>30%</td></tr></table>`;
+ const cash=`<table class="miniTable"><tr><th>Entity</th><th>Cash</th></tr><tr><td>Parent</td><td>$30M</td></tr><tr><td>Sub A</td><td>$15M</td></tr><tr><td>Sub B</td><td>$12M</td></tr></table>`;
+ const pg=`<div style="width:500px"><div class="barChart"><div style="height:120px">Group NI<br>38</div><div style="height:45px;background:#c4b5fd">NCI<br>4.4</div></div><div style="text-align:center;font-size:11px">Profit attribution ($M)</div></div>`;
+ return kind==="ownership"?own:kind==="flow"?flow:kind==="bars"?bars(false):kind==="barsIC"?bars(true):kind==="goodwillA"?gw(false):kind==="goodwillB"?gw(true):kind==="profit"?profit:kind==="cash"?cash:pg;
+}
+function loadQ(){
+ answered=false;$("#nextQ").disabled=true;let q=quiz[qi];$("#qnum").textContent=`Question ${qi+1} of 20`;$("#qbar").style.width=((qi)/20*100)+"%";$("#score").textContent=`Score: ${qs}`;$("#qvisual").innerHTML=visual(q.v);$("#qtext").textContent=q.q;$("#feedback").style.display="none";$("#opts").innerHTML=q.o.map((x,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(65+i)}. ${x}</button>`).join("");document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answerQ(+b.dataset.i)); if(typeof animateQuizVisual==="function")requestAnimationFrame(animateQuizVisual)}
+function answerQ(i){if(answered)return;answered=true;let q=quiz[qi];document.querySelectorAll(".opt").forEach((b,k)=>{if(k===q.a)b.classList.add("correct");else if(k===i)b.classList.add("wrong");b.disabled=true});if(i===q.a)qs++;$("#score").textContent=`Score: ${qs}`;$("#feedback").innerHTML=`<b>${i===q.a?"Correct.":"Review:"}</b> ${q.e}`;$("#feedback").style.display="block";$("#nextQ").disabled=false}
+$("#openQuiz").onclick=()=>{stopVoice();document.querySelector(".layout").style.display="none";document.querySelector(".steps").style.display="none";$("#quizWrap").style.display="block";qi=0;qs=0;loadQ();$("#quizWrap").scrollIntoView({behavior:"smooth"})};
+$("#closeQuiz").onclick=()=>{$("#quizWrap").style.display="none";document.querySelector(".layout").style.display="grid";document.querySelector(".steps").style.display="grid"};
+$("#nextQ").onclick=()=>{if(qi<19){qi++;loadQ()}else{$("#qbar").style.width="100%";$("#qtext").textContent=`Quiz complete — ${qs}/20 correct.`;$("#opts").innerHTML="";$("#qvisual").innerHTML=`<div style="text-align:center"><div class="big">${qs}/20</div><p>Review any missed concepts by restarting the quiz or return to the narrated lesson.</p></div>`;$("#feedback").style.display="none";$("#nextQ").disabled=true}};
+$("#restartQ").onclick=()=>{qi=0;qs=0;loadQ()};
+
+// Read-along transcript. Browser speech APIs do not guarantee word timestamps,
+// so text is revealed smoothly across the estimated utterance duration while cue highlights remain phrase-timed.
+function startTranscript(text){
+ let el=$("#transcript");
+ let chunks=text.match(/[^.!?]+[.!?]?/g)||[text];
+ el.innerHTML='<div id="transcriptHead">READ ALONG • complete sentence always remains visible</div>'+
+   chunks.map((s,i)=>`<div class="sentence" data-si="${i}">${s.trim().split(/\s+/).map((w,j)=>`<span class="phrase" data-w="${j}">${w}</span>`).join(" ")}</div>`).join("");
+ let words=[...el.querySelectorAll(".phrase")],idx=0,estimated=Math.max(5200,words.length/2.0*1000),tick=estimated/words.length;
+ function mark(){
+   words.forEach((w,i)=>w.classList.toggle("hot",i===idx));
+   if(words[idx])words[idx].scrollIntoView({block:"nearest",behavior:"smooth"});
+ }
+ mark();
+ let timer=setInterval(()=>{if(idx<words.length-1){idx++;mark()}else clearInterval(timer)},tick);cueTimers.push(timer)
+}
+runCues=function(L){
+ startTranscript(L.text);
+ let si=lessons.indexOf(L);
+ L.cues.forEach(([ms,txt,keys],ci)=>cueTimers.push(setTimeout(()=>{
+   caption(txt);$("#nowText").textContent=txt;$("#nowCard").classList.add("show");
+   clearV5();
+   pulseTargetSafe(keys[0]);
+   altCue(si,ci,keys);document.querySelectorAll("#impactPanel .hit").forEach((r,k)=>cueTimers.push(setTimeout(()=>gsap.fromTo(r,{scale:1},{scale:1.035,duration:.2,yoyo:true,repeat:1}),k*90)));
+ },ms)));
+}
+
+reset();
+</script></body></html>
